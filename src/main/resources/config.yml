@@ -1,0 +1,66 @@
+# Nascraft config.
+
+Items_quoted:
+  Categories:
+    1:
+      icon: "cobblestone"
+      name: "Basics"
+      items:
+        - "cobblestone"
+        - "stone"
+        - "oak_planks"
+    2:
+      icon: "white_wool"
+      name: "Construction"
+      items:
+        - "white_wool"
+        - "red_wool"
+        - "bricks"
+        - "dark_oak_door"
+    3:
+      icon: "diamond"
+      name: "precious"
+      items:
+        - "diamond"
+        - "emerald"
+        - "redstone"
+
+Price_options:
+  random_oscilation: true
+  supply_and_demand: true
+  fixed_price: false
+
+Economy_control:
+  taxation:
+    sell: 0.05 # 5% taxation when players sell items.
+    buy: 0.05 # 5% taxation when players buy items.
+    keep_track: true # know how much money has been collected through taxation.
+  High_economy_control:
+    enabled: true
+    force_crash: false
+    force_bull: true
+    force_bear: true
+
+Trading:
+  enabled: true
+  licence_price: 100000 # -1 means it cannot be purchased
+  taxation:
+    sell: 0.01
+    buy: 0.01
+  digital_portfolio: true
+
+News:
+  enabled: true
+  1:
+    text: "The FED (Federal Reserve of Diamonds) has announced a rise unprecedented of rates"
+    effects: 1
+    effect-1: "bear-2"
+  2:
+    text: "The ECB (European Crafting Bank) just announced a pack of measures to stimulate the economy"
+    effects: 1
+    effect-1: "bull-1"
+  3:
+    text: "One of the biggest financial companies just went bankrupt. How will the market face this?"
+    effects: 2
+    effect-1: "bull-1"
+    effect-2: "bear-2"
