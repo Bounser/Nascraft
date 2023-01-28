@@ -1,8 +1,12 @@
 package me.bounser.nascraft;
 
 import de.leonhard.storage.util.FileUtils;
+import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.commands.NascraftCommand;
 import me.bounser.nascraft.tools.Config;
+import me.bounser.nascraft.tools.Data;
+import me.leoko.advancedgui.manager.LayoutManager;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -12,6 +16,18 @@ import java.io.InputStream;
 
 public final class Nascraft extends JavaPlugin {
 
+    /*
+    Explanation on how the plugin works:
+    Essentially, the goal of the plugin is to keep the stock of each item in 0.
+    When a player sells or buys an item, the stock moves and depending on the direction
+    the price will fluctuate.
+
+    The deviation needed until the plugin changes the price has to be determined by the quantity of players
+    that will operate with the plugin, and more importantly, the quantity of resources.
+    The plugin will try to predict this big changes and act accordingly, so small and big servers
+    can use this plugin without worrying about too small/large fluctuations.
+     */
+
     private static Nascraft main;
     public static Nascraft getInstance(){ return main; }
 
@@ -19,11 +35,22 @@ public final class Nascraft extends JavaPlugin {
     public void onEnable() {
         main = this;
 
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+            getLogger().info("Nascraft failed to load! Vault is required.");
+            getPluginLoader().disablePlugin(this);
+        }
+
         if (Config.getInstance().getCheckResources()){ checkResources(); }
 
         getCommand("nascraft").setExecutor(new NascraftCommand(this));
 
+        LayoutManager.getInstance().registerLayoutExtension(new LayoutModifier(), this);
+
+        Bukkit.broadcastMessage("Loaded");
     }
+
+    @Override
+    public void onDisable() { Data.getInstance().savePrices(); }
 
     public void checkResources() {
 
