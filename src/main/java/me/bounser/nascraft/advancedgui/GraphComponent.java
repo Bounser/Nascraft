@@ -56,7 +56,7 @@ public class GraphComponent extends RectangularComponent {
 
         switch (timeFrame){
 
-            // 10 min
+            // 15 min
             case 1:
                 for(int i = 1; i<=3 ; i++){
                     SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
@@ -80,7 +80,7 @@ public class GraphComponent extends RectangularComponent {
                     SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM");
                     String time = sdf.format(cal.getTime());
                     interaction.getComponentTree().locate("time" + i, TextComponent.class).setText(time);
-                    cal.add(Calendar.DATE, -13);
+                    cal.add(Calendar.DATE, -12);
                 }
                 break;
             // 1 Year
@@ -89,7 +89,7 @@ public class GraphComponent extends RectangularComponent {
                     SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM");
                     String time = sdf.format(cal.getTime());
                     interaction.getComponentTree().locate("time" + i, TextComponent.class).setText(time);
-                    cal.add(Calendar.DATE, -182);
+                    cal.add(Calendar.DATE, -180);
                 }
                 break;
             // Ytd
@@ -99,7 +99,7 @@ public class GraphComponent extends RectangularComponent {
                 startYear.set(Calendar.MONTH, Calendar.JANUARY);
                 startYear.set(Calendar.DAY_OF_MONTH, 1);
 
-                SimpleDateFormat sdf = new SimpleDateFormat("dd MM yyyy");
+                SimpleDateFormat sdf = new SimpleDateFormat("MM/yyyy");
 
                 interaction.getComponentTree().locate("time3", TextComponent.class).setText(sdf.format(startYear));
                 interaction.getComponentTree().locate("time1", TextComponent.class).setText(sdf.format(currentDate));
@@ -187,12 +187,20 @@ public class GraphComponent extends RectangularComponent {
         if(values.size() > 1) {
             float first = values.get(0);
             float last = values.get(values.size() - 1);
+
             if (Float.compare(first, last) < 0) {
                 this.interaction.getComponentTree().locate("bear123").setHidden(true);
+                this.interaction.getComponentTree().locate("flat123").setHidden(true);
                 return new Color(0,200,20);
-            } else {
+
+            } else if (Float.compare(first, last) > 0){
                 this.interaction.getComponentTree().locate("bear123").setHidden(false);
                 return new Color(200,10,20);
+
+            } else {
+                this.interaction.getComponentTree().locate("bear123").setHidden(true);
+                this.interaction.getComponentTree().locate("flat123").setHidden(false);
+                return new Color(250,250,250);
             }
         }
         return new Color(250,250,250);
@@ -203,31 +211,52 @@ public class GraphComponent extends RectangularComponent {
         float maxValue = Collections.max(values);
         float minValue = Collections.min(values);
 
-        float escalated = (int) ((Math.round((height*0.8 - height*0.8 * (-minValue) / (maxValue - minValue))) + yc) + Math.round(height*0.05));
-        float deescalated;
-        int i = 1;
-
-        if (escalated < height + xc) {
-            TextComponent tc = interaction.getComponentTree().locate("scale0", TextComponent.class);
-            tc.setText("0");
-            tc.setY((int) escalated);
-            tc.setHidden(false);
-
-            RectComponent rc = interaction.getComponentTree().locate("last", RectComponent.class);
-            rc.setY((int) escalated);
-            rc.setHidden(false);
+        if(maxValue == minValue){
+            for (int i = 1; i<=4 ; i++) {
+                interaction.getComponentTree().locate("scale" + i, TextComponent.class).setHidden(true);
+            }
+            return;
         }
 
-        for (float val : Arrays.asList(79, 109, 139, 169)) {
-            deescalated = ((-val+yc+Math.round(height*0.85))*(maxValue-minValue)/(Math.round(height*0.8))) + minValue;
-            interaction.getComponentTree().locate("scale" + i, TextComponent.class).setText(String.valueOf(round(deescalated)));
+        int i = 1;
+        for(float val : Arrays.asList(maxValue, minValue, (maxValue-minValue)*2/3 + minValue, (maxValue-minValue)*1/3 + minValue)) {
+
+            int firstDigits = Integer.parseInt(String.valueOf(val).substring(0,2));
+            int numDigits = (int) Math.floor(Math.log10(val)) + (int) Math.floor(Math.log10(1-val));
+            if(numDigits >= 1) numDigits -= 1;
+            int reference = (int) (firstDigits * (Math.pow(10, numDigits)));
+
+            int pos = (int) (Math.round((height*0.8 - height*0.8 * (reference - minValue) / (maxValue - minValue))) + yc + Math.round(height*0.05));
+
+            interaction.getComponentTree().locate("scale" + i, TextComponent.class).setText(String.valueOf(reference));
+            interaction.getComponentTree().locate("scale" + i, TextComponent.class).setY(pos+4);
+            interaction.getComponentTree().locate("backscale" + i, RectComponent.class).setY(pos-7);
+
+            interaction.getComponentTree().locate("ref" + i, RectComponent.class).setY(pos);
             i++;
         }
-    }
 
-    private double round(double value) {
-        int scale = (int) Math.pow(10, 1);
-        return (double) Math.round(value * scale) / scale;
+
+        float escalated = (int) ((Math.round((height*0.8 - height*0.8 * (-minValue) / (maxValue - minValue))) + yc) + Math.round(height*0.05));
+
+        TextComponent tc = interaction.getComponentTree().locate("scale0", TextComponent.class);
+        RectComponent rc = interaction.getComponentTree().locate("last", RectComponent.class);
+        RectComponent bc = interaction.getComponentTree().locate("12backscale0", RectComponent.class);
+
+        if (escalated < height + xc) {
+            tc.setY((int) escalated +4);
+            tc.setHidden(false);
+
+            rc.setY((int) escalated);
+            rc.setHidden(false);
+
+            bc.setY((int) escalated-5);
+            bc.setHidden(false);
+        } else {
+            tc.setHidden(true);
+            rc.setHidden(true);
+            bc.setHidden(true);
+        }
     }
 
 }
