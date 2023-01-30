@@ -6,9 +6,12 @@ import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -17,6 +20,7 @@ import java.util.List;
 
 
 public class GraphComponent extends RectangularComponent {
+
 
     List<Float> values ;
     int width, height, yc, xc;
@@ -219,23 +223,35 @@ public class GraphComponent extends RectangularComponent {
         }
 
         int i = 1;
+
         for(float val : Arrays.asList(maxValue, minValue, (maxValue-minValue)*2/3 + minValue, (maxValue-minValue)*1/3 + minValue)) {
 
-            int firstDigits = Integer.parseInt(String.valueOf(val).substring(0,2));
+            int firstDigits = getFirstDigits(val);
+
             int numDigits = (int) Math.floor(Math.log10(val)) + (int) Math.floor(Math.log10(1-val));
-            if(numDigits >= 1) numDigits -= 1;
-            int reference = (int) (firstDigits * (Math.pow(10, numDigits)));
+            if(numDigits >= 0) numDigits -= 1;
+
+            float reference = (float) firstDigits * (float) (Math.pow(10, numDigits));
+
+            String result = String.valueOf(reference);
+            if (result.length() > 8 && reference < 1){
+                BigDecimal bd = new BigDecimal(reference);
+                bd = bd.setScale(4, RoundingMode.HALF_UP);
+                result = bd.toString();
+                result = result.replaceAll("0*$", "").replaceAll("\\.$", "");
+            } else if (reference > 1) {
+                result = String.valueOf((int) reference);
+            }
 
             int pos = (int) (Math.round((height*0.8 - height*0.8 * (reference - minValue) / (maxValue - minValue))) + yc + Math.round(height*0.05));
 
-            interaction.getComponentTree().locate("scale" + i, TextComponent.class).setText(String.valueOf(reference));
+            interaction.getComponentTree().locate("scale" + i, TextComponent.class).setText(result);
             interaction.getComponentTree().locate("scale" + i, TextComponent.class).setY(pos+4);
             interaction.getComponentTree().locate("backscale" + i, RectComponent.class).setY(pos-7);
 
             interaction.getComponentTree().locate("ref" + i, RectComponent.class).setY(pos);
             i++;
         }
-
 
         float escalated = (int) ((Math.round((height*0.8 - height*0.8 * (-minValue) / (maxValue - minValue))) + yc) + Math.round(height*0.05));
 
@@ -256,6 +272,27 @@ public class GraphComponent extends RectangularComponent {
             tc.setHidden(true);
             rc.setHidden(true);
             bc.setHidden(true);
+        }
+    }
+
+    public int getFirstDigits(float num) {
+
+        // If the number is greater (or equal) than 10 (Has 2 digits or more) we simply get the 2 first digits.
+        if(num >= 10){
+
+            return Integer.parseInt(String.valueOf(num).substring(0,2));
+        // In case the number is smaller than 10, we delete the . and ignore all the 0 before the first digit
+        } else {
+            String numString = String.valueOf(num);
+            numString = numString.replace(".", "");
+            int i = 0;
+            while (i < numString.length() && numString.charAt(i) == '0') {
+                i++;
+            }
+            numString = numString.substring(i);
+            int result = Integer.parseInt(numString.substring(0, 2));
+            if(result < 10) result *= 10;
+            return result;
         }
     }
 
