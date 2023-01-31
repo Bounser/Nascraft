@@ -6,5 +6,15 @@ depend: [ AdvancedGUI, Vault ]
 softdepend: [ PlaceholderAPI ]
 authors: [ bounser ]
 description: Market valuations in minecraft
+
 commands:
   nascraft:
+    description: Nascraft's admin command.
+    usage: /nc help
+    aliases:
+      - nc
+  market:
+    description: Interact with the market wherever you are!
+    usage: /mk help
+    aliases:
+      - mk

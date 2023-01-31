@@ -2,7 +2,10 @@ package me.bounser.nascraft;
 
 import de.leonhard.storage.util.FileUtils;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
+import me.bounser.nascraft.commands.MarketCommand;
 import me.bounser.nascraft.commands.NascraftCommand;
+import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.market.PricesManager;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import me.leoko.advancedgui.manager.LayoutManager;
@@ -16,18 +19,6 @@ import java.io.InputStream;
 
 public final class Nascraft extends JavaPlugin {
 
-    /*
-    Explanation on how the plugin works:
-    Essentially, the goal of the plugin is to keep the stock of each item in 0.
-    When a player sells or buys an item, the stock moves and depending on the direction
-    the price will fluctuate.
-
-    The deviation needed until the plugin changes the price has to be determined by the quantity of players
-    that will operate with the plugin, and more importantly, the quantity of resources.
-    The plugin will try to predict this big changes and act accordingly, so small and big servers
-    can use this plugin without worrying about too small/large fluctuations.
-     */
-
     private static Nascraft main;
     public static Nascraft getInstance(){ return main; }
 
@@ -39,14 +30,16 @@ public final class Nascraft extends JavaPlugin {
             getLogger().info("Nascraft failed to load! Vault is required.");
             getPluginLoader().disablePlugin(this);
         }
+        if (Config.getInstance().getCheckResources()){ /*checkResources();*/ }
 
-        if (Config.getInstance().getCheckResources()){ checkResources(); }
+        // Creating the only instance of PricesManager triggers the saveDataTask.
+        MarketManager.getInstance();
+        PricesManager.getInstance();
 
-        getCommand("nascraft").setExecutor(new NascraftCommand(this));
+        getCommand("nascraft").setExecutor(new NascraftCommand());
+        getCommand("market").setExecutor(new MarketCommand());
 
         LayoutManager.getInstance().registerLayoutExtension(new LayoutModifier(), this);
-
-        Bukkit.broadcastMessage("Loaded");
     }
 
     @Override

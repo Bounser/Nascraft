@@ -31,11 +31,20 @@ Items_quoted:
           child:
             stone_stairs:
               linked: 1.5
-            stone_slob:
+            stone_slab:
               linked: 0.5
             stone_pressure_plate:
               linked: 2
             stone_button:
+              linked: 1
+        cobbled_deepslate:
+          price: 0.7
+          child:
+            cobbled_deepslate_stairs:
+              linked: 1.5
+            cobbled_deepslate_slab:
+              linked: 0.5
+            cobbled_deepslate_wall:
               linked: 1
     2:
       icon: "redstone"
@@ -47,7 +56,79 @@ Items_quoted:
           child:
             redstone_block:
               linked: 9
-
+        redstone_torch:
+          price: 3
+        repeater:
+          price: 6
+        comparator:
+          price: 10
+        piston:
+          price: 9
+        observer:
+          price: 8
+    3:
+      icon: "oak_planks"
+      name: "In the woods"
+      required_to_move: 16
+      items:
+        oak_log:
+          price: 1
+          child:
+            oak_planks:
+              linked: 0.25
+            oak_stairs:
+              linked: 1.5
+            oak_slab:
+              linked: 0.5
+            stick:
+              linked: 0.0625
+        birch_log:
+          price: 1
+          child:
+            birch_planks:
+              linked: 0.25
+            birch_stairs:
+              linked: 1.5
+            birch_slab:
+              linked: 0.5
+            stick:
+              linked: 0.0625
+    4:
+      icon: "diamond"
+      name: "Valuables"
+      required_to_move: 16
+      items:
+        diamond:
+          price: 100
+        emerald:
+          price: 50
+        raw_gold:
+          price: 20
+    5:
+      icon: "coal"
+      name: "Utils"
+      required_to_move: 16
+      items:
+        coal:
+          price: 4
+          child:
+            charcoal:
+              linked: 1
+        leather:
+          price: 10
+    6:
+      icon: "iron_ingot"
+      name: "Utils"
+      required_to_move: 16
+      items:
+        iron_ingot:
+          price: 4
+        copper_ingot:
+          price: 3
+        gold_ingot:
+          price: 10
+        netherite_ingot:
+          price: 500
 
 Price_options:
   random_oscilation: true
@@ -76,27 +157,3 @@ Trading:
   virtual_portfolio: true
   limited_orders: true
   stoploss: true
-
-Random_events:
-  enabled: true
-  1:
-    text: "The FED (Federal Reserve of Diamonds) has announced a rise unprecedented of rates"
-    effects: 1
-    effect-1: "bear-2"
-  2:
-    text: "The ECB (European Crafting Bank) just announced a pack of measures to stimulate the economy"
-    effects: 1
-    effect-1: "bull-1"
-  3:
-    text: "One of the biggest financial companies just went bankrupt. How will the market react?"
-    effects: 2
-    effect-1: "bull-1"
-    effect-2: "bear-2"
-
-Text:
-  enabled: true
-  main_text: "Items Market"
-  # Due high change in this text currently they won't be affected.
-  buy: "BUY"
-  sell: "SELL"
-  hour: "hour"

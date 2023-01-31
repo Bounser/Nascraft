@@ -3,6 +3,7 @@ package me.bounser.nascraft.commands;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.MarketStatus;
 import me.bounser.nascraft.market.PricesManager;
+import me.bounser.nascraft.tools.Data;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -11,11 +12,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class NascraftCommand implements CommandExecutor {
-
-    private Nascraft main;
-    public  NascraftCommand(Nascraft main){
-        this.main = main;
-    }
 
 
     @Override
@@ -34,7 +30,9 @@ public class NascraftCommand implements CommandExecutor {
                     case "bear": PricesManager.getInstance().setMarketStatus(MarketStatus.BEAR1); break;
                     case "bull": PricesManager.getInstance().setMarketStatus(MarketStatus.BULL1); break;
                 }
-
+            case "save":
+                Data.getInstance().savePrices();
+                break;
 
             default: if(sender instanceof Player) sender.sendMessage("Argument not recognized.");
         }

@@ -1,27 +1,26 @@
 package me.bounser.nascraft.advancedgui;
 
+import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.tools.ImageManager;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
 
 
 public class GraphComponent extends RectangularComponent {
 
-
+    String mat;
     List<Float> values ;
     int width, height, yc, xc;
 
@@ -294,6 +293,18 @@ public class GraphComponent extends RectangularComponent {
             if(result < 10) result *= 10;
             return result;
         }
+    }
+
+    public void changeMat(String mat) {
+        this.mat = mat;
+
+        interaction.getComponentTree().locate("MainImage", ImageComponent.class).setImage(ImageManager.getInstance().getImage(mat, 60, 60));
+        String modified = Character.toUpperCase(mat.charAt(0)) + mat.substring(1);
+        interaction.getComponentTree().locate("maintext", TextComponent.class).setText(modified.replace("_", " "));
+
+        // HashMap<String, Float> childs = MarketManager.getInstance().getItem(mat).getChilds();
+
+
     }
 
 }

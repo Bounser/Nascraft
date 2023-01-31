@@ -1,11 +1,13 @@
 package me.bounser.nascraft.advancedgui;
 
-import me.bounser.nascraft.market.ItemsManager;
-import me.bounser.nascraft.tools.Config;
+import me.bounser.nascraft.market.Category;
+import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.tools.ImageManager;
 import me.leoko.advancedgui.utils.LayoutExtension;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.events.LayoutLoadEvent;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 
 import java.util.Arrays;
@@ -20,24 +22,26 @@ public class LayoutModifier implements LayoutExtension {
 
         GroupComponent cTree = event.getLayout().getTemplateComponentTree();
 
-        // Lang changes
-
-        // Icons
-
-        cTree.locate("icon1", DummyComponent.class).setComponent(
-                new RemoteImageComponent("icon1", null, false, event.getLayout().getDefaultInteraction(), "https://mc.nerothe.com/img/1.19.2/" + Config.getInstance().getIcon(1) + ".png", null, 54, 112, 61, 61, false));
-        cTree.locate("icon1", DummyComponent.class).setComponent(
-                new RemoteImageComponent("icon2", null, false, event.getLayout().getDefaultInteraction(), "https://mc.nerothe.com/img/1.19.2/" + Config.getInstance().getIcon(2) + ".png", null, 159, 72, 61, 61, false));
-        cTree.locate("icon1", DummyComponent.class).setComponent(
-                new RemoteImageComponent("icon3", null, false, event.getLayout().getDefaultInteraction(), "https://mc.nerothe.com/img/1.19.2/" + Config.getInstance().getIcon(3) + ".png", null, 264, 112, 61, 61, false));
-
         // GraphComponent
         DummyComponent dc = cTree.locate("graph123", DummyComponent.class);
         dc.setComponent(new GraphComponent("graph1", null, false,
-                event.getLayout().getDefaultInteraction(), 44, 55, 300, 140, Arrays.asList(564.6f, 20f, 1100f, 800f, 1800f, 1700f, 1000f, 1500f, 400f)));
+                event.getLayout().getDefaultInteraction(), 44, 55, 300, 140, Arrays.asList(0.022f, 0.001032f, 0.01345f, 0.03542f, 0.0353f, 0.09f, 0.14f, 0.08f, 0.054f, 0.02f, 0.0231f, 0.03f)));
+
+        // Main page
+        updateMainPage(cTree);
+
+        // Arrows
+        cTree.locate("ArrowUP").setClickAction((interaction, player, primaryTrigger) -> {
+            MarketManager.getInstance().changeCategoryOrder(true);
+            updateMainPage(cTree);
+        });
+
+        cTree.locate("ArrowDOWN").setClickAction((interaction, player, primaryTrigger) -> {
+            MarketManager.getInstance().changeCategoryOrder(false);
+            updateMainPage(cTree);
+        });
 
         // Time Span selectors
-
         for (int i = 1 ; i<=5 ; i++){
 
             int finalI = i;
@@ -48,6 +52,11 @@ public class LayoutModifier implements LayoutExtension {
             });
         }
 
+        // List
+
+
+
+        /*
         // Buy
 
         for (int i : Arrays.asList(1, 16, 64)){
@@ -65,6 +74,37 @@ public class LayoutModifier implements LayoutExtension {
                 ItemsManager.getInstance().getItem(mat).sellItem(i);
             });
         }
+        */
 
     }
+
+    public void updateMainPage(GroupComponent cTree) {
+
+        Bukkit.broadcastMessage("actualizando");
+        for(int i = 1; i < (MarketManager.getInstance().getNumOfCategories()+1); i++) {
+
+            Category cat = MarketManager.getInstance().getCategoryOfIndex(i - 1);
+            int numOfItems = cat.getNumOfItems();
+
+            for (int j = 1; j < (numOfItems + 1); j++) {
+
+                if (j <= 5) {
+
+                    // cTree.locate("t" + i + j, TextComponent.class).setText(String.valueOf(cat.getItemOfIndex(j).getPrice()));
+                    ImageComponent ic = cTree.locate("asdi" + i + "" + j, ImageComponent.class);
+                    ic.setImage(ImageManager.getInstance().getImage(cat.getItemOfIndex(j - 1).getMaterial(), 32, 32));
+
+                    int finalJ = j;
+                    ic.setClickAction((interaction, player, primaryTrigger) -> {
+
+                        interaction.getComponentTree().locate("nbk2fMcG", ViewComponent.class).setView("qrRtaAnd");
+                        interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(cat.getItemOfIndex(finalJ - 1).getMaterial());
+
+                    });
+                }
+            }
+        }
+    }
+
+
 }

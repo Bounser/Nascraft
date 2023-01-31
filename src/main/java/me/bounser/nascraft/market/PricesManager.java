@@ -16,11 +16,8 @@ public class PricesManager {
     }
 
     private PricesManager(){
-
-        saveData();
-
+        saveDataTask();
         if(Config.getInstance().getRandomOscilation()) { randomOscilations(); }
-
     }
 
     public void setMarketStatus(MarketStatus marketStatus) {
@@ -31,19 +28,20 @@ public class PricesManager {
 
     }
 
-    public void saveData() {
+    private void saveDataTask() {
 
+        // All the prices will be stored 2 times each hour.
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
             Data.getInstance().savePrices();
 
-        }, 50, 12000);
+        }, 50, 36000);
 
     }
 
     public void changeAllMarket(float percentage){
 
-        for(Item item : ItemsManager.getInstance().getAllItems()) {
+        for(Item item : MarketManager.getInstance().getAllItems()) {
 
             item.changePrice(percentage + (float) (Math.random() * percentage*0.5));
 
@@ -80,7 +78,7 @@ public class PricesManager {
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
-            for(Item item : ItemsManager.getInstance().getAllItems()) {
+            for(Item item : MarketManager.getInstance().getAllItems()) {
                 item.changePrice((float) (Math.random() * 2 -1));
             }
 
