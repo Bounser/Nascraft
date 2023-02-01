@@ -1,6 +1,7 @@
 package me.bounser.nascraft.tools;
 
 import me.bounser.nascraft.Nascraft;
+import me.leoko.advancedgui.manager.ResourceManager;
 
 import javax.imageio.ImageIO;
 import java.awt.geom.AffineTransform;
@@ -17,7 +18,7 @@ public class ImageManager {
         return instance == null ? instance = new ImageManager() : instance;
     }
 
-    public BufferedImage getImage(String mat, int width, int height) {
+    public BufferedImage getImage(String mat, int width, int height, boolean dithering) {
 
         BufferedImage image = null;
         try {
@@ -28,13 +29,7 @@ public class ImageManager {
             Nascraft.getInstance().getLogger().info("Unable to read image: " + mat + ".png");
             e.printStackTrace();
         }
-
-        AffineTransform at = new AffineTransform();
-        at.scale(width / (double) image.getWidth(), height / (double) image.getHeight());
-
-        AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
-        BufferedImage scaledImage = scaleOp.filter(image, new BufferedImage(width, height, image.getType()));
-        return scaledImage;
+        return ResourceManager.getInstance().processImage(image, width, height, dithering);
     }
 
 }
