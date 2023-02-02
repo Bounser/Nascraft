@@ -2,11 +2,13 @@ package me.bounser.nascraft.market;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.tools.Config;
+import me.bounser.nascraft.tools.Data;
 import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class MarketManager {
 
@@ -22,8 +24,7 @@ public class MarketManager {
 
     public void setupItems() {
 
-        Bukkit.broadcastMessage("Settuping items " + Config.getInstance().getCategories());
-
+        PricesManager.getInstance().setupFiles();
         for(String cat : Config.getInstance().getCategories()) {
 
             Category category = new Category(cat);
@@ -31,7 +32,6 @@ public class MarketManager {
 
             for(String mat : Config.getInstance().getAllMaterials(cat)) {
 
-                Bukkit.broadcastMessage("Item " + mat + " created in category " + category.getName());
                 Item item = new Item(mat, category);
                 items.add(item);
                 category.addItem(item);
@@ -43,7 +43,7 @@ public class MarketManager {
 
         for(Item item : items) {
 
-            if(item.getMaterial() == material){ return item; }
+            if(item.getMaterial().equals(material)){ return item; }
 
         }
         return null;

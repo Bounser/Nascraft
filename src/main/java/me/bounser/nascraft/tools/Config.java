@@ -6,6 +6,7 @@ import me.bounser.nascraft.market.MarketManager;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 public class Config {
@@ -17,6 +18,7 @@ public class Config {
     float taxBuy = -1;
     float taxSell = -1;
     int random0 = 0;
+    int precission = -1;
 
     public static Config getInstance(){
         return instance == null ? instance = new Config() : instance;
@@ -32,8 +34,6 @@ public class Config {
     public Boolean getCheckResources(){ return main.getConfig().getBoolean("AutoResourcesInjection"); }
 
     public int getRequiredToMove(String category){ return main.getConfig().getInt("Items_quoted.Categories." + category + ".required_to_move"); }
-
-    public boolean getDebug(){ return main.getConfig().getBoolean("Debug"); }
 
     public Set<String> getAllMaterials(String category) {
         return main.getConfig().getConfigurationSection("Items_quoted.Categories." + category + ".items.").getKeys(false);
@@ -55,6 +55,13 @@ public class Config {
         return 1;
     }
 
+    public int getDecimalPrecission() {
+        if(precission == -1) {
+            precission = config.getInt("Market_control.decimal_limit");
+        }
+        return precission;
+    }
+
 
     public boolean getRandomOscilation() {
 
@@ -67,8 +74,6 @@ public class Config {
         }
         return random0 == 1;
     }
-
-    public int getIcon(int category){ return main.getConfig().getInt("Items_Quoted.Categories." + category + ".icon"); }
 
     public float getTaxBuy() {
         if (taxBuy != -1) {

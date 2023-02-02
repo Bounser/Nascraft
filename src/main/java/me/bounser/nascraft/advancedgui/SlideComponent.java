@@ -52,13 +52,13 @@ public class SlideComponent extends RectangularComponent {
 
             float value = values.get(findIndex(points, point));
 
-            ts1.setX(point);
+            ts1.setX(point + 4);
             timetext.setX(point);
-            per.setX(point);
+            per.setX(point + 4);
 
             NumberFormat formatter = new DecimalFormat("#0.0");
 
-            ts1.setText(String.valueOf(value));
+            ts1.setText(value + "€");
             per.setText("(" + formatter.format((-100 + value*100/values.get(0))) + "%)");
 
             if(values.get(0) > value) {

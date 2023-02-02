@@ -3,6 +3,8 @@ package me.bounser.nascraft.market;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,8 +20,12 @@ public class Item {
     int nextMoveSell;
     int required;
 
+    int operations;
+
     // 24 (0-23) prices representing the prices in all 24 hours of the day
-    List<Float> prices;
+    List<Float> pricesH;
+    // 15 (0-14) prices representing the prices in the last 15 minutes
+    List<Float> pricesM;
     HashMap<String, Float> childs;
 
     public Item(String material, Category category){
@@ -28,38 +34,53 @@ public class Item {
         nextMoveBuy = required;
         nextMoveSell = required;
         mat = material;
-        // setPrices();
+        setupPrices();
         cat = category;
+        operations = 0;
         // this.childs = Config.getInstance().getChilds(material);
 
     }
 
-    public void setPrices() {
-
-        float[] p = Data.getInstance().getPrice(mat);
-
-        // If the price wasn't updated in the prev 24H or if it wasn't saved, all the record is the last price or the initial one.
-        if(p[1] > 23 || p[1] == -1){
-            price = p[0];
-            for(int i = 0; i <= 23; i++) prices.add(price);
-        } else {
-            for(int i = 0; i<= p[1]; i++) prices.add(p[0]);
-        }
-
+    public void setPrice(float price) {
+        this.price = price;
     }
 
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    public void setupPrices() {
+        pricesH = Data.getInstance().getHPrice(mat);
+
+        pricesM = Data.getInstance().getMPrice(mat);
+
+        price = pricesM.get(pricesM.size()-1);
+    }
+
+    public void addValueToH(float value) {
+        pricesH.remove(0);
+        pricesH.add(value);
+    }
+
+    public void addValueToM(float value) {
+        pricesM.remove(0);
+        pricesM.add(value);
+    }
+
+
     public void changePrice(float percentage) {
-        price += price * percentage;
+        price += round(price * percentage);
     }
 
     public float buyItem(int amount) {
 
+        operations++;
         if(nextMoveBuy + amount > required){
 
             if(stock < 0){
-                this.price = (float) (price*((Math.random() * (1.15 - 1.0) + stock*0.00001)));
+                this.price = round((float) (price* (1 +((Math.random() * 0.15) + stock*0.00001))));
             } else {
-                this.price = (float) (price*((Math.random() * (1.1 - 1.0))));
+                this.price = round((float) (price*(1 + (Math.random() * 0.1))));
             }
             buyItem(amount - required);
 
@@ -72,12 +93,13 @@ public class Item {
 
     public float sellItem(int amount) {
 
+        operations++;
         if(nextMoveSell + amount > required){
 
             if(stock > 0){
-                this.price = (float) (price*((Math.random() * (0.85 - 1.0) - stock*0.00001)));
+                this.price += round((float) (price*(0.85 + (Math.random() * 0.15 - stock*0.00001))));
             } else {
-                this.price = (float) (price*((Math.random() * (0.90 - 1.0))));
+                this.price += round((float) (price*(0.9 + (Math.random() * 0.1))));
             }
             sellItem(amount-required);
 
@@ -89,9 +111,24 @@ public class Item {
     }
 
     public String getMaterial() { return mat; }
+
     public float getPrice() { return price; }
+
+    public List<Float> getPricesH() { return pricesH; }
+    public List<Float> getPricesM() { return pricesM; }
+
     public int getStock() { return stock; }
+
     public String getCategory() { return cat.getName(); }
+
     public HashMap<String, Float> getChilds() { return childs; }
+
+    public int getOperations() { return operations; }
+
+    public static float round(float value) {
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(Config.getInstance().getDecimalPrecission(), RoundingMode.HALF_UP);
+        return bd.floatValue();
+    }
 
 }

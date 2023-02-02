@@ -8,6 +8,7 @@ import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
@@ -21,7 +22,7 @@ import java.util.List;
 public class GraphComponent extends RectangularComponent {
 
     String mat;
-    List<Float> values ;
+    List<Float> values;
     int width, height, yc, xc;
 
     // Time frames: 1 = 15 min, 2 = 1 day, 3 = 1 Month, 4 = 1 year, 5 = 1 ytd
@@ -31,11 +32,11 @@ public class GraphComponent extends RectangularComponent {
 
         super(id, clickAction, hidden, interaction, x, y, width, height);
 
-        this.values = values;
         this.width = width;
         this.height = height;
         this.xc = x;
         this.yc = y;
+        this.values = values;
 
         timeFrame = 1;
     }
@@ -55,67 +56,6 @@ public class GraphComponent extends RectangularComponent {
 
         interaction.getComponentTree().locate("timespan1", ViewComponent.class).setView("opt" + timeFrame);
 
-        Calendar cal = Calendar.getInstance();
-
-        switch (timeFrame){
-
-            // 15 min
-            case 1:
-                for(int i = 1; i<=3 ; i++){
-                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-                    String time = sdf.format(cal.getTime());
-                    interaction.getComponentTree().locate("time" + i, TextComponent.class).setText(time);
-                    cal.add(Calendar.MINUTE, -5);
-                }
-                break;
-            // 1 day
-            case 2:
-                for(int i = 1; i<=3 ; i++){
-                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-                    String time = sdf.format(cal.getTime());
-                    interaction.getComponentTree().locate("time" + i, TextComponent.class).setText(time);
-                    cal.add(Calendar.HOUR, -12);
-                }
-                break;
-            // 1 Month
-            case 3:
-                for(int i = 1; i<=3 ; i++){
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM");
-                    String time = sdf.format(cal.getTime());
-                    interaction.getComponentTree().locate("time" + i, TextComponent.class).setText(time);
-                    cal.add(Calendar.DATE, -12);
-                }
-                break;
-            // 1 Year
-            case 4:
-                for(int i = 1; i<=3 ; i++){
-                    SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM");
-                    String time = sdf.format(cal.getTime());
-                    interaction.getComponentTree().locate("time" + i, TextComponent.class).setText(time);
-                    cal.add(Calendar.DATE, -180);
-                }
-                break;
-            // Ytd
-            case 5:
-                Calendar currentDate = Calendar.getInstance();
-                Calendar startYear = Calendar.getInstance();
-                startYear.set(Calendar.MONTH, Calendar.JANUARY);
-                startYear.set(Calendar.DAY_OF_MONTH, 1);
-
-                SimpleDateFormat sdf = new SimpleDateFormat("MM/yyyy");
-
-                interaction.getComponentTree().locate("time3", TextComponent.class).setText(sdf.format(startYear));
-                interaction.getComponentTree().locate("time1", TextComponent.class).setText(sdf.format(currentDate));
-
-                long diff = currentDate.getTimeInMillis() - startYear.getTimeInMillis();
-                long middle = diff / 2;
-
-                Calendar middleDate = Calendar.getInstance();
-                middleDate.setTimeInMillis(startYear.getTimeInMillis() + middle);
-
-                interaction.getComponentTree().locate("time2", TextComponent.class).setText(sdf.format(middleDate));
-                break;
-        }
     }
 
     @Override
@@ -124,7 +64,7 @@ public class GraphComponent extends RectangularComponent {
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
         String time = sdf.format(cal.getTime());
-        return values.toString() + ":" + timeFrame + ":" + time;
+        return timeFrame + ":" + time + ":" + mat;
     }
 
     @Override
@@ -134,7 +74,8 @@ public class GraphComponent extends RectangularComponent {
 
     public void setTimeFrame(int timeFrame, List<Float> values) {
         this.timeFrame = timeFrame;
-        this.values = values;
+        interaction.getComponentTree().locate("slide1", SlideComponent.class).setTimeFrame(timeFrame);
+        setValues(values);
     }
 
     public void setValues(List<Float> values) {
@@ -244,7 +185,7 @@ public class GraphComponent extends RectangularComponent {
 
             int pos = (int) (Math.round((height*0.8 - height*0.8 * (reference - minValue) / (maxValue - minValue))) + yc + Math.round(height*0.05));
 
-            interaction.getComponentTree().locate("scale" + i, TextComponent.class).setText(result);
+            interaction.getComponentTree().locate("scale" + i, TextComponent.class).setText(result + "€");
             interaction.getComponentTree().locate("scale" + i, TextComponent.class).setY(pos+4);
             interaction.getComponentTree().locate("backscale" + i, RectComponent.class).setY(pos-7);
 
@@ -280,7 +221,7 @@ public class GraphComponent extends RectangularComponent {
         if(num >= 10){
 
             return Integer.parseInt(String.valueOf(num).substring(0,2));
-        // In case the number is smaller than 10, we delete the . and ignore all the 0 before the first digit
+        // In case the number is smaller than 10, we delete the "." and ignore all the 0 before the first digit
         } else {
             String numString = String.valueOf(num);
             numString = numString.replace(".", "");
@@ -298,12 +239,15 @@ public class GraphComponent extends RectangularComponent {
     public void changeMat(String mat) {
         this.mat = mat;
 
-        interaction.getComponentTree().locate("MainImage", ImageComponent.class).setImage(ImageManager.getInstance().getImage(mat, 60, 60));
+        ImageComponent ic = interaction.getComponentTree().locate("MainImage", ImageComponent.class);
+        ic.setImage(ImageManager.getInstance().getImage(mat, 60, 60, true));
         String modified = Character.toUpperCase(mat.charAt(0)) + mat.substring(1);
         interaction.getComponentTree().locate("maintext", TextComponent.class).setText(modified.replace("_", " "));
 
-        // HashMap<String, Float> childs = MarketManager.getInstance().getItem(mat).getChilds();
+        this.values = MarketManager.getInstance().getItem(mat).getPricesM();
+        interaction.getComponentTree().locate("slide1", SlideComponent.class).setValues(values);
 
+        // HashMap<String, Float> childs = MarketManager.getInstance().getItem(mat).getChilds();
 
     }
 

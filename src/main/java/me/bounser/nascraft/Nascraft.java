@@ -32,9 +32,7 @@ public final class Nascraft extends JavaPlugin {
         }
         if (Config.getInstance().getCheckResources()){ /*checkResources();*/ }
 
-        // Creating the only instance of PricesManager triggers the saveDataTask.
         MarketManager.getInstance();
-        PricesManager.getInstance();
 
         getCommand("nascraft").setExecutor(new NascraftCommand());
         getCommand("market").setExecutor(new MarketCommand());
@@ -43,7 +41,7 @@ public final class Nascraft extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() { Data.getInstance().savePrices(); }
+    public void onDisable() { /*Data.getInstance().savePrices();*/ }
 
     public void checkResources() {
 

@@ -5,10 +5,9 @@ AutoResourcesInjection: true
 
 Items_quoted:
   Categories:
-    # Num of the category. Categories are displayed in the main menu.
+    # Name of the category. Categories are displayed in the main menu.
     1:
-      icon: "cobblestone"
-      # Name of the category.
+      # Display-name of the category.
       name: "Stone age"
       # Number of individual items needed to fluctuate the price. Adjust for volatility.
       required_to_move: 64
@@ -47,7 +46,6 @@ Items_quoted:
             cobbled_deepslate_wall:
               linked: 1
     2:
-      icon: "redstone"
       name: "Tech"
       required_to_move: 16
       items:
@@ -67,7 +65,6 @@ Items_quoted:
         observer:
           price: 8
     3:
-      icon: "oak_planks"
       name: "In the woods"
       required_to_move: 16
       items:
@@ -94,7 +91,6 @@ Items_quoted:
             stick:
               linked: 0.0625
     4:
-      icon: "diamond"
       name: "Valuables"
       required_to_move: 16
       items:
@@ -105,7 +101,6 @@ Items_quoted:
         raw_gold:
           price: 20
     5:
-      icon: "coal"
       name: "Utils"
       required_to_move: 16
       items:
@@ -117,8 +112,7 @@ Items_quoted:
         leather:
           price: 10
     6:
-      icon: "iron_ingot"
-      name: "Utils"
+      name: "Ingots"
       required_to_move: 16
       items:
         iron_ingot:
@@ -135,16 +129,23 @@ Price_options:
   supply_and_demand: true
 
 Market_control:
+  # Limit the precision of prices. With 2: the minimum price would be 0.01, with 3: 0.001 etc
+  decimal_limit: 3
+  # The spread is determined by the deviation in both actions. In the default case: 2% + 2% -> 4% of spread
   taxation:
-    # 5% taxation when players sell items.
-    sell: 0.05
-    # 5% taxation when players buy items.
-    buy: 0.05
+    # 3% taxation when players sell items.
+    sell: 0.02
+    # 3% taxation when players buy items.
+    buy: 0.02
   high_market_control:
     enabled: true
+    # Wipe ~50% of the valuations in a couple movements.
     force_crash: false
+    # Pump a ~50% of the valuations in minutes
     force_bullrun: false
+    # Set the general tendency of the oscilations to positive.
     force_bull: true
+    # Set the general tendency of the oscilations to negative.
     force_bear: true
   emergency_stop: true
 
@@ -152,8 +153,8 @@ Trading:
   enabled: true
   licence_price: 100000 # -1 means it cannot be purchased
   taxation:
-    sell: 0.02
-    buy: 0.02
+    sell: 0.01
+    buy: 0.01
   virtual_portfolio: true
   limited_orders: true
   stoploss: true

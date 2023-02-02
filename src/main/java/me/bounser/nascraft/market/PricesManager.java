@@ -17,7 +17,7 @@ public class PricesManager {
 
     private PricesManager(){
         saveDataTask();
-        if(Config.getInstance().getRandomOscilation()) { randomOscilations(); }
+        shortTermPricesTask();
     }
 
     public void setMarketStatus(MarketStatus marketStatus) {
@@ -25,7 +25,23 @@ public class PricesManager {
             this.marketStatus = marketStatus;
             marketEvent();
         }
+    }
 
+    private void shortTermPricesTask() {
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
+
+            for (Item item : MarketManager.getInstance().getAllItems()) {
+                if(Config.getInstance().getRandomOscilation()) item.changePrice((float) (Math.random() * 2 -1)/100);
+                item.addValueToM(item.getPrice());
+            }
+
+        }, 60, 1200);
+
+    }
+
+    public void setupFiles() {
+        Data.getInstance().setupFiles();
     }
 
     private void saveDataTask() {
@@ -33,18 +49,17 @@ public class PricesManager {
         // All the prices will be stored 2 times each hour.
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
+            for (Item item : MarketManager.getInstance().getAllItems()) item.addValueToH(item.getPrice());
             Data.getInstance().savePrices();
 
-        }, 50, 36000);
+        }, 30000, 36000);
 
     }
 
     public void changeAllMarket(float percentage){
 
-        for(Item item : MarketManager.getInstance().getAllItems()) {
-
+        for (Item item : MarketManager.getInstance().getAllItems()) {
             item.changePrice(percentage + (float) (Math.random() * percentage*0.5));
-
         }
 
     }
@@ -74,16 +89,5 @@ public class PricesManager {
 
     }
 
-    public void randomOscilations() {
-
-        Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
-
-            for(Item item : MarketManager.getInstance().getAllItems()) {
-                item.changePrice((float) (Math.random() * 2 -1));
-            }
-
-        }, 50, 12000);
-
-    }
 
 }
