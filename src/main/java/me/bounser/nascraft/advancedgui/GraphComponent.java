@@ -10,6 +10,7 @@ import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
@@ -261,6 +262,7 @@ public class GraphComponent extends RectangularComponent {
             cTree.locate("buy" + i).setClickAction((interaction, player, primaryTrigger) -> {
                 item.buyItem(i);
                 updateButtonPrice(cTree.locate("pb" + i, TextComponent.class), item, true);
+                player.sendMessage(ChatColor.GRAY + "You just bought " + ChatColor.AQUA + i + ChatColor.GRAY + " of " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + item.getBuyPrice()*i);
             });
         }
 
@@ -273,6 +275,7 @@ public class GraphComponent extends RectangularComponent {
             cTree.locate("sell" + i).setClickAction((interaction, player, primaryTrigger) -> {
                 item.sellItem(i);
                 updateButtonPrice(cTree.locate("ps" + i, TextComponent.class), item, false);
+                player.sendMessage(ChatColor.GRAY + "You just sold " + ChatColor.AQUA + i + ChatColor.GRAY + " of " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + item.getBuyPrice()*i);
             });
         }
 
