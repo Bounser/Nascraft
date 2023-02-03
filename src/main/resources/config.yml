@@ -130,7 +130,7 @@ Price_options:
 
 Market_control:
   # Limit the precision of prices. With 2: the minimum price would be 0.01, with 3: 0.001 etc
-  decimal_limit: 3
+  decimal_limit: 2
   # The spread is determined by the deviation in both actions. In the default case: 2% + 2% -> 4% of spread
   taxation:
     # 3% taxation when players sell items.
@@ -158,3 +158,6 @@ Trading:
   virtual_portfolio: true
   limited_orders: true
   stoploss: true
+
+Lang:
+  currency: "€"

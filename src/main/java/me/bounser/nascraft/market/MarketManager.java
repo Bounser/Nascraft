@@ -1,14 +1,10 @@
 package me.bounser.nascraft.market;
 
-import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.Data;
-import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 public class MarketManager {
 
@@ -16,7 +12,6 @@ public class MarketManager {
     List<Category> categories = new ArrayList<>();
 
     private static MarketManager instance;
-    private static Nascraft main;
 
     public static MarketManager getInstance() { return instance == null ? instance = new MarketManager() : instance; }
 
@@ -25,6 +20,7 @@ public class MarketManager {
     public void setupItems() {
 
         PricesManager.getInstance().setupFiles();
+
         for(String cat : Config.getInstance().getCategories()) {
 
             Category category = new Category(cat);
@@ -49,14 +45,12 @@ public class MarketManager {
         return null;
     }
 
+    public List<Category> getCategories() { return categories; }
+
     public List<Item> getAllItems() { return items; }
 
     public Category getCategoryOfIndex(int index) {
         return categories.get(index);
-    }
-
-    public int getNumOfCategories() {
-        return categories.toArray().length;
     }
 
     public void changeCategoryOrder(boolean up) {

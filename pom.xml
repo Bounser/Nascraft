@@ -61,7 +61,7 @@
                     <relocations>
                         <relocation>
                             <pattern>de.leonhard.storage</pattern>
-                            <shadedPattern>sculktronics.bounser.storage</shadedPattern>
+                            <shadedPattern>nascraft.bounser.storage</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

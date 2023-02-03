@@ -6,7 +6,6 @@ import me.bounser.nascraft.market.MarketManager;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
 
 public class Config {
@@ -19,8 +18,9 @@ public class Config {
     float taxSell = -1;
     int random0 = 0;
     int precission = -1;
+    String currency = "0";
 
-    public static Config getInstance(){
+    public static Config getInstance() {
         return instance == null ? instance = new Config() : instance;
     }
 
@@ -31,28 +31,42 @@ public class Config {
         this.config = main.getConfig();
     }
 
-    public Boolean getCheckResources(){ return main.getConfig().getBoolean("AutoResourcesInjection"); }
+    public Boolean getCheckResources() {
+        return main.getConfig().getBoolean("AutoResourcesInjection");
+    }
 
-    public int getRequiredToMove(String category){ return main.getConfig().getInt("Items_quoted.Categories." + category + ".required_to_move"); }
+    public int getRequiredToMove(String category) {
+        return main.getConfig().getInt("Items_quoted.Categories." + category + ".required_to_move");
+    }
 
     public Set<String> getAllMaterials(String category) {
         return main.getConfig().getConfigurationSection("Items_quoted.Categories." + category + ".items.").getKeys(false);
     }
 
-    public Set<String> getCategories() { return main.getConfig().getConfigurationSection("Items_quoted.Categories.").getKeys(false); }
+    public Set<String> getCategories() {
+        return main.getConfig().getConfigurationSection("Items_quoted.Categories.").getKeys(false);
+    }
 
     public float getInitialPrice(String mat) {
 
         FileConfiguration config = main.getConfig();
 
-        for(String cat : getCategories()) {
+        for (String cat : getCategories()) {
 
-            for(String item : config.getConfigurationSection("Items_quoted.Categories." + cat + ".").getKeys(false)) {
-
-                if(item.equals(mat)) return (float) config.getDouble("Items_quoted.Categories." + cat + ".items." + item + ".price");
+            for (String item : config.getConfigurationSection("Items_quoted.Categories." + cat + ".items.").getKeys(false)) {
+                if(mat.equals(item)){
+                    return (float) config.getDouble("Items_quoted.Categories." + cat + ".items." + item + ".price");
+                }
             }
         }
         return 1;
+    }
+
+    public String getCurrency() {
+        if(currency.equals("0")) {
+            return currency = config.getString("Lang.currency");
+        }
+        return currency;
     }
 
     public int getDecimalPrecission() {
@@ -103,20 +117,21 @@ public class Config {
         return null;
     }
 
-    public HashMap<String, Float> getChilds(String mat) {
+    public HashMap<String, Float> getChilds(String mat, String cat) {
 
         HashMap<String, Float> childs = new HashMap<>();
-        Item item = MarketManager.getInstance().getItem(mat);
 
-        if(!config.contains("Items_Quoted.Categories." + item.getCategory() + ".items." + item.getMaterial() + ".child.")){
+        childs.put(mat, 1f);
+
+        if(!config.contains("Items_Quoted.Categories." + cat + ".items." + mat + ".child")){
             return null;
         }
-        Set<String> section = config.getConfigurationSection("Items_Quoted.Categories." + item.getCategory() + ".items." + item.getMaterial() + ".child.").getKeys(false);
+        Set<String> section = config.getConfigurationSection("Items_Quoted.Categories." + cat + ".items." + mat + ".child.").getKeys(false);
 
         if(section.size() == 0) return null;
         for(String childMat : section){
 
-            childs.put(childMat, (float) config.getDouble("Items_Quoted.Categories." + item.getCategory() + ".items." + item.getMaterial() + ".child." + mat + ".price"));
+            childs.put(childMat, (float) config.getDouble("Items_Quoted.Categories." + cat + ".items." + mat + ".child." + childMat + ".price"));
 
         }
         return childs;

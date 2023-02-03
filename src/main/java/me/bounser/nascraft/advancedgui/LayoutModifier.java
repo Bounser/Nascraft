@@ -3,6 +3,7 @@ package me.bounser.nascraft.advancedgui;
 import me.bounser.nascraft.market.Category;
 import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.ImageManager;
 import me.leoko.advancedgui.utils.LayoutExtension;
 import me.leoko.advancedgui.utils.components.*;
@@ -32,12 +33,12 @@ public class LayoutModifier implements LayoutExtension {
         // SlideComponent
         DummyComponent dct = cTree.locate("slide123", DummyComponent.class);
         dct.setComponent(new SlideComponent("slide1", null, false,
-                event.getLayout().getDefaultInteraction(), 44, 55, 300, 140, Arrays.asList(0.022f, 0.01032f, 0.01345f, 0.03542f, 0.0353f, 0.09f, 0.14f, 0.08f, 0.054f, 0.02f, 0.0231f, 0.03f, 0.022f)));
+                event.getLayout().getDefaultInteraction(), 44, 55, 300, 140, Arrays.asList(1f, 1f)));
 
         // GraphComponent
         DummyComponent dc = cTree.locate("graph123", DummyComponent.class);
         dc.setComponent(new GraphComponent("graph1", null, false,
-                event.getLayout().getDefaultInteraction(), 44, 55, 300, 140, Arrays.asList(0.022f, 0.01032f, 0.01345f, 0.03542f, 0.0353f, 0.09f, 0.14f, 0.08f, 0.054f, 0.02f, 0.0231f, 0.03f, 0.022f)));
+                event.getLayout().getDefaultInteraction(), 44, 55, 300, 140, Arrays.asList(1f, 1f)));
 
         // Main page
         updateMainPage(cTree);
@@ -59,31 +60,10 @@ public class LayoutModifier implements LayoutExtension {
             int finalI = i;
             cTree.locate("timesel" + i, RectComponent.class).setClickAction((interaction, player, primaryTrigger) -> {
 
-                interaction.getComponentTree().locate("graph1", GraphComponent.class).setTimeFrame(finalI, Arrays.asList(10.2f, 5.3f, 3.1f, 5f, 10f, 100f, 1100f, 800f));
+                interaction.getComponentTree().locate("graph1", GraphComponent.class).setTimeFrame(finalI);
 
             });
         }
-
-        /*
-        // Buy
-
-        for (int i : Arrays.asList(1, 16, 64)){
-            cTree.locate("buy" + i).setClickAction((interaction, player, primaryTrigger) -> {
-                String mat = interaction.getComponentTree().locate("maintext", TextComponent.class).getText().replace(" ", "_");
-                ItemsManager.getInstance().getItem(mat).buyItem(i);
-            });
-        }
-
-        // Sell
-
-        for (int i : Arrays.asList(1, 16, 64)){
-            cTree.locate("sell" + i).setClickAction((interaction, player, primaryTrigger) -> {
-                String mat = interaction.getComponentTree().locate("maintext", TextComponent.class).getText().replace(" ", "_");
-                ItemsManager.getInstance().getItem(mat).sellItem(i);
-            });
-        }
-        */
-
     }
 
     public void updateMainPage(GroupComponent cTree) {
@@ -97,7 +77,8 @@ public class LayoutModifier implements LayoutExtension {
 
                 if (j <= numOfItems) {
 
-                    // cTree.locate("t" + i + j, TextComponent.class).setText(String.valueOf(cat.getItemOfIndex(j).getPrice()));
+                    cTree.locate("t" + i + j + "1", TextComponent.class).setText(String.valueOf(cat.getItemOfIndex(j-1).getPrice()));
+                    cTree.locate("t" + i + j + "2", TextComponent.class).setText(String.valueOf(cat.getItemOfIndex(j-1).getPrice()));
                     ImageComponent ic = cTree.locate("asdi" + i + "" + j, ImageComponent.class);
                     ic.setImage(ImageManager.getInstance().getImage(cat.getItemOfIndex(j - 1).getMaterial(), 32, 32, false));
 
@@ -116,6 +97,7 @@ public class LayoutModifier implements LayoutExtension {
             }
         }
     }
+
 
     @EventHandler
     public void onInteractionStart(GuiInteractionBeginEvent event) {
@@ -139,7 +121,7 @@ public class LayoutModifier implements LayoutExtension {
         GroupComponent icTree = i.getComponentTree();
 
         if(max != null) {
-            ImageComponent ic = icTree.locate("trend1", ImageComponent.class);
+            ImageComponent ic = icTree.locate("trend", ImageComponent.class);
             ic.setHidden(false);
             ic.setImage(ImageManager.getInstance().getImage(max.getMaterial(), 33, 33, false));
             Item finalMax = max;
@@ -147,6 +129,8 @@ public class LayoutModifier implements LayoutExtension {
                 interaction.getComponentTree().locate("nbk2fMcG", ViewComponent.class).setView("qrRtaAnd");
                 interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(finalMax.getMaterial());
             });
+        } else {
+            icTree.locate("trend1", GroupComponent.class).setHidden(true);
         }
     }
 
@@ -163,9 +147,7 @@ public class LayoutModifier implements LayoutExtension {
                 if(is.getType().toString().equals(item.getMaterial())) {
                     content.put(is.getAmount(), item.getMaterial());
                 }
-
             }
-
         }
 
         if(content.size() > 2)

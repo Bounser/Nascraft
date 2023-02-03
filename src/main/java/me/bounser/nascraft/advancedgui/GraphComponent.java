@@ -1,6 +1,8 @@
 package me.bounser.nascraft.advancedgui;
 
+import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.ImageManager;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
@@ -8,7 +10,6 @@ import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
@@ -23,6 +24,7 @@ public class GraphComponent extends RectangularComponent {
 
     String mat;
     List<Float> values;
+    List<String> childsMat;
     int width, height, yc, xc;
 
     // Time frames: 1 = 15 min, 2 = 1 day, 3 = 1 Month, 4 = 1 year, 5 = 1 ytd
@@ -44,7 +46,9 @@ public class GraphComponent extends RectangularComponent {
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
 
-        setScaleReferences();
+        updateButtons();
+
+        // setScaleReferences();
 
         graphic.setColor(new Color(0, 0, 0));
 
@@ -62,7 +66,7 @@ public class GraphComponent extends RectangularComponent {
     public String getState(Player player, GuiPoint cursor) {
 
         Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat sdf = new SimpleDateFormat("mm");
         String time = sdf.format(cal.getTime());
         return timeFrame + ":" + time + ":" + mat;
     }
@@ -72,14 +76,22 @@ public class GraphComponent extends RectangularComponent {
         return new GraphComponent(id, clickAction, hidden, interaction, x, y, width, height, values);
     }
 
-    public void setTimeFrame(int timeFrame, List<Float> values) {
+    public void setTimeFrame(int timeFrame) {
         this.timeFrame = timeFrame;
         interaction.getComponentTree().locate("slide1", SlideComponent.class).setTimeFrame(timeFrame);
-        setValues(values);
+        switch(timeFrame) {
+            case 1:
+                setValues(MarketManager.getInstance().getItem(mat).getPricesM());
+                break;
+            case 2:
+                setValues(MarketManager.getInstance().getItem(mat).getPricesH());
+                break;
+        }
     }
 
     public void setValues(List<Float> values) {
         this.values = values;
+        interaction.getComponentTree().locate("slide1", SlideComponent.class).setValues(values);
     }
 
     public int[] getYPoints(int offset, boolean polygon) {
@@ -158,34 +170,32 @@ public class GraphComponent extends RectangularComponent {
         if(maxValue == minValue){
             for (int i = 1; i<=4 ; i++) {
                 interaction.getComponentTree().locate("scale" + i, TextComponent.class).setHidden(true);
+                interaction.getComponentTree().locate("backscale" + i, RectComponent.class).setHidden(true);
             }
+            interaction.getComponentTree().locate("scale0", TextComponent.class).setHidden(true);
+            interaction.getComponentTree().locate("last", RectComponent.class).setHidden(true);
+            interaction.getComponentTree().locate("12backscale0", RectComponent.class).setHidden(true);
             return;
         }
 
         int i = 1;
 
-        for(float val : Arrays.asList(maxValue, minValue, (maxValue-minValue)*2/3 + minValue, (maxValue-minValue)*1/3 + minValue)) {
+        for(float val : Arrays.asList(maxValue, minValue, round((maxValue-minValue)*2/3 + minValue), round((maxValue-minValue)*1/3 + minValue))) {
 
-            int firstDigits = getFirstDigits(val);
+            float reference;
+            if((maxValue-minValue) > 10) {
+                int firstDigits = getFirstDigits(val);
 
-            int numDigits = (int) Math.floor(Math.log10(val)) + (int) Math.floor(Math.log10(1-val));
-            if(numDigits >= 0) numDigits -= 1;
+                int numDigits = (int) Math.floor(Math.log10(val)) + (int) Math.floor(Math.log10(1 - val));
+                if (numDigits >= 0) numDigits -= 1;
 
-            float reference = (float) firstDigits * (float) (Math.pow(10, numDigits));
-
-            String result = String.valueOf(reference);
-            if (result.length() > 8 && reference < 1){
-                BigDecimal bd = new BigDecimal(reference);
-                bd = bd.setScale(4, RoundingMode.HALF_UP);
-                result = bd.toString();
-                result = result.replaceAll("0*$", "").replaceAll("\\.$", "");
-            } else if (reference > 1) {
-                result = String.valueOf((int) reference);
+                reference = (float) firstDigits * (float) (Math.pow(10, numDigits));
+            } else {
+                reference = round(val);
             }
-
             int pos = (int) (Math.round((height*0.8 - height*0.8 * (reference - minValue) / (maxValue - minValue))) + yc + Math.round(height*0.05));
 
-            interaction.getComponentTree().locate("scale" + i, TextComponent.class).setText(result + "€");
+            interaction.getComponentTree().locate("scale" + i, TextComponent.class).setText(reference + "");
             interaction.getComponentTree().locate("scale" + i, TextComponent.class).setY(pos+4);
             interaction.getComponentTree().locate("backscale" + i, RectComponent.class).setY(pos-7);
 
@@ -193,13 +203,14 @@ public class GraphComponent extends RectangularComponent {
             i++;
         }
 
+        // 0
         float escalated = (int) ((Math.round((height*0.8 - height*0.8 * (-minValue) / (maxValue - minValue))) + yc) + Math.round(height*0.05));
 
         TextComponent tc = interaction.getComponentTree().locate("scale0", TextComponent.class);
         RectComponent rc = interaction.getComponentTree().locate("last", RectComponent.class);
         RectComponent bc = interaction.getComponentTree().locate("12backscale0", RectComponent.class);
 
-        if (escalated < height + xc) {
+        if (escalated < height + yc) {
             tc.setY((int) escalated +4);
             tc.setHidden(false);
 
@@ -219,9 +230,8 @@ public class GraphComponent extends RectangularComponent {
 
         // If the number is greater (or equal) than 10 (Has 2 digits or more) we simply get the 2 first digits.
         if(num >= 10){
-
             return Integer.parseInt(String.valueOf(num).substring(0,2));
-        // In case the number is smaller than 10, we delete the "." and ignore all the 0 before the first digit
+            // In case the number is smaller than 10, we delete the "." and ignore all the 0 before the first digit
         } else {
             String numString = String.valueOf(num);
             numString = numString.replace(".", "");
@@ -236,6 +246,50 @@ public class GraphComponent extends RectangularComponent {
         }
     }
 
+    public static float round(float value) {
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(Config.getInstance().getDecimalPrecission(), RoundingMode.HALF_UP);
+        return bd.floatValue();
+    }
+
+    public void updateButtons() {
+
+        for (int i : Arrays.asList(1, 16, 64)){
+            Item item = MarketManager.getInstance().getItem(mat);
+            GroupComponent cTree = interaction.getComponentTree();
+            cTree.locate("pb" + i, TextComponent.class).setText(item.getBuyPrice()*i + Config.getInstance().getCurrency());
+            cTree.locate("buy" + i).setClickAction((interaction, player, primaryTrigger) -> {
+                item.buyItem(i);
+                updateButtonPrice(cTree.locate("pb" + i, TextComponent.class), item, true);
+            });
+        }
+
+        // Sell
+
+        for (int i : Arrays.asList(1, 16, 64)){
+            Item item = MarketManager.getInstance().getItem(mat);
+            GroupComponent cTree = interaction.getComponentTree();
+            cTree.locate("ps" + i, TextComponent.class).setText(item.getSellPrice()*i + Config.getInstance().getCurrency());
+            cTree.locate("sell" + i).setClickAction((interaction, player, primaryTrigger) -> {
+                item.sellItem(i);
+                updateButtonPrice(cTree.locate("ps" + i, TextComponent.class), item, false);
+            });
+        }
+
+    }
+
+    public void updateButtonPrice(TextComponent priceText, Item item, boolean buy) {
+        if(buy) {
+            for (int i : Arrays.asList(1, 16, 64)){
+                priceText.setText(item.getBuyPrice()*i + Config.getInstance().getCurrency());
+            }
+        } else {
+            for (int i : Arrays.asList(1, 16, 64)){
+                priceText.setText(item.getSellPrice()*i + Config.getInstance().getCurrency());
+            }
+        }
+    }
+
     public void changeMat(String mat) {
         this.mat = mat;
 
@@ -247,8 +301,31 @@ public class GraphComponent extends RectangularComponent {
         this.values = MarketManager.getInstance().getItem(mat).getPricesM();
         interaction.getComponentTree().locate("slide1", SlideComponent.class).setValues(values);
 
-        // HashMap<String, Float> childs = MarketManager.getInstance().getItem(mat).getChilds();
+        HashMap<String, Float> childs = MarketManager.getInstance().getItem(mat).getChilds();
 
+        if(childs == null) {
+            interaction.getComponentTree().locate("childs").setHidden(true);
+        } else {
+            childsMat = new ArrayList<>(childs.keySet());
+
+            interaction.getComponentTree().locate("childact").setClickAction((interaction, player, primaryTrigger) -> {
+
+                changeChildsOrder();
+
+                for(int i = 1; i < 8 ; i++) {
+
+                    interaction.getComponentTree().locate("child" + i, ImageComponent.class).setImage(ImageManager.getInstance().getImage(childsMat.get(i-1), 32, 32, true));
+                    int j = 0;
+                    for(float v : values) {
+                        values.set(j, v*childs.get(childsMat.get(i-1)));
+                    }
+                }
+            });
+        }
+    }
+
+    public void changeChildsOrder() {
+        Collections.rotate(childsMat, -1);
     }
 
 }

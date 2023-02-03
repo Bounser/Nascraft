@@ -2,6 +2,7 @@ package me.bounser.nascraft.market;
 
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
+import org.bukkit.Bukkit;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -37,7 +38,7 @@ public class Item {
         setupPrices();
         cat = category;
         operations = 0;
-        // this.childs = Config.getInstance().getChilds(material);
+        this.childs = Config.getInstance().getChilds(material, category.getName());
 
     }
 
@@ -59,14 +60,13 @@ public class Item {
 
     public void addValueToH(float value) {
         pricesH.remove(0);
-        pricesH.add(value);
+        pricesH.add(round(value));
     }
 
     public void addValueToM(float value) {
         pricesM.remove(0);
-        pricesM.add(value);
+        pricesM.add(round(value));
     }
-
 
     public void changePrice(float percentage) {
         price += round(price * percentage);
@@ -76,43 +76,43 @@ public class Item {
 
         operations++;
         if(nextMoveBuy + amount > required){
-
-            if(stock < 0){
-                this.price = round((float) (price* (1 +((Math.random() * 0.15) + stock*0.00001))));
-            } else {
-                this.price = round((float) (price*(1 + (Math.random() * 0.1))));
+            for(int i = 1; i <= (nextMoveBuy + amount)%required; i++) {
+                if(stock > 0){
+                    this.price = round((float) (price* (1 +((Math.random() * 0.05) + stock*0.00001))));
+                } else {
+                    this.price = round((float) (price*(1 + (Math.random() * 0.01))));
+                }
+                nextMoveBuy = (nextMoveBuy + amount) - required*i;
             }
-            buyItem(amount - required);
-
         } else {
             nextMoveBuy += amount;
         }
         stock -= amount;
-        return price += price * Config.getInstance().getTaxBuy();
+        return price + round(price * Config.getInstance().getTaxBuy());
     }
 
     public float sellItem(int amount) {
 
         operations++;
         if(nextMoveSell + amount > required){
-
-            if(stock > 0){
-                this.price += round((float) (price*(0.85 + (Math.random() * 0.15 - stock*0.00001))));
-            } else {
-                this.price += round((float) (price*(0.9 + (Math.random() * 0.1))));
+            for(int i = 1; i <= (nextMoveBuy + amount)%required; i++) {
+                if(stock < 0){
+                    this.price = round((float) (price* (0.9 +((Math.random() * 0.05) + stock*0.00001))));
+                } else {
+                    this.price = round((float) (price*(0.95 + (Math.random() * 0.01))));
+                }
+                nextMoveSell = (nextMoveSell + amount) - required*i;
             }
-            sellItem(amount-required);
-
         } else {
             nextMoveSell += amount;
         }
         stock += amount;
-        return price -= price*Config.getInstance().getTaxSell();
+        return price - round(price*Config.getInstance().getTaxSell());
     }
 
     public String getMaterial() { return mat; }
 
-    public float getPrice() { return price; }
+    public float getPrice() { return round(price); }
 
     public List<Float> getPricesH() { return pricesH; }
     public List<Float> getPricesM() { return pricesM; }
@@ -129,6 +129,13 @@ public class Item {
         BigDecimal bd = new BigDecimal(value);
         bd = bd.setScale(Config.getInstance().getDecimalPrecission(), RoundingMode.HALF_UP);
         return bd.floatValue();
+    }
+
+    public float getBuyPrice() {
+        return round(price + price*Config.getInstance().getTaxBuy());
+    }
+    public float getSellPrice() {
+        return round(price - price*Config.getInstance().getTaxSell());
     }
 
 }

@@ -41,7 +41,7 @@ public final class Nascraft extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() { /*Data.getInstance().savePrices();*/ }
+    public void onDisable() { Data.getInstance().savePrices(); }
 
     public void checkResources() {
 
