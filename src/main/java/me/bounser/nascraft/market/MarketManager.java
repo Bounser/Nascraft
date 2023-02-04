@@ -3,7 +3,6 @@ package me.bounser.nascraft.market;
 import me.bounser.nascraft.tools.Config;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MarketManager {
@@ -51,14 +50,6 @@ public class MarketManager {
 
     public Category getCategoryOfIndex(int index) {
         return categories.get(index);
-    }
-
-    public void changeCategoryOrder(boolean up) {
-        if (up) {
-            Collections.rotate(categories, -1);
-        } else {
-            Collections.rotate(categories, 1);
-        }
     }
 
 }

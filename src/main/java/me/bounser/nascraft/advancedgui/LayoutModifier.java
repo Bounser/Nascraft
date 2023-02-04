@@ -3,7 +3,6 @@ package me.bounser.nascraft.advancedgui;
 import me.bounser.nascraft.market.Category;
 import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.ImageManager;
 import me.leoko.advancedgui.utils.LayoutExtension;
 import me.leoko.advancedgui.utils.components.*;
@@ -11,14 +10,12 @@ import me.leoko.advancedgui.utils.events.GuiInteractionBeginEvent;
 import me.leoko.advancedgui.utils.events.LayoutLoadEvent;
 
 import me.leoko.advancedgui.utils.interactions.Interaction;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 public class LayoutModifier implements LayoutExtension {
 
@@ -40,18 +37,18 @@ public class LayoutModifier implements LayoutExtension {
         dc.setComponent(new GraphComponent("graph1", null, false,
                 event.getLayout().getDefaultInteraction(), 44, 55, 300, 140, Arrays.asList(1f, 1f)));
 
-        // Main page
-        updateMainPage(cTree);
+        // DisplayComponent
+        DummyComponent ddc = event.getLayout().getDefaultInteraction().getComponentTree().locate("display123", DummyComponent.class);
+        ddc.setComponent(new DisplayComponent("display1", null, false,
+                event.getLayout().getDefaultInteraction(), MarketManager.getInstance().getCategories()));
 
         // Arrows
         cTree.locate("ArrowUP").setClickAction((interaction, player, primaryTrigger) -> {
-            MarketManager.getInstance().changeCategoryOrder(true);
-            updateMainPage(interaction.getComponentTree());
+            cTree.locate("display1", DisplayComponent.class).nextPage();
         });
 
         cTree.locate("ArrowDOWN").setClickAction((interaction, player, primaryTrigger) -> {
-            MarketManager.getInstance().changeCategoryOrder(false);
-            updateMainPage(interaction.getComponentTree());
+            cTree.locate("display1", DisplayComponent.class).prevPage();
         });
 
         // Time Span selectors
@@ -64,6 +61,14 @@ public class LayoutModifier implements LayoutExtension {
 
             });
         }
+
+        // Back button
+        cTree.locate("back").setClickAction((interaction, player, primaryTrigger) -> {
+            interaction.getComponentTree().locate("nbk2fMcG", ViewComponent.class).setView("I4ztUi1d");
+            updateTrending(interaction);
+            updateSuggestions(interaction, player);
+        });
+
     }
 
     public void updateMainPage(GroupComponent cTree) {
@@ -121,8 +126,8 @@ public class LayoutModifier implements LayoutExtension {
         GroupComponent icTree = i.getComponentTree();
 
         if(max != null) {
+            icTree.locate("trend1", GroupComponent.class).setHidden(false);
             ImageComponent ic = icTree.locate("trend", ImageComponent.class);
-            ic.setHidden(false);
             ic.setImage(ImageManager.getInstance().getImage(max.getMaterial(), 33, 33, false));
             Item finalMax = max;
             ic.setClickAction((interaction, player, primaryTrigger) -> {
@@ -135,8 +140,13 @@ public class LayoutModifier implements LayoutExtension {
     }
 
     public void updateSuggestions(Interaction inter, Player p) {
+
         GroupComponent icTree = inter.getComponentTree();
         HashMap<Integer, String> content = new HashMap<>();
+
+        icTree.locate("sug1", ImageComponent.class).setHidden(true);
+        icTree.locate("sug2", ImageComponent.class).setHidden(true);
+        icTree.locate("sug3", ImageComponent.class).setHidden(true);
 
         Inventory inv = p.getInventory();
         for(ItemStack is : inv.getContents()) {
@@ -144,21 +154,34 @@ public class LayoutModifier implements LayoutExtension {
             if(is != null)
             for(Item item : MarketManager.getInstance().getAllItems()) {
 
-                if(is.getType().toString().equals(item.getMaterial())) {
-                    content.put(is.getAmount(), item.getMaterial());
+                if(is.getType().toString().equals(item.getMaterial().toUpperCase())) {
+                        content.put(is.getAmount(), item.getMaterial());
                 }
             }
         }
+        HashMap<String, Integer> result = new HashMap<>();
 
-        if(content.size() > 2)
+        for (Map.Entry<Integer, String> entry : content.entrySet()) {
+            String key = entry.getValue();
+            int value = result.getOrDefault(key, 0);
+            result.put(key, value + entry.getKey());
+        }
+
+        HashMap<Integer, String> cont = new HashMap<>();
+
+        for (Map.Entry<String, Integer> entry : result.entrySet()) {
+            cont.put(entry.getValue(), entry.getKey());
+        }
+
+        if(result.size() > 1)
             for(int i = 1; i <= 3; i++) {
 
                 int maxx = 0;
-                for(int amount : content.keySet()) {
-                    if(amount > maxx) maxx = amount;
+                for(int amount : cont.keySet()) {
+                    if(amount >= maxx) maxx = amount;
                 }
 
-                String mat = content.get(maxx);
+                String mat = cont.get(maxx);
                 ImageComponent ic = icTree.locate("sug" + i, ImageComponent.class);
 
                 ic.setHidden(false);
@@ -168,8 +191,7 @@ public class LayoutModifier implements LayoutExtension {
                     interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(mat);
                 });
 
-                content.remove(maxx);
-
+                cont.remove(maxx);
             }
     }
 

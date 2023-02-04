@@ -9,8 +9,6 @@ Items_quoted:
     1:
       # Display-name of the category.
       name: "Stone age"
-      # Number of individual items needed to fluctuate the price. Adjust for volatility.
-      required_to_move: 64
       items:
         # Items of the category
         cobblestone:
@@ -47,7 +45,6 @@ Items_quoted:
               linked: 1
     2:
       name: "Tech"
-      required_to_move: 16
       items:
         redstone:
           price: 2
@@ -66,7 +63,6 @@ Items_quoted:
           price: 8
     3:
       name: "In the woods"
-      required_to_move: 16
       items:
         oak_log:
           price: 1
@@ -92,7 +88,6 @@ Items_quoted:
               linked: 0.0625
     4:
       name: "Valuables"
-      required_to_move: 16
       items:
         diamond:
           price: 100
@@ -102,7 +97,6 @@ Items_quoted:
           price: 20
     5:
       name: "Utils"
-      required_to_move: 16
       items:
         coal:
           price: 4
@@ -113,7 +107,6 @@ Items_quoted:
           price: 10
     6:
       name: "Ingots"
-      required_to_move: 16
       items:
         iron_ingot:
           price: 4

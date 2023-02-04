@@ -5,11 +5,8 @@ import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.commands.MarketCommand;
 import me.bounser.nascraft.commands.NascraftCommand;
 import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.market.PricesManager;
 import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.Data;
 import me.leoko.advancedgui.manager.LayoutManager;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -41,7 +38,7 @@ public final class Nascraft extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() { Data.getInstance().savePrices(); }
+    public void onDisable() { /*Data.getInstance().savePrices();*/ }
 
     public void checkResources() {
 

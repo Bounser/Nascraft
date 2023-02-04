@@ -11,7 +11,9 @@ import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.awt.*;
 import java.math.BigDecimal;
@@ -258,11 +260,12 @@ public class GraphComponent extends RectangularComponent {
         for (int i : Arrays.asList(1, 16, 64)){
             Item item = MarketManager.getInstance().getItem(mat);
             GroupComponent cTree = interaction.getComponentTree();
-            cTree.locate("pb" + i, TextComponent.class).setText(item.getBuyPrice()*i + Config.getInstance().getCurrency());
+            cTree.locate("pb" + i, TextComponent.class).setText(item.getBuyPrice()*i + "");
             cTree.locate("buy" + i).setClickAction((interaction, player, primaryTrigger) -> {
                 item.buyItem(i);
                 updateButtonPrice(cTree.locate("pb" + i, TextComponent.class), item, true);
-                player.sendMessage(ChatColor.GRAY + "You just bought " + ChatColor.AQUA + i + ChatColor.GRAY + " of " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + item.getBuyPrice()*i);
+                player.sendMessage(ChatColor.GRAY + "You just bought " + ChatColor.AQUA + i + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + item.getBuyPrice()*i);
+                player.getInventory().addItem(new ItemStack(Objects.requireNonNull(Material.getMaterial(mat.toUpperCase())), i));
             });
         }
 
@@ -271,11 +274,12 @@ public class GraphComponent extends RectangularComponent {
         for (int i : Arrays.asList(1, 16, 64)){
             Item item = MarketManager.getInstance().getItem(mat);
             GroupComponent cTree = interaction.getComponentTree();
-            cTree.locate("ps" + i, TextComponent.class).setText(item.getSellPrice()*i + Config.getInstance().getCurrency());
+            cTree.locate("ps" + i, TextComponent.class).setText(item.getSellPrice()*i + "");
             cTree.locate("sell" + i).setClickAction((interaction, player, primaryTrigger) -> {
                 item.sellItem(i);
                 updateButtonPrice(cTree.locate("ps" + i, TextComponent.class), item, false);
-                player.sendMessage(ChatColor.GRAY + "You just sold " + ChatColor.AQUA + i + ChatColor.GRAY + " of " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + item.getBuyPrice()*i);
+                player.sendMessage(ChatColor.GRAY + "You just sold " + ChatColor.AQUA + i + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + item.getSellPrice()*i);
+                player.getInventory().removeItem(new ItemStack(Objects.requireNonNull(Material.getMaterial(mat.toUpperCase())), i));
             });
         }
 

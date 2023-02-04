@@ -4,10 +4,12 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class MarketCommand implements CommandExecutor {
@@ -27,6 +29,8 @@ public class MarketCommand implements CommandExecutor {
             case "buy":
                 sender.sendMessage("Precio anterior: " + MarketManager.getInstance().getItem(args[1]).getPrice());
                 MarketManager.getInstance().getItem(args[1]).buyItem(Integer.parseInt(args[2]));
+                Player p = (Player) sender;
+                p.getInventory().addItem(new ItemStack(Material.getMaterial(args[1].toUpperCase()), Integer.valueOf(args[2])));
                 sender.sendMessage("You just bought " + args[1]);
                 sender.sendMessage("Precio despues: " + MarketManager.getInstance().getItem(args[1]).getPrice());
                 break;

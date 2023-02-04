@@ -17,10 +17,6 @@ public class Item {
 
     int stock;
 
-    int nextMoveBuy;
-    int nextMoveSell;
-    int required;
-
     int operations;
 
     // 24 (0-23) prices representing the prices in all 24 hours of the day
@@ -31,9 +27,6 @@ public class Item {
 
     public Item(String material, Category category){
 
-        required = Config.getInstance().getRequiredToMove(category.getName());
-        nextMoveBuy = required;
-        nextMoveSell = required;
         mat = material;
         setupPrices();
         cat = category;
@@ -75,18 +68,14 @@ public class Item {
     public float buyItem(int amount) {
 
         operations++;
-        if(nextMoveBuy + amount > required){
-            for(int i = 1; i <= (nextMoveBuy + amount)%required; i++) {
-                if(stock > 0){
-                    this.price = round((float) (price* (1 +((Math.random() * 0.05) + stock*0.00001))));
-                } else {
-                    this.price = round((float) (price*(1 + (Math.random() * 0.01))));
-                }
-                nextMoveBuy = (nextMoveBuy + amount) - required*i;
-            }
+
+        if(price < 10) {
+            if(Math.random() < amount * 0.01 - stock * 0.001)
+            price += 0.01;
         } else {
-            nextMoveBuy += amount;
+            price = round((float) (price* (1 +(Math.random() * 0.05) - stock*0.0001)));
         }
+
         stock -= amount;
         return price + round(price * Config.getInstance().getTaxBuy());
     }
@@ -94,17 +83,12 @@ public class Item {
     public float sellItem(int amount) {
 
         operations++;
-        if(nextMoveSell + amount > required){
-            for(int i = 1; i <= (nextMoveBuy + amount)%required; i++) {
-                if(stock < 0){
-                    this.price = round((float) (price* (0.9 +((Math.random() * 0.05) + stock*0.00001))));
-                } else {
-                    this.price = round((float) (price*(0.95 + (Math.random() * 0.01))));
-                }
-                nextMoveSell = (nextMoveSell + amount) - required*i;
-            }
+
+        if(price < 10) {
+            if(Math.random() < amount * 0.01 - stock * 0.001)
+                price -= 0.01;
         } else {
-            nextMoveSell += amount;
+            price = round((float) (price* (1 -(Math.random() * 0.05) + stock*0.0001)));
         }
         stock += amount;
         return price - round(price*Config.getInstance().getTaxSell());

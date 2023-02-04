@@ -11,6 +11,8 @@ import me.leoko.advancedgui.utils.interactions.Interaction;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,6 +37,18 @@ public class DisplayComponent extends RectangularComponent {
         for (int i = 1; i <= 3; i++) {
 
             Category cat = categories.get(i-1);
+
+            float change = cat.getCategoryChange();
+            TextComponent textc = cTree.locate("change" + i, TextComponent.class);
+            textc.setText(change + "%");
+
+            if (change < 0) {
+                textc.setColor(new Color(240, 0, 0));
+            } else if(change > 0) {
+                textc.setColor(new Color(0, 240, 0));
+            } else {
+                textc.setColor(new Color(240, 240, 240));
+            }
 
             for (int j = 1; j <= 5; j++) {
 

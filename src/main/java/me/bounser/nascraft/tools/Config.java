@@ -1,6 +1,7 @@
 package me.bounser.nascraft.tools;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.market.Category;
 import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -131,10 +132,14 @@ public class Config {
         if(section.size() == 0) return null;
         for(String childMat : section){
 
-            childs.put(childMat, (float) config.getDouble("Items_Quoted.Categories." + cat + ".items." + mat + ".child." + childMat + ".price"));
+            childs.put(childMat, (float) config.getDouble("Items_Quoted.Categories." + cat + ".items." + mat + ".child." + childMat + ".linked"));
 
         }
         return childs;
+    }
+
+    public String getDisplayName(Category cat ){
+        return config.getString("Items_quoted.Categories." + cat.getName() + ".name");
     }
 
 }
