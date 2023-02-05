@@ -11,14 +11,14 @@ import me.leoko.advancedgui.utils.interactions.Interaction;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class DisplayComponent extends RectangularComponent {
 
     List<Category> categories;
+    HashMap<Player, List<Category>> page = new HashMap<>();
 
     boolean state;
 
@@ -36,7 +36,7 @@ public class DisplayComponent extends RectangularComponent {
 
         for (int i = 1; i <= 3; i++) {
 
-            Category cat = categories.get(i-1);
+            Category cat = page.get(player).get(i-1);
 
             float change = cat.getCategoryChange();
             TextComponent textc = cTree.locate("change" + i, TextComponent.class);
@@ -92,13 +92,29 @@ public class DisplayComponent extends RectangularComponent {
         this.categories = categories;
     }
 
-    public void nextPage() {
-        Collections.rotate(categories, -1);
+    public void nextPage(Player player) {
+
+        page.computeIfAbsent(player, k -> categories);
+
+        List<Category> cats = page.get(player);
+
+        Collections.rotate(cats, -1);
+
+        page.put(player, cats);
+
         state = !state;
     }
 
-    public void prevPage() {
-        Collections.rotate(categories, 1);
+    public void prevPage(Player player) {
+
+        page.computeIfAbsent(player, k -> categories);
+
+        List<Category> cats = page.get(player);
+
+        Collections.rotate(cats, 1);
+
+        page.put(player, cats);
+
         state = !state;
     }
 

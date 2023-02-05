@@ -44,11 +44,11 @@ public class LayoutModifier implements LayoutExtension {
 
         // Arrows
         cTree.locate("ArrowUP").setClickAction((interaction, player, primaryTrigger) -> {
-            cTree.locate("display1", DisplayComponent.class).nextPage();
+            cTree.locate("display1", DisplayComponent.class).nextPage(player);
         });
 
         cTree.locate("ArrowDOWN").setClickAction((interaction, player, primaryTrigger) -> {
-            cTree.locate("display1", DisplayComponent.class).prevPage();
+            cTree.locate("display1", DisplayComponent.class).prevPage(player);
         });
 
         // Time Span selectors
