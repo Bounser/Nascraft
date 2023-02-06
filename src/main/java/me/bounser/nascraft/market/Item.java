@@ -1,13 +1,20 @@
 package me.bounser.nascraft.market;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 public class Item {
 
@@ -65,33 +72,64 @@ public class Item {
         price += round(price * percentage);
     }
 
-    public float buyItem(int amount) {
+    public void buyItem(int amount, Player player) {
 
-        operations++;
+        Economy econ = Nascraft.getEconomy();
 
-        if(price < 10) {
-            if(Math.random() < amount * 0.01 - stock * 0.001)
-            price += 0.01;
-        } else {
-            price = round((float) (price* (1 +(Math.random() * 0.05) - stock*0.0001)));
+        if (!econ.has(player, getBuyPrice()*amount)) {
+            player.sendMessage(ChatColor.RED + "You can't afford to pay that!");
         }
 
+        boolean hasSpace = false;
+
+        if (player.getInventory().firstEmpty() == -1) {
+            for (ItemStack is : player.getInventory()) {
+
+                if(is.getType().toString().equals(mat.toUpperCase()) && amount < is.getMaxStackSize() - is.getAmount()) { hasSpace = true; }
+
+            }
+            if(!hasSpace) {
+                player.sendMessage(ChatColor.RED + "Not enough space in inventory!");
+                return;
+            }
+        }
+
+        econ.depositPlayer(player, -getBuyPrice()*amount);
+
+        player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
+
+        player.sendMessage(ChatColor.GRAY + "You just bought " + ChatColor.AQUA + amount + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + getBuyPrice()*amount);
+
+        if (price < 10) {
+            if (Math.random() < amount * 0.01 - stock * 0.001)
+                price +=  + 0.01;
+        } else {
+            price = round((float) (price* (1 +(Math.random() * 0.005 * amount) - stock*0.0001)));
+        }
+        operations++;
         stock -= amount;
-        return price + round(price * Config.getInstance().getTaxBuy());
     }
 
-    public float sellItem(int amount) {
+    public void sellItem(int amount, Player player) {
 
-        operations++;
+        if (!player.getInventory().contains(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount))) {
+            player.sendMessage(ChatColor.RED + "Not enough items to sell.");
+        }
+
+        player.getInventory().removeItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
+
+        Nascraft.getEconomy().depositPlayer(player, getSellPrice()*amount);
+
+        player.sendMessage(ChatColor.GRAY + "You just sold " + ChatColor.AQUA + amount + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + getSellPrice()*amount);
 
         if(price < 10) {
             if(Math.random() < amount * 0.01 - stock * 0.001)
                 price -= 0.01;
         } else {
-            price = round((float) (price* (1 -(Math.random() * 0.05) + stock*0.0001)));
+            price = round((float) (price* (1 -(Math.random() * 0.005 * amount) + stock*0.0001)));
         }
+        operations++;
         stock += amount;
-        return price - round(price*Config.getInstance().getTaxSell());
     }
 
     public String getMaterial() { return mat; }

@@ -7,7 +7,10 @@ import me.bounser.nascraft.commands.NascraftCommand;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.tools.Config;
 import me.leoko.advancedgui.manager.LayoutManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import net.milkbowl.vault.economy.Economy;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,17 +20,21 @@ import java.io.InputStream;
 public final class Nascraft extends JavaPlugin {
 
     private static Nascraft main;
+    private static Economy econ = null;
+
     public static Nascraft getInstance(){ return main; }
 
     @Override
     public void onEnable() {
         main = this;
 
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            getLogger().info("Nascraft failed to load! Vault is required.");
-            getPluginLoader().disablePlugin(this);
+        if (!setupEconomy()) {
+            getLogger().severe("Nascraft failed to load! Vault is required.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
         }
-        if (Config.getInstance().getCheckResources()){ /*checkResources();*/ }
+
+        if (Config.getInstance().getCheckResources()) { /*checkResources();*/ }
 
         MarketManager.getInstance();
 
@@ -39,6 +46,19 @@ public final class Nascraft extends JavaPlugin {
 
     @Override
     public void onDisable() { /*Data.getInstance().savePrices();*/ }
+
+
+    public static Economy getEconomy() { return econ; }
+
+    private boolean setupEconomy() {
+        if (getServer().getPluginManager().getPlugin("Vault") == null) { return false; }
+
+        RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+        if (rsp == null) { return false; }
+
+        econ = rsp.getProvider();
+        return econ != null;
+    }
 
     public void checkResources() {
 

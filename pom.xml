@@ -96,6 +96,10 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -121,6 +125,12 @@
             <groupId>com.github.simplix-softworks</groupId>
             <artifactId>SimplixStorage</artifactId>
             <version>LATEST</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>LATEST</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
