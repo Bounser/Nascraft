@@ -118,39 +118,42 @@ Items_quoted:
           price: 500
 
 Price_options:
-  random_oscilation: true
+  # With random oscillation enabled prices will vary in time based on these settings:
+  random_oscilation:
+    enabled: true
+    # Percentage of change in absolute terms.
+    deviation: 2
+    # Portion of which the oscillation will vary.
+    # Example: With a deviation of 2 and a median of 0.5 the prices will fluctuate between -1% and +1%
+    # With a deviation of 3 and a median of 0.66 the prices will fluctuate between -1% and +2%
+    # This will be translated into a price trend in the long run.
+    # Note: To modify the trend in the short term the commands to force conditions are recommended.
+    median: 0.5
+  # Should prices be affected by buys / sells?
   supply_and_demand: true
 
 Market_control:
-  # Limit the precision of prices. With 2: the minimum price would be 0.01, with 3: 0.001 etc
+  # Limit the precision of prices. With 2 the minimum price would be 0.01, with 3: 0.001 etc
   decimal_limit: 2
-  # The spread is determined by the deviation in both actions. In the default case: 2% + 2% -> 4% of spread
+  # The spread is determined by the deviation in both actions. In the default case: 3% + 2% -> 5% of spread
   taxation:
     # 3% taxation when players sell items.
-    sell: 0.02
-    # 3% taxation when players buy items.
+    sell: 0.03
+    # 2% taxation when players buy items.
     buy: 0.02
   high_market_control:
+    # Enable the /nascraft force <> subcommands:
     enabled: true
-    # Wipe ~50% of the valuations in a couple movements.
+    # Wipe ~50% of the valuations in a couple of movements.
     force_crash: false
     # Pump a ~50% of the valuations in minutes
     force_bullrun: false
-    # Set the general tendency of the oscilations to positive.
+    # Set the general tendency of the oscillations to positive.
     force_bull: true
-    # Set the general tendency of the oscilations to negative.
+    # Set the general tendency of the oscillations to negative.
     force_bear: true
-  emergency_stop: true
-
-Trading:
-  enabled: true
-  licence_price: 100000 # -1 means it cannot be purchased
-  taxation:
-    sell: 0.01
-    buy: 0.01
-  virtual_portfolio: true
-  limited_orders: true
-  stoploss: true
+    # Performing this command will shut down the possibility of players to buy and sell.
+    emergency_stop: true
 
 Lang:
-  currency: "€"
+  currency: " €"

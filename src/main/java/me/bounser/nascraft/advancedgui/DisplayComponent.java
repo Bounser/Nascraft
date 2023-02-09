@@ -12,13 +12,11 @@ import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 public class DisplayComponent extends RectangularComponent {
 
     List<Category> categories;
-    HashMap<Player, List<Category>> page = new HashMap<>();
 
     boolean state;
 
@@ -36,7 +34,7 @@ public class DisplayComponent extends RectangularComponent {
 
         for (int i = 1; i <= 3; i++) {
 
-            Category cat = page.get(player).get(i-1);
+            Category cat = categories.get(i-1);
 
             float change = cat.getCategoryChange();
             TextComponent textc = cTree.locate("change" + i, TextComponent.class);
@@ -66,7 +64,7 @@ public class DisplayComponent extends RectangularComponent {
                     int finalJ = j;
                     ic.setClickAction((interaction, p, primaryTrigger) -> {
 
-                        interaction.getComponentTree().locate("nbk2fMcG", ViewComponent.class).setView("qrRtaAnd");
+                        interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("TradeScreen1");
                         interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(cat.getItemOfIndex(finalJ - 1).getMaterial());
                     });
                 } else {
@@ -92,30 +90,8 @@ public class DisplayComponent extends RectangularComponent {
         this.categories = categories;
     }
 
-    public void nextPage(Player player) {
+    public void nextPage() { Collections.rotate(categories, -1); }
 
-        page.computeIfAbsent(player, k -> categories);
-
-        List<Category> cats = page.get(player);
-
-        Collections.rotate(cats, -1);
-
-        page.put(player, cats);
-
-        state = !state;
-    }
-
-    public void prevPage(Player player) {
-
-        page.computeIfAbsent(player, k -> categories);
-
-        List<Category> cats = page.get(player);
-
-        Collections.rotate(cats, 1);
-
-        page.put(player, cats);
-
-        state = !state;
-    }
+    public void prevPage() { Collections.rotate(categories, 1); }
 
 }

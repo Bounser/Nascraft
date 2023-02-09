@@ -1,16 +1,17 @@
 package me.bounser.nascraft.advancedgui;
 
+import me.bounser.nascraft.tools.Config;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
+import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
-import me.leoko.advancedgui.utils.components.GroupComponent;
-import me.leoko.advancedgui.utils.components.RectComponent;
 import me.leoko.advancedgui.utils.components.TextComponent;
-import me.leoko.advancedgui.utils.components.RectangularComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -49,24 +50,33 @@ public class SlideComponent extends RectangularComponent {
             TextComponent timetext = cTree.locate("time1", TextComponent.class);
             TextComponent per = cTree.locate("perslide1", TextComponent.class);
 
-
             float value = values.get(findIndex(points, point));
+            float multiplier = cTree.locate("graph1", GraphComponent.class).getChildMultiplier();
 
-            ts1.setX(point + 4);
             timetext.setX(point);
-            per.setX(point + 4);
 
             NumberFormat formatter = new DecimalFormat("#0.0");
 
-            ts1.setText(value + "€");
-            per.setText("(" + formatter.format((-100 + value*100/values.get(0))) + "%)");
+            ts1.setText(round(value*multiplier) + Config.getInstance().getCurrency());
+
+            ImageComponent up = cTree.locate("upgreen", ImageComponent.class);
+            ImageComponent down = cTree.locate("downred", ImageComponent.class);
 
             if(values.get(0) > value) {
-                per.setColor(new Color(200, 0, 0));
+                up.setHidden(false);
+                down.setHidden(true);
+                per.setColor(new Color(255, 46, 46));
+                per.setText("    " + formatter.format((-100 + value*100/values.get(0))) + "%");
             } else if (values.get(0) < value) {
-                per.setColor((new Color(0, 200, 0)));
+                down.setHidden(false);
+                up.setHidden(true);
+                per.setColor((new Color(51, 238, 25)));
+                per.setText("    " + formatter.format((-100 + value*100/values.get(0))) + "%");
             } else {
+                down.setHidden(true);
+                up.setHidden(true);
                 per.setColor((new Color(250, 250, 250)));
+                per.setText("~ 0%");
             }
 
             // Time stamp
@@ -160,6 +170,12 @@ public class SlideComponent extends RectangularComponent {
 
     public void setTimeFrame(int timeFrame) {
         this.timeFrame = timeFrame;
+    }
+
+    public static float round(float value) {
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(Config.getInstance().getDecimalPrecission(), RoundingMode.HALF_UP);
+        return bd.floatValue();
     }
 
 }

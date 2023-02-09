@@ -12,6 +12,8 @@ import org.bukkit.inventory.ItemStack;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -26,10 +28,13 @@ public class Item {
 
     int operations;
 
-    // 24 (0-23) prices representing the prices in all 24 hours of the day
+    // 24 (0-23) prices representing the prices in all 24 hours of the day.
     List<Float> pricesH;
-    // 15 (0-14) prices representing the prices in the last 15 minutes
+    // 15 (0-14) prices representing the prices in the last 15 minutes.
     List<Float> pricesM;
+    // 30 (0-29) prices representing the prices in the last month.
+    List<Float> pricesMM;
+
     HashMap<String, Float> childs;
 
     public Item(String material, Category category){
@@ -52,8 +57,8 @@ public class Item {
 
     public void setupPrices() {
         pricesH = Data.getInstance().getHPrice(mat);
-
         pricesM = Data.getInstance().getMPrice(mat);
+        pricesMM = Data.getInstance().getMMPrice(mat);
 
         price = pricesM.get(pricesM.size()-1);
     }
@@ -138,6 +143,7 @@ public class Item {
 
     public List<Float> getPricesH() { return pricesH; }
     public List<Float> getPricesM() { return pricesM; }
+    public List<Float> getPricesMM() { return pricesMM; }
 
     public int getStock() { return stock; }
 
@@ -153,11 +159,7 @@ public class Item {
         return bd.floatValue();
     }
 
-    public float getBuyPrice() {
-        return round(price + price*Config.getInstance().getTaxBuy());
-    }
-    public float getSellPrice() {
-        return round(price - price*Config.getInstance().getTaxSell());
-    }
+    public float getBuyPrice() { return round(price + price*Config.getInstance().getTaxBuy()); }
+    public float getSellPrice() { return round(price - price*Config.getInstance().getTaxSell()); }
 
 }

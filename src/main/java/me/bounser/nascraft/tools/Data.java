@@ -4,7 +4,6 @@ import de.leonhard.storage.Json;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
-import org.bukkit.Bukkit;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -103,7 +102,6 @@ public class Data {
 
         for(Item item : MarketManager.getInstance().getAllItems()) {
 
-            Bukkit.broadcastMessage("guardando " + item.getMaterial());
             Json json = new Json("Price-History-" + item.getMaterial(), Nascraft.getInstance().getDataFolder().getPath() + "/data");
 
             // HISTORY
@@ -193,6 +191,48 @@ public class Data {
         }
     }
 
+    public List<Float> getMMPrice(String mat) {
+
+        Json json = new Json("Price-History-" + mat, Nascraft.getInstance().getDataFolder().getPath() + "/data");
+
+        Calendar calendar = Calendar.getInstance();
+
+        int day = getDay();
+
+        if (json.contains(mat + ".lastSaveD")) {
+
+            int lastDay = json.getInt(mat + ".lastSaveD");
+
+            List<Float> prices = new ArrayList<>();
+
+            for(int i = 29 ; i >= 0 ; i--) {
+
+                if(json.contains(mat + ".recent." + (day - i) + ".price")) {
+
+                    prices.add(json.getFloat(mat + ".recent." + (day - i) + ".price"));
+
+                } else {
+                    if(!json.contains(mat + ".recent." + (day - i -1) + ".price")) {
+                        prices.add(Config.getInstance().getInitialPrice(mat));
+                    } else {
+                        prices.add((prices.get(prices.size()-1)));
+                    }
+                }
+            }
+            return prices;
+
+        } else {
+
+            float price = Config.getInstance().getInitialPrice(mat);
+            for(int i = 0; i < 30 ; i++) {
+                json.set(mat + ".history." + (day - i) + ".price", price);
+            }
+            json.set(mat + ".lastSaveD", day);
+            return new ArrayList<>(Collections.nCopies(30, price));
+        }
+    }
+
+
     public int getDay() {
 
         LocalDateTime start = LocalDateTime.of(2023, 1, 1, 0, 0, 0);
@@ -209,7 +249,6 @@ public class Data {
         Calendar calendar = Calendar.getInstance();
 
         return calendar.get(Calendar.HOUR_OF_DAY);
-
     }
 
 }

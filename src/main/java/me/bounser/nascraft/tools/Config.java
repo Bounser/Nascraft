@@ -4,6 +4,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.Category;
 import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
@@ -110,7 +111,7 @@ public class Config {
 
         for(String cat : getCategories()) {
 
-            if(main.getConfig().getConfigurationSection("Items_Quoted.Categories." + cat + ".items").getKeys(false).contains(mat)) {
+            if(main.getConfig().getConfigurationSection("Items_quoted.Categories." + cat + ".items").getKeys(false).contains(mat)) {
                 return cat;
             }
 
@@ -120,19 +121,20 @@ public class Config {
 
     public HashMap<String, Float> getChilds(String mat, String cat) {
 
+        if(!config.contains("Items_quoted.Categories." + cat + ".items." + mat + ".child")){
+            return null;
+        }
+
         HashMap<String, Float> childs = new HashMap<>();
 
         childs.put(mat, 1f);
 
-        if(!config.contains("Items_Quoted.Categories." + cat + ".items." + mat + ".child")){
-            return null;
-        }
-        Set<String> section = config.getConfigurationSection("Items_Quoted.Categories." + cat + ".items." + mat + ".child.").getKeys(false);
+        Set<String> section = config.getConfigurationSection("Items_quoted.Categories." + cat + ".items." + mat + ".child.").getKeys(false);
 
         if(section.size() == 0) return null;
         for(String childMat : section){
 
-            childs.put(childMat, (float) config.getDouble("Items_Quoted.Categories." + cat + ".items." + mat + ".child." + childMat + ".linked"));
+            childs.put(childMat, (float) config.getDouble("Items_quoted.Categories." + cat + ".items." + mat + ".child." + childMat + ".linked"));
 
         }
         return childs;

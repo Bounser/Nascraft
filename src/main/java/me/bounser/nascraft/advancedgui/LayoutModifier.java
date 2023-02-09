@@ -10,6 +10,7 @@ import me.leoko.advancedgui.utils.events.GuiInteractionBeginEvent;
 import me.leoko.advancedgui.utils.events.LayoutLoadEvent;
 
 import me.leoko.advancedgui.utils.interactions.Interaction;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.Inventory;
@@ -27,28 +28,30 @@ public class LayoutModifier implements LayoutExtension {
 
         GroupComponent cTree = event.getLayout().getTemplateComponentTree();
 
+        updateMainPage(cTree);
+
         // SlideComponent
         DummyComponent dct = cTree.locate("slide123", DummyComponent.class);
         dct.setComponent(new SlideComponent("slide1", null, false,
-                event.getLayout().getDefaultInteraction(), 44, 55, 300, 140, Arrays.asList(1f, 1f)));
+                event.getLayout().getDefaultInteraction(), 11, 54, 362, 139, Arrays.asList(1f, 1f)));
 
         // GraphComponent
         DummyComponent dc = cTree.locate("graph123", DummyComponent.class);
         dc.setComponent(new GraphComponent("graph1", null, false,
-                event.getLayout().getDefaultInteraction(), 44, 55, 300, 140, Arrays.asList(1f, 1f)));
+                event.getLayout().getDefaultInteraction(), 11, 54, 362, 139, Arrays.asList(1f, 1f)));
 
         // DisplayComponent
-        DummyComponent ddc = event.getLayout().getDefaultInteraction().getComponentTree().locate("display123", DummyComponent.class);
+        DummyComponent ddc = cTree.locate("display123", DummyComponent.class);
         ddc.setComponent(new DisplayComponent("display1", null, false,
                 event.getLayout().getDefaultInteraction(), MarketManager.getInstance().getCategories()));
 
         // Arrows
         cTree.locate("ArrowUP").setClickAction((interaction, player, primaryTrigger) -> {
-            cTree.locate("display1", DisplayComponent.class).nextPage(player);
+            cTree.locate("display1", DisplayComponent.class).nextPage();
         });
 
         cTree.locate("ArrowDOWN").setClickAction((interaction, player, primaryTrigger) -> {
-            cTree.locate("display1", DisplayComponent.class).prevPage(player);
+            cTree.locate("display1", DisplayComponent.class).prevPage();
         });
 
         // Time Span selectors
@@ -64,11 +67,11 @@ public class LayoutModifier implements LayoutExtension {
 
         // Back button
         cTree.locate("back").setClickAction((interaction, player, primaryTrigger) -> {
-            interaction.getComponentTree().locate("nbk2fMcG", ViewComponent.class).setView("I4ztUi1d");
+            interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("I4ztUi1d");
             updateTrending(interaction);
             updateSuggestions(interaction, player);
         });
-
+        Bukkit.broadcastMessage("9");
     }
 
     public void updateMainPage(GroupComponent cTree) {
@@ -90,7 +93,7 @@ public class LayoutModifier implements LayoutExtension {
                     int finalJ = j;
                     ic.setClickAction((interaction, player, primaryTrigger) -> {
 
-                        interaction.getComponentTree().locate("nbk2fMcG", ViewComponent.class).setView("qrRtaAnd");
+                        interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("TradeScreen1");
                         interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(cat.getItemOfIndex(finalJ - 1).getMaterial());
 
                     });
@@ -109,9 +112,9 @@ public class LayoutModifier implements LayoutExtension {
 
         if (!event.getGuiInstance().getLayout().getName().equals("Nascraft")) return;
 
-        updateTrending(event.getInteraction());
+        // updateTrending(event.getInteraction());
 
-        updateSuggestions(event.getInteraction(),event.getPlayer());
+        // updateSuggestions(event.getInteraction(),event.getPlayer());
 
     }
 
@@ -131,7 +134,7 @@ public class LayoutModifier implements LayoutExtension {
             ic.setImage(ImageManager.getInstance().getImage(max.getMaterial(), 33, 33, false));
             Item finalMax = max;
             ic.setClickAction((interaction, player, primaryTrigger) -> {
-                interaction.getComponentTree().locate("nbk2fMcG", ViewComponent.class).setView("qrRtaAnd");
+                interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("TradeScreen1");
                 interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(finalMax.getMaterial());
             });
         } else {
@@ -187,7 +190,7 @@ public class LayoutModifier implements LayoutExtension {
                 ic.setHidden(false);
                 ic.setImage(ImageManager.getInstance().getImage(mat, 33, 33, false));
                 ic.setClickAction((interaction, player, primaryTrigger) -> {
-                    interaction.getComponentTree().locate("nbk2fMcG", ViewComponent.class).setView("qrRtaAnd");
+                    interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("TradeScreen1");
                     interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(mat);
                 });
 

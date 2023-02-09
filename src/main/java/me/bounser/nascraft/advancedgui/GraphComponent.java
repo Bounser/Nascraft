@@ -10,10 +10,7 @@ import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.awt.*;
 import java.math.BigDecimal;
@@ -28,6 +25,7 @@ public class GraphComponent extends RectangularComponent {
     String mat;
     List<Float> values;
     List<String> childsMat;
+    HashMap<String, Float> childs;
     int width, height, yc, xc;
 
     // Time frames: 1 = 15 min, 2 = 1 day, 3 = 1 Month, 4 = 1 year, 5 = 1 ytd
@@ -60,8 +58,6 @@ public class GraphComponent extends RectangularComponent {
         graphic.setColor(setupBackGround());
 
         graphic.drawPolyline(getXPoints(false), getYPoints(0, false), getXPoints(false).length);
-
-        interaction.getComponentTree().locate("timespan1", ViewComponent.class).setView("opt" + timeFrame);
 
     }
 
@@ -129,7 +125,7 @@ public class GraphComponent extends RectangularComponent {
 
         int j = 0;
         for (int i = 0; i < (values.size()-1); i++) {
-            x[j] = z*i + xc;
+            x[j] = z*i+1*i + xc;
             j++;
         }
         x[j] = xc + width;
@@ -147,18 +143,18 @@ public class GraphComponent extends RectangularComponent {
             float first = values.get(0);
             float last = values.get(values.size() - 1);
 
+            ViewComponent backg = interaction.getComponentTree().locate("backgroundview", ViewComponent.class);
+
             if (Float.compare(first, last) < 0) {
-                this.interaction.getComponentTree().locate("bear123").setHidden(true);
-                this.interaction.getComponentTree().locate("flat123").setHidden(true);
+                backg.setView("bull123");
                 return new Color(0,200,20);
 
             } else if (Float.compare(first, last) > 0){
-                this.interaction.getComponentTree().locate("bear123").setHidden(false);
+                backg.setView("bear123");
                 return new Color(200,10,20);
 
             } else {
-                this.interaction.getComponentTree().locate("bear123").setHidden(true);
-                this.interaction.getComponentTree().locate("flat123").setHidden(false);
+                backg.setView("flat123");
                 return new Color(250,250,250);
             }
         }
@@ -257,6 +253,8 @@ public class GraphComponent extends RectangularComponent {
 
     public void updateButtons() {
 
+        // Buy
+
         for (int i : Arrays.asList(1, 16, 64)){
             Item item = MarketManager.getInstance().getItem(mat);
             GroupComponent cTree = interaction.getComponentTree();
@@ -299,6 +297,7 @@ public class GraphComponent extends RectangularComponent {
 
     public void changeMat(String mat) {
         this.mat = mat;
+        this.childs = MarketManager.getInstance().getItem(mat).getChilds();
 
         ImageComponent ic = interaction.getComponentTree().locate("MainImage", ImageComponent.class);
         ic.setImage(ImageManager.getInstance().getImage(mat, 60, 60, true));
@@ -308,31 +307,53 @@ public class GraphComponent extends RectangularComponent {
         this.values = MarketManager.getInstance().getItem(mat).getPricesM();
         interaction.getComponentTree().locate("slide1", SlideComponent.class).setValues(values);
 
-        HashMap<String, Float> childs = MarketManager.getInstance().getItem(mat).getChilds();
-
-        if(childs == null) {
+        if (childs == null) {
             interaction.getComponentTree().locate("childs").setHidden(true);
+            interaction.getComponentTree().locate("minichild").setHidden(true);
         } else {
+            interaction.getComponentTree().locate("childs").setHidden(false);
+            interaction.getComponentTree().locate("minichild").setHidden(false);
+
             childsMat = new ArrayList<>(childs.keySet());
 
+            updateChilds(childs);
+
             interaction.getComponentTree().locate("childact").setClickAction((interaction, player, primaryTrigger) -> {
-
                 changeChildsOrder();
-
-                for(int i = 1; i < 8 ; i++) {
-
-                    interaction.getComponentTree().locate("child" + i, ImageComponent.class).setImage(ImageManager.getInstance().getImage(childsMat.get(i-1), 32, 32, true));
-                    int j = 0;
-                    for(float v : values) {
-                        values.set(j, v*childs.get(childsMat.get(i-1)));
-                    }
-                }
+                updateChilds(childs);
             });
         }
     }
 
+    public void updateChilds(HashMap<String, Float> childs) {
+
+        for (int i = 1; i <= 8 ; i++) {
+
+            if (childs.keySet().size() >= i) {
+                interaction.getComponentTree().locate("child" + i, ImageComponent.class).setImage(ImageManager.getInstance().getImage(childsMat.get(i-1), 32, 32, true));
+                int j = 0;
+                interaction.getComponentTree().locate("child" + i, ImageComponent.class).setHidden(false);
+            } else {
+                interaction.getComponentTree().locate("child" + i, ImageComponent.class).setHidden(true);
+            }
+            interaction.getComponentTree().locate("childback", RectComponent.class).setWidth(5 + 34*childs.keySet().size());
+        }
+
+        if(childsMat.get(0).equals(mat)) {
+            interaction.getComponentTree().locate("minichild").setHidden(true);
+        } else {
+            interaction.getComponentTree().locate("minichild").setHidden(false);
+            interaction.getComponentTree().locate("childper", ImageComponent.class).setImage(ImageManager.getInstance().getImage(childsMat.get(0), 26, 26, true));
+        }
+
+    }
+
     public void changeChildsOrder() {
         Collections.rotate(childsMat, -1);
+    }
+
+    public float getChildMultiplier() {
+        return childs.get(childsMat.get(0));
     }
 
 }
