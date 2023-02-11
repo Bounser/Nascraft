@@ -11,6 +11,7 @@ import me.leoko.advancedgui.utils.interactions.Interaction;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class DisplayComponent extends RectangularComponent {
 
     protected DisplayComponent(String id, Action clickAction, boolean hidden, Interaction interaction, List<Category> categories) {
         super(id, clickAction, hidden, interaction, 0, 0, 5, 5);
-        this.categories = categories;
+        this.categories = new ArrayList<>(categories);
     }
 
     @Override
