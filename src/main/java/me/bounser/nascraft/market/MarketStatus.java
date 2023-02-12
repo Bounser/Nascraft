@@ -9,6 +9,7 @@ public enum MarketStatus {
     BEAR1,
     BEAR2,
     BEAR3,
-    CRASH
+    CRASH,
+    FLAT
 
 }

@@ -16,6 +16,8 @@ public class PricesManager {
     }
 
     private PricesManager(){
+        marketStatus = MarketStatus.FLAT;
+
         saveDataTask();
         shortTermPricesTask();
     }
@@ -23,7 +25,6 @@ public class PricesManager {
     public void setMarketStatus(MarketStatus marketStatus) {
         if(this.marketStatus != marketStatus) {
             this.marketStatus = marketStatus;
-            marketEvent();
         }
     }
 
@@ -32,7 +33,10 @@ public class PricesManager {
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
             for (Item item : MarketManager.getInstance().getAllItems()) {
-                if(Config.getInstance().getRandomOscilation()) item.changePrice((float) (Math.random() * 2 -1)/100);
+                if(Config.getInstance().getRandomOscilation()){
+
+                    item.changePrice(getPercentage());
+                }
                 item.addValueToM(item.getPrice());
             }
 
@@ -56,37 +60,43 @@ public class PricesManager {
 
     }
 
-    public void changeAllMarket(float percentage){
+    public float getPercentage() {
 
-        for (Item item : MarketManager.getInstance().getAllItems()) {
-            item.changePrice(percentage + (float) (Math.random() * percentage*0.5));
+        float percentage;
+
+        switch (marketStatus) {
+
+            case BULL1:
+                percentage = 1f;
+                break;
+            case BULL2:
+                percentage = 2f;
+                break;
+            case BULL3:
+                percentage = 5f;
+                break;
+            case BULLRUN:
+                percentage = 15f;
+                break;
+
+            case BEAR1:
+                percentage = -1f;
+                break;
+            case BEAR2:
+                percentage = -2f;
+                break;
+            case BEAR3:
+                percentage = -5f;
+                break;
+            case CRASH:
+                percentage = -15f;
+                break;
+
+            default:
+                percentage = 0;
+
         }
-
-    }
-
-    public void marketEvent() {
-
-        Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
-
-            switch (marketStatus) {
-
-                case BULLRUN:
-                    changeAllMarket((float) 0.1);
-                    break;
-                case BULL1:
-                    changeAllMarket((float) 0.01);
-                    break;
-                case BULL2:
-                    changeAllMarket((float) 0.03);
-                    break;
-                case BULL3:
-                    changeAllMarket((float) 0.08);
-                    break;
-
-            }
-
-        }, 50, 12000);
-
+        return (float) (Math.random() * percentage - percentage);
     }
 
 

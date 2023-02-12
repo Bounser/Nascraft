@@ -4,7 +4,6 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -12,11 +11,8 @@ import org.bukkit.inventory.ItemStack;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.Array;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 public class Item {
 
@@ -30,7 +26,7 @@ public class Item {
 
     // 24 (0-23) prices representing the prices in all 24 hours of the day.
     List<Float> pricesH;
-    // 15 (0-14) prices representing the prices in the last 15 minutes.
+    // 20 (0-19) prices representing the prices in the last 20 minutes.
     List<Float> pricesM;
     // 30 (0-29) prices representing the prices in the last month.
     List<Float> pricesMM;
@@ -107,11 +103,11 @@ public class Item {
 
         if (price < 10) {
             if (Math.random() < amount * 0.01 - stock * 0.001)
-                price +=  + 0.01;
+                price += 0.01;
         } else {
             price = round((float) (price* (1 +(Math.random() * 0.005 * amount) - stock*0.0001)));
         }
-        operations++;
+        operations += amount;
         stock -= amount;
     }
 
@@ -133,7 +129,7 @@ public class Item {
         } else {
             price = round((float) (price* (1 -(Math.random() * 0.005 * amount) + stock*0.0001)));
         }
-        operations++;
+        operations += amount;
         stock += amount;
     }
 

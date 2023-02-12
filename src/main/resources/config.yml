@@ -9,20 +9,32 @@ Items_quoted:
     1:
       # Display-name of the category.
       name: "Stone age"
+      # Items of the category.
       items:
-        # Items of the category
+        # Material of the item.
         cobblestone:
           # INITIAL price. This value will be ignored once the market starts developing his own valuations.
           price: 1
-          # child items. The price of this items will be determined by his parent item and vice versa.
+          # child items. The price of these items will be determined by his parent item and vice versa.
           child:
-            cobblestone_stairs:
-              # this option will set the price of cobblestone stairs at 1.5 * (price of cobblestone).
-              linked: 1.5
             cobblestone_slab:
+              # To make a cobblestone slab we only need half of a cobblestone, so the price of the slab is half the price of the cobblestone.
+              # Result: (Price cobblestone)*0.5 - Hence, the initial price will be 0.5 for one slab.
               linked: 0.5
+            cobblestone_stairs:
+              # For a cobblestone stair we need 6 of cobblestone, while we only get 4 stairs. So, the price will be 6/4 = 3/2 = 1.5
+              # Keep in mind that this logic is not necessary, as you could say that a stair costs x10 the price of cobblestone,
+              # but that not only makes no sense, it would probably allow people to take advantage of these overvaluations.
+              linked: 1.5
             cobblestone_wall:
+              # Spends 6, gets 6. 6/6 = 1/1 = 1
               linked: 1
+            stone:
+              # The childs can also be depending on more than 1 items. In this case, to get stone you need to process the cobblestone
+              # with coal. With one coal you can process 8 items; that means that the valuation of this child should be
+              # influenced by 1/8 of the movements of the coal.
+              depends:
+                coal: 0.13
         stone:
           price: 1.5
           child:
@@ -43,6 +55,7 @@ Items_quoted:
               linked: 0.5
             cobbled_deepslate_wall:
               linked: 1
+    # Another category.
     2:
       name: "Tech"
       items:
@@ -152,8 +165,11 @@ Market_control:
     force_bull: true
     # Set the general tendency of the oscillations to negative.
     force_bear: true
-    # Performing this command will shut down the possibility of players to buy and sell.
+    # Performing this command will shut down the possibility of players to buy and sell any item
     emergency_stop: true
 
 Lang:
   currency: " €"
+  # Whether the currency symbol should be printed after or before the number.
+  # Example: With after: true -> 100 € with after: false ->  €100
+  currency_after: true
