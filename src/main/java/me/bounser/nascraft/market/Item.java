@@ -3,14 +3,13 @@ package me.bounser.nascraft.market;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
+import me.bounser.nascraft.tools.NUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,6 +18,7 @@ public class Item {
     String mat;
     float price;
     Category cat;
+    Trend trend;
 
     int stock;
 
@@ -26,10 +26,12 @@ public class Item {
 
     // 24 (0-23) prices representing the prices in all 24 hours of the day.
     List<Float> pricesH;
-    // 20 (0-19) prices representing the prices in the last 20 minutes.
+    // 20 (0-14) prices representing the prices in the last 15 minutes.
     List<Float> pricesM;
     // 30 (0-29) prices representing the prices in the last month.
     List<Float> pricesMM;
+    // 24 (0-23) prices representing 2 prices each month.
+    List<Float> pricesY;
 
     HashMap<String, Float> childs;
 
@@ -40,6 +42,7 @@ public class Item {
         cat = category;
         operations = 0;
         this.childs = Config.getInstance().getChilds(material, category.getName());
+        trend = Trend.valueOf(Config.getInstance().getItemDefaultTrend(category.getName(), material));
 
     }
 
@@ -55,30 +58,35 @@ public class Item {
         pricesH = Data.getInstance().getHPrice(mat);
         pricesM = Data.getInstance().getMPrice(mat);
         pricesMM = Data.getInstance().getMMPrice(mat);
+        pricesY = Data.getInstance().getYPrice(mat);
 
         price = pricesM.get(pricesM.size()-1);
     }
 
     public void addValueToH(float value) {
         pricesH.remove(0);
-        pricesH.add(round(value));
+        pricesH.add(NUtils.round(value));
     }
 
     public void addValueToM(float value) {
         pricesM.remove(0);
-        pricesM.add(round(value));
+        pricesM.add(NUtils.round(value));
     }
 
     public void changePrice(float percentage) {
-        price += round(price * percentage);
+
+        if(price + NUtils.round(price * percentage/100) > Math.pow(10, -Config.getInstance().getDecimalPrecission())) {
+            price += NUtils.round(price * percentage/100);
+        }
     }
 
-    public void buyItem(int amount, Player player) {
+    public void buyItem(int amount, Player player, String mat, float multiplier) {
 
         Economy econ = Nascraft.getEconomy();
 
-        if (!econ.has(player, getBuyPrice()*amount)) {
+        if (!econ.has(player, getBuyPrice()*amount*multiplier)) {
             player.sendMessage(ChatColor.RED + "You can't afford to pay that!");
+            return;
         }
 
         boolean hasSpace = false;
@@ -95,26 +103,27 @@ public class Item {
             }
         }
 
-        econ.depositPlayer(player, -getBuyPrice()*amount);
+        econ.depositPlayer(player, -getBuyPrice()*amount*multiplier);
 
         player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        player.sendMessage(ChatColor.GRAY + "You just bought " + ChatColor.AQUA + amount + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + getBuyPrice()*amount);
+        player.sendMessage(ChatColor.GRAY + "You just bought " + ChatColor.AQUA + amount + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + getBuyPrice()*amount*multiplier);
 
         if (price < 10) {
             if (Math.random() < amount * 0.01 - stock * 0.001)
                 price += 0.01;
         } else {
-            price = round((float) (price* (1 +(Math.random() * 0.005 * amount) - stock*0.0001)));
+            price = NUtils.round((float) (price* (1 +(Math.random() * 0.001 * amount) - stock*0.0001)));
         }
         operations += amount;
         stock -= amount;
     }
 
-    public void sellItem(int amount, Player player) {
+    public void sellItem(int amount, Player player, String mat, float multiplier) {
 
-        if (!player.getInventory().contains(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount))) {
+        if (!player.getInventory().containsAtLeast(new ItemStack(Material.getMaterial(mat.toUpperCase())), amount)) {
             player.sendMessage(ChatColor.RED + "Not enough items to sell.");
+            return;
         }
 
         player.getInventory().removeItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
@@ -127,7 +136,7 @@ public class Item {
             if(Math.random() < amount * 0.01 - stock * 0.001)
                 price -= 0.01;
         } else {
-            price = round((float) (price* (1 -(Math.random() * 0.005 * amount) + stock*0.0001)));
+            price = NUtils.round((float) (price* (1 -(Math.random() * 0.001 * amount) + stock*0.0001)));
         }
         operations += amount;
         stock += amount;
@@ -135,11 +144,12 @@ public class Item {
 
     public String getMaterial() { return mat; }
 
-    public float getPrice() { return round(price); }
+    public float getPrice() { return NUtils.round(price); }
 
     public List<Float> getPricesH() { return pricesH; }
     public List<Float> getPricesM() { return pricesM; }
     public List<Float> getPricesMM() { return pricesMM; }
+    public List<Float> getPricesY() { return pricesY; }
 
     public int getStock() { return stock; }
 
@@ -149,13 +159,19 @@ public class Item {
 
     public int getOperations() { return operations; }
 
-    public static float round(float value) {
-        BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(Config.getInstance().getDecimalPrecission(), RoundingMode.HALF_UP);
-        return bd.floatValue();
+    public void lowerOperations() {
+
+        if(operations > 10) {
+            operations = operations - Math.round((float) operations/4f);
+            operations -= 5;
+        } else if (operations > 1){
+            operations -= 1;
+        }
     }
 
-    public float getBuyPrice() { return round(price + price*Config.getInstance().getTaxBuy()); }
-    public float getSellPrice() { return round(price - price*Config.getInstance().getTaxSell()); }
+    public float getBuyPrice() { return NUtils.round(price + price*Config.getInstance().getTaxBuy()); }
+    public float getSellPrice() { return NUtils.round(price - price*Config.getInstance().getTaxSell()); }
+
+    public Trend getTrend() { return trend; }
 
 }
