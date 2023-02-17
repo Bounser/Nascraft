@@ -7,7 +7,7 @@ import org.bukkit.Bukkit;
 
 public class PricesManager {
 
-    MarketStatus marketStatus;
+    Trend trend;
 
     public static PricesManager instance;
 
@@ -16,15 +16,15 @@ public class PricesManager {
     }
 
     private PricesManager(){
-        marketStatus = MarketStatus.FLAT;
+        trend = Trend.valueOf(Config.getInstance().getGeneralTrend());
 
         saveDataTask();
         shortTermPricesTask();
     }
 
-    public void setMarketStatus(MarketStatus marketStatus) {
-        if(this.marketStatus != marketStatus) {
-            this.marketStatus = marketStatus;
+    public void setMarketStatus(Trend trend) {
+        if(this.trend != trend) {
+            this.trend = trend;
         }
     }
 
@@ -33,14 +33,17 @@ public class PricesManager {
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
             for (Item item : MarketManager.getInstance().getAllItems()) {
-                if(Config.getInstance().getRandomOscilation()){
+                if(Config.getInstance().getRandomOscillation()){
 
-                    item.changePrice(getPercentage());
+                    item.changePrice(getPercentage(item));
                 }
+                item.lowerOperations();
+
+
                 item.addValueToM(item.getPrice());
             }
 
-        }, 60, 1200);
+        }, 20, 1200);
 
     }
 
@@ -56,48 +59,68 @@ public class PricesManager {
             for (Item item : MarketManager.getInstance().getAllItems()) item.addValueToH(item.getPrice());
             Data.getInstance().savePrices();
 
-        }, 30000, 36000);
+        }, 30000, 72000);
 
     }
 
-    public float getPercentage() {
+    public float getPercentage(Item item) {
 
-        float percentage;
+        Trend tendency = item.getTrend();
 
-        switch (marketStatus) {
+        if(tendency == null) tendency = trend;
+
+        if(tendency.equals(Trend.FLAT)) {
+            return (float) (Math.random() * 2 - 1);
+        }
+
+        float positive, negative;
+
+        switch (tendency) {
 
             case BULL1:
-                percentage = 1f;
+                positive = 1.1f;
+                negative = 1f;
                 break;
             case BULL2:
-                percentage = 2f;
+                positive = 1.2f;
+                negative = 1f;
                 break;
             case BULL3:
-                percentage = 5f;
+                positive = 1.3f;
+                negative = 1f;
                 break;
             case BULLRUN:
-                percentage = 15f;
+                positive = 3f;
+                negative = 1f;
                 break;
 
             case BEAR1:
-                percentage = -1f;
+                positive = 1f;
+                negative = 1.1f;
                 break;
             case BEAR2:
-                percentage = -2f;
+                positive = 1f;
+                negative = 1.2f;
                 break;
             case BEAR3:
-                percentage = -5f;
+                positive = 1f;
+                negative = 1.3f;
                 break;
             case CRASH:
-                percentage = -15f;
+                positive = 1f;
+                negative = 3f;
                 break;
 
             default:
-                percentage = 0;
+                positive = 1f;
+                negative = 1f;
 
         }
-        return (float) (Math.random() * percentage - percentage);
+        return (float) (Math.random() * (2*positive) - (negative));
     }
 
+    public Trend getMarketStatus() {
+        return trend;
+    }
 
 }

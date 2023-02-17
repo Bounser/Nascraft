@@ -21,7 +21,7 @@ import java.util.List;
 public class SlideComponent extends RectangularComponent {
 
     List<Float> values;
-    // Time frames: 1 = 15 min, 2 = 1 day, 3 = 1 Month, 4 = 1 year, 5 = 1 ytd
+    // Time frames: 1 = 15 min, 2 = 1 day, 3 = 1 Month, 4 = 1 year
     private int timeFrame;
 
     public SlideComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, List<Float> values) {
@@ -33,6 +33,7 @@ public class SlideComponent extends RectangularComponent {
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
 
+        // If It's not in bounds means that it's not being hovered.
         if(isInBounds(player, cursor)) {
             GroupComponent cTree = interaction.getComponentTree();
 
@@ -109,20 +110,6 @@ public class SlideComponent extends RectangularComponent {
                     sdf = new SimpleDateFormat("dd/MM/yyyy");
                     cal.add(Calendar.DATE, Math.round(-365 * ((float) (x + width - point)/(float) width)));
                     time = sdf.format(cal.getTime());
-                    break;
-                // Ytd
-                case 5:
-                    Calendar resultDate = Calendar.getInstance();
-                    Calendar startOfYear = Calendar.getInstance();
-                    startOfYear.set(Calendar.MONTH, Calendar.JANUARY);
-                    startOfYear.set(Calendar.DAY_OF_MONTH, 1);
-
-                    long daysBetween = ((resultDate.getTimeInMillis() - startOfYear.getTimeInMillis()) / (24 * 60 * 60 * 1000))* ((x + width - point)/width);
-
-                    resultDate.setTimeInMillis(startOfYear.getTimeInMillis() + (daysBetween * 24 * 60 * 60 * 1000));
-
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-                    time = dateFormat.format(resultDate.getTime());
                     break;
             }
             timetext.setText(time);

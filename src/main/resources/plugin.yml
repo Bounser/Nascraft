@@ -1,7 +1,7 @@
 name: Nascraft
 version: '${project.version}'
 main: me.bounser.nascraft.Nascraft
-api-version: 1.19
+api-version: 1.13
 depend: [ AdvancedGUI, Vault ]
 softdepend: [ PlaceholderAPI ]
 authors: [ bounser ]
@@ -10,11 +10,9 @@ description: Market valuations in minecraft
 commands:
   nascraft:
     description: Nascraft's admin command.
-    usage: /nc help
     aliases:
       - nc
   market:
     description: Interact with the market wherever you are!
-    usage: /mk help
     aliases:
       - mk

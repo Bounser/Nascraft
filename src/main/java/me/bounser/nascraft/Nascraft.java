@@ -6,8 +6,8 @@ import me.bounser.nascraft.commands.MarketCommand;
 import me.bounser.nascraft.commands.NascraftCommand;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.tools.Config;
+import me.bounser.nascraft.tools.Data;
 import me.leoko.advancedgui.manager.LayoutManager;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -35,7 +35,7 @@ public final class Nascraft extends JavaPlugin {
             return;
         }
 
-        if (Config.getInstance().getCheckResources()) { /*checkResources();*/ }
+        if (Config.getInstance().getCheckResources()) { checkResources(); }
 
         MarketManager.getInstance();
 
@@ -46,7 +46,7 @@ public final class Nascraft extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() { /*Data.getInstance().savePrices();*/ }
+    public void onDisable() { Data.getInstance().savePrices(); }
 
 
     public static Economy getEconomy() { return econ; }
@@ -78,8 +78,10 @@ public final class Nascraft extends JavaPlugin {
             }
             InputStream fromLayout0 = getResource("Nascraft.json");
 
-            if (input != fromLayout0) {
+            assert input != null;
+            if (!input.equals(fromLayout0)) {
                 getLogger().info("Layout Nascraft.json updated.");
+                assert fromLayout0 != null;
                 FileUtils.writeToFile(toLayout0, fromLayout0);
             }
 
@@ -88,9 +90,10 @@ public final class Nascraft extends JavaPlugin {
             InputStream fromLayout0 = getResource("Nascraft.json");
 
             getLogger().info("Layout Nascraft.json added.");
+            assert fromLayout0 != null;
             FileUtils.writeToFile(toLayout0, fromLayout0);
 
         }
-
     }
+
 }

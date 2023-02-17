@@ -24,10 +24,10 @@ public class Item {
 
     int operations;
 
+    // 15 (0-14) prices representing the prices in the last 15 minutes.
+    List<Float> pricesM;
     // 24 (0-23) prices representing the prices in all 24 hours of the day.
     List<Float> pricesH;
-    // 20 (0-14) prices representing the prices in the last 15 minutes.
-    List<Float> pricesM;
     // 30 (0-29) prices representing the prices in the last month.
     List<Float> pricesMM;
     // 24 (0-23) prices representing 2 prices each month.
@@ -110,10 +110,12 @@ public class Item {
         player.sendMessage(ChatColor.GRAY + "You just bought " + ChatColor.AQUA + amount + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + getBuyPrice()*amount*multiplier);
 
         if (price < 10) {
-            if (Math.random() < amount * 0.01 - stock * 0.001)
+            if (Math.random() < (amount * 0.01 - stock * 0.001))
                 price += 0.01;
         } else {
-            price = NUtils.round((float) (price* (1 +(Math.random() * 0.001 * amount) - stock*0.0001)));
+            float val = NUtils.round((float) (price* (1 +(Math.random() * 0.001 * amount) - stock*0.0001)));
+
+            if(val < Config.getInstance().getLimits()[1]) price = val;
         }
         operations += amount;
         stock -= amount;
@@ -128,13 +130,13 @@ public class Item {
 
         player.getInventory().removeItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        Nascraft.getEconomy().depositPlayer(player, getSellPrice()*amount);
+        Nascraft.getEconomy().depositPlayer(player, getSellPrice()*amount*multiplier);
 
-        player.sendMessage(ChatColor.GRAY + "You just sold " + ChatColor.AQUA + amount + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + getSellPrice()*amount);
+        player.sendMessage(ChatColor.GRAY + "You just sold " + ChatColor.AQUA + amount + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + getSellPrice()*amount*multiplier);
 
         if(price < 10) {
-            if(Math.random() < amount * 0.01 - stock * 0.001)
-                price -= 0.01;
+            if(Math.random() < (amount * 0.01 - stock * 0.001))
+                if(price - 0.01 > Config.getInstance().getLimits()[0]) price -= 0.01;
         } else {
             price = NUtils.round((float) (price* (1 -(Math.random() * 0.001 * amount) + stock*0.0001)));
         }
@@ -155,7 +157,9 @@ public class Item {
 
     public String getCategory() { return cat.getName(); }
 
-    public HashMap<String, Float> getChilds() { return childs; }
+    public HashMap<String, Float> getChilds() {
+        return childs;
+    }
 
     public int getOperations() { return operations; }
 

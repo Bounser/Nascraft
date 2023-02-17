@@ -15,46 +15,43 @@ Items_quoted:
         cobblestone:
           # INITIAL price. This value will be ignored once the market starts developing his own valuations.
           price: 1
+          # Specify the trend of the item fluctuations (Only if random oscillations is enabled)
+          # Available values: FLAT, BEAR1, BEAR2, BEAR3, BULL1, BULL2, BULL3
+          trend: "BULL1"
           # child items. The price of these items will be determined by his parent item and vice versa.
           child:
             cobblestone_slab:
               # To make a cobblestone slab we only need half of a cobblestone, so the price of the slab is half the price of the cobblestone.
               # Result: (Price cobblestone)*0.5 - Hence, the initial price will be 0.5 for one slab.
-              linked: 0.5
+              multiplier: 0.5
             cobblestone_stairs:
               # For a cobblestone stair we need 6 of cobblestone, while we only get 4 stairs. So, the price will be 6/4 = 3/2 = 1.5
               # Keep in mind that this logic is not necessary, as you could say that a stair costs x10 the price of cobblestone,
               # but that not only makes no sense, it would probably allow people to take advantage of these overvaluations.
-              linked: 1.5
+              multiplier: 1.5
             cobblestone_wall:
               # Spends 6, gets 6. 6/6 = 1/1 = 1
-              linked: 1
-            stone:
-              # The childs can also be depending on more than 1 items. In this case, to get stone you need to process the cobblestone
-              # with coal. With one coal you can process 8 items; that means that the valuation of this child should be
-              # influenced by 1/8 of the movements of the coal.
-              depends:
-                coal: 0.13
+              multiplier: 1
         stone:
           price: 1.5
           child:
             stone_stairs:
-              linked: 1.5
+              multiplier: 1.5
             stone_slab:
-              linked: 0.5
+              multiplier: 0.5
             stone_pressure_plate:
-              linked: 2
+              multiplier: 2
             stone_button:
-              linked: 1
+              multiplier: 1
         cobbled_deepslate:
           price: 0.7
           child:
             cobbled_deepslate_stairs:
-              linked: 1.5
+              multiplier: 1.5
             cobbled_deepslate_slab:
-              linked: 0.5
+              multiplier: 0.5
             cobbled_deepslate_wall:
-              linked: 1
+              multiplier: 1
     # Another category.
     2:
       name: "Tech"
@@ -63,7 +60,7 @@ Items_quoted:
           price: 2
           child:
             redstone_block:
-              linked: 9
+              multiplier: 9
         redstone_torch:
           price: 3
         repeater:
@@ -81,24 +78,24 @@ Items_quoted:
           price: 1
           child:
             oak_planks:
-              linked: 0.25
+              multiplier: 0.25
             oak_stairs:
-              linked: 1.5
+              multiplier: 0.375
             oak_slab:
-              linked: 0.5
+              multiplier: 0.125
             stick:
-              linked: 0.0625
+              multiplier: 0.0625
         birch_log:
           price: 1
           child:
             birch_planks:
-              linked: 0.25
+              multiplier: 0.25
             birch_stairs:
-              linked: 1.5
+              multiplier: 0.375
             birch_slab:
-              linked: 0.5
+              multiplier: 0.125
             stick:
-              linked: 0.0625
+              multiplier: 0.0625
     4:
       name: "Valuables"
       items:
@@ -115,7 +112,7 @@ Items_quoted:
           price: 4
           child:
             charcoal:
-              linked: 1
+              multiplier: 1
         leather:
           price: 10
     6:
@@ -132,22 +129,20 @@ Items_quoted:
 
 Price_options:
   # With random oscillation enabled prices will vary in time based on these settings:
-  random_oscilation:
+  random_oscillation:
     enabled: true
-    # Percentage of change in absolute terms.
-    deviation: 2
-    # Portion of which the oscillation will vary.
-    # Example: With a deviation of 2 and a median of 0.5 the prices will fluctuate between -1% and +1%
-    # With a deviation of 3 and a median of 0.66 the prices will fluctuate between -1% and +2%
-    # This will be translated into a price trend in the long run.
-    # Note: To modify the trend in the short term the commands to force conditions are recommended.
-    median: 0.5
+    # Specify the general trend of the market (Only applied to items without a specified trend)
+    # Available values: FLAT, BEAR1, BEAR2, BEAR3, BULL1, BULL2, BULL3
+    market_trend: FLAT
   # Should prices be affected by buys / sells?
   supply_and_demand: true
 
 Market_control:
   # Limit the precision of prices. With 2 the minimum price would be 0.01, with 3: 0.001 etc
   decimal_limit: 2
+  limits:
+    low: 0.01
+    high: 99999
   # The spread is determined by the deviation in both actions. In the default case: 3% + 2% -> 5% of spread
   taxation:
     # 3% taxation when players sell items.
@@ -165,11 +160,6 @@ Market_control:
     force_bull: true
     # Set the general tendency of the oscillations to negative.
     force_bear: true
-    # Performing this command will shut down the possibility of players to buy and sell any item
-    emergency_stop: true
 
 Lang:
-  currency: " €"
-  # Whether the currency symbol should be printed after or before the number.
-  # Example: With after: true -> 100 € with after: false ->  €100
-  currency_after: true
+  currency: "€"

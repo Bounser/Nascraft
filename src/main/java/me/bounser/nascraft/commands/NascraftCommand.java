@@ -2,7 +2,7 @@ package me.bounser.nascraft.commands;
 
 import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.market.MarketStatus;
+import me.bounser.nascraft.market.Trend;
 import me.bounser.nascraft.market.PricesManager;
 import me.bounser.nascraft.tools.Data;
 import org.bukkit.ChatColor;
@@ -26,17 +26,17 @@ public class NascraftCommand implements CommandExecutor {
 
             case "force":
                 switch (args[1]){
-                    case "bull1": PricesManager.getInstance().setMarketStatus(MarketStatus.BULL1); break;
-                    case "bull2": PricesManager.getInstance().setMarketStatus(MarketStatus.BULL2); break;
-                    case "bull3": PricesManager.getInstance().setMarketStatus(MarketStatus.BULL3); break;
-                    case "bullrun": PricesManager.getInstance().setMarketStatus(MarketStatus.BULLRUN); break;
+                    case "bull1": PricesManager.getInstance().setMarketStatus(Trend.BULL1); break;
+                    case "bull2": PricesManager.getInstance().setMarketStatus(Trend.BULL2); break;
+                    case "bull3": PricesManager.getInstance().setMarketStatus(Trend.BULL3); break;
+                    case "bullrun": PricesManager.getInstance().setMarketStatus(Trend.BULLRUN); break;
 
-                    case "bear1": PricesManager.getInstance().setMarketStatus(MarketStatus.BEAR1); break;
-                    case "bear2": PricesManager.getInstance().setMarketStatus(MarketStatus.BEAR2); break;
-                    case "bear3": PricesManager.getInstance().setMarketStatus(MarketStatus.BEAR3); break;
-                    case "crash": PricesManager.getInstance().setMarketStatus(MarketStatus.CRASH); break;
+                    case "bear1": PricesManager.getInstance().setMarketStatus(Trend.BEAR1); break;
+                    case "bear2": PricesManager.getInstance().setMarketStatus(Trend.BEAR2); break;
+                    case "bear3": PricesManager.getInstance().setMarketStatus(Trend.BEAR3); break;
+                    case "crash": PricesManager.getInstance().setMarketStatus(Trend.CRASH); break;
 
-                    case "flat": PricesManager.getInstance().setMarketStatus(MarketStatus.FLAT); break;
+                    case "flat": PricesManager.getInstance().setMarketStatus(Trend.FLAT); break;
 
                     default: sender.sendMessage(ChatColor.RED + "Market status not recognized.");
                 }
@@ -49,8 +49,12 @@ public class NascraftCommand implements CommandExecutor {
                 for(Item item : MarketManager.getInstance().getAllItems()) {
                     sender.sendMessage(ChatColor.GRAY + "Mat: " + item.getMaterial() + " price: " + item.getPrice() + " stock: " + item.getStock());
                 }
+                break;
+            case "status":
+                sender.sendMessage(PricesManager.getInstance().getMarketStatus().toString());
+                break;
 
-            default: if(sender instanceof Player) sender.sendMessage(ChatColor.RED + "Argument not recognized.");
+            default: sender.sendMessage(ChatColor.RED + "Argument not recognized.");
         }
 
         return false;

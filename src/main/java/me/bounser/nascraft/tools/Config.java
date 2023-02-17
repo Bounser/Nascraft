@@ -2,9 +2,6 @@ package me.bounser.nascraft.tools;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.Category;
-import me.bounser.nascraft.market.Item;
-import me.bounser.nascraft.market.MarketManager;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
@@ -20,6 +17,7 @@ public class Config {
     float taxSell = -1;
     int random0 = 0;
     int precission = -1;
+    int[] limit = {-1, -1};
     String currency = "0";
 
     public static Config getInstance() {
@@ -79,10 +77,10 @@ public class Config {
     }
 
 
-    public boolean getRandomOscilation() {
+    public boolean getRandomOscillation() {
 
         if (random0 == 0) {
-            if (main.getConfig().getBoolean("Price_options.random_oscilation")) {
+            if (main.getConfig().getBoolean("Price_options.random_oscillation.enabled")) {
                 random0 = 1;
             } else {
                 random0 = 0;
@@ -134,7 +132,7 @@ public class Config {
         if(section.size() == 0) return null;
         for(String childMat : section){
 
-            childs.put(childMat, (float) config.getDouble("Items_quoted.Categories." + cat + ".items." + mat + ".child." + childMat + ".linked"));
+            childs.put(childMat, (float) config.getDouble("Items_quoted.Categories." + cat + ".items." + mat + ".child." + childMat + ".multiplier"));
 
         }
         return childs;
@@ -142,6 +140,26 @@ public class Config {
 
     public String getDisplayName(Category cat ){
         return config.getString("Items_quoted.Categories." + cat.getName() + ".name");
+    }
+
+    public String getGeneralTrend(){
+        return config.getString("Price_options.random_oscillation.market_trend");
+    }
+
+    public String getItemDefaultTrend(String category, String material){
+        String trend = config.getString("Items_quoted.Categories." + category + ".items." + material + ".trend");
+        return trend == null ? "FLAT" : trend;
+    }
+
+    public int[] getLimits() {
+        if((limit[0] == -1) && (limit[1] == -1)) {
+
+            limit[0] = config.getInt("Market_control.limits.low");
+            limit[10] = config.getInt("Market_control.limits.high");
+
+            return limit;
+        }
+        return limit;
     }
 
 }
