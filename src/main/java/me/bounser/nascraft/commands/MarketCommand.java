@@ -1,16 +1,12 @@
 package me.bounser.nascraft.commands;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
-import me.leoko.advancedgui.manager.GuiWallManager;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class MarketCommand implements CommandExecutor {
@@ -24,20 +20,18 @@ public class MarketCommand implements CommandExecutor {
         Player p = (Player) sender;
 
         if(args.length == 0) {
-            sender.sendMessage(ChatColor.RED  + "Invalid use of command. /market buy/sell material quantity");
+            sender.sendMessage(ChatColor.RED  + "Invalid use of command. /market <Buy/Sell> <Material> <Quantity>");
             return false;
         }
         switch (args[0]){
             case "buy":
-                MarketManager.getInstance().getItem(args[1]).buyItem(Integer.parseInt(args[2]), p);
+                MarketManager.getInstance().getItem(args[1]).buyItem(Integer.parseInt(args[2]), p, args[1], 1);
                 break;
             case "sell":
-                MarketManager.getInstance().getItem(args[1]).sellItem(Integer.parseInt(args[2]), p);
+                MarketManager.getInstance().getItem(args[1]).sellItem(Integer.parseInt(args[2]), p, args[1], 1);
                 break;
-            case "info":
-                for(Item item : MarketManager.getInstance().getAllItems()) {
-                    sender.sendMessage("Mat: " + item.getMaterial() + " price: " + item.getPrice() + " stock: " + item.getStock());
-                }
+            default:
+                sender.sendMessage(ChatColor.RED + "Wrong command.");
         }
         return false;
     }

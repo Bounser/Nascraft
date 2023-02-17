@@ -21,29 +21,26 @@ public class Item {
     Trend trend;
 
     int stock;
-
     int operations;
 
-    // 15 (0-14) prices representing the prices in the last 15 minutes.
+    // 30 (0-29) values representing the prices in the last 15 minutes.
     List<Float> pricesM;
-    // 24 (0-23) prices representing the prices in all 24 hours of the day.
+    // 24 (0-23) values representing the prices in all 24 hours of the day.
     List<Float> pricesH;
-    // 30 (0-29) prices representing the prices in the last month.
+    // 30 (0-29) values representing the prices in the last month.
     List<Float> pricesMM;
-    // 24 (0-23) prices representing 2 prices each month.
+    // 24 (0-23) values representing 2 prices each month.
     List<Float> pricesY;
 
     HashMap<String, Float> childs;
 
     public Item(String material, Category category){
-
         mat = material;
         setupPrices();
         cat = category;
         operations = 0;
         this.childs = Config.getInstance().getChilds(material, category.getName());
         trend = Trend.valueOf(Config.getInstance().getItemDefaultTrend(category.getName(), material));
-
     }
 
     public void setPrice(float price) {
@@ -78,6 +75,8 @@ public class Item {
         if(price + NUtils.round(price * percentage/100) > Math.pow(10, -Config.getInstance().getDecimalPrecission())) {
             price += NUtils.round(price * percentage/100);
         }
+        if(price < Config.getInstance().getLimits()[0]) price = Config.getInstance().getLimits()[0];
+        if(price > Config.getInstance().getLimits()[1]) price = Config.getInstance().getLimits()[1];
     }
 
     public void buyItem(int amount, Player player, String mat, float multiplier) {

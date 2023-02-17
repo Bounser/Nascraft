@@ -87,10 +87,10 @@ public class SlideComponent extends RectangularComponent {
             String time = "ERROR";
 
             switch (timeFrame) {
-                // 15 min
+                // 30 min
                 case 1:
                     sdf = new SimpleDateFormat("HH:mm");
-                    cal.add(Calendar.MINUTE, Math.round(-15 * ((float) (x + width - point)/(float) width)));
+                    cal.add(Calendar.MINUTE, Math.round(-30 * ((float) (x + width - point)/(float) width)));
                     time = sdf.format(cal.getTime());
                     break;
                 // 1 day

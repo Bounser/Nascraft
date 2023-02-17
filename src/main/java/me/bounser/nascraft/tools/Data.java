@@ -15,47 +15,34 @@ import java.util.List;
 public class Data {
 
     /*
-     * Data structure:
-     *
-     *  Location: Nascraft/data/Price_History_(Material).json
-     *  Price_History_(Material).json: (Simplified)
-     *  Material:
-     *      lastSavedD: 67
-     *      lastSavedH: 14
-     *      stock: 100
-     *      recent:
-     *        1:
-     *          price: 12.2
-     *        2:
-     *          price: 15.3
-     *        3:
-     *          price: 12.3
-     *          ...
-     *
-     *        24:
-     *          price: 45.3
-     *      history:
-     *        # Days from 01/01/2023
-     *        86:
-     *          price: 10
-     *          stock: 58
-     *        87:
-     *          price: 10
-     *          stock: 58
-     *        ...
-     *
-     *  Location: Nascraft/data/Trading_data/UUID1
-     *  UUID1.json:
-     *      assets:
-     *        num: 3
-     *        1:
-     *          mat: Stone
-     *          q: 100
-     *          mp: 11
-     *        2:
-     *          mat: Diamond
-     *          q: 2
-     *          mp: 54.2
+      Data info:
+
+       Location: Nascraft/data/Price_History_(Material).json
+       Price_History_(Material).json: (Simplified)
+       Material:
+           lastSavedD: 67
+           lastSavedH: 14
+           stock: 100
+           recent:
+             1:
+               price: 12.2
+             2:
+               price: 15.3
+             3:
+               price: 12.3
+               ...
+
+             24:
+               price: 45.3
+           history:
+             # Days from 01/01/2023
+             86:
+               price: 10
+               stock: 58
+             87:
+               price: 10
+               stock: 58
+             ...
      */
 
     private static Data instance;
@@ -67,14 +54,13 @@ public class Data {
         int days = getDay();
         int hour = getHour();
 
-        int j = 0;
-        for(String cat : Config.getInstance().getCategories()) {
+        for (String cat : Config.getInstance().getCategories()) {
 
-            for(String mat : Config.getInstance().getAllMaterials(cat)) {
-                j++;
+            for (String mat : Config.getInstance().getAllMaterials(cat)) {
+
                 Json json = new Json("Price-History-" + mat, Nascraft.getInstance().getDataFolder().getPath() + "/data");
 
-                if(!(json.contains(mat + ".lastSaveD")) && !json.contains(mat + ".lastSaveD")) {
+                if (!(json.contains(mat + ".lastSaveD")) && !json.contains(mat + ".lastSaveD")) {
 
                     float price = Config.getInstance().getInitialPrice(mat);
 
@@ -86,9 +72,8 @@ public class Data {
 
                     // RECENT
                     json.set(mat + ".lastSaveH", hour);
-                    for(int i = 1; i <= 24 ; i++) {
+                    for (int i = 1; i <= 24 ; i++) {
                         json.set(mat + ".recent." + (25 - i) + ".price", price);
-
                     }
                 }
             }
@@ -100,7 +85,7 @@ public class Data {
         int days = getDay();
         int hour = getHour();
 
-        for(Item item : MarketManager.getInstance().getAllItems()) {
+        for (Item item : MarketManager.getInstance().getAllItems()) {
 
             Json json = new Json("Price-History-" + item.getMaterial(), Nascraft.getInstance().getDataFolder().getPath() + "/data");
 
@@ -113,7 +98,7 @@ public class Data {
 
             // RECENT
             int x = 0;
-            for(float i : item.getPricesH()) {
+            for (float i : item.getPricesH()) {
                 if(hour - x < 1) {
                     json.set(item.getMaterial() + ".recent." + (hour + 24 - x) + ".price", i);
                 } else {
@@ -124,7 +109,21 @@ public class Data {
         }
     }
 
-    // Only called on item creation
+    // Returns the last price repeated 30 times in a list.
+    public List<Float> getMPrice(String mat) {
+
+        Json json = new Json("Price-History-" + mat, Nascraft.getInstance().getDataFolder().getPath() + "/data");
+
+        if (json.contains(mat + ".lastSaveD") && json.contains(mat + ".lastSaveH")) {
+            float price = (float) json.getDouble(mat + ".recent." + json.getInt(mat + ".lastSaveH") + ".price");
+            return new ArrayList<>(Collections.nCopies(30, price));
+        } else {
+            float price = Config.getInstance().getInitialPrice(mat);
+            return new ArrayList<>(Collections.nCopies(30, price));
+        }
+    }
+
+    // Returns a list with the prices of the 24 prev hours
     public List<Float> getHPrice(String mat) {
 
         Json json = new Json("Price-History-" + mat, Nascraft.getInstance().getDataFolder().getPath() + "/data");
@@ -141,27 +140,27 @@ public class Data {
 
             List<Float> prices = new ArrayList<>();
 
-            if(lastDay == day) {
-                if(lastHour == hour) {
-                    for(int i = lastHour ; i > 0 ; i--) {
+            if (lastDay == day) {
+                if (lastHour == hour) {
+                    for (int i = lastHour ; i > 0 ; i--) {
                         prices.add(json.getFloat(mat + ".recent." + i + ".price"));
                     }
-                    for(int i = 24 ; i > lastHour ; i--) {
+                    for (int i = 24 ; i > lastHour ; i--) {
                         prices.add(json.getFloat(mat + ".recent." + i + ".price"));
                     }
                     return prices;
                 }
-                if(hour - lastHour > 24) {
+                if (hour - lastHour > 24) {
                     return new ArrayList<>(Collections.nCopies(24, json.getFloat(mat + ".recent." + lastHour+ ".price")));
 
                 } else {
-                    for(int i = 1; i <= hour-lastHour; i++) {
+                    for (int i = 1; i <= hour-lastHour; i++) {
                         prices.add(json.getFloat(mat + ".recent." + lastHour+ ".price"));
                     }
-                    for(int i = lastHour ; i > 0 ; i--) {
+                    for (int i = lastHour ; i > 0 ; i--) {
                         if(prices.size() < 24) prices.add(json.getFloat(mat + ".recent." + i+ ".price"));
                     }
-                    if(prices.size() < 24)
+                    if (prices.size() < 24)
                         for(int i = 24 ; i > lastHour ; i--) if(prices.size() < 24) prices.add(json.getFloat(mat + ".recent." + i+ ".price"));
                     return prices;
                 }
@@ -170,7 +169,7 @@ public class Data {
         } else {
 
             float price = Config.getInstance().getInitialPrice(mat);
-            for(int i = 1; i <= 24 ; i++) {
+            for (int i = 1; i <= 24 ; i++) {
                 json.set(mat + ".recent." + (25 - i) + ".price", price);
             }
             json.set(mat + ".lastSaveH", hour);
@@ -178,41 +177,63 @@ public class Data {
         }
     }
 
-    public List<Float> getMPrice(String mat) {
-
-        Json json = new Json("Price-History-" + mat, Nascraft.getInstance().getDataFolder().getPath() + "/data");
-
-        if (json.contains(mat + ".lastSaveD") && json.contains(mat + ".lastSaveH")) {
-            float price = (float) json.getDouble(mat + ".recent." + json.getInt(mat + ".lastSaveH") + ".price");
-            return new ArrayList<>(Collections.nCopies(24, price));
-        } else {
-            float price = Config.getInstance().getInitialPrice(mat);
-            return new ArrayList<>(Collections.nCopies(24, price));
-        }
-    }
-
+    // Returns a list with 30 prices of the last 30 days
     public List<Float> getMMPrice(String mat) {
 
         Json json = new Json("Price-History-" + mat, Nascraft.getInstance().getDataFolder().getPath() + "/data");
-
-        Calendar calendar = Calendar.getInstance();
 
         int day = getDay();
 
         if (json.contains(mat + ".lastSaveD")) {
 
-            int lastDay = json.getInt(mat + ".lastSaveD");
+            List<Float> prices = new ArrayList<>();
+
+            for (int i = 30 ; i >= 0 ; i--) {
+
+                if (json.contains(mat + ".history." + (day - i) + ".price")) {
+
+                    prices.add(json.getFloat(mat + ".history." + (day - i) + ".price"));
+
+                } else {
+                    if (!json.contains(mat + ".history." + (day - i -1) + ".price")) {
+                            prices.add(Config.getInstance().getInitialPrice(mat));
+                    } else {
+                        prices.add((prices.get(prices.size()-1)));
+                    }
+                }
+            }
+            return prices;
+
+        } else {
+
+            float price = Config.getInstance().getInitialPrice(mat);
+            for (int i = 0; i < 30 ; i++) {
+                json.set(mat + ".history." + (day - i) + ".price", price);
+            }
+            json.set(mat + ".lastSaveD", day);
+            return new ArrayList<>(Collections.nCopies(30, price));
+        }
+    }
+
+    // Returns a list with 30 prices of the last 365 days
+    public List<Float> getYPrice(String mat) {
+
+        Json json = new Json("Price-History-" + mat, Nascraft.getInstance().getDataFolder().getPath() + "/data");
+
+        int day = getDay();
+
+        if (json.contains(mat + ".lastSaveD")) {
 
             List<Float> prices = new ArrayList<>();
 
-            for(int i = 29 ; i >= 0 ; i--) {
+            for (int i = 29 ; i >= 0 ; i--) {
 
-                if(json.contains(mat + ".recent." + (day - i) + ".price")) {
+                if (json.contains(mat + ".history." + (day - i*15) + ".price")) {
 
-                    prices.add(json.getFloat(mat + ".recent." + (day - i) + ".price"));
+                    prices.add(json.getFloat(mat + ".history." + (day - i*15) + ".price"));
 
                 } else {
-                    if(!json.contains(mat + ".recent." + (day - i -1) + ".price")) {
+                    if(!json.contains(mat + ".history." + (day - (i-1)*15) + ".price")) {
                         prices.add(Config.getInstance().getInitialPrice(mat));
                     } else {
                         prices.add((prices.get(prices.size()-1)));
@@ -224,15 +245,11 @@ public class Data {
         } else {
 
             float price = Config.getInstance().getInitialPrice(mat);
-            for(int i = 0; i < 30 ; i++) {
-                json.set(mat + ".history." + (day - i) + ".price", price);
-            }
-            json.set(mat + ".lastSaveD", day);
-            return new ArrayList<>(Collections.nCopies(30, price));
+            return new ArrayList<>(Collections.nCopies(24, price));
         }
     }
 
-
+    // Returns an int representing the days that passed since the first day of 2023.
     public int getDay() {
 
         LocalDateTime start = LocalDateTime.of(2023, 1, 1, 0, 0, 0);
@@ -241,9 +258,9 @@ public class Data {
 
         Duration diff = Duration.between(start, end);
         return (int) diff.toDays();
-
     }
 
+    // Returns the hour of the day.
     public int getHour() {
 
         Calendar calendar = Calendar.getInstance();

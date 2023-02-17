@@ -10,7 +10,6 @@ import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
@@ -132,9 +131,9 @@ public class GraphComponent extends RectangularComponent {
         int j = 0;
 
         float a = 0;
-        if(values.size() < 25) a = 0.5f;
+        if(timeFrame != 3) a = 0.5f;
         for (int i = 0; i < (values.size()-1); i++) {
-            x[j] = z*i + Math.round(a*i) + xc;
+            x[j] = (z*i + Math.round(a*i) + xc);
             j++;
         }
         if (polygon) {

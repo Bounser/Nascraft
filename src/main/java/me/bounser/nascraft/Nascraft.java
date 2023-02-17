@@ -84,9 +84,7 @@ public final class Nascraft extends JavaPlugin {
                 assert fromLayout0 != null;
                 FileUtils.writeToFile(toLayout0, fromLayout0);
             }
-
         } else {
-
             InputStream fromLayout0 = getResource("Nascraft.json");
 
             getLogger().info("Layout Nascraft.json added.");

@@ -35,10 +35,6 @@ public class Config {
         return main.getConfig().getBoolean("AutoResourcesInjection");
     }
 
-    public int getRequiredToMove(String category) {
-        return main.getConfig().getInt("Items_quoted.Categories." + category + ".required_to_move");
-    }
-
     public Set<String> getAllMaterials(String category) {
         return main.getConfig().getConfigurationSection("Items_quoted.Categories." + category + ".items.").getKeys(false);
     }
@@ -76,7 +72,6 @@ public class Config {
         return precission;
     }
 
-
     public boolean getRandomOscillation() {
 
         if (random0 == 0) {
@@ -112,7 +107,6 @@ public class Config {
             if(main.getConfig().getConfigurationSection("Items_quoted.Categories." + cat + ".items").getKeys(false).contains(mat)) {
                 return cat;
             }
-
         }
         return null;
     }
@@ -131,9 +125,7 @@ public class Config {
 
         if(section.size() == 0) return null;
         for(String childMat : section){
-
             childs.put(childMat, (float) config.getDouble("Items_quoted.Categories." + cat + ".items." + mat + ".child." + childMat + ".multiplier"));
-
         }
         return childs;
     }
@@ -153,10 +145,8 @@ public class Config {
 
     public int[] getLimits() {
         if((limit[0] == -1) && (limit[1] == -1)) {
-
             limit[0] = config.getInt("Market_control.limits.low");
-            limit[10] = config.getInt("Market_control.limits.high");
-
+            limit[1] = config.getInt("Market_control.limits.high");
             return limit;
         }
         return limit;
