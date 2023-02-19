@@ -4,6 +4,7 @@ import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.Trend;
 import me.bounser.nascraft.market.PricesManager;
+import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -19,12 +20,18 @@ public class NascraftCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         if(!sender.hasPermission("nascraft.admin") && sender instanceof Player) {
-            sender.sendMessage(ChatColor.RED + "You are not allowed to use this command!");
+            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "You are not allowed to use this command!");
             return false;
         }
-        switch(args[0]){
 
+        if(args.length == 0) {
+            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: force | save | info | status");
+            return false;
+        }
+
+        switch(args[0]){
             case "force":
+                if (Config.getInstance().isForceAllowed())
                 switch (args[1]){
                     case "bull1": PricesManager.getInstance().setMarketStatus(Trend.BULL1); break;
                     case "bull2": PricesManager.getInstance().setMarketStatus(Trend.BULL2); break;
@@ -38,25 +45,25 @@ public class NascraftCommand implements CommandExecutor {
 
                     case "flat": PricesManager.getInstance().setMarketStatus(Trend.FLAT); break;
 
-                    default: sender.sendMessage(ChatColor.RED + "Market status not recognized.");
+                    default: sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Market status not recognized.");
+                } else {
+                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "<force> command is disabled in the config.");
                 }
-
+                break;
             case "save":
                 Data.getInstance().savePrices();
+                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Data saved.");
                 break;
-
             case "info":
                 for(Item item : MarketManager.getInstance().getAllItems()) {
                     sender.sendMessage(ChatColor.GRAY + "Mat: " + item.getMaterial() + " price: " + item.getPrice() + " stock: " + item.getStock());
                 }
                 break;
             case "status":
-                sender.sendMessage(PricesManager.getInstance().getMarketStatus().toString());
+                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "General status: " + ChatColor.BLUE + PricesManager.getInstance().getMarketStatus().toString());
                 break;
-
-            default: sender.sendMessage(ChatColor.RED + "Argument not recognized.");
+            default: sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Argument not recognized. Available arguments: force | save | info | status");
         }
-
         return false;
     }
 

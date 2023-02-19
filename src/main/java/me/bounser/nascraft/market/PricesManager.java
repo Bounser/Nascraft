@@ -20,6 +20,7 @@ public class PricesManager {
 
         saveDataTask();
         shortTermPricesTask();
+        dailyTask();
     }
 
     public void setMarketStatus(Trend trend) {
@@ -34,11 +35,9 @@ public class PricesManager {
 
             for (Item item : MarketManager.getInstance().getAllItems()) {
                 if(Config.getInstance().getRandomOscillation()){
-
                     item.changePrice(getPercentage(item));
                 }
                 item.lowerOperations();
-
 
                 item.addValueToM(item.getPrice());
             }
@@ -62,6 +61,16 @@ public class PricesManager {
         }, 30000, 72000);
 
     }
+
+    private void dailyTask() {
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
+
+            for (Item item : MarketManager.getInstance().getAllItems()) item.dailyUpdate();
+
+        }, 1728000, 1728000);
+    }
+
 
     public float getPercentage(Item item) {
 

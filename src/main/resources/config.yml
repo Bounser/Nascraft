@@ -1,31 +1,31 @@
 # Nascraft config.
 
-# Check if the layout(s) required are present, and place them in case they are not.
+# Check if the layout required is present, and update it on start up.
 AutoResourcesInjection: true
 
 Items_quoted:
   Categories:
-    # Name of the category. Categories are displayed in the main menu.
+    # Reference for the category. Categories are displayed in the main menu.
     1:
       # Display-name of the category.
       name: "Stone age"
-      # Items of the category.
+      # Items of the category. A maximum amount of 6 items are allowed per category.
       items:
         # Material of the item.
         cobblestone:
           # INITIAL price. This value will be ignored once the market starts developing his own valuations.
-          price: 1
-          # Specify the trend of the item fluctuations (Only if random oscillations is enabled)
+          price: 1.2
+          # (OPTIONAL) Specify the trend of the item fluctuations (Only if random oscillations is enabled)
           # Available values: FLAT, BEAR1, BEAR2, BEAR3, BULL1, BULL2, BULL3
           trend: "BULL1"
-          # child items. The price of these items will be determined by his parent item and vice versa.
+          # child items. The price of these items will be determined by his parent item.
           child:
             cobblestone_slab:
               # To make a cobblestone slab we only need half of a cobblestone, so the price of the slab is half the price of the cobblestone.
-              # Result: (Price cobblestone)*0.5 - Hence, the initial price will be 0.5 for one slab.
+              # Result: (Price cobblestone)*0.5 - Hence, the initial price will be 0.6 for one slab.
               multiplier: 0.5
             cobblestone_stairs:
-              # For a cobblestone stair we need 6 of cobblestone, while we only get 4 stairs. So, the price will be 6/4 = 3/2 = 1.5
+              # To make a cobblestone stair we require 6 of cobblestone, while we only get 4 stairs. Then, the price will be 6/4 = 3/2 = 1.5
               # Keep in mind that this logic is not necessary, as you could say that a stair costs x10 the price of cobblestone,
               # but that not only makes no sense, it would probably allow people to take advantage of these overvaluations.
               multiplier: 1.5
@@ -134,32 +134,31 @@ Price_options:
     # Specify the general trend of the market (Only applied to items without a specified trend)
     # Available values: FLAT, BEAR1, BEAR2, BEAR3, BULL1, BULL2, BULL3
     market_trend: FLAT
-  # Should prices be affected by buys / sells?
-  supply_and_demand: true
 
 Market_control:
-  # Limit the precision of prices. With 2 the minimum price would be 0.01, with 3: 0.001 etc
+  # Limit the precision of prices.
   decimal_limit: 2
+  # Set limits on how low and high prices can be.
   limits:
     low: 0.01
     high: 99999
-  # The spread is determined by the deviation in both actions. In the default case: 3% + 2% -> 5% of spread
+  # Although the taxation gets separated in sell and buy, the total tax payed is the same:
+  # The spread is determined by the deviation in both actions. In the default case: 3% + 2% -> 5% of spread.
+
+  # To avoid strengthening the underground economy, try to keep this value as low as possible,
+  # as heavy taxation can induce players to trade with each other, eliminating intermediaries
+  # reducing the collected money from taxes and making the market less efficient.
   taxation:
     # 3% taxation when players sell items.
     sell: 0.03
     # 2% taxation when players buy items.
     buy: 0.02
-  high_market_control:
-    # Enable the /nascraft force <> subcommands:
-    enabled: true
-    # Wipe ~50% of the valuations in a couple of movements.
-    force_crash: false
-    # Pump a ~50% of the valuations in minutes
-    force_bullrun: false
-    # Set the general tendency of the oscillations to positive.
-    force_bull: true
-    # Set the general tendency of the oscillations to negative.
-    force_bear: true
+  # Change the trend of prices in-game. Keep in mind that the trend will last until the next restart.
+  # Command: /nascraft force <TREND>  - Where TREND can be: flat, bear1, bear2, bear3, crash, bull1, bull2, bull3, bullran
+  force_command: false
 
 Lang:
   currency: "€"
+  # Available placeholders: [AMOUNT], [MATERIAL], [WORTH]
+  buy_message: "&7You just bought &d[AMOUNT] &7x &d[MATERIAL] &7worth &6[WORTH]"
+  sell_message: "&7You just bought &d[AMOUNT] &7x &d[MATERIAL] &7worth &6[WORTH]"

@@ -26,11 +26,10 @@ public class GraphComponent extends RectangularComponent {
     HashMap<String, Float> childs;
     int width, height, yc, xc;
 
-    // Time frames: 1 = 15 min, 2 = 1 day, 3 = 1 Month, 4 = 1 year
+    // Time frames: 1 = 30 min, 2 = 1 day, 3 = 1 Month, 4 = 1 year
     private int timeFrame;
 
     public GraphComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, List<Float> values) {
-
         super(id, clickAction, hidden, interaction, x, y, width, height);
 
         this.width = width-1;
@@ -44,7 +43,6 @@ public class GraphComponent extends RectangularComponent {
 
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
-
         updateButtonPrice();
 
         graphic.setColor(new Color(0, 0, 0));
@@ -54,12 +52,10 @@ public class GraphComponent extends RectangularComponent {
         graphic.setColor(setupBackGround());
 
         graphic.drawPolyline(getXPoints(false), getYPoints(0, false), getXPoints(false).length);
-
     }
 
     @Override
     public String getState(Player player, GuiPoint cursor) {
-
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("mm");
         String time = sdf.format(cal.getTime());
@@ -72,6 +68,7 @@ public class GraphComponent extends RectangularComponent {
     }
 
     public void setTimeFrame(int timeFrame) {
+
         this.timeFrame = timeFrame;
         interaction.getComponentTree().locate("slide1", SlideComponent.class).setTimeFrame(timeFrame);
         interaction.getComponentTree().locate("timeview", ViewComponent.class).setView("times" + timeFrame);
@@ -183,7 +180,6 @@ public class GraphComponent extends RectangularComponent {
                 interaction.getComponentTree().locate("sellprice" + i, TextComponent.class).setText(NUtils.round(getItem().getSellPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
             }
         }
-
     }
 
     public void changeMat(String mat) {

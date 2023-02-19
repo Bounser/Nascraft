@@ -27,9 +27,9 @@ public class Item {
     List<Float> pricesM;
     // 24 (0-23) values representing the prices in all 24 hours of the day.
     List<Float> pricesH;
-    // 30 (0-29) values representing the prices in the last month.
+    // 30 (0-29) values representing the prices in the last month. *
     List<Float> pricesMM;
-    // 24 (0-23) values representing 2 prices each month.
+    // 24 (0-23) values representing 2 prices each month. *
     List<Float> pricesY;
 
     HashMap<String, Float> childs;
@@ -92,9 +92,7 @@ public class Item {
 
         if (player.getInventory().firstEmpty() == -1) {
             for (ItemStack is : player.getInventory()) {
-
-                if(is.getType().toString().equals(mat.toUpperCase()) && amount < is.getMaxStackSize() - is.getAmount()) { hasSpace = true; }
-
+                if(is == null || (is.getType().toString().equals(mat.toUpperCase()) && amount < is.getMaxStackSize() - is.getAmount())) { hasSpace = true; }
             }
             if(!hasSpace) {
                 player.sendMessage(ChatColor.RED + "Not enough space in inventory!");
@@ -106,7 +104,9 @@ public class Item {
 
         player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        player.sendMessage(ChatColor.GRAY + "You just bought " + ChatColor.AQUA + amount + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + getBuyPrice()*amount*multiplier);
+        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(getBuyPrice()*amount*multiplier))).replace("[MATERIAL]", mat);
+
+        player.sendMessage(msg);
 
         if (price < 10) {
             if (Math.random() < (amount * 0.01 - stock * 0.001))
@@ -115,6 +115,7 @@ public class Item {
             float val = NUtils.round((float) (price* (1 +(Math.random() * 0.001 * amount) - stock*0.0001)));
 
             if(val < Config.getInstance().getLimits()[1]) price = val;
+            else price = Config.getInstance().getLimits()[1];
         }
         operations += amount;
         stock -= amount;
@@ -131,16 +132,26 @@ public class Item {
 
         Nascraft.getEconomy().depositPlayer(player, getSellPrice()*amount*multiplier);
 
-        player.sendMessage(ChatColor.GRAY + "You just sold " + ChatColor.AQUA + amount + ChatColor.GRAY + " x " + ChatColor.AQUA + mat + ChatColor.GRAY + " worth " + ChatColor.GOLD + getSellPrice()*amount*multiplier);
+        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(getBuyPrice()*amount*multiplier))).replace("[MATERIAL]", mat.replace("_", ""));
+
+        player.sendMessage(msg);
 
         if(price < 10) {
             if(Math.random() < (amount * 0.01 - stock * 0.001))
                 if(price - 0.01 > Config.getInstance().getLimits()[0]) price -= 0.01;
+                else price = Config.getInstance().getLimits()[0];
         } else {
             price = NUtils.round((float) (price* (1 -(Math.random() * 0.001 * amount) + stock*0.0001)));
         }
         operations += amount;
         stock += amount;
+    }
+
+    public void dailyUpdate() {
+        pricesMM.remove(0);
+        pricesMM.add(price);
+
+        pricesY = Data.getInstance().getYPrice(mat);
     }
 
     public String getMaterial() { return mat; }
@@ -165,7 +176,7 @@ public class Item {
     public void lowerOperations() {
 
         if(operations > 10) {
-            operations = operations - Math.round((float) operations/4f);
+            operations = operations - Math.round((float) operations/10f);
             operations -= 5;
         } else if (operations > 1){
             operations -= 1;

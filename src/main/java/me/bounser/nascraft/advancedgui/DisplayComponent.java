@@ -25,7 +25,7 @@ import static java.lang.Math.abs;
 
 public class DisplayComponent extends RectangularComponent {
 
-    // The purpose of this component is to add the logic of the main page.
+    // The purpose of this component is to add the functionalities of the main page
     // It allows cycling between categories and updates the trending and top movers sections.
 
     List<Category> categories;
@@ -54,7 +54,7 @@ public class DisplayComponent extends RectangularComponent {
 
             Category cat = categories.get(i-1);
 
-            // Six items per category
+            // Max six items per category
             for (int j = 1; j <= 6; j++) {
 
                 if (j <= cat.getNumOfItems()) {
@@ -92,7 +92,7 @@ public class DisplayComponent extends RectangularComponent {
     @Override
     public String getState(Player player, GuiPoint cursor) {
 
-        // Gets updated every minute or if the categories change of order.
+        // Gets updated every minute or if the order of categories changes.
         Calendar cal = Calendar.getInstance();
         SimpleDateFormat sdf = new SimpleDateFormat("mm");
         String time = sdf.format(cal.getTime());
@@ -115,14 +115,12 @@ public class DisplayComponent extends RectangularComponent {
     public void updateTrending(Interaction inter) {
         Item max = null;
 
-        // We get the item with most operations.
         for(Item item : MarketManager.getInstance().getAllItems()) {
             if((max == null || max.getOperations() < item.getOperations()) && item.getOperations() > 10) max = item;
         }
 
         GroupComponent icTree = inter.getComponentTree();
 
-        // And we print it
         if(max != null) {
             icTree.locate("trend1", GroupComponent.class).setHidden(false);
             ImageComponent ic = icTree.locate("trend", ImageComponent.class);
@@ -147,7 +145,7 @@ public class DisplayComponent extends RectangularComponent {
         GroupComponent icTree = inter.getComponentTree();
         List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllItems());
 
-        // We get up to three items. In each loop we get the item with the most change, and we remove it from the initial list.
+        // We get up to three items. In each loop we get the item with the biggest change, and we remove it from the initial list.
         for(int i = 1; i <= 3 ; i++) {
 
             Item imax = items.get(0);
@@ -164,7 +162,6 @@ public class DisplayComponent extends RectangularComponent {
             }
             items.remove(imax);
 
-            // Once we do this, the item gets printed:
             ImageComponent ic = icTree.locate("top" + i, ImageComponent.class);
 
             BufferedImage bi = (BufferedImage) ic.getImage();
@@ -193,7 +190,7 @@ public class DisplayComponent extends RectangularComponent {
             }
 
             for(int j = 1; j <= 4; j++) {
-                icTree.locate("topt" + j + i, TextComponent.class).setText(fvar + "%");
+                icTree.locate("topt" + j + i, TextComponent.class).setText(String.valueOf(fvar).replace("-", "") + "%");
             }
         }
     }

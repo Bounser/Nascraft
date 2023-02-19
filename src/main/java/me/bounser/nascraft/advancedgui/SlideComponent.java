@@ -21,7 +21,7 @@ import java.util.List;
 public class SlideComponent extends RectangularComponent {
 
     List<Float> values;
-    // Time frames: 1 = 15 min, 2 = 1 day, 3 = 1 Month, 4 = 1 year
+    // Time frames: 1 = 30 min, 2 = 1 day, 3 = 1 Month, 4 = 1 year
     private int timeFrame;
 
     public SlideComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, List<Float> values) {
@@ -33,7 +33,6 @@ public class SlideComponent extends RectangularComponent {
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
 
-        // If It's not in bounds means that it's not being hovered.
         if(isInBounds(player, cursor)) {
             GroupComponent cTree = interaction.getComponentTree();
 
@@ -116,7 +115,6 @@ public class SlideComponent extends RectangularComponent {
         } else {
             interaction.getComponentTree().locate("slider").setHidden(true);
         }
-
     }
 
     @Override

@@ -16,9 +16,12 @@ public class Config {
     float taxBuy = -1;
     float taxSell = -1;
     int random0 = 0;
+    int force = -1;
     int precission = -1;
     int[] limit = {-1, -1};
     String currency = "0";
+    String buyMsg = "0";
+    String sellMsg = "0";
 
     public static Config getInstance() {
         return instance == null ? instance = new Config() : instance;
@@ -99,17 +102,6 @@ public class Config {
             return taxSell = (float) main.getConfig().getDouble("Market_control.taxation.sell");
         }
     }
-    
-    public String getCategory(String mat) {
-
-        for(String cat : getCategories()) {
-
-            if(main.getConfig().getConfigurationSection("Items_quoted.Categories." + cat + ".items").getKeys(false).contains(mat)) {
-                return cat;
-            }
-        }
-        return null;
-    }
 
     public HashMap<String, Float> getChilds(String mat, String cat) {
 
@@ -150,6 +142,34 @@ public class Config {
             return limit;
         }
         return limit;
+    }
+
+    public boolean isForceAllowed() {
+        if (force == -1)
+            if (config.getBoolean("Market_control.force_command")) {
+                force = 1;
+                return true;
+            } else {
+                force = 0;
+                return false;
+            }
+        return force != 0;
+    }
+
+    public String getBuyMessage() {
+        if (buyMsg == "0") {
+            return buyMsg = config.getString("Lang.buy_message");
+        } else {
+            return buyMsg;
+        }
+    }
+
+    public String getSellMessage() {
+        if (sellMsg == "0") {
+            return sellMsg = config.getString("Lang.sell_message");
+        } else {
+            return sellMsg;
+        }
     }
 
 }
