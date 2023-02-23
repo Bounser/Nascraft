@@ -1,4 +1,4 @@
-package me.bounser.nascraft.market;
+package me.bounser.nascraft.tools;
 
 public enum Trend {
 

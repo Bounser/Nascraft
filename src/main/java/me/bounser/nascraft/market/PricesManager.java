@@ -1,9 +1,14 @@
 package me.bounser.nascraft.market;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
+import me.bounser.nascraft.tools.Trend;
+import me.leoko.advancedgui.manager.GuiWallManager;
+import me.leoko.advancedgui.utils.GuiWallInstance;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 public class PricesManager {
 
@@ -24,7 +29,7 @@ public class PricesManager {
     }
 
     public void setMarketStatus(Trend trend) {
-        if(this.trend != trend) {
+        if (this.trend != trend) {
             this.trend = trend;
         }
     }
@@ -34,7 +39,7 @@ public class PricesManager {
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
             for (Item item : MarketManager.getInstance().getAllItems()) {
-                if(Config.getInstance().getRandomOscillation()){
+                if (Config.getInstance().getRandomOscillation()) {
                     item.changePrice(getPercentage(item));
                 }
                 item.lowerOperations();
@@ -42,17 +47,22 @@ public class PricesManager {
                 item.addValueToM(item.getPrice());
             }
 
+            if (GuiWallManager.getInstance().getActiveInstances() != null)
+            for (GuiWallInstance instance : GuiWallManager.getInstance().getActiveInstances()) {
+                if (instance.getLayout().getName().equals("Nascraft")) {
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        if (instance.getInteraction(player) != null) {
+                            LayoutModifier.getInstance().updateMainPage(instance.getInteraction(player).getComponentTree(), true, player);
+                        }
+                    }
+                }
+            }
         }, 20, 1200);
-
-    }
-
-    public void setupFiles() {
-        Data.getInstance().setupFiles();
     }
 
     private void saveDataTask() {
 
-        // All the prices will be stored 2 times each hour.
+        // All the prices will be stored each hour
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
             for (Item item : MarketManager.getInstance().getAllItems()) item.addValueToH(item.getPrice());
@@ -76,9 +86,9 @@ public class PricesManager {
 
         Trend tendency = item.getTrend();
 
-        if(tendency == null) tendency = trend;
+        if (tendency == null) tendency = trend;
 
-        if(tendency.equals(Trend.FLAT)) {
+        if (tendency.equals(Trend.FLAT)) {
             return (float) (Math.random() * 2 - 1);
         }
 
@@ -87,11 +97,11 @@ public class PricesManager {
         switch (tendency) {
 
             case BULL1:
-                positive = 1.1f;
+                positive = 1.05f;
                 negative = 1f;
                 break;
             case BULL2:
-                positive = 1.2f;
+                positive = 1.1f;
                 negative = 1f;
                 break;
             case BULL3:
@@ -105,11 +115,11 @@ public class PricesManager {
 
             case BEAR1:
                 positive = 1f;
-                negative = 1.1f;
+                negative = 1.05f;
                 break;
             case BEAR2:
                 positive = 1f;
-                negative = 1.2f;
+                negative = 1.1f;
                 break;
             case BEAR3:
                 positive = 1f;

@@ -1,6 +1,7 @@
 package me.bounser.nascraft.market;
 
 import me.bounser.nascraft.tools.Config;
+import me.bounser.nascraft.tools.Data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,36 +11,40 @@ public class MarketManager {
     List<Item> items = new ArrayList<>();
     List<Category> categories = new ArrayList<>();
 
-    private static MarketManager instance;
+    private static MarketManager instance = null;
 
-    public static MarketManager getInstance() { return instance == null ? instance = new MarketManager() : instance; }
+    public static MarketManager getInstance() { return instance == null ? new MarketManager() : instance; }
 
-    private MarketManager() { setupItems(); }
+    private MarketManager() {
+        instance = this;
+        setupItems();
+    }
 
     public void setupItems() {
 
-        PricesManager.getInstance().setupFiles();
+        for (String categoryRef : Config.getInstance().getCategories()) {
 
-        for(String cat : Config.getInstance().getCategories()) {
-
-            Category category = new Category(cat);
+            Category category = new Category(categoryRef);
             categories.add(category);
+        }
+        for (Category category : categories) {
 
-            for(String mat : Config.getInstance().getAllMaterials(cat)) {
+            for (String mat : Config.getInstance().getAllMaterials(category.getName())) {
 
                 Item item = new Item(mat, category);
                 items.add(item);
                 category.addItem(item);
             }
         }
+
+        Data.getInstance().setupFiles(categories);
+        PricesManager.getInstance();
     }
 
     public Item getItem(String material) {
 
-        for(Item item : items) {
-
-            if(item.getMaterial().equals(material)){ return item; }
-
+        for (Item item : items) {
+            if (item.getMaterial().equals(material)) { return item; }
         }
         return null;
     }

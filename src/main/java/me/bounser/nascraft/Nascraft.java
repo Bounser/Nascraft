@@ -8,26 +8,26 @@ import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import me.leoko.advancedgui.manager.LayoutManager;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.milkbowl.vault.economy.Economy;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 
 public final class Nascraft extends JavaPlugin {
 
     private static Nascraft main;
     private static Economy econ = null;
 
-    public static Nascraft getInstance(){ return main; }
+    public static Nascraft getInstance() { return main; }
 
     @Override
     public void onEnable() {
+
         main = this;
+        Config.getInstance();
 
         if (!setupEconomy()) {
             getLogger().severe("Nascraft failed to load! Vault is required.");
@@ -42,12 +42,11 @@ public final class Nascraft extends JavaPlugin {
         getCommand("nascraft").setExecutor(new NascraftCommand());
         getCommand("market").setExecutor(new MarketCommand());
 
-        LayoutManager.getInstance().registerLayoutExtension(new LayoutModifier(), this);
+        LayoutManager.getInstance().registerLayoutExtension(LayoutModifier.getInstance(), this);
     }
 
     @Override
     public void onDisable() { Data.getInstance().savePrices(); }
-
 
     public static Economy getEconomy() { return econ; }
 
@@ -67,30 +66,16 @@ public final class Nascraft extends JavaPlugin {
         getLogger().info("If you want to disable this procedure, set AutoLayoutInjection to false in the config.yml file.");
 
         File toLayout0 = new File(getDataFolder().getParent() + "/AdvancedGUI/layout/Nascraft.json");
-        if (toLayout0.exists()) {
 
-            InputStream input = null;
-            try {
-                input = new FileInputStream(toLayout0);
-            } catch (FileNotFoundException e) {
-                getLogger().info("Error trying to read layout Nascraft.json in AdvancedGUI's layouts folder");
-                e.printStackTrace();
-            }
+        if (!toLayout0.exists()) {
             InputStream fromLayout0 = getResource("Nascraft.json");
-
-            assert input != null;
-            if (!input.equals(fromLayout0)) {
-                getLogger().info("Layout Nascraft.json updated.");
-                assert fromLayout0 != null;
-                FileUtils.writeToFile(toLayout0, fromLayout0);
-            }
-        } else {
-            InputStream fromLayout0 = getResource("Nascraft.json");
-
-            getLogger().info("Layout Nascraft.json added.");
             assert fromLayout0 != null;
             FileUtils.writeToFile(toLayout0, fromLayout0);
+            getLogger().info("Layout Nascraft.json added.");
 
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "ag reload");
+        } else {
+            getLogger().info("Layout present.");
         }
     }
 

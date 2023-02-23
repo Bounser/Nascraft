@@ -2,6 +2,7 @@ package me.bounser.nascraft.tools;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.Category;
+import me.bounser.nascraft.market.MarketManager;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.HashMap;
@@ -11,50 +12,45 @@ public class Config {
 
     private final FileConfiguration config;
     private static Config instance;
-    private static Nascraft main;
 
-    float taxBuy = -1;
-    float taxSell = -1;
-    int random0 = 0;
-    int force = -1;
-    int precission = -1;
-    int[] limit = {-1, -1};
-    String currency = "0";
-    String buyMsg = "0";
-    String sellMsg = "0";
+    private float taxBuy = -1;
+    private float taxSell = -1;
+    private int random0 = 0;
+    private int force = -1;
+    private int precission = -1;
+    private final int[] limit = {-1, -1};
+    private String currency = "0";
+    private String buyMsg = "0";
+    private String sellMsg = "0";
 
     public static Config getInstance() {
         return instance == null ? instance = new Config() : instance;
     }
 
     private Config() {
-        main = Nascraft.getInstance();
-        main.getConfig().options().copyDefaults();
-        main.saveDefaultConfig();
-        this.config = main.getConfig();
+        Nascraft.getInstance().saveDefaultConfig();
+        this.config = Nascraft.getInstance().getConfig();
     }
 
     public Boolean getCheckResources() {
-        return main.getConfig().getBoolean("AutoResourcesInjection");
+        return config.getBoolean("AutoResourcesInjection");
     }
 
     public Set<String> getAllMaterials(String category) {
-        return main.getConfig().getConfigurationSection("Items_quoted.Categories." + category + ".items.").getKeys(false);
+        return config.getConfigurationSection("Items_quoted.Categories." + category + ".items.").getKeys(false);
     }
 
     public Set<String> getCategories() {
-        return main.getConfig().getConfigurationSection("Items_quoted.Categories.").getKeys(false);
+        return config.getConfigurationSection("Items_quoted.Categories.").getKeys(false);
     }
 
     public float getInitialPrice(String mat) {
 
-        FileConfiguration config = main.getConfig();
+        for (Category cat : MarketManager.getInstance().getCategories()) {
 
-        for (String cat : getCategories()) {
-
-            for (String item : config.getConfigurationSection("Items_quoted.Categories." + cat + ".items.").getKeys(false)) {
-                if(mat.equals(item)){
-                    return (float) config.getDouble("Items_quoted.Categories." + cat + ".items." + item + ".price");
+            for (String item : config.getConfigurationSection("Items_quoted.Categories." + cat.getName() + ".items.").getKeys(false)) {
+                if (mat.equals(item)){
+                    return (float) config.getDouble("Items_quoted.Categories." + cat.getName() + ".items." + item + ".price");
                 }
             }
         }
@@ -62,14 +58,14 @@ public class Config {
     }
 
     public String getCurrency() {
-        if(currency.equals("0")) {
+        if (currency.equals("0")) {
             return currency = config.getString("Lang.currency");
         }
         return currency;
     }
 
     public int getDecimalPrecission() {
-        if(precission == -1) {
+        if (precission == -1) {
             precission = config.getInt("Market_control.decimal_limit");
         }
         return precission;
@@ -78,7 +74,7 @@ public class Config {
     public boolean getRandomOscillation() {
 
         if (random0 == 0) {
-            if (main.getConfig().getBoolean("Price_options.random_oscillation.enabled")) {
+            if (config.getBoolean("Price_options.random_oscillation.enabled")) {
                 random0 = 1;
             } else {
                 random0 = 0;
@@ -91,7 +87,7 @@ public class Config {
         if (taxBuy != -1) {
             return taxBuy;
         } else {
-            return taxBuy = (float) main.getConfig().getDouble("Market_control.taxation.buy");
+            return taxBuy = (float) config.getDouble("Market_control.taxation.buy");
         }
     }
 
@@ -99,13 +95,13 @@ public class Config {
         if (taxSell != -1) {
             return taxSell;
         } else {
-            return taxSell = (float) main.getConfig().getDouble("Market_control.taxation.sell");
+            return taxSell = (float) config.getDouble("Market_control.taxation.sell");
         }
     }
 
     public HashMap<String, Float> getChilds(String mat, String cat) {
 
-        if(!config.contains("Items_quoted.Categories." + cat + ".items." + mat + ".child")){
+        if (!config.contains("Items_quoted.Categories." + cat + ".items." + mat + ".child")){
             return null;
         }
 
@@ -115,8 +111,8 @@ public class Config {
 
         Set<String> section = config.getConfigurationSection("Items_quoted.Categories." + cat + ".items." + mat + ".child.").getKeys(false);
 
-        if(section.size() == 0) return null;
-        for(String childMat : section){
+        if (section.size() == 0) return null;
+        for (String childMat : section){
             childs.put(childMat, (float) config.getDouble("Items_quoted.Categories." + cat + ".items." + mat + ".child." + childMat + ".multiplier"));
         }
         return childs;
@@ -136,7 +132,7 @@ public class Config {
     }
 
     public int[] getLimits() {
-        if((limit[0] == -1) && (limit[1] == -1)) {
+        if ((limit[0] == -1) && (limit[1] == -1)) {
             limit[0] = config.getInt("Market_control.limits.low");
             limit[1] = config.getInt("Market_control.limits.high");
             return limit;
@@ -156,8 +152,12 @@ public class Config {
         return force != 0;
     }
 
+    public String getTitle() {
+        return config.getString("Lang.title");
+    }
+
     public String getBuyMessage() {
-        if (buyMsg == "0") {
+        if (buyMsg.equals( "0")) {
             return buyMsg = config.getString("Lang.buy_message");
         } else {
             return buyMsg;
@@ -165,7 +165,7 @@ public class Config {
     }
 
     public String getSellMessage() {
-        if (sellMsg == "0") {
+        if (sellMsg.equals( "0")) {
             return sellMsg = config.getString("Lang.sell_message");
         } else {
             return sellMsg;

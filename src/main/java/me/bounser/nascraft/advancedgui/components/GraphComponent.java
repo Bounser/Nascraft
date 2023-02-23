@@ -1,9 +1,10 @@
-package me.bounser.nascraft.advancedgui;
+package me.bounser.nascraft.advancedgui.components;
 
 import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.NUtils;
+import me.bounser.nascraft.tools.TimeSpan;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
@@ -17,73 +18,84 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
-
 public class GraphComponent extends RectangularComponent {
 
-    Item item;
-    List<Float> values;
-    List<String> childsMat;
-    HashMap<String, Float> childs;
-    int width, height, yc, xc;
+    private Item item;
+    private List<Float> values;
+    private List<String> childsMat;
+    private HashMap<String, Float> childs;
+    public int width, height, yc, xc;
 
-    // Time frames: 1 = 30 min, 2 = 1 day, 3 = 1 Month, 4 = 1 year
-    private int timeFrame;
+    private TimeSpan timeFrame;
 
-    public GraphComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, List<Float> values) {
+    ViewComponent background;
+    TextComponent mainText;
+    GroupComponent childComponents;
+
+    public GraphComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, ViewComponent backgroundView, TextComponent mainText) {
         super(id, clickAction, hidden, interaction, x, y, width, height);
 
         this.width = width-1;
         this.height = height;
         this.xc = x;
         this.yc = y;
-        this.values = values;
+        this.values = Arrays.asList(1f, 1f);
 
-        timeFrame = 1;
+        timeFrame = TimeSpan.MINUTE;
+
+        background = backgroundView;
+        this.mainText = mainText;
     }
 
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
+        Color bgcolor = setupBackGround();
+
+        background.apply(graphic, player, cursor);
+        mainText.apply(graphic, player, cursor);
+
         updateButtonPrice();
 
         graphic.setColor(new Color(0, 0, 0));
 
         graphic.fillPolygon(getXPoints(true), getYPoints(0, true), getXPoints(true).length);
 
-        graphic.setColor(setupBackGround());
+        graphic.setColor(bgcolor);
 
         graphic.drawPolyline(getXPoints(false), getYPoints(0, false), getXPoints(false).length);
+
     }
 
     @Override
     public String getState(Player player, GuiPoint cursor) {
         Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("mm");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd:HH:mm");
         String time = sdf.format(cal.getTime());
-        return timeFrame + ":" + time + ":" + item.getMaterial();
+        return timeFrame + "-" + time + "-" + item.getMaterial();
     }
 
     @Override
     public Component clone(Interaction interaction) {
-        return new GraphComponent(id, clickAction, hidden, interaction, x, y, width, height, values);
+        return new GraphComponent(id, clickAction, hidden, interaction, x, y, width, height, background, mainText);
     }
 
-    public void setTimeFrame(int timeFrame) {
+    public void setTimeFrame(TimeSpan timeFrame) {
 
         this.timeFrame = timeFrame;
         interaction.getComponentTree().locate("slide1", SlideComponent.class).setTimeFrame(timeFrame);
         interaction.getComponentTree().locate("timeview", ViewComponent.class).setView("times" + timeFrame);
 
         switch(timeFrame) {
-            case 1:
+            case MINUTE:
                 setValues(item.getPricesM());
                 break;
-            case 2:
+            case DAY:
                 setValues(item.getPricesH());
                 break;
-            case 3:
+            case MONTH:
                 setValues(item.getPricesMM());
                 break;
-            case 4:
+            case YEAR:
                 setValues(item.getPricesY());
                 break;
         }
@@ -97,7 +109,7 @@ public class GraphComponent extends RectangularComponent {
     public int[] getYPoints(int offset, boolean polygon) {
 
         int size = values.size();
-        if(polygon) size += 2;
+        if (polygon) size += 2;
         int[] y = new int[size];
 
         float maxValue = Collections.max(values);
@@ -110,7 +122,7 @@ public class GraphComponent extends RectangularComponent {
             y[i] = (int) ((Math.round((maxh - maxh * (value - minValue) / (maxValue - minValue))) + yc - offset) + Math.round(height*0.05));
             i++;
         }
-        if(polygon){
+        if (polygon){
             y[i++] = yc;
             y[i] = yc;
         }
@@ -128,7 +140,7 @@ public class GraphComponent extends RectangularComponent {
         int j = 0;
 
         float a = 0;
-        if(timeFrame != 3) a = 0.5f;
+        if (timeFrame != TimeSpan.MONTH) a = 0.5f;
         for (int i = 0; i < (values.size()-1); i++) {
             x[j] = (z*i + Math.round(a*i) + xc);
             j++;
@@ -145,22 +157,20 @@ public class GraphComponent extends RectangularComponent {
 
     public Color setupBackGround() {
 
-        if(values.size() > 1) {
+        if (values.size() > 1) {
             float first = values.get(0);
             float last = values.get(values.size() - 1);
 
-            ViewComponent backg = interaction.getComponentTree().locate("backgroundview", ViewComponent.class);
-
             if (Float.compare(first, last) < 0) {
-                backg.setView("bull123");
+                background.setView("bull123");
                 return new Color(0,200,20);
 
             } else if (Float.compare(first, last) > 0){
-                backg.setView("bear123");
+                background.setView("bear123");
                 return new Color(200,10,20);
 
             } else {
-                backg.setView("flat123");
+                background.setView("flat123");
                 return new Color(250,250,250);
             }
         }
@@ -169,56 +179,59 @@ public class GraphComponent extends RectangularComponent {
 
     public void updateButtonPrice() {
 
-        if(childs == null) {
-            for(int i : Arrays.asList(1, 16, 64)) {
-                interaction.getComponentTree().locate("buyprice" + i, TextComponent.class).setText(getItem().getBuyPrice()*i + Config.getInstance().getCurrency());
-                interaction.getComponentTree().locate("sellprice" + i, TextComponent.class).setText(getItem().getSellPrice()*i + Config.getInstance().getCurrency());
+        GroupComponent ct = interaction.getComponentTree();
+        if (childs == null) {
+            for (int i : Arrays.asList(1, 16, 64)) {
+                ct.locate("buyprice" + i, TextComponent.class).setText(getItem().getBuyPrice()*i + Config.getInstance().getCurrency());
+                ct.locate("sellprice" + i, TextComponent.class).setText(getItem().getSellPrice()*i + Config.getInstance().getCurrency());
             }
         } else {
-            for(int i : Arrays.asList(1, 16, 64)) {
-                interaction.getComponentTree().locate("buyprice" + i, TextComponent.class).setText(NUtils.round(getItem().getBuyPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
-                interaction.getComponentTree().locate("sellprice" + i, TextComponent.class).setText(NUtils.round(getItem().getSellPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
+            for (int i : Arrays.asList(1, 16, 64)) {
+                ct.locate("buyprice" + i, TextComponent.class).setText(NUtils.round(getItem().getBuyPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
+                ct.locate("sellprice" + i, TextComponent.class).setText(NUtils.round(getItem().getSellPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
             }
         }
     }
 
     public void changeMat(String mat) {
 
+        childComponents = interaction.getComponentTree().locate("childC", GroupComponent.class);
+
         item = MarketManager.getInstance().getItem(mat);
         this.childs = item.getChilds();
 
-        ImageComponent ic = interaction.getComponentTree().locate("MainImage", ImageComponent.class);
+        GroupComponent ct = interaction.getComponentTree();
+
+        ImageComponent ic = childComponents.locate("MainImage", ImageComponent.class);
         ic.setImage(NUtils.getImage(mat, 60, 60, true));
         String modified = Character.toUpperCase(mat.charAt(0)) + mat.substring(1);
-        interaction.getComponentTree().locate("maintext", TextComponent.class).setText(modified.replace("_", " "));
+        mainText.setText(modified.replace("_", " "));
 
         this.values = MarketManager.getInstance().getItem(mat).getPricesM();
-        interaction.getComponentTree().locate("slide1", SlideComponent.class).setValues(values);
-
+        ct.locate("slide1", SlideComponent.class).setValues(values);
         if (childs == null) {
-            interaction.getComponentTree().locate("childs").setHidden(true);
-            interaction.getComponentTree().locate("minichild").setHidden(true);
+            childComponents.locate("childs").setHidden(true);
+            childComponents.locate("minichild").setHidden(true);
             childsMat = new ArrayList<>();
             childsMat.add(0, mat);
         } else {
-            interaction.getComponentTree().locate("childs").setHidden(false);
-            interaction.getComponentTree().locate("minichild").setHidden(false);
+            childComponents.locate("childs").setHidden(false);
+            childComponents.locate("minichild").setHidden(false);
 
             childsMat = new ArrayList<>(childs.keySet());
 
-            while(!childsMat.get(0).equals(mat)) {
+            while (!childsMat.get(0).equals(mat)) {
                 Collections.rotate(childsMat, 1);
             }
 
             updateChilds(childs);
 
-            interaction.getComponentTree().locate("childact").setClickAction((interaction, player, primaryTrigger) -> {
+            childComponents.locate("childact").setClickAction((interaction, player, primaryTrigger) -> {
                 changeChildsOrder();
                 updateChilds(childs);
             });
         }
-
-        setTimeFrame(1);
+        setTimeFrame(TimeSpan.MINUTE);
     }
 
     public void updateChilds(HashMap<String, Float> childs) {
@@ -226,21 +239,20 @@ public class GraphComponent extends RectangularComponent {
         for (int i = 1; i <= 8 ; i++) {
 
             if (childs.keySet().size() >= i) {
-                interaction.getComponentTree().locate("child" + i, ImageComponent.class).setImage(NUtils.getImage(childsMat.get(i-1), 32, 32, true));
-                interaction.getComponentTree().locate("child" + i, ImageComponent.class).setHidden(false);
+                childComponents.locate("child" + i, ImageComponent.class).setImage(NUtils.getImage(childsMat.get(i-1), 32, 32, true));
+                childComponents.locate("child" + i, ImageComponent.class).setHidden(false);
             } else {
-                interaction.getComponentTree().locate("child" + i, ImageComponent.class).setHidden(true);
+                childComponents.locate("child" + i, ImageComponent.class).setHidden(true);
             }
-            interaction.getComponentTree().locate("childback", RectComponent.class).setWidth(10 + 33*childs.keySet().size());
+            childComponents.locate("childback", RectComponent.class).setWidth(10 + 33*childs.keySet().size());
         }
 
-        if(childsMat.get(0).equals(item.getMaterial())) {
-            interaction.getComponentTree().locate("minichild").setHidden(true);
+        if (childsMat.get(0).equals(item.getMaterial())) {
+            childComponents.locate("minichild").setHidden(true);
         } else {
-            interaction.getComponentTree().locate("minichild").setHidden(false);
-            interaction.getComponentTree().locate("childper", ImageComponent.class).setImage(NUtils.getImage(childsMat.get(0), 26, 26, true));
+            childComponents.locate("minichild").setHidden(false);
+            childComponents.locate("childper", ImageComponent.class).setImage(NUtils.getImage(childsMat.get(0), 26, 26, true));
         }
-
         updateButtonPrice();
     }
 
@@ -249,7 +261,7 @@ public class GraphComponent extends RectangularComponent {
     }
 
     public float getChildMultiplier() {
-        if(childs == null) {
+        if (childs == null) {
             return 1;
         } else {
             return childs.get(childsMat.get(0));
@@ -261,12 +273,12 @@ public class GraphComponent extends RectangularComponent {
     }
 
     public String getMat() {
-        if(childsMat == null) return item.getMaterial();
+        if (childsMat == null) return item.getMaterial();
         else return childsMat.get(0);
     }
 
     public float getMultiplier() {
-        if(childs != null) return childs.get(childsMat.get(0));
+        if (childs != null) return childs.get(childsMat.get(0));
         else return 1;
     }
 

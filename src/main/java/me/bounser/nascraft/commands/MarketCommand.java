@@ -14,12 +14,13 @@ public class MarketCommand implements CommandExecutor {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
-        if(!(sender instanceof Player)) {
+        if (!(sender instanceof Player)) {
             Nascraft.getInstance().getLogger().info(ChatColor.RED + "This command can only be used by players!");
+            return false;
         }
         Player p = (Player) sender;
 
-        if(args.length == 0) {
+        if (args.length == 0) {
             sender.sendMessage(ChatColor.RED  + "Invalid use of command. /market <Buy/Sell> <Material> <Quantity>");
             return false;
         }

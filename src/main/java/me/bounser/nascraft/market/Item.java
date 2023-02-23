@@ -4,6 +4,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import me.bounser.nascraft.tools.NUtils;
+import me.bounser.nascraft.tools.Trend;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -15,15 +16,15 @@ import java.util.List;
 
 public class Item {
 
-    String mat;
-    float price;
-    Category cat;
-    Trend trend;
+    private final String mat;
+    private float price;
+    private final Category cat;
+    private final Trend trend;
 
-    int stock;
-    int operations;
+    private int stock;
+    private int operations;
 
-    // 30 (0-29) values representing the prices in the last 15 minutes.
+    // 30 (0-29) values representing the prices in the last 30 minutes.
     List<Float> pricesM;
     // 24 (0-23) values representing the prices in all 24 hours of the day.
     List<Float> pricesH;
@@ -32,7 +33,7 @@ public class Item {
     // 24 (0-23) values representing 2 prices each month. *
     List<Float> pricesY;
 
-    HashMap<String, Float> childs;
+    private final HashMap<String, Float> childs;
 
     public Item(String material, Category category){
         mat = material;
@@ -41,6 +42,8 @@ public class Item {
         operations = 0;
         this.childs = Config.getInstance().getChilds(material, category.getName());
         trend = Trend.valueOf(Config.getInstance().getItemDefaultTrend(category.getName(), material));
+
+        stock = Data.getInstance().getStock(material);
     }
 
     public void setPrice(float price) {
@@ -52,8 +55,9 @@ public class Item {
     }
 
     public void setupPrices() {
-        pricesH = Data.getInstance().getHPrice(mat);
+
         pricesM = Data.getInstance().getMPrice(mat);
+        pricesH = Data.getInstance().getHPrice(mat);
         pricesMM = Data.getInstance().getMMPrice(mat);
         pricesY = Data.getInstance().getYPrice(mat);
 
@@ -72,11 +76,11 @@ public class Item {
 
     public void changePrice(float percentage) {
 
-        if(price + NUtils.round(price * percentage/100) > Math.pow(10, -Config.getInstance().getDecimalPrecission())) {
+        if (price + NUtils.round(price * percentage/100) > Math.pow(10, -Config.getInstance().getDecimalPrecission())) {
             price += NUtils.round(price * percentage/100);
         }
-        if(price < Config.getInstance().getLimits()[0]) price = Config.getInstance().getLimits()[0];
-        if(price > Config.getInstance().getLimits()[1]) price = Config.getInstance().getLimits()[1];
+        if (price < Config.getInstance().getLimits()[0]) price = Config.getInstance().getLimits()[0];
+        if (price > Config.getInstance().getLimits()[1]) price = Config.getInstance().getLimits()[1];
     }
 
     public void buyItem(int amount, Player player, String mat, float multiplier) {
@@ -92,9 +96,9 @@ public class Item {
 
         if (player.getInventory().firstEmpty() == -1) {
             for (ItemStack is : player.getInventory()) {
-                if(is == null || (is.getType().toString().equals(mat.toUpperCase()) && amount < is.getMaxStackSize() - is.getAmount())) { hasSpace = true; }
+                if(is != null && is.getType().toString().equals(mat.toUpperCase()) && amount < is.getMaxStackSize() - is.getAmount()) { hasSpace = true; }
             }
-            if(!hasSpace) {
+            if (!hasSpace) {
                 player.sendMessage(ChatColor.RED + "Not enough space in inventory!");
                 return;
             }
@@ -109,10 +113,10 @@ public class Item {
         player.sendMessage(msg);
 
         if (price < 10) {
-            if (Math.random() < (amount * 0.01 - stock * 0.001))
+            if (Math.random()*2 < (amount * 0.01 - stock * 0.001))
                 price += 0.01;
         } else {
-            float val = NUtils.round((float) (price* (1 +(Math.random() * 0.001 * amount) - stock*0.0001)));
+            float val = NUtils.round((float) (price + (price*amount)/(1000 + stock*0.001) * Math.random()));
 
             if(val < Config.getInstance().getLimits()[1]) price = val;
             else price = Config.getInstance().getLimits()[1];
@@ -136,12 +140,12 @@ public class Item {
 
         player.sendMessage(msg);
 
-        if(price < 10) {
-            if(Math.random() < (amount * 0.01 - stock * 0.001))
-                if(price - 0.01 > Config.getInstance().getLimits()[0]) price -= 0.01;
+        if (price < 10) {
+            if (Math.random() < (amount * 0.01 - stock * 0.001))
+                if (price - 0.01 > Config.getInstance().getLimits()[0]) price -= 0.01;
                 else price = Config.getInstance().getLimits()[0];
         } else {
-            price = NUtils.round((float) (price* (1 -(Math.random() * 0.001 * amount) + stock*0.0001)));
+            price = NUtils.round((float) (price - (price*amount)/(1000 - stock*0.001) * Math.random()));
         }
         operations += amount;
         stock += amount;
@@ -167,16 +171,14 @@ public class Item {
 
     public String getCategory() { return cat.getName(); }
 
-    public HashMap<String, Float> getChilds() {
-        return childs;
-    }
+    public HashMap<String, Float> getChilds() { return childs; }
 
     public int getOperations() { return operations; }
 
     public void lowerOperations() {
 
         if(operations > 10) {
-            operations = operations - Math.round((float) operations/10f);
+            operations -= Math.round((float) operations/10f);
             operations -= 5;
         } else if (operations > 1){
             operations -= 1;

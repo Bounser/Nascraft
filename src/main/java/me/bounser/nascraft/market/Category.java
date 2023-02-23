@@ -7,8 +7,8 @@ import java.util.List;
 
 public class Category {
 
-    String name;
-    List<Item> items = new ArrayList<>();
+    private final String name;
+    private final List<Item> items = new ArrayList<>();
 
     public Category(String name) {
         this.name = name;
@@ -19,7 +19,7 @@ public class Category {
     }
 
     public int getNumOfItems() {
-        return items.toArray().length;
+        return items.size();
     }
 
     public Item getItemOfIndex(int index) {
@@ -28,6 +28,10 @@ public class Category {
 
     public String getName() {
         return name;
+    }
+
+    public List<Item> getItems() {
+        return items;
     }
 
     public String getDisplayName() {

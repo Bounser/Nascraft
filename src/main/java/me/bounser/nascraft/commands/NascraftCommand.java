@@ -2,10 +2,11 @@ package me.bounser.nascraft.commands;
 
 import me.bounser.nascraft.market.Item;
 import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.market.Trend;
+import me.bounser.nascraft.tools.Trend;
 import me.bounser.nascraft.market.PricesManager;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
+import me.leoko.advancedgui.manager.GuiWallManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -15,16 +16,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class NascraftCommand implements CommandExecutor {
 
-
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
-        if(!sender.hasPermission("nascraft.admin") && sender instanceof Player) {
+        if (!sender.hasPermission("nascraft.admin") && sender instanceof Player) {
             sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "You are not allowed to use this command!");
             return false;
         }
 
-        if(args.length == 0) {
+        if (args.length == 0) {
             sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: force | save | info | status");
             return false;
         }
@@ -61,6 +61,9 @@ public class NascraftCommand implements CommandExecutor {
                 break;
             case "status":
                 sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "General status: " + ChatColor.BLUE + PricesManager.getInstance().getMarketStatus().toString());
+                break;
+            case "locate":
+                sender.sendMessage(String.valueOf(GuiWallManager.getInstance().getActiveInstances((Player) sender).get(0).getInteraction((Player) sender).getComponentTree().locate(args[1]).getState((Player) sender, GuiWallManager.getInstance().getActiveInstances((Player) sender).get(0).getCursor((Player) sender))));
                 break;
             default: sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Argument not recognized. Available arguments: force | save | info | status");
         }
