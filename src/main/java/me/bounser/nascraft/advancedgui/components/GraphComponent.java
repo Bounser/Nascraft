@@ -28,9 +28,9 @@ public class GraphComponent extends RectangularComponent {
 
     private TimeSpan timeFrame;
 
-    ViewComponent background;
-    TextComponent mainText;
-    GroupComponent childComponents;
+    private final ViewComponent background;
+    private final TextComponent mainText;
+    private GroupComponent childComponents;
 
     public GraphComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, ViewComponent backgroundView, TextComponent mainText) {
         super(id, clickAction, hidden, interaction, x, y, width, height);

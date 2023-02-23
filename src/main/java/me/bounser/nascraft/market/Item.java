@@ -104,7 +104,7 @@ public class Item {
             }
         }
 
-        econ.depositPlayer(player, -getBuyPrice()*amount*multiplier);
+        econ.withdrawPlayer(player, getBuyPrice()*amount*multiplier);
 
         player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
@@ -112,14 +112,12 @@ public class Item {
 
         player.sendMessage(msg);
 
-        if (price < 10) {
-            if (Math.random()*2 < (amount * 0.01 - stock * 0.001))
+        if (price < Math.random()*20 + 30) {
+            if (Math.random() < (amount * 0.01 * (2/(1+Math.exp(-stock*0.0001)))))
                 price += 0.01;
         } else {
-            float val = NUtils.round((float) (price + (price*amount)/(1000 + stock*0.001) * Math.random()));
-
-            if(val < Config.getInstance().getLimits()[1]) price = val;
-            else price = Config.getInstance().getLimits()[1];
+            float val = NUtils.round((float) (price + price*0.01*(1 + 0.5/(1+Math.exp(-stock*0.0001))) + amount*0.1));
+            price = Math.min(val, Config.getInstance().getLimits()[1]);
         }
         operations += amount;
         stock -= amount;
@@ -140,12 +138,16 @@ public class Item {
 
         player.sendMessage(msg);
 
-        if (price < 10) {
-            if (Math.random() < (amount * 0.01 - stock * 0.001))
+        if (price < Math.random()*20 + 30) {
+            if (Math.random() < (amount * 0.01 * (2/(1+Math.exp(-stock*0.0001))))) {
                 if (price - 0.01 > Config.getInstance().getLimits()[0]) price -= 0.01;
                 else price = Config.getInstance().getLimits()[0];
+            }
+
         } else {
-            price = NUtils.round((float) (price - (price*amount)/(1000 - stock*0.001) * Math.random()));
+            if(Math.random() < amount * 0.01) {
+                price = NUtils.round((float) (price - price*0.01*(1 + 0.5/(1+Math.exp(stock*0.0001))) + amount*0.1));
+            }
         }
         operations += amount;
         stock += amount;
@@ -189,5 +191,15 @@ public class Item {
     public float getSellPrice() { return NUtils.round(price - price*Config.getInstance().getTaxSell()); }
 
     public Trend getTrend() { return trend; }
+
+    public float getStockFactor() {
+        if(stock > 100) {
+            return (float) Math.log(stock)/2;
+        } else if (-1 <= stock){
+            return 1;
+        } else {
+            return (float) -Math.log(stock*-1)/2;
+        }
+    }
 
 }

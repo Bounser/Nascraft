@@ -1,7 +1,5 @@
 package me.bounser.nascraft.advancedgui;
 
-import jdk.internal.misc.ScopedMemoryAccess;
-import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.components.GraphComponent;
 import me.bounser.nascraft.advancedgui.components.SlideComponent;
 import me.bounser.nascraft.market.Category;
@@ -16,7 +14,6 @@ import me.leoko.advancedgui.utils.events.GuiInteractionBeginEvent;
 import me.leoko.advancedgui.utils.events.GuiInteractionExitEvent;
 import me.leoko.advancedgui.utils.events.LayoutLoadEvent;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 
@@ -27,8 +24,8 @@ import static java.lang.Math.abs;
 
 public class LayoutModifier implements LayoutExtension {
 
-    SlideComponent sc = null;
-    GraphComponent gc = null;
+    private SlideComponent sc = null;
+    private GraphComponent gc = null;
 
     public HashMap<Player, List<Category>> playerCategory;
 
@@ -52,7 +49,7 @@ public class LayoutModifier implements LayoutExtension {
         GroupComponent slideComponents = TS.locate("SComp1", GroupComponent.class);
         TS.getComponents().remove(slideComponents);
         // SlideComponent
-        if(sc == null)
+        if (sc == null)
             sc = new SlideComponent("slide1", null, false,
                 event.getLayout().getDefaultInteraction(), 11, 60, 362, 121, slideComponents);
         TS.locate("slide123", DummyComponent.class).setComponent(sc);
@@ -64,7 +61,7 @@ public class LayoutModifier implements LayoutExtension {
         TS.getComponents().remove(mainText);
 
         // GraphComponent
-        if(gc == null)
+        if (gc == null)
             gc = new GraphComponent("graph1", null, false,
                 event.getLayout().getDefaultInteraction(), 11, 54, 362, 139, backgroundView, mainText);
         TS.locate("graph123", DummyComponent.class).setComponent(gc);

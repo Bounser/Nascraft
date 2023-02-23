@@ -8,8 +8,8 @@ import java.util.List;
 
 public class MarketManager {
 
-    List<Item> items = new ArrayList<>();
-    List<Category> categories = new ArrayList<>();
+    private final List<Item> items = new ArrayList<>();
+    private final List<Category> categories = new ArrayList<>();
 
     private static MarketManager instance = null;
 

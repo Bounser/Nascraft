@@ -135,7 +135,7 @@ Price_options:
     market_trend: FLAT
 
 Market_control:
-  # Limit the precision of prices.
+  # Limit the precision of prices. In general, it is not recommended changing it.
   decimal_limit: 2
   # Set limits on how low and high prices can be.
   limits:

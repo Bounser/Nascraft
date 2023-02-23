@@ -24,7 +24,7 @@ public class SlideComponent extends RectangularComponent {
     private List<Float> values;
     private TimeSpan timeFrame;
 
-    GroupComponent components;
+    private final GroupComponent components;
 
     public SlideComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, GroupComponent component) {
         super(id, clickAction, hidden, interaction, x, y, width, height);

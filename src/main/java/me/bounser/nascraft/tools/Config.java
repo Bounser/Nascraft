@@ -18,7 +18,7 @@ public class Config {
     private int random0 = 0;
     private int force = -1;
     private int precission = -1;
-    private final int[] limit = {-1, -1};
+    private final float[] limit = {-1, -1};
     private String currency = "0";
     private String buyMsg = "0";
     private String sellMsg = "0";
@@ -131,10 +131,10 @@ public class Config {
         return trend == null ? "FLAT" : trend;
     }
 
-    public int[] getLimits() {
+    public float[] getLimits() {
         if ((limit[0] == -1) && (limit[1] == -1)) {
-            limit[0] = config.getInt("Market_control.limits.low");
-            limit[1] = config.getInt("Market_control.limits.high");
+            limit[0] = (float) config.getDouble("Market_control.limits.low");
+            limit[1] = (float) config.getDouble("Market_control.limits.high");
             return limit;
         }
         return limit;

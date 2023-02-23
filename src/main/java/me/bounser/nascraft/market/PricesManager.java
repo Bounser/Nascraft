@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 
 public class PricesManager {
 
-    Trend trend;
+    private Trend trend;
 
     public static PricesManager instance;
 
