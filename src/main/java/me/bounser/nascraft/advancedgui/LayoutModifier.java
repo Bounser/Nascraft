@@ -42,29 +42,40 @@ public class LayoutModifier implements LayoutExtension {
         playerCategory = new HashMap<>();
 
         GroupComponent cTree = event.getLayout().getTemplateComponentTree();
-        GroupComponent TS = cTree.locate("TS1", GroupComponent.class);
+        GroupComponent TS = cTree.locate("TS1", GroupComponent.class); // Trade Screen
 
         updateMainPage(cTree, false, null);
 
-        GroupComponent slideComponents = TS.locate("SComp1", GroupComponent.class);
-        TS.getComponents().remove(slideComponents);
-        // SlideComponent
-        if (sc == null)
-            sc = new SlideComponent("slide1", null, false,
-                event.getLayout().getDefaultInteraction(), 11, 60, 362, 121, slideComponents);
-        TS.locate("slide123", DummyComponent.class).setComponent(sc);
-
+        // GraphComponent
         ViewComponent backgroundView = TS.locate("bview1", ViewComponent.class);
         TextComponent mainText = TS.locate("maintext1", TextComponent.class);
 
         TS.getComponents().remove(backgroundView);
         TS.getComponents().remove(mainText);
 
-        // GraphComponent
         if (gc == null)
             gc = new GraphComponent("graph1", null, false,
                 event.getLayout().getDefaultInteraction(), 11, 54, 362, 139, backgroundView, mainText);
         TS.locate("graph123", DummyComponent.class).setComponent(gc);
+
+        // SlideComponent
+        GroupComponent slideComponents = TS.locate("SComp1", GroupComponent.class);
+
+        TS.getComponents().remove(slideComponents);
+
+        if (sc == null) {
+            RectComponent bar = slideComponents.locate("bar", RectComponent.class);
+            RectComponent translucid = slideComponents.locate("translucid", RectComponent.class);
+            ImageComponent up = slideComponents.locate("upgreen", ImageComponent.class);
+            ImageComponent down = slideComponents.locate("downred", ImageComponent.class);
+            TextComponent textslide = slideComponents.locate("textslide1", TextComponent.class);
+            TextComponent timetext = slideComponents.locate("time1", TextComponent.class);
+            TextComponent perslide = slideComponents.locate("perslide1", TextComponent.class);
+
+            sc = new SlideComponent("slide1", null, false,
+                    event.getLayout().getDefaultInteraction(), 11, 60, 362, 121, bar, translucid, up, down, textslide, timetext, perslide, event.getLayout().getTemplateComponentTree().locate("graph1", GraphComponent.class));
+        }
+        TS.locate("slide123", DummyComponent.class).setComponent(sc);
 
         // Arrows
         cTree.locate("ArrowUP").setClickAction((interaction, player, primaryTrigger) -> {
@@ -108,10 +119,10 @@ public class LayoutModifier implements LayoutExtension {
             });
         }
 
-        // Title
-        String text = Config.getInstance().getTitle();
+        // Lang
+        List<String> lang = Config.getInstance().getLang();
         for (int i = 1; i <= 4 ; i++) {
-            cTree.locate("title" + i, TextComponent.class).setText(text);
+            cTree.locate("title" + i, TextComponent.class).setText(lang.get(0));
         }
     }
 
@@ -159,8 +170,8 @@ public class LayoutModifier implements LayoutExtension {
 
                 if (j <= numOfItems) {
 
-                    cTree.locate("t" + i + j + "1", TextComponent.class).setText(String.valueOf(cat.getItemOfIndex(j-1).getPrice()));
-                    cTree.locate("t" + i + j + "2", TextComponent.class).setText(String.valueOf(cat.getItemOfIndex(j-1).getPrice()));
+                    cTree.locate("t" + i + j + "1", TextComponent.class).setText(cat.getItemOfIndex(j-1).getPrice() + Config.getInstance().getCurrency());
+                    cTree.locate("t" + i + j + "2", TextComponent.class).setText(cat.getItemOfIndex(j-1).getPrice() + Config.getInstance().getCurrency());
 
                     ImageComponent ic = cTree.locate("asdi" + i + "" + j, ImageComponent.class);
                     ic.setImage(NUtils.getImage(cat.getItemOfIndex(j - 1).getMaterial(), 32, 32, false));

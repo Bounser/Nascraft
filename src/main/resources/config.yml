@@ -1,6 +1,6 @@
 # Nascraft config.
 
-# Check if the layout required is present, and update it on start up.
+# Verify if the necessary layout is present, and if not, place it in AdvancedGUI's layout folder.
 AutoResourcesInjection: true
 
 Items_quoted:
@@ -127,6 +127,12 @@ Items_quoted:
         netherite_ingot:
           price: 500
 Price_options:
+  # Limit the precision of prices. In general, it is not recommended changing it.
+  decimal_limit: 2
+  # Set limits on how low and high prices can be.
+  limits:
+    low: 0.05
+    high: 99999
   # With random oscillation enabled prices will vary in time.
   random_oscillation:
     enabled: true
@@ -135,12 +141,6 @@ Price_options:
     market_trend: FLAT
 
 Market_control:
-  # Limit the precision of prices. In general, it is not recommended changing it.
-  decimal_limit: 2
-  # Set limits on how low and high prices can be.
-  limits:
-    low: 0.05
-    high: 99999
   # Although the taxation gets separated in both sell and buy actions, the total tax paid is the same no matter how you split it:
   # The spread is determined by the deviation in both actions. In the default case: 3% + 2% -> 5% of spread.
 
@@ -156,12 +156,22 @@ Market_control:
   # Command: /nascraft force <TREND>  - Where TREND can be: flat, bear1, bear2, bear3, crash, bull1, bull2, bull3, bullran
   # -- BE CAUTIOUS WHILE USING, MIGHT HAVE A BIG IMPACT --
   force_command: false
+  # Must players have the permission nascraft.market to operate directly with commands?
+  market_permission: true
 
 Lang:
-  # Currency to
+  # Currency to use next to prices.
   currency: "€"
-  # Title
+  # Title.
   title: "Item Market"
   # Available placeholders: [AMOUNT], [MATERIAL], [WORTH]
   buy_message: "&7You just bought &d[AMOUNT] &7x &d[MATERIAL] &7worth &6[WORTH]"
   sell_message: "&7You just sold &d[AMOUNT] &7x &d[MATERIAL] &7worth &6[WORTH]"
+  # More text of the layout:
+  topmovers: "Top Movers"
+  subtop: "in the last 30 min"
+  buy: "Buy"
+  sell: "Sell"
+  price: "Price:"
+  amount_selection: "Select amount:"
+  trend: "Trend:"

@@ -1,6 +1,8 @@
 package me.bounser.nascraft.commands;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.tools.Config;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -16,6 +18,11 @@ public class MarketCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         if(sender instanceof Player) {
+
+            if (!sender.hasPermission("nascraft.market") && Config.getInstance().getMarketPermissionRequirement()) {
+                sender.sendMessage(ChatColor.RED  + "You are not allowed to do that!");
+                return false;
+            }
 
             if (args.length != 3) {
                 sender.sendMessage(ChatColor.RED  + "Invalid use of command. /market <Buy/Sell> <Material> <Quantity>");
@@ -51,9 +58,15 @@ public class MarketCommand implements CommandExecutor {
             }
         } else {
             if (args.length != 4) {
-                sender.sendMessage(ChatColor.RED  + "Invalid use of command. (CONSOLE) /market <Buy/Sell> <Material> <Quantity> <Player>");
+                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Invalid use of command. (CONSOLE) /market <Buy/Sell> <Material> <Quantity> <Player>");
                 return false;
             }
+
+            if(Bukkit.getPlayer(args[3]) == null) {
+                Nascraft.getInstance().getLogger().info(ChatColor.RED + "Invalid player");
+                return false;
+            }
+
             switch (args[0]){
                 case "buy":
                     MarketManager.getInstance().getItem(args[1]).buyItem(Integer.parseInt(args[2]), Bukkit.getPlayer(args[3]), args[1], 1);

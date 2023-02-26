@@ -63,7 +63,6 @@ public class GraphComponent extends RectangularComponent {
         graphic.setColor(bgcolor);
 
         graphic.drawPolyline(getXPoints(false), getYPoints(0, false), getXPoints(false).length);
-
     }
 
     @Override
@@ -76,7 +75,7 @@ public class GraphComponent extends RectangularComponent {
 
     @Override
     public Component clone(Interaction interaction) {
-        return new GraphComponent(id, clickAction, hidden, interaction, x, y, width, height, background, mainText);
+        return new GraphComponent(id, clickAction, hidden, interaction, x, y, width, height, background.clone(interaction), mainText.clone(interaction));
     }
 
     public void setTimeFrame(TimeSpan timeFrame) {
