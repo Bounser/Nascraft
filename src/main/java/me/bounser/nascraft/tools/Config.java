@@ -1,12 +1,11 @@
 package me.bounser.nascraft.tools;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.market.Category;
-import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.market.managers.resources.Category;
+import me.bounser.nascraft.market.managers.MarketManager;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 public class Config {
 
@@ -66,7 +65,7 @@ public class Config {
 
     public int getDecimalPrecission() {
         if (precission == -1) {
-            precission = config.getInt("Market_control.decimal_limit");
+            precission = config.getInt("Price_options.decimal_limit");
         }
         return precission;
     }
@@ -133,8 +132,8 @@ public class Config {
 
     public float[] getLimits() {
         if ((limit[0] == -1) && (limit[1] == -1)) {
-            limit[0] = (float) config.getDouble("Market_control.limits.low");
-            limit[1] = (float) config.getDouble("Market_control.limits.high");
+            limit[0] = (float) config.getDouble("Price_options.limits.low");
+            limit[1] = (float) config.getDouble("Price_options.limits.high");
             return limit;
         }
         return limit;
@@ -152,8 +151,19 @@ public class Config {
         return force != 0;
     }
 
-    public String getTitle() {
-        return config.getString("Lang.title");
+    public List<String> getLang() {
+
+        List<String> msg = new ArrayList<>();
+        msg.add(config.getString("Lang.title"));
+        msg.add(config.getString("Lang.topmovers"));
+        msg.add(config.getString("Lang.subtop"));
+        msg.add(config.getString("Lang.buy"));
+        msg.add(config.getString("Lang.sell"));
+        msg.add(config.getString("Lang.price"));
+        msg.add(config.getString("Lang.amount_selection"));
+        msg.add(config.getString("trend"));
+
+        return msg;
     }
 
     public String getBuyMessage() {
@@ -170,6 +180,17 @@ public class Config {
         } else {
             return sellMsg;
         }
+    }
+
+    public boolean getMarketPermissionRequirement() {
+        return config.getBoolean("Market_control.market_permission");
+    }
+
+    public String getAlias(String mat, String category) {
+        if(!config.contains("Items_quoted.Categories." + category + "." + mat + ".alias")) {
+            return (Character.toUpperCase(mat.charAt(0)) + mat.substring(1)).replace("_", " ");
+        }
+        return config.getString("Items_quoted.Categories." + category + "." + mat + ".alias");
     }
 
 }

@@ -1,28 +1,42 @@
-package me.bounser.nascraft.market;
+package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.market.managers.resources.Category;
+import me.bounser.nascraft.market.managers.resources.TimeSpan;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import me.bounser.nascraft.tools.NUtils;
-import me.bounser.nascraft.tools.Trend;
+import me.bounser.nascraft.market.managers.resources.Trend;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class Item {
 
     private final String mat;
+    private final String alias;
     private float price;
     private final Category cat;
     private final Trend trend;
 
     private int stock;
     private int operations;
+
+    // 30 min
+    private final GraphData gd1;
+    // 1 day
+    private final GraphData gd2;
+    // 1 month
+    private final GraphData gd3;
+    // 1 year
+    private final GraphData gd4;
+
 
     // 30 (0-29) values representing the prices in the last 30 minutes.
     List<Float> pricesM;
@@ -35,8 +49,9 @@ public class Item {
 
     private final HashMap<String, Float> childs;
 
-    public Item(String material, Category category){
+    public Item(String material, String alias, Category category){
         mat = material;
+        this.alias = alias;
         setupPrices();
         cat = category;
         operations = 0;
@@ -44,6 +59,11 @@ public class Item {
         trend = Trend.valueOf(Config.getInstance().getItemDefaultTrend(category.getName(), material));
 
         stock = Data.getInstance().getStock(material);
+
+        gd1 = new GraphData(TimeSpan.MINUTE, pricesM);
+        gd2 = new GraphData(TimeSpan.DAY, pricesH);
+        gd3 = new GraphData(TimeSpan.MONTH, pricesMM);
+        gd4 = new GraphData(TimeSpan.DAY, pricesY);
     }
 
     public void setPrice(float price) {
@@ -201,5 +221,21 @@ public class Item {
             return (float) -Math.log(stock*-1)/2;
         }
     }
+
+    public List<GraphData> getGraphData() {
+        return Arrays.asList(gd1, gd2, gd3, gd4);
+    }
+
+    public GraphData getGraphData(TimeSpan timeSpan) {
+        switch (timeSpan) {
+            case MINUTE: return gd1;
+            case DAY: return gd1;
+            case MONTH: return gd1;
+            case YEAR: return gd1;
+            default: return null;
+        }
+    }
+
+    public String getName() { return alias; }
 
 }

@@ -15,6 +15,8 @@ Items_quoted:
         cobblestone:
           # INITIAL price. This value will be ignored once the market starts developing its own valuations.
           price: 1.2
+          # Display-name of the item. If not stated, the material (With the first letter capitalized and without low bars) will be displayed.
+          alias: "Cobble"
           # (OPTIONAL) Specify the trend of the item fluctuations (Only if random oscillations is enabled)
           # Available values: FLAT, BEAR1, BEAR2, BEAR3, BULL1, BULL2, BULL3
           trend: "BULL1"
