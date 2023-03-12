@@ -1,7 +1,7 @@
 package me.bounser.nascraft.commands;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.tools.Config;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -41,7 +41,7 @@ public class MarketCommand implements CommandExecutor {
                 return false;
             }
 
-            if(MarketManager.getInstance().getItem(args[1]) == null) {
+            if (MarketManager.getInstance().getItem(args[1]) == null) {
                 sender.sendMessage(ChatColor.RED + "That material isn't valid!");
                 return false;
             }
@@ -62,7 +62,7 @@ public class MarketCommand implements CommandExecutor {
                 return false;
             }
 
-            if(Bukkit.getPlayer(args[3]) == null) {
+            if (Bukkit.getPlayer(args[3]) == null) {
                 Nascraft.getInstance().getLogger().info(ChatColor.RED + "Invalid player");
                 return false;
             }
@@ -80,4 +80,5 @@ public class MarketCommand implements CommandExecutor {
         }
         return false;
     }
+
 }

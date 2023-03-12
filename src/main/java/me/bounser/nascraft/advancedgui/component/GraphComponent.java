@@ -1,32 +1,34 @@
-package me.bounser.nascraft.advancedgui.components;
+package me.bounser.nascraft.advancedgui.component;
 
-import me.bounser.nascraft.market.Item;
-import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.market.unit.GraphData;
+import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.NUtils;
-import me.bounser.nascraft.tools.TimeSpan;
+import me.bounser.nascraft.market.managers.resources.TimeSpan;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
 public class GraphComponent extends RectangularComponent {
 
     private Item item;
+
+    private GraphData gd;
+
     private List<Float> values;
     private List<String> childsMat;
     private HashMap<String, Float> childs;
     public int width, height, yc, xc;
-
-    private TimeSpan timeFrame;
 
     private final ViewComponent background;
     private final TextComponent mainText;
@@ -39,9 +41,7 @@ public class GraphComponent extends RectangularComponent {
         this.height = height;
         this.xc = x;
         this.yc = y;
-        this.values = Arrays.asList(1f, 1f);
-
-        timeFrame = TimeSpan.MINUTE;
+        setValues(item.getGraphData().get(0).getValues());
 
         background = backgroundView;
         this.mainText = mainText;
@@ -49,6 +49,9 @@ public class GraphComponent extends RectangularComponent {
 
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
+
+        Bukkit.broadcastMessage(gd.getGraphState() + Arrays.toString(gd.getXPositions()));
+
         Color bgcolor = setupBackGround();
 
         background.apply(graphic, player, cursor);
@@ -58,19 +61,16 @@ public class GraphComponent extends RectangularComponent {
 
         graphic.setColor(new Color(0, 0, 0));
 
-        graphic.fillPolygon(getXPoints(true), getYPoints(0, true), getXPoints(true).length);
+        graphic.fillPolygon(gd.getPXPositions(), gd.getPYPositions(), gd.getPLength());
 
         graphic.setColor(bgcolor);
 
-        graphic.drawPolyline(getXPoints(false), getYPoints(0, false), getXPoints(false).length);
+        graphic.drawPolyline(gd.getXPositions(), gd.getYPositions(), gd.getLength());
     }
 
     @Override
     public String getState(Player player, GuiPoint cursor) {
-        Calendar cal = Calendar.getInstance();
-        SimpleDateFormat sdf = new SimpleDateFormat("dd:HH:mm");
-        String time = sdf.format(cal.getTime());
-        return timeFrame + "-" + time + "-" + item.getMaterial();
+        return gd.getGraphState();
     }
 
     @Override
@@ -80,78 +80,16 @@ public class GraphComponent extends RectangularComponent {
 
     public void setTimeFrame(TimeSpan timeFrame) {
 
-        this.timeFrame = timeFrame;
+        gd = item.getGraphData(timeFrame);
         interaction.getComponentTree().locate("slide1", SlideComponent.class).setTimeFrame(timeFrame);
         interaction.getComponentTree().locate("timeview", ViewComponent.class).setView("times" + timeFrame);
 
-        switch(timeFrame) {
-            case MINUTE:
-                setValues(item.getPricesM());
-                break;
-            case DAY:
-                setValues(item.getPricesH());
-                break;
-            case MONTH:
-                setValues(item.getPricesMM());
-                break;
-            case YEAR:
-                setValues(item.getPricesY());
-                break;
-        }
+        setValues(item.getPrices(timeFrame));
     }
 
     public void setValues(List<Float> values) {
         this.values = values;
         interaction.getComponentTree().locate("slide1", SlideComponent.class).setValues(values);
-    }
-
-    public int[] getYPoints(int offset, boolean polygon) {
-
-        int size = values.size();
-        if (polygon) size += 2;
-        int[] y = new int[size];
-
-        float maxValue = Collections.max(values);
-        float minValue = Collections.min(values);
-
-        int i = 0;
-        for (float value : values) {
-
-            int maxh = (int) Math.round(height*0.8);
-            y[i] = (int) ((Math.round((maxh - maxh * (value - minValue) / (maxValue - minValue))) + yc - offset) + Math.round(height*0.05));
-            i++;
-        }
-        if (polygon){
-            y[i++] = yc;
-            y[i] = yc;
-        }
-        return y;
-    }
-
-    public int[] getXPoints(boolean polygon) {
-
-        int z = Math.round(width/(values.size()-1));
-
-        int size = values.size();
-        if (polygon) size += 2;
-
-        int[] x = new int[size];
-        int j = 0;
-
-        float a = 0;
-        if (timeFrame != TimeSpan.MONTH) a = 0.5f;
-        for (int i = 0; i < (values.size()-1); i++) {
-            x[j] = (z*i + Math.round(a*i) + xc);
-            j++;
-        }
-        if (polygon) {
-            x[j++] = xc + width + 2;
-            x[j++] = xc + width + 2;
-            x[j] = xc;
-        } else {
-            x[j++] = xc + width + 1;
-        }
-        return x;
     }
 
     public Color setupBackGround() {
@@ -199,15 +137,18 @@ public class GraphComponent extends RectangularComponent {
         item = MarketManager.getInstance().getItem(mat);
         this.childs = item.getChilds();
 
+        gd = item.getGraphData(TimeSpan.MINUTE);
+
         GroupComponent ct = interaction.getComponentTree();
 
         ImageComponent ic = childComponents.locate("MainImage", ImageComponent.class);
         ic.setImage(NUtils.getImage(mat, 60, 60, true));
-        String modified = Character.toUpperCase(mat.charAt(0)) + mat.substring(1);
-        mainText.setText(modified.replace("_", " "));
 
-        this.values = MarketManager.getInstance().getItem(mat).getPricesM();
+        mainText.setText(item.getName());
+
+        this.values = MarketManager.getInstance().getItem(mat).getPrices(TimeSpan.MINUTE);
         ct.locate("slide1", SlideComponent.class).setValues(values);
+
         if (childs == null) {
             childComponents.locate("childs").setHidden(true);
             childComponents.locate("minichild").setHidden(true);
@@ -280,5 +221,7 @@ public class GraphComponent extends RectangularComponent {
         if (childs != null) return childs.get(childsMat.get(0));
         else return 1;
     }
+
+    public GraphData getGraphData() { return gd; }
 
 }

@@ -1,4 +1,4 @@
-package me.bounser.nascraft.tools;
+package me.bounser.nascraft.market.managers.resources;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

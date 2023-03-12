@@ -1,13 +1,13 @@
 package me.bounser.nascraft.advancedgui;
 
-import me.bounser.nascraft.advancedgui.components.GraphComponent;
-import me.bounser.nascraft.advancedgui.components.SlideComponent;
-import me.bounser.nascraft.market.Category;
-import me.bounser.nascraft.market.Item;
-import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.advancedgui.component.GraphComponent;
+import me.bounser.nascraft.advancedgui.component.SlideComponent;
+import me.bounser.nascraft.market.managers.resources.Category;
+import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.NUtils;
-import me.bounser.nascraft.tools.TimeSpan;
+import me.bounser.nascraft.market.managers.resources.TimeSpan;
 import me.leoko.advancedgui.utils.LayoutExtension;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.events.GuiInteractionBeginEvent;
@@ -227,10 +227,10 @@ public class LayoutModifier implements LayoutExtension {
             Item imax = items.get(0);
             for (Item item : items) {
 
-                float variation = NUtils.roundToOne(-100 + 100*(item.getPrice()/item.getPricesM().get(0)));
+                float variation = NUtils.roundToOne(-100 + 100*(item.getPrice()/item.getPrices(TimeSpan.MINUTE).get(0)));
 
                 if (variation != 0) {
-                    if (abs(variation) > abs(-100 + 100*(imax.getPrice()/imax.getPricesM().get(0)))){
+                    if (abs(variation) > abs(-100 + 100*(imax.getPrice()/imax.getPrices(TimeSpan.MINUTE).get(0)))){
                         imax = item;
                     }
                 }
@@ -250,7 +250,7 @@ public class LayoutModifier implements LayoutExtension {
                 interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(finalImax.getMaterial());
             });
 
-            float fvar = NUtils.roundToOne(-100 + 100*(imax.getPrice()/imax.getPricesM().get(0)));
+            float fvar = NUtils.roundToOne(-100 + 100*(imax.getPrice()/imax.getPrices(TimeSpan.MINUTE).get(0)));
 
             if (fvar != 0){
                 if (fvar > 0) {

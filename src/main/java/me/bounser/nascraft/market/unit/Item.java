@@ -37,15 +37,14 @@ public class Item {
     // 1 year
     private final GraphData gd4;
 
-
     // 30 (0-29) values representing the prices in the last 30 minutes.
-    List<Float> pricesM;
+    private List<Float> pricesM;
     // 24 (0-23) values representing the prices in all 24 hours of the day.
-    List<Float> pricesH;
+    private List<Float> pricesH;
     // 30 (0-29) values representing the prices in the last month. *
-    List<Float> pricesMM;
+    private List<Float> pricesMM;
     // 24 (0-23) values representing 2 prices each month. *
-    List<Float> pricesY;
+    private List<Float> pricesY;
 
     private final HashMap<String, Float> childs;
 
@@ -75,7 +74,6 @@ public class Item {
     }
 
     public void setupPrices() {
-
         pricesM = Data.getInstance().getMPrice(mat);
         pricesH = Data.getInstance().getHPrice(mat);
         pricesMM = Data.getInstance().getMMPrice(mat);
@@ -95,7 +93,6 @@ public class Item {
     }
 
     public void changePrice(float percentage) {
-
         if (price + NUtils.round(price * percentage/100) > Math.pow(10, -Config.getInstance().getDecimalPrecission())) {
             price += NUtils.round(price * percentage/100);
         }
@@ -165,7 +162,7 @@ public class Item {
             }
 
         } else {
-            if(Math.random() < amount * 0.01) {
+            if (Math.random() < amount * 0.01) {
                 price = NUtils.round((float) (price - price*0.01*(1 + 0.5/(1+Math.exp(stock*0.0001))) + amount*0.1));
             }
         }
@@ -184,10 +181,15 @@ public class Item {
 
     public float getPrice() { return NUtils.round(price); }
 
-    public List<Float> getPricesH() { return pricesH; }
-    public List<Float> getPricesM() { return pricesM; }
-    public List<Float> getPricesMM() { return pricesMM; }
-    public List<Float> getPricesY() { return pricesY; }
+    public List<Float> getPrices(TimeSpan timeSpan) {
+        switch (timeSpan) {
+            case MINUTE: return pricesM;
+            case DAY: return pricesH;
+            case MONTH: return pricesMM;
+            case YEAR: return pricesY;
+            default: return null;
+        }
+    }
 
     public int getStock() { return stock; }
 
@@ -198,8 +200,7 @@ public class Item {
     public int getOperations() { return operations; }
 
     public void lowerOperations() {
-
-        if(operations > 10) {
+        if (operations > 10) {
             operations -= Math.round((float) operations/10f);
             operations -= 5;
         } else if (operations > 1){
@@ -211,16 +212,6 @@ public class Item {
     public float getSellPrice() { return NUtils.round(price - price*Config.getInstance().getTaxSell()); }
 
     public Trend getTrend() { return trend; }
-
-    public float getStockFactor() {
-        if(stock > 100) {
-            return (float) Math.log(stock)/2;
-        } else if (-1 <= stock){
-            return 1;
-        } else {
-            return (float) -Math.log(stock*-1)/2;
-        }
-    }
 
     public List<GraphData> getGraphData() {
         return Arrays.asList(gd1, gd2, gd3, gd4);

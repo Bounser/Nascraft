@@ -1,15 +1,14 @@
-package me.bounser.nascraft.advancedgui.components;
+package me.bounser.nascraft.advancedgui.component;
 
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.NUtils;
-import me.bounser.nascraft.tools.TimeSpan;
+import me.bounser.nascraft.market.managers.resources.TimeSpan;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
@@ -56,7 +55,7 @@ public class SlideComponent extends RectangularComponent {
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
 
-        int[] points = graphComponent.getXPoints(false);
+        int[] points = graphComponent.getGraphData().getXPositions();
 
         int point = closestNumber(points, cursor.getX());
 

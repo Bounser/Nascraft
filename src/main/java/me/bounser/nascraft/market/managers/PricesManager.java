@@ -1,10 +1,11 @@
-package me.bounser.nascraft.market;
+package me.bounser.nascraft.market.managers;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
+import me.bounser.nascraft.market.managers.resources.Trend;
+import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
-import me.bounser.nascraft.tools.Trend;
 import me.leoko.advancedgui.manager.GuiWallManager;
 import me.leoko.advancedgui.utils.GuiWallInstance;
 import org.bukkit.Bukkit;
@@ -49,14 +50,18 @@ public class PricesManager {
 
             if (GuiWallManager.getInstance().getActiveInstances() != null)
             for (GuiWallInstance instance : GuiWallManager.getInstance().getActiveInstances()) {
+
                 if (instance.getLayout().getName().equals("Nascraft")) {
                     for (Player player : Bukkit.getOnlinePlayers()) {
+
                         if (instance.getInteraction(player) != null) {
                             LayoutModifier.getInstance().updateMainPage(instance.getInteraction(player).getComponentTree(), true, player);
                         }
                     }
                 }
             }
+            GraphManager.getInstance().outdatedCollector();
+
         }, 20, 1200);
     }
 
@@ -69,7 +74,6 @@ public class PricesManager {
             Data.getInstance().savePrices();
 
         }, 30000, 72000);
-
     }
 
     private void dailyTask() {
@@ -91,51 +95,9 @@ public class PricesManager {
         if (tendency.equals(Trend.FLAT)) {
             return (float) (Math.random() * 2 - 1);
         }
+        float[] ext = Trend.extents(trend);
 
-        float positive, negative;
-
-        switch (tendency) {
-
-            case BULL1:
-                positive = 1.05f;
-                negative = 1f;
-                break;
-            case BULL2:
-                positive = 1.1f;
-                negative = 1f;
-                break;
-            case BULL3:
-                positive = 1.3f;
-                negative = 1f;
-                break;
-            case BULLRUN:
-                positive = 3f;
-                negative = 1f;
-                break;
-
-            case BEAR1:
-                positive = 1f;
-                negative = 1.05f;
-                break;
-            case BEAR2:
-                positive = 1f;
-                negative = 1.1f;
-                break;
-            case BEAR3:
-                positive = 1f;
-                negative = 1.3f;
-                break;
-            case CRASH:
-                positive = 1f;
-                negative = 3f;
-                break;
-
-            default:
-                positive = 1f;
-                negative = 1f;
-
-        }
-        return (float) (Math.random() * (2*positive) - (negative));
+        return (float) (Math.random() * (2*ext[0]) - (ext[1]));
     }
 
     public Trend getMarketStatus() {
