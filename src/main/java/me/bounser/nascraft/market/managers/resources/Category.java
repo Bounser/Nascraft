@@ -1,5 +1,6 @@
-package me.bounser.nascraft.market;
+package me.bounser.nascraft.market.managers.resources;
 
+import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.tools.Config;
 
 import java.util.ArrayList;

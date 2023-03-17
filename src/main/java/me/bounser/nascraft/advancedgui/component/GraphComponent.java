@@ -1,5 +1,6 @@
 package me.bounser.nascraft.advancedgui.component;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.unit.GraphData;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
@@ -34,6 +35,8 @@ public class GraphComponent extends RectangularComponent {
     private final TextComponent mainText;
     private GroupComponent childComponents;
 
+    private SlideComponent sc;
+
     public GraphComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, ViewComponent backgroundView, TextComponent mainText) {
         super(id, clickAction, hidden, interaction, x, y, width, height);
 
@@ -41,7 +44,6 @@ public class GraphComponent extends RectangularComponent {
         this.height = height;
         this.xc = x;
         this.yc = y;
-        setValues(item.getGraphData().get(0).getValues());
 
         background = backgroundView;
         this.mainText = mainText;
@@ -49,8 +51,6 @@ public class GraphComponent extends RectangularComponent {
 
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
-
-        Bukkit.broadcastMessage(gd.getGraphState() + Arrays.toString(gd.getXPositions()));
 
         Color bgcolor = setupBackGround();
 
@@ -81,15 +81,16 @@ public class GraphComponent extends RectangularComponent {
     public void setTimeFrame(TimeSpan timeFrame) {
 
         gd = item.getGraphData(timeFrame);
-        interaction.getComponentTree().locate("slide1", SlideComponent.class).setTimeFrame(timeFrame);
+        sc.setTimeFrame(timeFrame);
         interaction.getComponentTree().locate("timeview", ViewComponent.class).setView("times" + timeFrame);
 
         setValues(item.getPrices(timeFrame));
+        gd.changeState();
     }
 
     public void setValues(List<Float> values) {
         this.values = values;
-        interaction.getComponentTree().locate("slide1", SlideComponent.class).setValues(values);
+        sc.setValues(values);
     }
 
     public Color setupBackGround() {
@@ -132,6 +133,8 @@ public class GraphComponent extends RectangularComponent {
 
     public void changeMat(String mat) {
 
+        if(sc == null) { sc = this.interaction.getComponentTree().locate("slide1", SlideComponent.class); }
+
         childComponents = interaction.getComponentTree().locate("childC", GroupComponent.class);
 
         item = MarketManager.getInstance().getItem(mat);
@@ -139,15 +142,12 @@ public class GraphComponent extends RectangularComponent {
 
         gd = item.getGraphData(TimeSpan.MINUTE);
 
-        GroupComponent ct = interaction.getComponentTree();
-
         ImageComponent ic = childComponents.locate("MainImage", ImageComponent.class);
         ic.setImage(NUtils.getImage(mat, 60, 60, true));
 
         mainText.setText(item.getName());
 
-        this.values = MarketManager.getInstance().getItem(mat).getPrices(TimeSpan.MINUTE);
-        ct.locate("slide1", SlideComponent.class).setValues(values);
+        setValues(MarketManager.getInstance().getItem(mat).getPrices(TimeSpan.MINUTE));
 
         if (childs == null) {
             childComponents.locate("childs").setHidden(true);
@@ -172,6 +172,8 @@ public class GraphComponent extends RectangularComponent {
             });
         }
         setTimeFrame(TimeSpan.MINUTE);
+
+        gd.changeState();
     }
 
     public void updateChilds(HashMap<String, Float> childs) {
@@ -198,14 +200,6 @@ public class GraphComponent extends RectangularComponent {
 
     public void changeChildsOrder() {
         Collections.rotate(childsMat, -1);
-    }
-
-    public float getChildMultiplier() {
-        if (childs == null) {
-            return 1;
-        } else {
-            return childs.get(childsMat.get(0));
-        }
     }
 
     public Item getItem() {

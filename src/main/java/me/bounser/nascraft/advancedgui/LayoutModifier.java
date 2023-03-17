@@ -1,5 +1,6 @@
 package me.bounser.nascraft.advancedgui;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.component.GraphComponent;
 import me.bounser.nascraft.advancedgui.component.SlideComponent;
 import me.bounser.nascraft.market.managers.resources.Category;
@@ -73,8 +74,9 @@ public class LayoutModifier implements LayoutExtension {
             TextComponent perslide = slideComponents.locate("perslide1", TextComponent.class);
 
             sc = new SlideComponent("slide1", null, false,
-                    event.getLayout().getDefaultInteraction(), 11, 60, 362, 121, bar, translucid, up, down, textslide, timetext, perslide, event.getLayout().getTemplateComponentTree().locate("graph1", GraphComponent.class));
+                    event.getLayout().getDefaultInteraction(), 11, 60, 362, 121, bar, translucid, up, down, textslide, timetext, perslide);
         }
+
         TS.locate("slide123", DummyComponent.class).setComponent(sc);
 
         // Arrows

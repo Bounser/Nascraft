@@ -6,8 +6,8 @@ import me.bounser.nascraft.market.unit.Item;
 
 public class GraphManager {
 
-    private final int width = 370, height = 200;
-    private final int offsetX = 370, offsetY = 200;
+    private final int width = 361, height = 126;
+    private final int offsetX = 10, offsetY = 54;
 
     private static GraphManager instance;
 

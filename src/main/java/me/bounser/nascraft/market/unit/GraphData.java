@@ -65,7 +65,7 @@ public class GraphData {
         py[i] = offset[1];
 
         // X points
-        int z = Math.round(values.size()/(values.size()-1));
+        int z = Math.round(size[0]/(values.size()-1));
 
         x = new int[values.size()];
         px = new int[values.size() + 2];
