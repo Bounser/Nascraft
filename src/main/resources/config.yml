@@ -1,6 +1,6 @@
 # Nascraft config.
 
-# Verify if the necessary layout is present, and if not, place it in AdvancedGUI's layout folder.
+# Verify if the necessary layout is present (And in its correct version), and if not, place it in AdvancedGUI's layout folder.
 AutoResourcesInjection: true
 
 Items_quoted:
@@ -161,15 +161,25 @@ Market_control:
   # Must players have the permission nascraft.market to operate directly with commands?
   market_permission: true
 
+Miscellaneous:
+  player_notifications:
+    enabled: true
+    # Time between periodical notifications (In minutes, only integers allowed)
+    time: 5
+    # Available modes: ACTIONBAR, CHAT and BOSSBAR.
+    mode: "ACTIONBAR"
+    # Permission: nascraft.notifications
+    permission: true
+
 Lang:
   # Currency to use next to prices.
   currency: "€"
-  # Title.
+  # Main title.
   title: "Item Market"
   # Available placeholders: [AMOUNT], [MATERIAL], [WORTH]
   buy_message: "&7You just bought &d[AMOUNT] &7x &d[MATERIAL] &7worth &6[WORTH]"
   sell_message: "&7You just sold &d[AMOUNT] &7x &d[MATERIAL] &7worth &6[WORTH]"
-  # More text of the layout:
+  # More text:
   topmovers: "Top Movers"
   subtop: "in the last 30 min"
   buy: "Buy"

@@ -2,9 +2,10 @@ package me.bounser.nascraft.tools;
 
 import de.leonhard.storage.Json;
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.market.Category;
-import me.bounser.nascraft.market.Item;
-import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.market.managers.resources.Category;
+import me.bounser.nascraft.market.managers.resources.TimeSpan;
+import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.managers.MarketManager;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -100,7 +101,7 @@ public class Data {
 
             // RECENT
             int x = 0;
-            for (float i : item.getPricesH()) {
+            for (float i : item.getPrices(TimeSpan.DAY)) {
                 if (hour - x < 0) {
                     json.set(item.getMaterial() + ".recent." + (hour + 23 - x) + ".price", i);
                 } else {

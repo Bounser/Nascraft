@@ -1,5 +1,6 @@
 package me.bounser.nascraft.advancedgui.component;
 
+import me.bounser.nascraft.market.unit.GraphData;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.NUtils;
 import me.bounser.nascraft.market.managers.resources.TimeSpan;
@@ -19,12 +20,11 @@ import java.util.List;
 
 public class SlideComponent extends RectangularComponent {
 
-    private List<Float> values;
-    private TimeSpan timeFrame;
+    private GraphData graphData;
 
-    List<Component> components;
+    private List<Component> components;
 
-    GraphComponent graphComponent;
+    private GraphComponent graphComponent;
 
     private final RectComponent bar;
     private final RectComponent translucid;
@@ -34,12 +34,8 @@ public class SlideComponent extends RectangularComponent {
     private final TextComponent timetext;
     private final TextComponent perslide;
 
-    public SlideComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, RectComponent bar, RectComponent translucid, ImageComponent up, ImageComponent down, TextComponent textslide, TextComponent timetext, TextComponent perslide, GraphComponent gc) {
+    public SlideComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, RectComponent bar, RectComponent translucid, ImageComponent up, ImageComponent down, TextComponent textslide, TextComponent timetext, TextComponent perslide) {
         super(id, clickAction, hidden, interaction, x, y, width, height);
-        this.values = Arrays.asList(1f, 1f);
-        setTimeFrame(TimeSpan.MINUTE);
-
-        graphComponent = gc;
 
         this.bar = bar;
         this.translucid = translucid;
@@ -55,6 +51,8 @@ public class SlideComponent extends RectangularComponent {
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
 
+        if(graphComponent == null) { graphComponent = this.interaction.getComponentTree().locate("graph1", GraphComponent.class); }
+
         int[] points = graphComponent.getGraphData().getXPositions();
 
         int point = closestNumber(points, cursor.getX());
@@ -63,8 +61,10 @@ public class SlideComponent extends RectangularComponent {
         translucid.setX(point);
         translucid.setWidth((x + width - point));
 
+        List<Float> values = graphData.getValues();
+
         float value = values.get(findIndex(points, point));
-        float multiplier = graphComponent.getChildMultiplier();
+        float multiplier = graphComponent.getMultiplier();
 
         timetext.setX(point);
 
@@ -89,7 +89,7 @@ public class SlideComponent extends RectangularComponent {
             perslide.setText("~ 0%");
         }
 
-        timetext.setText(TimeSpan.getTime(timeFrame, (x + width - point/(float) width)));
+        timetext.setText(TimeSpan.getTime(graphData.getTimeSpan(), (x + width - point/(float) width)));
 
         components.forEach(comp -> comp.apply(graphic, player, cursor));
     }
@@ -101,7 +101,7 @@ public class SlideComponent extends RectangularComponent {
 
     @Override
     public Component clone(Interaction interaction) {
-        return new SlideComponent(getId(), clickAction, hidden, interaction, x, y, width, height, bar.clone(interaction), translucid.clone(interaction), up.clone(interaction), down.clone(interaction), textslide.clone(interaction), timetext.clone(interaction), perslide.clone(interaction), graphComponent);
+        return new SlideComponent(getId(), clickAction, hidden, interaction, x, y, width, height, bar.clone(interaction), translucid.clone(interaction), up.clone(interaction), down.clone(interaction), textslide.clone(interaction), timetext.clone(interaction), perslide.clone(interaction));
     }
 
     public int closestNumber(int[] numbers, int x) {
@@ -126,12 +126,8 @@ public class SlideComponent extends RectangularComponent {
         return -1;
     }
 
-    public void setValues(List<Float> values) {
-        this.values = values;
-    }
-
-    public void setTimeFrame(TimeSpan timeFrame) {
-        this.timeFrame = timeFrame;
+    public void setGraphData(GraphData graphData) {
+        this.graphData = graphData;
     }
 
 }

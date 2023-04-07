@@ -1,6 +1,5 @@
 package me.bounser.nascraft.advancedgui.component;
 
-import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.unit.GraphData;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
@@ -13,7 +12,6 @@ import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
@@ -24,9 +22,8 @@ public class GraphComponent extends RectangularComponent {
 
     private Item item;
 
-    private GraphData gd;
+    private GraphData graphData;
 
-    private List<Float> values;
     private List<String> childsMat;
     private HashMap<String, Float> childs;
     public int width, height, yc, xc;
@@ -35,7 +32,7 @@ public class GraphComponent extends RectangularComponent {
     private final TextComponent mainText;
     private GroupComponent childComponents;
 
-    private SlideComponent sc;
+    private SlideComponent slideComponent;
 
     public GraphComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, ViewComponent backgroundView, TextComponent mainText) {
         super(id, clickAction, hidden, interaction, x, y, width, height);
@@ -61,16 +58,16 @@ public class GraphComponent extends RectangularComponent {
 
         graphic.setColor(new Color(0, 0, 0));
 
-        graphic.fillPolygon(gd.getPXPositions(), gd.getPYPositions(), gd.getPLength());
+        graphic.fillPolygon(graphData.getPXPositions(), graphData.getPYPositions(), graphData.getPLength());
 
         graphic.setColor(bgcolor);
 
-        graphic.drawPolyline(gd.getXPositions(), gd.getYPositions(), gd.getLength());
+        graphic.drawPolyline(graphData.getXPositions(), graphData.getYPositions(), graphData.getLength());
     }
 
     @Override
     public String getState(Player player, GuiPoint cursor) {
-        return gd.getGraphState();
+        return graphData.getGraphState();
     }
 
     @Override
@@ -80,24 +77,22 @@ public class GraphComponent extends RectangularComponent {
 
     public void setTimeFrame(TimeSpan timeFrame) {
 
-        gd = item.getGraphData(timeFrame);
-        sc.setTimeFrame(timeFrame);
+        graphData = item.getGraphData(timeFrame);
         interaction.getComponentTree().locate("timeview", ViewComponent.class).setView("times" + timeFrame);
 
-        setValues(item.getPrices(timeFrame));
-        gd.changeState();
+        setGraphData(graphData);
+        graphData.changeState();
     }
 
-    public void setValues(List<Float> values) {
-        this.values = values;
-        sc.setValues(values);
+    public void setGraphData(GraphData graphData) {
+        slideComponent.setGraphData(graphData);
     }
 
     public Color setupBackGround() {
 
-        if (values.size() > 1) {
-            float first = values.get(0);
-            float last = values.get(values.size() - 1);
+        if (graphData.getValues().size() > 1) {
+            float first = graphData.getValues().get(0);
+            float last = graphData.getValues().get(graphData.getValues().size() - 1);
 
             if (Float.compare(first, last) < 0) {
                 background.setView("bull123");
@@ -133,21 +128,21 @@ public class GraphComponent extends RectangularComponent {
 
     public void changeMat(String mat) {
 
-        if(sc == null) { sc = this.interaction.getComponentTree().locate("slide1", SlideComponent.class); }
+        if(slideComponent == null) { slideComponent = this.interaction.getComponentTree().locate("slide1", SlideComponent.class); }
 
         childComponents = interaction.getComponentTree().locate("childC", GroupComponent.class);
 
         item = MarketManager.getInstance().getItem(mat);
         this.childs = item.getChilds();
 
-        gd = item.getGraphData(TimeSpan.MINUTE);
+        graphData = item.getGraphData(TimeSpan.MINUTE);
 
         ImageComponent ic = childComponents.locate("MainImage", ImageComponent.class);
         ic.setImage(NUtils.getImage(mat, 60, 60, true));
 
         mainText.setText(item.getName());
 
-        setValues(MarketManager.getInstance().getItem(mat).getPrices(TimeSpan.MINUTE));
+        setGraphData(MarketManager.getInstance().getItem(mat).getGraphData(TimeSpan.MINUTE));
 
         if (childs == null) {
             childComponents.locate("childs").setHidden(true);
@@ -173,7 +168,7 @@ public class GraphComponent extends RectangularComponent {
         }
         setTimeFrame(TimeSpan.MINUTE);
 
-        gd.changeState();
+        graphData.changeState();
     }
 
     public void updateChilds(HashMap<String, Float> childs) {
@@ -216,6 +211,6 @@ public class GraphComponent extends RectangularComponent {
         else return 1;
     }
 
-    public GraphData getGraphData() { return gd; }
+    public GraphData getGraphData() { return graphData; }
 
 }

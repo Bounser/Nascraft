@@ -9,6 +9,8 @@ public class GraphManager {
     private final int width = 361, height = 126;
     private final int offsetX = 10, offsetY = 54;
 
+    private int cycle = 0;
+
     private static GraphManager instance;
 
     public static GraphManager getInstance() {
@@ -28,6 +30,7 @@ public class GraphManager {
 
     public void outdatedCollector() {
 
+        cycle++;
         for(Item item : MarketManager.getInstance().getAllItems()) {
 
             for(GraphData gd : item.getGraphData()) {
@@ -39,10 +42,25 @@ public class GraphManager {
                         gd.changeState();
                         break;
                     case DAY:
+                        if(cycle%60==0) {
+                            gd.clear();
+                            gd.setValues(item.getPrices(TimeSpan.DAY));
+                            gd.changeState();
+                        }
                         break;
                     case MONTH:
+                        if(cycle%(60*24)==0) {
+                            gd.clear();
+                            gd.setValues(item.getPrices(TimeSpan.DAY));
+                            gd.changeState();
+                        }
                         break;
                     case YEAR:
+                        if(cycle%(60*24*365)==0) {
+                            gd.clear();
+                            gd.setValues(item.getPrices(TimeSpan.DAY));
+                            gd.changeState();
+                        }
                         break;
                 }
             }

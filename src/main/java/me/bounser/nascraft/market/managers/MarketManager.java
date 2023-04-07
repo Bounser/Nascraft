@@ -1,5 +1,7 @@
-package me.bounser.nascraft.market;
+package me.bounser.nascraft.market.managers;
 
+import me.bounser.nascraft.market.managers.resources.Category;
+import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 
@@ -31,7 +33,7 @@ public class MarketManager {
 
             for (String mat : Config.getInstance().getAllMaterials(category.getName())) {
 
-                Item item = new Item(mat, category);
+                Item item = new Item(mat, Config.getInstance().getAlias(mat, category.getName()), category);
                 items.add(item);
                 category.addItem(item);
             }
@@ -39,22 +41,16 @@ public class MarketManager {
 
         Data.getInstance().setupFiles(categories);
         PricesManager.getInstance();
+        GraphManager.getInstance();
     }
 
     public Item getItem(String material) {
-
-        for (Item item : items) {
-            if (item.getMaterial().equals(material)) { return item; }
-        }
+        for (Item item : items) { if (item.getMaterial().equals(material)) { return item; } }
         return null;
     }
 
     public List<Category> getCategories() { return categories; }
 
     public List<Item> getAllItems() { return items; }
-
-    public Category getCategoryOfIndex(int index) {
-        return categories.get(index);
-    }
 
 }

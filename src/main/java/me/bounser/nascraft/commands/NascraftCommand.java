@@ -1,9 +1,9 @@
 package me.bounser.nascraft.commands;
 
-import me.bounser.nascraft.market.Item;
-import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.tools.Trend;
-import me.bounser.nascraft.market.PricesManager;
+import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.market.managers.resources.Trend;
+import me.bounser.nascraft.market.managers.PricesManager;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import me.leoko.advancedgui.manager.GuiWallManager;
@@ -55,7 +55,7 @@ public class NascraftCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Data saved.");
                 break;
             case "info":
-                for(Item item : MarketManager.getInstance().getAllItems()) {
+                for (Item item : MarketManager.getInstance().getAllItems()) {
                     sender.sendMessage(ChatColor.GRAY + "Mat: " + item.getMaterial() + " price: " + item.getPrice() + " stock: " + item.getStock());
                 }
                 break;

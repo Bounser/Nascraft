@@ -161,7 +161,7 @@ public class Config {
         msg.add(config.getString("Lang.sell"));
         msg.add(config.getString("Lang.price"));
         msg.add(config.getString("Lang.amount_selection"));
-        msg.add(config.getString("trend"));
+        msg.add(config.getString("Lang.trend"));
 
         return msg;
     }
@@ -193,5 +193,11 @@ public class Config {
         return config.getString("Items_quoted.Categories." + category + "." + mat + ".alias");
     }
 
+    public boolean getPlayerNotificationIcon() { return config.getBoolean("Miscellaneous.player_notifications.enabled"); }
+
+    // Returns time in ticks
+    public int getNotificationsInterval() { return config.getInt("Miscellaneous.player_notifications.time")*60*20; }
+
+    public String getNotificationsMode() { return config.getString("Miscellaneous.player_notifications.mode"); }
 }
 

@@ -1,6 +1,5 @@
 package me.bounser.nascraft.advancedgui;
 
-import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.component.GraphComponent;
 import me.bounser.nascraft.advancedgui.component.SlideComponent;
 import me.bounser.nascraft.market.managers.resources.Category;
@@ -121,11 +120,12 @@ public class LayoutModifier implements LayoutExtension {
             });
         }
 
-        // Lang
-        List<String> lang = Config.getInstance().getLang();
-        for (int i = 1; i <= 4 ; i++) {
-            cTree.locate("title" + i, TextComponent.class).setText(lang.get(0));
+        // Notifications button
+        if(!Config.getInstance().getPlayerNotificationIcon()) {
+            cTree.locate("a8lw0trw").setHidden(true);
         }
+
+        setLang(cTree);
     }
 
     @EventHandler
@@ -270,6 +270,31 @@ public class LayoutModifier implements LayoutExtension {
                 icTree.locate("topt" + j + i, TextComponent.class).setText(String.valueOf(fvar).replace("-", "") + "%");
             }
         }
+    }
+
+    public void setLang(GroupComponent cTree) {
+
+        List<String> lang = Config.getInstance().getLang();
+        // Title
+        for (int i = 1; i <= 4 ; i++) { cTree.locate("title" + i, TextComponent.class).setText(lang.get(0)); }
+        // Top Movers
+        cTree.locate("w1omKKFS", TextComponent.class).setText(lang.get(1));
+        // Sub top movers
+        cTree.locate("ypqwCPVb", TextComponent.class).setText(lang.get(2));
+        // Buy
+        cTree.locate("8mbDiOVM", TextComponent.class).setText(lang.get(3));
+        cTree.locate("rK8xOEwj", TextComponent.class).setText(lang.get(3).toUpperCase());
+        // Sell
+        cTree.locate("jEXxBLF2", TextComponent.class).setText(lang.get(4));
+        cTree.locate("ZakfQVQ0", TextComponent.class).setText(lang.get(4).toUpperCase());
+        // Price text
+        cTree.locate("EGgOeYza", TextComponent.class).setText(lang.get(5));
+        cTree.locate("EfJrz4vo", TextComponent.class).setText(lang.get(5));
+        // Amount
+        cTree.locate("pfFe6Wjt", TextComponent.class).setText(lang.get(6));
+        cTree.locate("ityZyfNt", TextComponent.class).setText(lang.get(6));
+        // Trend
+        cTree.locate("pfV4FIy1", TextComponent.class).setText(lang.get(7));
     }
 
 }
