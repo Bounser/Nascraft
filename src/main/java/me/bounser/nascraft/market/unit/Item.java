@@ -220,9 +220,9 @@ public class Item {
     public GraphData getGraphData(TimeSpan timeSpan) {
         switch (timeSpan) {
             case MINUTE: return gd1;
-            case DAY: return gd1;
-            case MONTH: return gd1;
-            case YEAR: return gd1;
+            case DAY: return gd2;
+            case MONTH: return gd3;
+            case YEAR: return gd4;
             default: return null;
         }
     }

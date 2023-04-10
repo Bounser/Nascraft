@@ -3,6 +3,7 @@ package me.bounser.nascraft.tools;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.managers.resources.Category;
 import me.bounser.nascraft.market.managers.MarketManager;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.*;
@@ -187,10 +188,10 @@ public class Config {
     }
 
     public String getAlias(String mat, String category) {
-        if(!config.contains("Items_quoted.Categories." + category + "." + mat + ".alias")) {
+        if(!config.contains("Items_quoted.Categories." + category + ".items." + mat + ".alias")) {
             return (Character.toUpperCase(mat.charAt(0)) + mat.substring(1)).replace("_", " ");
         }
-        return config.getString("Items_quoted.Categories." + category + "." + mat + ".alias");
+        return config.getString("Items_quoted.Categories." + category + ".items." + mat + ".alias");
     }
 
     public boolean getPlayerNotificationIcon() { return config.getBoolean("Miscellaneous.player_notifications.enabled"); }

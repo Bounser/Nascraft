@@ -2,7 +2,9 @@ package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.market.managers.GraphManager;
 import me.bounser.nascraft.market.managers.resources.TimeSpan;
+import org.bukkit.Bukkit;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,7 +48,7 @@ public class GraphData {
     public int getPLength() { return px.length; }
 
     private void renderPositions() {
-        
+
         // Y points
         y = new int[values.size()];
         py = new int[values.size() + 2];
@@ -72,7 +74,7 @@ public class GraphData {
 
         int j;
         for (j = 0; j < (values.size()-1); j++) {
-            x[j] = (z*j + Math.round(j) + offset[0]);
+            x[j] = (int) (z*j + Math.round(j*0.5) + offset[0]);
             px[j] = x[j];
         }
 

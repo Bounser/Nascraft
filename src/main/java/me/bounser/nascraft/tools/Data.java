@@ -192,7 +192,7 @@ public class Data {
 
             List<Float> prices = new ArrayList<>();
 
-            for (int i = 30 ; i >= 0 ; i--) {
+            for (int i = 29 ; i >= 0 ; i--) {
 
                 if (json.contains(mat + ".history." + (day - i) + ".price")) {
 

@@ -28,13 +28,14 @@ public class SlideComponent extends RectangularComponent {
 
     private final RectComponent bar;
     private final RectComponent translucid;
+    private final RectComponent divisor;
     private final ImageComponent up;
     private final ImageComponent down;
     private final TextComponent textslide;
     private final TextComponent timetext;
     private final TextComponent perslide;
 
-    public SlideComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, RectComponent bar, RectComponent translucid, ImageComponent up, ImageComponent down, TextComponent textslide, TextComponent timetext, TextComponent perslide) {
+    public SlideComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, RectComponent bar, RectComponent translucid, ImageComponent up, ImageComponent down, TextComponent textslide, TextComponent timetext, TextComponent perslide, RectComponent divisor) {
         super(id, clickAction, hidden, interaction, x, y, width, height);
 
         this.bar = bar;
@@ -44,8 +45,9 @@ public class SlideComponent extends RectangularComponent {
         this.textslide = textslide;
         this.timetext = timetext;
         this.perslide = perslide;
+        this.divisor = divisor;
 
-        components = Arrays.asList(this.bar, this.translucid, this.up,  this.down,  this.textslide,  this.timetext,  this.perslide);
+        components = Arrays.asList(this.translucid, this.bar,  this.textslide,  this.timetext,  this.perslide, this.divisor);
     }
 
     @Override
@@ -73,18 +75,14 @@ public class SlideComponent extends RectangularComponent {
         textslide.setText(NUtils.round(value*multiplier) + Config.getInstance().getCurrency());
 
         if (values.get(0) > value) {
-            up.setHidden(false);
-            down.setHidden(true);
             perslide.setColor(new Color(255, 46, 46));
             perslide.setText("    " + formatter.format((-100 + value*100/values.get(0))*-1) + "%");
+            up.apply(graphic, player, cursor);
         } else if (values.get(0) < value) {
-            down.setHidden(false);
-            up.setHidden(true);
             perslide.setColor((new Color(51, 238, 25)));
             perslide.setText("    " + formatter.format((-100 + value*100/values.get(0))) + "%");
+            down.apply(graphic, player, cursor);
         } else {
-            down.setHidden(true);
-            up.setHidden(true);
             perslide.setColor((new Color(250, 250, 250)));
             perslide.setText("~ 0%");
         }
@@ -101,7 +99,7 @@ public class SlideComponent extends RectangularComponent {
 
     @Override
     public Component clone(Interaction interaction) {
-        return new SlideComponent(getId(), clickAction, hidden, interaction, x, y, width, height, bar.clone(interaction), translucid.clone(interaction), up.clone(interaction), down.clone(interaction), textslide.clone(interaction), timetext.clone(interaction), perslide.clone(interaction));
+        return new SlideComponent(getId(), clickAction, hidden, interaction, x, y, width, height, bar.clone(interaction), translucid.clone(interaction), up.clone(interaction), down.clone(interaction), textslide.clone(interaction), timetext.clone(interaction), perslide.clone(interaction), divisor.clone(interaction));
     }
 
     public int closestNumber(int[] numbers, int x) {
