@@ -62,7 +62,7 @@ public class Item {
         gd1 = new GraphData(TimeSpan.MINUTE, pricesM);
         gd2 = new GraphData(TimeSpan.DAY, pricesH);
         gd3 = new GraphData(TimeSpan.MONTH, pricesMM);
-        gd4 = new GraphData(TimeSpan.DAY, pricesY);
+        gd4 = new GraphData(TimeSpan.YEAR, pricesY);
     }
 
     public void setPrice(float price) {

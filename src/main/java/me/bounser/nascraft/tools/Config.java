@@ -194,7 +194,7 @@ public class Config {
         return config.getString("Items_quoted.Categories." + category + ".items." + mat + ".alias");
     }
 
-    public boolean getPlayerNotificationIcon() { return config.getBoolean("Miscellaneous.player_notifications.enabled"); }
+    public boolean getNotificationsEnabled() { return config.getBoolean("Miscellaneous.player_notifications.enabled"); }
 
     // Returns time in ticks
     public int getNotificationsInterval() { return config.getInt("Miscellaneous.player_notifications.time")*60*20; }

@@ -4,7 +4,6 @@ import me.bounser.nascraft.market.managers.GraphManager;
 import me.bounser.nascraft.market.managers.resources.TimeSpan;
 import org.bukkit.Bukkit;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -17,7 +16,7 @@ public class GraphData {
 
     private List<Float> values;
     private final TimeSpan timeSpan;
-    private boolean state;
+    private String state;
     private final int[] size = GraphManager.getInstance().getSize();
     private final int[] offset = GraphManager.getInstance().getOffset();
 
@@ -28,17 +27,17 @@ public class GraphData {
 
     public TimeSpan getTimeSpan() { return timeSpan; }
 
-    public void clear() { x = null; y = null; }
+    public void clear() { y = null; py = null;}
 
     public int[] getXPositions() {
-        if(x == null) renderPositions();
+        if(y == null) renderPositions();
         return x;
     }
 
     public int[] getYPositions() { return y; }
 
     public int[] getPXPositions() {
-        if(px == null) renderPositions();
+        if(py == null) renderPositions();
         return px;
     }
 
@@ -67,26 +66,28 @@ public class GraphData {
         py[i] = offset[1];
 
         // X points
-        int z = Math.round(size[0]/(values.size()-1));
+        if(x == null || px == null) {
+            int z = Math.round(size[0]/(values.size()-1));
 
-        x = new int[values.size()];
-        px = new int[values.size() + 2];
+            x = new int[values.size()];
+            px = new int[values.size() + 2];
 
-        int j;
-        for (j = 0; j < (values.size()-1); j++) {
-            x[j] = (int) (z*j + Math.round(j*0.5) + offset[0]);
-            px[j] = x[j];
+            int j;
+            for (j = 0; j < (values.size()-1); j++) {
+                x[j] = (int) (z*j + Math.round(j*0.5) + offset[0]);
+                px[j] = x[j];
+            }
+
+            x[j] = offset[0] + size[0] + 1;
+            px[j++] = offset[0] + size[0] + 2;
+            px[j++] = offset[0] + size[0] + 2;
+            px[j] = offset[0];
         }
-
-        x[j] = offset[0] + size[0] + 1;
-        px[j++] = offset[0] + size[0] + 2;
-        px[j++] = offset[0] + size[0] + 2;
-        px[j] = offset[0];
     }
 
-    public String getGraphState() { return state ? "0" : "1"; }
+    public String getGraphState() { return state; }
 
-    public void changeState() { state = !state; }
+    public void changeState() { state = String.valueOf((float) Math.random()); }
 
     public void setValues(List<Float> values) { this.values = values; }
 

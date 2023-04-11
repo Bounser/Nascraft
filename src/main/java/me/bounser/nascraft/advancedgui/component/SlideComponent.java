@@ -53,7 +53,7 @@ public class SlideComponent extends RectangularComponent {
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
 
-        if(graphComponent == null) { graphComponent = this.interaction.getComponentTree().locate("graph1", GraphComponent.class); }
+        if (graphComponent == null) { graphComponent = this.interaction.getComponentTree().locate("graph1", GraphComponent.class); }
 
         int[] points = graphComponent.getGraphData().getXPositions();
 
@@ -87,7 +87,7 @@ public class SlideComponent extends RectangularComponent {
             perslide.setText("~ 0%");
         }
 
-        timetext.setText(TimeSpan.getTime(graphData.getTimeSpan(), (x + width - point/(float) width)));
+        timetext.setText(TimeSpan.getTime(graphData.getTimeSpan(), (x + width - point)/(float) width));
 
         components.forEach(comp -> comp.apply(graphic, player, cursor));
     }
