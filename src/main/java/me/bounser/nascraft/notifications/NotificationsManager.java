@@ -51,6 +51,21 @@ public class NotificationsManager {
         }
     }
 
+    public void addPlayer(Player player, Item item) {
+
+        List<Item> items = players.get(player);
+        if(!items.contains(item)) items.add(item);
+
+        players.put(player.getUniqueId(), items);
+    }
+
+    public void removePlayer(Player player, Item item) {
+        List<Item> items = players.get(player);
+        if(items.contains(item)) items.remove(item);
+
+        players.put(player.getUniqueId(), items);
+    }
+
     public void removePlayer(Player player) {
         players.remove(player.getUniqueId());
     }

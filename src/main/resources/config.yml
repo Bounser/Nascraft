@@ -163,7 +163,7 @@ Market_control:
 
 Miscellaneous:
   player_notifications:
-    enabled: true
+    enabled: false
     # Time between periodical notifications (In minutes, only integers allowed)
     time: 5
     # Available modes: ACTIONBAR, CHAT and BOSSBAR.

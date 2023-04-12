@@ -71,9 +71,10 @@ public class LayoutModifier implements LayoutExtension {
             TextComponent textslide = slideComponents.locate("textslide1", TextComponent.class);
             TextComponent timetext = slideComponents.locate("time1", TextComponent.class);
             TextComponent perslide = slideComponents.locate("perslide1", TextComponent.class);
+            RectComponent divisor = slideComponents.locate("TIAYadch", RectComponent.class);
 
             sc = new SlideComponent("slide1", null, false,
-                    event.getLayout().getDefaultInteraction(), 11, 60, 362, 121, bar, translucid, up, down, textslide, timetext, perslide);
+                    event.getLayout().getDefaultInteraction(), 11, 60, 362, 121, bar, translucid, up, down, textslide, timetext, perslide, divisor);
         }
 
         TS.locate("slide123", DummyComponent.class).setComponent(sc);
@@ -120,9 +121,10 @@ public class LayoutModifier implements LayoutExtension {
             });
         }
 
-        // Notifications button
-        if(!Config.getInstance().getPlayerNotificationIcon()) {
+        // Notifications
+        if (!Config.getInstance().getNotificationsEnabled()) {
             cTree.locate("a8lw0trw").setHidden(true);
+            cTree.locate("RDKH4p2v").setHidden(true);
         }
 
         setLang(cTree);
@@ -160,6 +162,8 @@ public class LayoutModifier implements LayoutExtension {
         } else {
             categories = playerCategory.get(player);
         }
+
+        cTree.locate("description", TextComponent.class).setText(categories.get(0).getDisplayName());
 
         // Three rows.
         for (int i = 1; i <= 3; i++) {

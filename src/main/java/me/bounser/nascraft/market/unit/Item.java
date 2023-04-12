@@ -229,4 +229,6 @@ public class Item {
 
     public String getName() { return alias; }
 
+    public String getMaterialName() { return mat; }
+
 }

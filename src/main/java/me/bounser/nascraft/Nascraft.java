@@ -44,7 +44,7 @@ public final class Nascraft extends JavaPlugin {
         getCommand("nascraft").setExecutor(new NascraftCommand());
         getCommand("market").setExecutor(new MarketCommand());
 
-        Bukkit.getPluginManager().registerEvents(new ConnectionEvent(), this);
+        if(Config.getInstance().getNotificationsEnabled()) { Bukkit.getPluginManager().registerEvents(new ConnectionEvent(), this); }
 
         LayoutManager.getInstance().registerLayoutExtension(LayoutModifier.getInstance(), this);
     }
