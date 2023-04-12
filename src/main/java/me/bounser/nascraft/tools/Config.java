@@ -3,7 +3,6 @@ package me.bounser.nascraft.tools;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.managers.resources.Category;
 import me.bounser.nascraft.market.managers.MarketManager;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 import java.util.*;
@@ -194,11 +193,5 @@ public class Config {
         return config.getString("Items_quoted.Categories." + category + ".items." + mat + ".alias");
     }
 
-    public boolean getNotificationsEnabled() { return config.getBoolean("Miscellaneous.player_notifications.enabled"); }
-
-    // Returns time in ticks
-    public int getNotificationsInterval() { return config.getInt("Miscellaneous.player_notifications.time")*60*20; }
-
-    public String getNotificationsMode() { return config.getString("Miscellaneous.player_notifications.mode"); }
 }
 

@@ -4,7 +4,6 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.market.managers.resources.Trend;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.notifications.NotificationsManager;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import me.leoko.advancedgui.manager.GuiWallManager;
@@ -28,7 +27,6 @@ public class PricesManager {
         saveDataTask();
         shortTermPricesTask();
         dailyTask();
-        NotificationsManager.getInstance().notifyTask();
     }
 
     public void setMarketStatus(Trend trend) {

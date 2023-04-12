@@ -6,7 +6,6 @@ import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.commands.MarketCommand;
 import me.bounser.nascraft.commands.NascraftCommand;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.notifications.ConnectionEvent;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import me.leoko.advancedgui.manager.LayoutManager;
@@ -43,8 +42,6 @@ public final class Nascraft extends JavaPlugin {
 
         getCommand("nascraft").setExecutor(new NascraftCommand());
         getCommand("market").setExecutor(new MarketCommand());
-
-        Bukkit.getPluginManager().registerEvents(new ConnectionEvent(), this);
 
         LayoutManager.getInstance().registerLayoutExtension(LayoutModifier.getInstance(), this);
     }

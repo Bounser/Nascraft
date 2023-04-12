@@ -161,16 +161,6 @@ Market_control:
   # Must players have the permission nascraft.market to operate directly with commands?
   market_permission: true
 
-Miscellaneous:
-  player_notifications:
-    enabled: true
-    # Time between periodical notifications (In minutes, only integers allowed)
-    time: 5
-    # Available modes: ACTIONBAR, CHAT and BOSSBAR.
-    mode: "ACTIONBAR"
-    # Permission: nascraft.notifications
-    permission: true
-
 Lang:
   # Currency to use next to prices.
   currency: "€"
