@@ -16,7 +16,7 @@ public class Config {
     private float taxSell = -1;
     private int random0 = 0;
     private int force = -1;
-    private int precission = -1;
+    private int precision = -1;
     private final float[] limit = {-1, -1};
     private String currency = "0";
     private String buyMsg = "0";
@@ -64,10 +64,10 @@ public class Config {
     }
 
     public int getDecimalPrecission() {
-        if (precission == -1) {
-            precission = config.getInt("Price_options.decimal_limit");
+        if (precision == -1) {
+            precision = config.getInt("Price_options.decimal_limit");
         }
-        return precission;
+        return precision;
     }
 
     public boolean getRandomOscillation() {
@@ -86,7 +86,7 @@ public class Config {
         if (taxBuy != -1) {
             return taxBuy;
         } else {
-            return taxBuy = (float) config.getDouble("Market_control.taxation.buy");
+            return taxBuy = 1 + (float) config.getDouble("Market_control.taxation.buy");
         }
     }
 
@@ -94,7 +94,7 @@ public class Config {
         if (taxSell != -1) {
             return taxSell;
         } else {
-            return taxSell = (float) config.getDouble("Market_control.taxation.sell");
+            return taxSell = 1 - (float) config.getDouble("Market_control.taxation.sell");
         }
     }
 
@@ -191,6 +191,27 @@ public class Config {
             return (Character.toUpperCase(mat.charAt(0)) + mat.substring(1)).replace("_", " ");
         }
         return config.getString("Items_quoted.Categories." + category + ".items." + mat + ".alias");
+    }
+
+    public float getSupport(String mat, String category) {
+        if(config.contains("Items_quoted.Categories." + category + ".items." + mat + ".resistance")) {
+            return (float) config.getDouble("Items_quoted.Categories." + category + ".items." + mat + ".support");
+        }
+        return 0;
+    }
+
+    public float getResistance(String mat, String category) {
+        if(config.contains("Items_quoted.Categories." + category + ".items." + mat + ".resistance")) {
+            return (float) config.getDouble("Items_quoted.Categories." + category + ".items." + mat + ".resistance");
+        }
+        return 0;
+    }
+
+    public int getElasticity(String mat, String category) {
+        if(config.contains("Items_quoted.Categories." + category + ".items." + mat + ".elasticity")) {
+            return config.getInt("Items_quoted.Categories." + category + ".items." + mat + ".elasticity");
+        }
+        return 10;
     }
 
 }

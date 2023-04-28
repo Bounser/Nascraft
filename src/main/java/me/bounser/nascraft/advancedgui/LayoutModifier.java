@@ -227,10 +227,10 @@ public class LayoutModifier implements LayoutExtension {
             Item imax = items.get(0);
             for (Item item : items) {
 
-                float variation = NUtils.roundToOne(-100 + 100*(item.getPrice()/item.getPrices(TimeSpan.MINUTE).get(0)));
+                float variation = NUtils.roundToOne(-100 + 100*(item.getPrice().getValue()/item.getPrices(TimeSpan.MINUTE).get(0)));
 
                 if (variation != 0) {
-                    if (abs(variation) > abs(-100 + 100*(imax.getPrice()/imax.getPrices(TimeSpan.MINUTE).get(0)))){
+                    if (abs(variation) > abs(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.MINUTE).get(0)))){
                         imax = item;
                     }
                 }
@@ -250,7 +250,7 @@ public class LayoutModifier implements LayoutExtension {
                 interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(finalImax.getMaterial());
             });
 
-            float fvar = NUtils.roundToOne(-100 + 100*(imax.getPrice()/imax.getPrices(TimeSpan.MINUTE).get(0)));
+            float fvar = NUtils.roundToOne(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.MINUTE).get(0)));
 
             if (fvar != 0){
                 if (fvar > 0) {

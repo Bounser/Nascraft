@@ -96,8 +96,8 @@ public class Data {
             json.set(item.getMaterial() + ".lastSaveD", day);
             json.set(item.getMaterial() + ".lastSaveH", hour);
 
-            json.set(item.getMaterial() + ".history." + day + ".price", item.getPrice());
-            json.set(item.getMaterial() + ".history." + day + ".stock", item.getStock());
+            json.set(item.getMaterial() + ".history." + day + ".price", item.getPrice().getValue());
+            json.set(item.getMaterial() + ".history." + day + ".stock", item.getPrice().getStock());
 
             // RECENT
             int x = 0;

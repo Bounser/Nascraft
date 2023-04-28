@@ -6,7 +6,6 @@ import me.bounser.nascraft.market.managers.resources.TimeSpan;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import me.bounser.nascraft.tools.NUtils;
-import me.bounser.nascraft.market.managers.resources.Trend;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -21,11 +20,10 @@ public class Item {
 
     private final String mat;
     private final String alias;
-    private float price;
     private final Category cat;
-    private final Trend trend;
 
-    private int stock;
+    private final Price price;
+
     private int operations;
 
     // 30 min
@@ -51,13 +49,16 @@ public class Item {
     public Item(String material, String alias, Category category){
         mat = material;
         this.alias = alias;
-        setupPrices();
+
+        this.price = new Price(setupPrices(),
+                Data.getInstance().getStock(mat),
+                Config.getInstance().getElasticity(mat, category.getName()),
+                Config.getInstance().getSupport(mat, category.getName()),
+                Config.getInstance().getResistance(mat, category.getName()));
+
         cat = category;
         operations = 0;
         this.childs = Config.getInstance().getChilds(material, category.getName());
-        trend = Trend.valueOf(Config.getInstance().getItemDefaultTrend(category.getName(), material));
-
-        stock = Data.getInstance().getStock(material);
 
         gd1 = new GraphData(TimeSpan.MINUTE, pricesM);
         gd2 = new GraphData(TimeSpan.DAY, pricesH);
@@ -65,21 +66,15 @@ public class Item {
         gd4 = new GraphData(TimeSpan.YEAR, pricesY);
     }
 
-    public void setPrice(float price) {
-        this.price = price;
-    }
+    public String getName() { return alias; }
 
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
-    public void setupPrices() {
+    public float setupPrices() {
         pricesM = Data.getInstance().getMPrice(mat);
         pricesH = Data.getInstance().getHPrice(mat);
         pricesMM = Data.getInstance().getMMPrice(mat);
         pricesY = Data.getInstance().getYPrice(mat);
 
-        price = pricesM.get(pricesM.size()-1);
+        return pricesM.get(pricesM.size()-1);
     }
 
     public void addValueToH(float value) {
@@ -92,19 +87,11 @@ public class Item {
         pricesM.add(NUtils.round(value));
     }
 
-    public void changePrice(float percentage) {
-        if (price + NUtils.round(price * percentage/100) > Math.pow(10, -Config.getInstance().getDecimalPrecission())) {
-            price += NUtils.round(price * percentage/100);
-        }
-        if (price < Config.getInstance().getLimits()[0]) price = Config.getInstance().getLimits()[0];
-        if (price > Config.getInstance().getLimits()[1]) price = Config.getInstance().getLimits()[1];
-    }
-
     public void buyItem(int amount, Player player, String mat, float multiplier) {
 
         Economy econ = Nascraft.getEconomy();
 
-        if (!econ.has(player, getBuyPrice()*amount*multiplier)) {
+        if (!econ.has(player, price.getBuyPrice()*amount*multiplier)) {
             player.sendMessage(ChatColor.RED + "You can't afford to pay that!");
             return;
         }
@@ -121,23 +108,17 @@ public class Item {
             }
         }
 
-        econ.withdrawPlayer(player, getBuyPrice()*amount*multiplier);
+        econ.withdrawPlayer(player, price.getBuyPrice()*amount*multiplier);
 
         player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(getBuyPrice()*amount*multiplier))).replace("[MATERIAL]", mat);
+        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(price.getBuyPrice()*amount*multiplier))).replace("[MATERIAL]", mat);
 
         player.sendMessage(msg);
 
-        if (price < Math.random()*20 + 30) {
-            if (Math.random() < (amount * 0.01 * (2/(1+Math.exp(-stock*0.0001)))))
-                price += 0.01;
-        } else {
-            float val = NUtils.round((float) (price + price*0.01*(1 + 0.5/(1+Math.exp(-stock*0.0001))) + amount*0.1));
-            price = Math.min(val, Config.getInstance().getLimits()[1]);
-        }
+        price.changeStock(-amount);
+
         operations += amount;
-        stock -= amount;
     }
 
     public void sellItem(int amount, Player player, String mat, float multiplier) {
@@ -149,37 +130,27 @@ public class Item {
 
         player.getInventory().removeItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        Nascraft.getEconomy().depositPlayer(player, getSellPrice()*amount*multiplier);
+        Nascraft.getEconomy().depositPlayer(player, price.getSellPrice()*amount*multiplier);
 
-        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(getBuyPrice()*amount*multiplier))).replace("[MATERIAL]", mat.replace("_", ""));
+        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(price.getBuyPrice()*amount*multiplier))).replace("[MATERIAL]", mat.replace("_", ""));
 
         player.sendMessage(msg);
 
-        if (price < Math.random()*20 + 30) {
-            if (Math.random() < (amount * 0.01 * (2/(1+Math.exp(-stock*0.0001))))) {
-                if (price - 0.01 > Config.getInstance().getLimits()[0]) price -= 0.01;
-                else price = Config.getInstance().getLimits()[0];
-            }
+        price.changeStock(amount);
 
-        } else {
-            if (Math.random() < amount * 0.01) {
-                price = NUtils.round((float) (price - price*0.01*(1 + 0.5/(1+Math.exp(stock*0.0001))) + amount*0.1));
-            }
-        }
         operations += amount;
-        stock += amount;
     }
 
     public void dailyUpdate() {
         pricesMM.remove(0);
-        pricesMM.add(price);
+        pricesMM.add(price.getValue());
 
         pricesY = Data.getInstance().getYPrice(mat);
     }
 
     public String getMaterial() { return mat; }
 
-    public float getPrice() { return NUtils.round(price); }
+    public Price getPrice() { return price; }
 
     public List<Float> getPrices(TimeSpan timeSpan) {
         switch (timeSpan) {
@@ -190,10 +161,6 @@ public class Item {
             default: return null;
         }
     }
-
-    public int getStock() { return stock; }
-
-    public String getCategory() { return cat.getName(); }
 
     public HashMap<String, Float> getChilds() { return childs; }
 
@@ -208,11 +175,6 @@ public class Item {
         }
     }
 
-    public float getBuyPrice() { return NUtils.round(price + price*Config.getInstance().getTaxBuy()); }
-    public float getSellPrice() { return NUtils.round(price - price*Config.getInstance().getTaxSell()); }
-
-    public Trend getTrend() { return trend; }
-
     public List<GraphData> getGraphData() {
         return Arrays.asList(gd1, gd2, gd3, gd4);
     }
@@ -226,7 +188,5 @@ public class Item {
             default: return null;
         }
     }
-
-    public String getName() { return alias; }
 
 }

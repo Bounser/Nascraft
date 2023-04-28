@@ -1,13 +1,13 @@
 # Nascraft config.
 
-# Verify if the necessary layout is present (And in its correct version), and if not, place it in AdvancedGUI's layout folder.
+# Verifies if the necessary layout is present (And in its correct version), and if not, places it in AdvancedGUI's layout folder.
 AutoResourcesInjection: true
 
 Items_quoted:
   Categories:
     # Reference of the category. Categories are displayed in the main menu.
     1:
-      # Display-name of the category. (Can't be long)
+      # Display-name of the category. (Can't be very long)
       name: "Stone age"
       # Items of the category. A MAXIMUM amount of SIX (6) items are allowed per category.
       items:
@@ -17,9 +17,16 @@ Items_quoted:
           price: 1.2
           # Display-name of the item. If not stated, the material (With the first letter capitalized and without low bars) will be displayed.
           alias: "Cobble"
-          # (OPTIONAL) Specify the trend of the item fluctuations (Only if random oscillations is enabled)
-          # Available values: FLAT, BEAR1, BEAR2, BEAR3, BULL1, BULL2, BULL3
-          trend: "BULL1"
+          # (OPTIONAL) You can have a support level, a resistance or both for each item.
+          # In this example, the item will fluctuate randomly between 0,3 - 2 and will try to go again to this range when, due to
+          # players operations, the price deviates.
+          advanced_pricing:
+            support: 0.8
+            resistance: 2
+            # (OPTIONAL) The elasticity of an item determines the quantity of the deviations
+            # A number between 0 and 20 is expected. 20 = highly sensitive ; 10 = standard sensitivity ; 0 = no sensitivity
+            elasticity: 7
+            noise_intensity: 1.4
           # child items. The price of these items will be determined by his parent item.
           child:
             cobblestone_slab:
@@ -154,10 +161,6 @@ Market_control:
     sell: 0.03
     # 2% taxation when players buy items.
     buy: 0.02
-  # Change the trend of prices in-game. Keep in mind that the trend will last until the next restart.
-  # Command: /nascraft force <TREND>  - Where TREND can be: flat, bear1, bear2, bear3, crash, bull1, bull2, bull3, bullran
-  # -- BE CAUTIOUS WHILE USING, MIGHT HAVE A BIG IMPACT --
-  force_command: false
   # Must players have the permission nascraft.market to operate directly with commands?
   market_permission: true
 

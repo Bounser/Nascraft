@@ -2,7 +2,6 @@ package me.bounser.nascraft.market.managers;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
-import me.bounser.nascraft.market.managers.resources.Trend;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
@@ -11,28 +10,19 @@ import me.leoko.advancedgui.utils.GuiWallInstance;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public class PricesManager {
+public class TasksManager {
 
-    private Trend trend;
+    public static TasksManager instance;
 
-    public static PricesManager instance;
-
-    public static PricesManager getInstance() {
-        return instance == null ? instance = new PricesManager() : instance;
+    public static TasksManager getInstance() {
+        return instance == null ? instance = new TasksManager() : instance;
     }
 
-    private PricesManager(){
-        trend = Trend.valueOf(Config.getInstance().getGeneralTrend());
+    private TasksManager(){
 
         saveDataTask();
         shortTermPricesTask();
         dailyTask();
-    }
-
-    public void setMarketStatus(Trend trend) {
-        if (this.trend != trend) {
-            this.trend = trend;
-        }
     }
 
     private void shortTermPricesTask() {
@@ -41,11 +31,11 @@ public class PricesManager {
 
             for (Item item : MarketManager.getInstance().getAllItems()) {
                 if (Config.getInstance().getRandomOscillation()) {
-                    item.changePrice(getPercentage(item));
+                    item.getPrice().applyNoise();
                 }
                 item.lowerOperations();
 
-                item.addValueToM(item.getPrice());
+                item.addValueToM(item.getPrice().getValue());
             }
 
             if (GuiWallManager.getInstance().getActiveInstances() != null)
@@ -70,7 +60,7 @@ public class PricesManager {
         // All the prices will be stored each hour
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
-            for (Item item : MarketManager.getInstance().getAllItems()) item.addValueToH(item.getPrice());
+            for (Item item : MarketManager.getInstance().getAllItems()) item.addValueToH(item.getPrice().getValue());
             Data.getInstance().savePrices();
 
         }, 30000, 72000);
@@ -83,25 +73,6 @@ public class PricesManager {
             for (Item item : MarketManager.getInstance().getAllItems()) item.dailyUpdate();
 
         }, 1728000, 1728000);
-    }
-
-
-    public float getPercentage(Item item) {
-
-        Trend tendency = item.getTrend();
-
-        if (tendency == null) tendency = trend;
-
-        if (tendency.equals(Trend.FLAT)) {
-            return (float) (Math.random() * 2 - 1);
-        }
-        float[] ext = Trend.extents(trend);
-
-        return (float) (Math.random() * (2*ext[0]) - (ext[1]));
-    }
-
-    public Trend getMarketStatus() {
-        return trend;
     }
 
 }

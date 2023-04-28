@@ -40,7 +40,7 @@ public class MarketManager {
         }
 
         Data.getInstance().setupFiles(categories);
-        PricesManager.getInstance();
+        TasksManager.getInstance();
         GraphManager.getInstance();
     }
 
