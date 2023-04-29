@@ -13,20 +13,19 @@ Items_quoted:
       items:
         # Material of the item.
         cobblestone:
-          # INITIAL price. This value will be ignored once the market starts developing its own valuations.
-          price: 1.2
-          # Display-name of the item. If not stated, the material (With the first letter capitalized and without low bars) will be displayed.
+          # (OPTIONAL) Display-name of the item. If not stated, the material (With the first letter capitalized and without low bars) will be displayed.
           alias: "Cobble"
+          # REQUIRED: INITIAL price. This value will be ignored once the market starts developing its own valuations.
+          price: 1.2
           # (OPTIONAL) You can have a support level, a resistance or both for each item.
           # In this example, the item will fluctuate randomly between 0,3 - 2 and will try to go again to this range when, due to
           # players operations, the price deviates.
-          advanced_pricing:
-            support: 0.8
-            resistance: 2
-            # (OPTIONAL) The elasticity of an item determines the quantity of the deviations
-            # A number between 0 and 20 is expected. 20 = highly sensitive ; 10 = standard sensitivity ; 0 = no sensitivity
-            elasticity: 7
-            noise_intensity: 1.4
+          support: 0.8
+          resistance: 2
+          # (OPTIONAL) The elasticity of an item determines the quantity of the deviations of player induced movements.
+          elasticity: 1.1
+          # (OPTIONAL) How intense should the noise be?
+          noise_intensity: 1.4
           # child items. The price of these items will be determined by his parent item.
           child:
             cobblestone_slab:
@@ -43,6 +42,8 @@ Items_quoted:
               multiplier: 1
         stone:
           price: 1.5
+          support: 0.9
+          elasticity: 0.3
           child:
             stone_stairs:
               multiplier: 1.5
@@ -110,8 +111,11 @@ Items_quoted:
       items:
         diamond:
           price: 100
+          resistance: 300
         emerald:
           price: 50
+          resistance: 100
+          support: 30
         raw_gold:
           price: 20
     5:
@@ -135,6 +139,7 @@ Items_quoted:
           price: 10
         netherite_ingot:
           price: 500
+
 Price_options:
   # Limit the precision of prices. In general, it is not recommended changing it.
   decimal_limit: 2
@@ -151,16 +156,16 @@ Price_options:
 
 Market_control:
   # Although the taxation gets separated in both sell and buy actions, the total tax paid is the same no matter how you split it:
-  # The spread is determined by the deviation in both actions. In the default case: 3% + 2% -> 5% of spread.
+  # The spread is determined by the deviation in both actions. In the default case: 6% + 4% -> 10% of spread.
 
   # To avoid strengthening the underground economy try to keep this value as low as possible,
   # as a heavy taxation can induce players to trade with each other directly, eliminating intermediaries,
   # reducing the collected money from taxes and making the market less efficient.
   taxation:
-    # 3% taxation when players sell items.
-    sell: 0.03
-    # 2% taxation when players buy items.
-    buy: 0.02
+    # 6% taxation when players sell items.
+    sell: 0.06
+    # 4% taxation when players buy items.
+    buy: 0.04
   # Must players have the permission nascraft.market to operate directly with commands?
   market_permission: true
 

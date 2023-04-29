@@ -207,12 +207,18 @@ public class Config {
         return 0;
     }
 
-    public int getElasticity(String mat, String category) {
+    public float getElasticity(String mat, String category) {
         if(config.contains("Items_quoted.Categories." + category + ".items." + mat + ".elasticity")) {
-            return config.getInt("Items_quoted.Categories." + category + ".items." + mat + ".elasticity");
+            return (float) config.getDouble("Items_quoted.Categories." + category + ".items." + mat + ".elasticity");
         }
         return 10;
     }
 
+    public float getNoiseIntensity(String mat, String category) {
+        if(config.contains("Items_quoted.Categories." + category + ".items." + mat + ".elasticity")) {
+            return (float) config.getDouble("Items_quoted.Categories." + category + ".items." + mat + ".noise_intensity");
+        }
+        return 1;
+    }
 }
 

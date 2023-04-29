@@ -54,7 +54,8 @@ public class Item {
                 Data.getInstance().getStock(mat),
                 Config.getInstance().getElasticity(mat, category.getName()),
                 Config.getInstance().getSupport(mat, category.getName()),
-                Config.getInstance().getResistance(mat, category.getName()));
+                Config.getInstance().getResistance(mat, category.getName()),
+                Config.getInstance().getNoiseIntensity(mat, category.getName()));
 
         cat = category;
         operations = 0;
