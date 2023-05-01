@@ -117,7 +117,7 @@ public class Item {
 
         player.sendMessage(msg);
 
-        price.changeStock(-amount);
+        price.changeStock(amount);
 
         operations += amount;
     }
@@ -137,7 +137,7 @@ public class Item {
 
         player.sendMessage(msg);
 
-        price.changeStock(amount);
+        price.changeStock(-amount);
 
         operations += amount;
     }

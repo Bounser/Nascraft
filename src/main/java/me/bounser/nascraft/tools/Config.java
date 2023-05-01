@@ -211,7 +211,7 @@ public class Config {
         if(config.contains("Items_quoted.Categories." + category + ".items." + mat + ".elasticity")) {
             return (float) config.getDouble("Items_quoted.Categories." + category + ".items." + mat + ".elasticity");
         }
-        return 10;
+        return 1;
     }
 
     public float getNoiseIntensity(String mat, String category) {

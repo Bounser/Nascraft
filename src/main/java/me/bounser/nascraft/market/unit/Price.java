@@ -38,9 +38,12 @@ public class Price {
 
     public void changeStock(int change) {
 
-        value = NUtils.round((float) (value + value*change*0.01*(1 + 0.5/(1+Math.exp(-stock*0.0001)))*elasticity));
-
-        verifyChange();
+        if(value < 50 + 20 * Math.random() && elasticity*0.2 > Math.random()) {
+            value += 0.01 * change * Integer.signum(change);
+        } else {
+            value = NUtils.round((float) (value + value*change*0.0003*(1 + 0.5/(1+Math.exp(-stock*0.0001)))*elasticity));
+            verifyChange();
+        }
 
         stock += change;
     }
@@ -52,19 +55,45 @@ public class Price {
 
     public void applyNoise() {
 
-        if(support != 0) {
-            if(value < support && Math.random() > 0.3) {
-                value = (float) (value*(1 + 0.2*Math.random()*intensity));
-            }
-        } else if(resistance != 0){
-            if(value > resistance && Math.random() > 0.3) {
-                value = (float) (value*(1 - 0.2*Math.random()*intensity));
-            }
-        } else {
-            value = (float) (value*0.9 + 0.2*Math.random()*intensity);
-        }
+        if (value > 30 + 50 * Math.random()) {
 
-        value = NUtils.round(value);
+            if (support != 0 || resistance != 0) {
+                if (support != 0 ) {
+                    if (value < support && Math.random() > 0.5) {
+                        value = (float) (value * (0.99 + 0.03 * Math.random() * intensity));
+                    }
+                }
+                if (resistance != 0) {
+                    if (value > resistance && Math.random() > 0.5) {
+                        value = (float) (value * (1.01 - 0.03 * Math.random() * intensity));
+                    }
+                }
+            } else if (Math.random() > 0.4) {
+                value = (float) (value * (0.99 + 0.02 * Math.random() * intensity));
+            }
+            value = NUtils.round(value);
+
+        } else {
+
+            if (support != 0 || resistance != 0) {
+                if (support != 0) {
+                    if (value < support && Math.random() * intensity > 0.3) {
+                        value += 0.01;
+                    }
+                }
+                if (resistance != 0){
+                    if (value > resistance && Math.random()*intensity > 0.3) {
+                        value -= 0.01;
+                    }
+                }
+            } else {
+                if (0.5 > Math.random() && Math.random()*intensity > 0.3) {
+                    value += 0.01;
+                } else {
+                    value -= 0.01;
+                }
+            }
+        }
         verifyChange();
     }
 

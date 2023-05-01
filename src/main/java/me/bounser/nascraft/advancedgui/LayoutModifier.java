@@ -170,8 +170,8 @@ public class LayoutModifier implements LayoutExtension {
 
                 if (j <= numOfItems) {
 
-                    cTree.locate("t" + i + j + "1", TextComponent.class).setText(cat.getItemOfIndex(j-1).getPrice() + Config.getInstance().getCurrency());
-                    cTree.locate("t" + i + j + "2", TextComponent.class).setText(cat.getItemOfIndex(j-1).getPrice() + Config.getInstance().getCurrency());
+                    cTree.locate("t" + i + j + "1", TextComponent.class).setText(cat.getItemOfIndex(j-1).getPrice().getValue() + Config.getInstance().getCurrency());
+                    cTree.locate("t" + i + j + "2", TextComponent.class).setText(cat.getItemOfIndex(j-1).getPrice().getValue() + Config.getInstance().getCurrency());
 
                     ImageComponent ic = cTree.locate("asdi" + i + "" + j, ImageComponent.class);
                     ic.setImage(NUtils.getImage(cat.getItemOfIndex(j - 1).getMaterial(), 32, 32, false));

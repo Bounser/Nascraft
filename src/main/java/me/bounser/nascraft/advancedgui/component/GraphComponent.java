@@ -116,13 +116,13 @@ public class GraphComponent extends RectangularComponent {
         GroupComponent ct = interaction.getComponentTree();
         if (childs == null) {
             for (int i : Arrays.asList(1, 16, 64)) {
-                ct.locate("buyprice" + i, TextComponent.class).setText(getItem().getBuyPrice()*i + Config.getInstance().getCurrency());
-                ct.locate("sellprice" + i, TextComponent.class).setText(getItem().getSellPrice()*i + Config.getInstance().getCurrency());
+                ct.locate("buyprice" + i, TextComponent.class).setText(getItem().getPrice().getBuyPrice()*i + Config.getInstance().getCurrency());
+                ct.locate("sellprice" + i, TextComponent.class).setText(getItem().getPrice().getSellPrice()*i + Config.getInstance().getCurrency());
             }
         } else {
             for (int i : Arrays.asList(1, 16, 64)) {
-                ct.locate("buyprice" + i, TextComponent.class).setText(NUtils.round(getItem().getBuyPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
-                ct.locate("sellprice" + i, TextComponent.class).setText(NUtils.round(getItem().getSellPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
+                ct.locate("buyprice" + i, TextComponent.class).setText(NUtils.round(getItem().getPrice().getBuyPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
+                ct.locate("sellprice" + i, TextComponent.class).setText(NUtils.round(getItem().getPrice().getSellPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
             }
         }
     }
