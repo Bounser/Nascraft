@@ -15,9 +15,9 @@ public class NUtils {
 
     public static HashMap<String, BufferedImage> images = new HashMap<>();
 
-    public static float round(float value) {
+    public static float round(float value, int precission) {
         BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(Config.getInstance().getDecimalPrecission(), RoundingMode.HALF_UP);
+        bd = bd.setScale(precission, RoundingMode.HALF_UP);
         return bd.floatValue();
     }
 

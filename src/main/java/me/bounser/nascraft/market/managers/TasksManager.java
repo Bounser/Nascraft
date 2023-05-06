@@ -30,7 +30,7 @@ public class TasksManager {
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
             for (Item item : MarketManager.getInstance().getAllItems()) {
-                if (Config.getInstance().getRandomOscillation()) {
+                if (Config.getInstance().getPriceNoise()) {
                     item.getPrice().applyNoise();
                 }
                 item.lowerOperations();

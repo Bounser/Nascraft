@@ -49,7 +49,7 @@ public class Config {
 
             for (String item : config.getConfigurationSection("Items_quoted.Categories." + cat.getName() + ".items.").getKeys(false)) {
                 if (mat.equals(item)){
-                    return (float) config.getDouble("Items_quoted.Categories." + cat.getName() + ".items." + item + ".price");
+                    return (float) config.getDouble("Items_quoted.Categories." + cat.getName() + ".items." + item + ".initial_price");
                 }
             }
         }
@@ -63,17 +63,10 @@ public class Config {
         return currency;
     }
 
-    public int getDecimalPrecission() {
-        if (precision == -1) {
-            precision = config.getInt("Price_options.decimal_limit");
-        }
-        return precision;
-    }
-
-    public boolean getRandomOscillation() {
+    public boolean getPriceNoise() {
 
         if (random0 == 0) {
-            if (config.getBoolean("Price_options.random_oscillation.enabled")) {
+            if (config.getBoolean("Price_options.noise.enabled")) {
                 random0 = 1;
             } else {
                 random0 = 0;
@@ -121,15 +114,6 @@ public class Config {
         return config.getString("Items_quoted.Categories." + cat.getName() + ".name");
     }
 
-    public String getGeneralTrend(){
-        return config.getString("Price_options.random_oscillation.market_trend");
-    }
-
-    public String getItemDefaultTrend(String category, String material){
-        String trend = config.getString("Items_quoted.Categories." + category + ".items." + material + ".trend");
-        return trend == null ? "FLAT" : trend;
-    }
-
     public float[] getLimits() {
         if ((limit[0] == -1) && (limit[1] == -1)) {
             limit[0] = (float) config.getDouble("Price_options.limits.low");
@@ -137,18 +121,6 @@ public class Config {
             return limit;
         }
         return limit;
-    }
-
-    public boolean isForceAllowed() {
-        if (force == -1)
-            if (config.getBoolean("Market_control.force_command")) {
-                force = 1;
-                return true;
-            } else {
-                force = 0;
-                return false;
-            }
-        return force != 0;
     }
 
     public List<String> getLang() {

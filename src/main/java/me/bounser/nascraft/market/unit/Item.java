@@ -5,7 +5,6 @@ import me.bounser.nascraft.market.managers.resources.Category;
 import me.bounser.nascraft.market.managers.resources.TimeSpan;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
-import me.bounser.nascraft.tools.NUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -80,12 +79,12 @@ public class Item {
 
     public void addValueToH(float value) {
         pricesH.remove(0);
-        pricesH.add(NUtils.round(value));
+        pricesH.add(value);
     }
 
     public void addValueToM(float value) {
         pricesM.remove(0);
-        pricesM.add(NUtils.round(value));
+        pricesM.add(value);
     }
 
     public void buyItem(int amount, Player player, String mat, float multiplier) {
@@ -113,11 +112,11 @@ public class Item {
 
         player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(price.getBuyPrice()*amount*multiplier))).replace("[MATERIAL]", mat);
+        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(price.getBuyPrice()*amount*multiplier)).replace("[MATERIAL]", mat);
 
         player.sendMessage(msg);
 
-        price.changeStock(amount);
+        price.changeStock(-amount);
 
         operations += amount;
     }
@@ -133,11 +132,11 @@ public class Item {
 
         Nascraft.getEconomy().depositPlayer(player, price.getSellPrice()*amount*multiplier);
 
-        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(price.getBuyPrice()*amount*multiplier))).replace("[MATERIAL]", mat.replace("_", ""));
+        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(price.getSellPrice()*amount*multiplier)).replace("[MATERIAL]", mat.replace("_", ""));
 
         player.sendMessage(msg);
 
-        price.changeStock(-amount);
+        price.changeStock(amount);
 
         operations += amount;
     }

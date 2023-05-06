@@ -72,7 +72,7 @@ public class SlideComponent extends RectangularComponent {
 
         NumberFormat formatter = new DecimalFormat("#0.0");
 
-        textslide.setText(NUtils.round(value*multiplier) + Config.getInstance().getCurrency());
+        textslide.setText(NUtils.round(value*multiplier, 2) + Config.getInstance().getCurrency());
 
         if (values.get(0) > value) {
             perslide.setColor(new Color(255, 46, 46));

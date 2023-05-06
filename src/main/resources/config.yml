@@ -1,47 +1,49 @@
-# Nascraft config.
+# Nascraft config - 1.2.1
 
-# Verifies if the necessary layout is present (And in its correct version), and if not, places it in AdvancedGUI's layout folder.
+# Verify whether the required layout is present (and in the correct version), and if it is not, place it in the layout folder of AdvancedGUI.
 AutoResourcesInjection: true
 
 Items_quoted:
   Categories:
     # Reference of the category. Categories are displayed in the main menu.
     1:
-      # Display-name of the category. (Can't be very long)
+      # Display name of the category (cannot be very long).
       name: "Stone age"
-      # Items of the category. A MAXIMUM amount of SIX (6) items are allowed per category.
+      # Items within the category. A maximum of six (6) items are allowed per category.
       items:
         # Material of the item.
         cobblestone:
-          # (OPTIONAL) Display-name of the item. If not stated, the material (With the first letter capitalized and without low bars) will be displayed.
+          # OPTIONAL: Display name of the item. If not specified, the material (with the first letter capitalized and without underscores) will be displayed.
           alias: "Cobble"
-          # REQUIRED: INITIAL price. This value will be ignored once the market starts developing its own valuations.
-          price: 1.2
-          # (OPTIONAL) You can have a support level, a resistance or both for each item.
-          # In this example, the item will fluctuate randomly between 0,3 - 2 and will try to go again to this range when, due to
-          # players operations, the price deviates.
+          # REQUIRED: INITIAL price. This value will be disregarded once the market begins to establish its own valuations.
+          initial_price: 1.2
+          # OPTIONAL: You can have a support level, a resistance level, or both for each item.
+          # In this example, the item will fluctuate randomly between 0,3 - 2 and will try to go again to this range
+          # when the price deviates due to player actions.
           support: 0.8
           resistance: 2
-          # (OPTIONAL) The elasticity of an item determines the quantity of the deviations of player induced movements.
-          elasticity: 1.1
-          # (OPTIONAL) How intense should the noise be?
+          # OPTIONAL: The elasticity of an item determines the degree of deviation caused by player movements.
+          elasticity: 0.53
+          # OPTIONAL: The intensity of the noise determines the magnitude of the random fluctuations.
           noise_intensity: 1.4
-          # child items. The price of these items will be determined by his parent item.
+          # Child items. The price of these items will be determined by their parent item.
           child:
             cobblestone_slab:
               # To make a cobblestone slab we only need half of a cobblestone block, so the price of the slab is half the price of the cobblestone.
-              # Result: (Price cobblestone)*0.5 - Hence, the initial price will be 0.6 for one slab.
+              # Therefore, the initial price will be 0.5 times the price of cobblestone, resulting in 0.6 for one slab in this example.
               multiplier: 0.5
             cobblestone_stairs:
-              # To make a cobblestone stair we require 6 of cobblestone, while we only get 4 stairs. Then, the price will be 6/4 = 3/2 = 1.5
-              # Keep in mind that this logic is not necessary, as you could say, if you want, that a stair costs x10 the price of cobblestone,
-              # but that not only makes no sense, it would probably allow people to take advantage of these overvaluations.
+              # To make a cobblestone stair, we require six cobblestones, but we only get four stairs.
+              # Therefore, the price will be 6/4 = 3/2 = 1.5 times the price of cobblestone.
+              #
+              # NOTE: Keep in mind that this logic is not necessary, as you could choose to set the price of a stair as ten times the price of cobblestone.
+              # However, this would not make sense and would likely allow people to take advantage of the overvaluation.
               multiplier: 1.5
             cobblestone_wall:
-              # Spends 6, gets 6. 6/6 = 1/1 = 1
+              # Spends 6, gets 6. Therefore, the ratio is 6/6 = 1/1 = 1.
               multiplier: 1
         stone:
-          price: 1.5
+          initial_price: 1.5
           support: 0.9
           elasticity: 0.3
           child:
@@ -54,7 +56,7 @@ Items_quoted:
             stone_button:
               multiplier: 1
         cobbled_deepslate:
-          price: 0.7
+          initial_price: 0.7
           child:
             cobbled_deepslate_stairs:
               multiplier: 1.5
@@ -67,25 +69,25 @@ Items_quoted:
       name: "Tech"
       items:
         redstone:
-          price: 2
+          initial_price: 2
           child:
             redstone_block:
               multiplier: 9
         redstone_torch:
-          price: 3
+          initial_price: 3
         repeater:
-          price: 6
+          initial_price: 6
         comparator:
-          price: 10
+          initial_price: 10
         piston:
-          price: 9
+          initial_price: 9
         observer:
-          price: 8
+          initial_price: 8
     3:
       name: "In the woods"
       items:
         oak_log:
-          price: 1
+          initial_price: 1
           child:
             oak_planks:
               multiplier: 0.25
@@ -96,7 +98,7 @@ Items_quoted:
             stick:
               multiplier: 0.0625
         birch_log:
-          price: 1
+          initial_price: 1
           child:
             birch_planks:
               multiplier: 0.25
@@ -110,67 +112,62 @@ Items_quoted:
       name: "Valuables"
       items:
         diamond:
-          price: 100
+          initial_price: 100
           resistance: 300
         emerald:
-          price: 50
+          initial_price: 50
           resistance: 100
           support: 30
         raw_gold:
-          price: 20
+          initial_price: 20
     5:
       name: "Utils"
       items:
         coal:
-          price: 4
+          initial_price: 4
           child:
             charcoal:
               multiplier: 1
         leather:
-          price: 10
+          initial_price: 10
     6:
       name: "Ingots"
       items:
         iron_ingot:
-          price: 4
+          initial_price: 4
         copper_ingot:
-          price: 3
+          initial_price: 3
         gold_ingot:
-          price: 10
+          initial_price: 10
         netherite_ingot:
-          price: 500
+          initial_price: 500
 
 Price_options:
-  # Limit the precision of prices. In general, it is not recommended changing it.
-  decimal_limit: 2
-  # Set limits on how low and high prices can be.
+  # Set limits on the minimum and maximum prices.
   limits:
     low: 0.05
     high: 99999
-  # With random oscillation enabled prices will vary in time.
-  random_oscillation:
+  # With noise enabled, prices will vary over time in a pseudo-random manner.
+  noise:
     enabled: true
-    # Specify the general trend of the market (Only applied to items without a specified trend)
-    # Available values: FLAT, BEAR1, BEAR2, BEAR3, BULL1, BULL2, BULL3
-    market_trend: FLAT
 
 Market_control:
-  # Although the taxation gets separated in both sell and buy actions, the total tax paid is the same no matter how you split it:
-  # The spread is determined by the deviation in both actions. In the default case: 6% + 4% -> 10% of spread.
+  # Although taxation is separated for buying and selling actions separately, the total tax paid is the same regardless of how it is split
+  # The spread is determined by the deviation in both actions. In the default case, it is 6% for selling and 4% for buying, resulting in a total spread of 10%.
 
-  # To avoid strengthening the underground economy try to keep this value as low as possible,
-  # as a heavy taxation can induce players to trade with each other directly, eliminating intermediaries,
-  # reducing the collected money from taxes and making the market less efficient.
+  # To avoid strengthening the underground economy, try to keep the taxation as low as possible.
+  # Heavy taxation can encourage players to trade with each other directly, bypassing intermediaries,
+  # and reducing the amount of money collected from taxes and making the market less efficient.
   taxation:
     # 6% taxation when players sell items.
     sell: 0.06
     # 4% taxation when players buy items.
     buy: 0.04
-  # Must players have the permission nascraft.market to operate directly with commands?
+  # Do players need the permission "nascraft.market" to operate directly with commands?
   market_permission: true
 
 Lang:
-  # Currency to use next to prices.
+  # Specify the currency to be used next to prices.
   currency: "€"
   # Main title.
   title: "Item Market"

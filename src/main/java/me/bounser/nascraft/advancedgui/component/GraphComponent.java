@@ -64,6 +64,7 @@ public class GraphComponent extends RectangularComponent {
         graphic.setColor(bgcolor);
 
         graphic.drawPolyline(graphData.getXPositions(), graphData.getYPositions(), graphData.getLength());
+
     }
 
     @Override
@@ -121,8 +122,8 @@ public class GraphComponent extends RectangularComponent {
             }
         } else {
             for (int i : Arrays.asList(1, 16, 64)) {
-                ct.locate("buyprice" + i, TextComponent.class).setText(NUtils.round(getItem().getPrice().getBuyPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
-                ct.locate("sellprice" + i, TextComponent.class).setText(NUtils.round(getItem().getPrice().getSellPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
+                ct.locate("buyprice" + i, TextComponent.class).setText(NUtils.round(getItem().getPrice().getBuyPrice()*i*childs.get(childsMat.get(0)), 2) + Config.getInstance().getCurrency());
+                ct.locate("sellprice" + i, TextComponent.class).setText(NUtils.round(getItem().getPrice().getSellPrice()*i*childs.get(childsMat.get(0)), 2) + Config.getInstance().getCurrency());
             }
         }
     }
