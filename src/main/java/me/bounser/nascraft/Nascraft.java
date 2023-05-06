@@ -6,6 +6,7 @@ import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.commands.MarketCommand;
 import me.bounser.nascraft.commands.NascraftCommand;
 import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import me.leoko.advancedgui.manager.LayoutManager;
@@ -34,6 +35,10 @@ public final class Nascraft extends JavaPlugin {
             getLogger().severe("Nascraft failed to load! Vault is required.");
             getServer().getPluginManager().disablePlugin(this);
             return;
+        }
+
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PAPIExpansion(this).register();
         }
 
         if (Config.getInstance().getCheckResources()) { checkResources(); }

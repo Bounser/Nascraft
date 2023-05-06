@@ -45,7 +45,7 @@ public class MarketManager {
     }
 
     public Item getItem(String material) {
-        for (Item item : items) { if (item.getMaterial().equals(material)) { return item; } }
+        for (Item item : items) { if (item.getMaterial().equalsIgnoreCase(material)) { return item; } }
         return null;
     }
 
