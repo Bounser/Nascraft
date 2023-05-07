@@ -16,3 +16,8 @@ commands:
     description: Interact with the market wherever you are!
     aliases:
       - mk
+  sell:
+    description: Sell items directly to the market
+    aliases:
+      - nsell
+

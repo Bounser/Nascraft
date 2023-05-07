@@ -5,6 +5,7 @@ import me.bounser.nascraft.market.managers.resources.Category;
 import me.bounser.nascraft.market.managers.resources.TimeSpan;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
+import me.bounser.nascraft.tools.NUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -108,11 +109,11 @@ public class Item {
             }
         }
 
-        econ.withdrawPlayer(player, price.getBuyPrice()*amount*multiplier);
+        econ.withdrawPlayer(player, NUtils.round(price.getBuyPrice()*amount*multiplier, 2));
 
         player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(price.getBuyPrice()*amount*multiplier)).replace("[MATERIAL]", mat);
+        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(price.getBuyPrice()*amount*multiplier, 2)).replace("[MATERIAL]", mat)) + Config.getInstance().getCurrency();
 
         player.sendMessage(msg);
 
@@ -130,9 +131,9 @@ public class Item {
 
         player.getInventory().removeItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        Nascraft.getEconomy().depositPlayer(player, price.getSellPrice()*amount*multiplier);
+        Nascraft.getEconomy().depositPlayer(player, NUtils.round(price.getSellPrice()*amount*multiplier, 2));
 
-        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(price.getSellPrice()*amount*multiplier)).replace("[MATERIAL]", mat.replace("_", ""));
+        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(price.getSellPrice()*amount*multiplier, 2))).replace("[MATERIAL]", mat.replace("_", "")) + Config.getInstance().getCurrency();
 
         player.sendMessage(msg);
 

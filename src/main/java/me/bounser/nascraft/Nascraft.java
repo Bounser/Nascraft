@@ -5,11 +5,13 @@ import de.leonhard.storage.util.FileUtils;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.commands.MarketCommand;
 import me.bounser.nascraft.commands.NascraftCommand;
+import me.bounser.nascraft.commands.SellCommand;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.Data;
 import me.leoko.advancedgui.manager.LayoutManager;
+import me.bounser.nascraft.tools.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -41,12 +43,15 @@ public final class Nascraft extends JavaPlugin {
             new PAPIExpansion(this).register();
         }
 
+        new Metrics(this, 18404);
+
         if (Config.getInstance().getCheckResources()) { checkResources(); }
 
         MarketManager.getInstance();
 
         getCommand("nascraft").setExecutor(new NascraftCommand());
         getCommand("market").setExecutor(new MarketCommand());
+        getCommand("sell").setExecutor(new SellCommand());
 
         LayoutManager.getInstance().registerLayoutExtension(LayoutModifier.getInstance(), this);
     }

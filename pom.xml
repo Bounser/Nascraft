@@ -6,7 +6,7 @@
 
     <groupId>me.bounser</groupId>
     <artifactId>Nascraft</artifactId>
-    <version>1.2.2</version>
+    <version>1.2.3</version>
     <packaging>jar</packaging>
 
     <name>Nascraft</name>
@@ -61,7 +61,7 @@
                     <relocations>
                         <relocation>
                             <pattern>de.leonhard.storage</pattern>
-                            <shadedPattern>nascraft.bounser.storage</shadedPattern>
+                            <shadedPattern>me.bounser.nascraft.tools.storage</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

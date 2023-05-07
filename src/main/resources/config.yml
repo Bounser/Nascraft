@@ -167,8 +167,12 @@ Market_control:
   market_permission: true
 
 Lang:
+  # Sell message:
+  sellmsg: "You are going to sell [MATERIAL] for an approximate amount of [WORTH]\nWrite "
   # Specify the currency to be used next to prices.
   currency: "€"
+
+  # LAYOUT TEXTS:
   # Main title.
   title: "Item Market"
   # Available placeholders: [AMOUNT], [MATERIAL], [WORTH]
