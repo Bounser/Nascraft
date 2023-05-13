@@ -33,7 +33,7 @@ public class NascraftCommand implements CommandExecutor {
                 break;
             case "info":
                 for (Item item : MarketManager.getInstance().getAllItems()) {
-                    sender.sendMessage(ChatColor.GRAY + "Mat: " + item.getMaterial() + " price: " + item.getPrice() + " stock: " + item.getPrice().getStock());
+                    sender.sendMessage(ChatColor.GRAY + "Mat: " + item.getMaterial() + " value: " + item.getPrice().getValue() + " stock: " + item.getPrice().getStock());
                 }
                 break;
             case "locate":
