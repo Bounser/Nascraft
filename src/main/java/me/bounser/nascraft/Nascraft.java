@@ -6,10 +6,11 @@ import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.commands.MarketCommand;
 import me.bounser.nascraft.commands.NascraftCommand;
 import me.bounser.nascraft.commands.SellCommand;
+import me.bounser.nascraft.database.Data;
+import me.bounser.nascraft.database.SQLManager;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.Data;
 import me.leoko.advancedgui.manager.LayoutManager;
 import me.bounser.nascraft.tools.Metrics;
 import org.bukkit.Bukkit;
@@ -24,6 +25,7 @@ public final class Nascraft extends JavaPlugin {
 
     private static Nascraft main;
     private static Economy econ = null;
+    private SQLManager sqlManager;
 
     public static Nascraft getInstance() { return main; }
 
@@ -31,6 +33,9 @@ public final class Nascraft extends JavaPlugin {
     public void onEnable() {
 
         main = this;
+
+        new Metrics(this, 18404);
+
         Config.getInstance();
 
         if (!setupEconomy()) {
@@ -42,8 +47,6 @@ public final class Nascraft extends JavaPlugin {
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PAPIExpansion(this).register();
         }
-
-        new Metrics(this, 18404);
 
         if (Config.getInstance().getCheckResources()) { checkResources(); }
 
@@ -57,7 +60,7 @@ public final class Nascraft extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() { Data.getInstance().savePrices(); }
+    public void onDisable() { Data.getInstance().shutdownDatabase(); }
 
     public static Economy getEconomy() { return econ; }
 
@@ -104,5 +107,4 @@ public final class Nascraft extends JavaPlugin {
             getLogger().info("Layout present and in the correct version.");
         }
     }
-
 }

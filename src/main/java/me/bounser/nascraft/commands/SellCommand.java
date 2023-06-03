@@ -3,7 +3,7 @@ package me.bounser.nascraft.commands;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.NUtils;
+import me.bounser.nascraft.tools.RoundUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -45,7 +45,7 @@ public class SellCommand implements CommandExecutor {
 
                 if(item != null) {
 
-                    String text = ChatColor.GRAY + "Estimated value: \n\n> " + ChatColor.GOLD + handItems.getType() +" x "+ handItems.getAmount() +" = "+ NUtils.round(handItems.getAmount()*item.getPrice().getSellPrice(),2) + Config.getInstance().getCurrency() + "\n  ";
+                    String text = ChatColor.GRAY + "Estimated value: \n\n> " + ChatColor.GOLD + handItems.getType() +" x "+ handItems.getAmount() +" = "+ RoundUtils.round(handItems.getAmount()*item.getPrice().getSellPrice()) + Config.getInstance().getCurrency() + "\n  ";
 
                     TextComponent message = new TextComponent("\n " + ChatColor.GOLD + "[ Click here to confirm ]\n");
                     message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sell confirm"));

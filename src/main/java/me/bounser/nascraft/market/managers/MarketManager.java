@@ -1,9 +1,9 @@
 package me.bounser.nascraft.market.managers;
 
+import me.bounser.nascraft.database.Data;
 import me.bounser.nascraft.market.managers.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.Data;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,8 @@ public class MarketManager {
             }
         }
 
-        Data.getInstance().setupFiles(categories);
+        Data.getInstance().setupDatabase(categories);
+
         TasksManager.getInstance();
         GraphManager.getInstance();
     }

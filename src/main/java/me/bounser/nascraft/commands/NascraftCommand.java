@@ -2,7 +2,7 @@ package me.bounser.nascraft.commands;
 
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.tools.Data;
+import me.bounser.nascraft.database.JsonManager;
 import me.leoko.advancedgui.manager.GuiWallManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -28,12 +28,12 @@ public class NascraftCommand implements CommandExecutor {
 
         switch(args[0]){
             case "save":
-                Data.getInstance().savePrices();
+                JsonManager.getInstance().savePrices();
                 sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Data saved.");
                 break;
             case "info":
                 for (Item item : MarketManager.getInstance().getAllItems()) {
-                    sender.sendMessage(ChatColor.GRAY + "Mat: " + item.getMaterial() + " price: " + item.getPrice() + " stock: " + item.getPrice().getStock());
+                    sender.sendMessage(ChatColor.GRAY + "Mat: " + item.getMaterial() + " value: " + item.getPrice().getValue() + " stock: " + item.getPrice().getStock());
                 }
                 break;
             case "locate":

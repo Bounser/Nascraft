@@ -8,6 +8,7 @@ import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.NUtils;
 import me.bounser.nascraft.market.managers.resources.TimeSpan;
+import me.bounser.nascraft.tools.RoundUtils;
 import me.leoko.advancedgui.utils.LayoutExtension;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.events.GuiInteractionBeginEvent;
@@ -174,7 +175,7 @@ public class LayoutModifier implements LayoutExtension {
                     cTree.locate("t" + i + j + "2", TextComponent.class).setText(cat.getItemOfIndex(j-1).getPrice().getValue() + Config.getInstance().getCurrency());
 
                     ImageComponent ic = cTree.locate("asdi" + i + "" + j, ImageComponent.class);
-                    ic.setImage(NUtils.getImage(cat.getItemOfIndex(j - 1).getMaterial(), 32, 32, false));
+                    ic.setImage(Images.getInstance().getImage(cat.getItemOfIndex(j - 1).getMaterial(), 32, 32, false));
 
                     int finalJ = j;
                     ic.setClickAction((interaction, p, primaryTrigger) -> {
@@ -203,8 +204,8 @@ public class LayoutModifier implements LayoutExtension {
             ImageComponent ic = icTree.locate("trend", ImageComponent.class);
 
             BufferedImage bi = (BufferedImage) ic.getImage();
-            if (!NUtils.areEqual(NUtils.getImage(max.getMaterial(), 33, 33, false), bi)) {
-                ic.setImage(NUtils.getImage(max.getMaterial(), 33, 33, false));
+            if (!Images.areEqual(Images.getInstance().getImage(max.getMaterial(), 33, 33, false), bi)) {
+                ic.setImage(Images.getInstance().getImage(max.getMaterial(), 33, 33, false));
             }
 
             Item finalMax = max;
@@ -227,7 +228,7 @@ public class LayoutModifier implements LayoutExtension {
             Item imax = items.get(0);
             for (Item item : items) {
 
-                float variation = NUtils.roundToOne(-100 + 100*(item.getPrice().getValue()/item.getPrices(TimeSpan.MINUTE).get(0)));
+                float variation = RoundUtils.roundToOne(-100 + 100*(item.getPrice().getValue()/item.getPrices(TimeSpan.MINUTE).get(0)));
 
                 if (variation != 0) {
                     if (abs(variation) > abs(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.MINUTE).get(0)))){
@@ -240,8 +241,8 @@ public class LayoutModifier implements LayoutExtension {
             ImageComponent ic = icTree.locate("top" + i, ImageComponent.class);
 
             BufferedImage bi = (BufferedImage) ic.getImage();
-            if (!NUtils.areEqual(NUtils.getImage(imax.getMaterial(), 33, 33, false), bi)) {
-                ic.setImage(NUtils.getImage(imax.getMaterial(), 33, 33, false));
+            if (!Images.areEqual(Images.getInstance().getImage(imax.getMaterial(), 33, 33, false), bi)) {
+                ic.setImage(Images.getInstance().getImage(imax.getMaterial(), 33, 33, false));
             }
 
             Item finalImax = imax;
@@ -250,7 +251,7 @@ public class LayoutModifier implements LayoutExtension {
                 interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(finalImax.getMaterial());
             });
 
-            float fvar = NUtils.roundToOne(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.MINUTE).get(0)));
+            float fvar = RoundUtils.roundToOne(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.MINUTE).get(0)));
 
             if (fvar != 0){
                 if (fvar > 0) {

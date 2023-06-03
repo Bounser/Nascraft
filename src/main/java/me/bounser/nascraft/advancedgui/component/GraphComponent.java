@@ -1,11 +1,13 @@
 package me.bounser.nascraft.advancedgui.component;
 
+import me.bounser.nascraft.advancedgui.Images;
 import me.bounser.nascraft.market.unit.GraphData;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.NUtils;
 import me.bounser.nascraft.market.managers.resources.TimeSpan;
+import me.bounser.nascraft.tools.RoundUtils;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
@@ -122,8 +124,8 @@ public class GraphComponent extends RectangularComponent {
             }
         } else {
             for (int i : Arrays.asList(1, 16, 64)) {
-                ct.locate("buyprice" + i, TextComponent.class).setText(NUtils.round(getItem().getPrice().getBuyPrice()*i*childs.get(childsMat.get(0)), 2) + Config.getInstance().getCurrency());
-                ct.locate("sellprice" + i, TextComponent.class).setText(NUtils.round(getItem().getPrice().getSellPrice()*i*childs.get(childsMat.get(0)), 2) + Config.getInstance().getCurrency());
+                ct.locate("buyprice" + i, TextComponent.class).setText(RoundUtils.round(getItem().getPrice().getBuyPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
+                ct.locate("sellprice" + i, TextComponent.class).setText(RoundUtils.round(getItem().getPrice().getSellPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
             }
         }
     }
@@ -140,7 +142,7 @@ public class GraphComponent extends RectangularComponent {
         graphData = item.getGraphData(TimeSpan.MINUTE);
 
         ImageComponent ic = childComponents.locate("MainImage", ImageComponent.class);
-        ic.setImage(NUtils.getImage(mat, 60, 60, true));
+        ic.setImage(Images.getInstance().getImage(mat, 60, 60, true));
 
         mainText.setText(item.getName());
 
@@ -178,7 +180,7 @@ public class GraphComponent extends RectangularComponent {
         for (int i = 1; i <= 8 ; i++) {
 
             if (childs.keySet().size() >= i) {
-                childComponents.locate("child" + i, ImageComponent.class).setImage(NUtils.getImage(childsMat.get(i-1), 32, 32, true));
+                childComponents.locate("child" + i, ImageComponent.class).setImage(Images.getInstance().getImage(childsMat.get(i-1), 32, 32, true));
                 childComponents.locate("child" + i, ImageComponent.class).setHidden(false);
             } else {
                 childComponents.locate("child" + i, ImageComponent.class).setHidden(true);
@@ -190,7 +192,7 @@ public class GraphComponent extends RectangularComponent {
             childComponents.locate("minichild").setHidden(true);
         } else {
             childComponents.locate("minichild").setHidden(false);
-            childComponents.locate("childper", ImageComponent.class).setImage(NUtils.getImage(childsMat.get(0), 26, 26, true));
+            childComponents.locate("childper", ImageComponent.class).setImage(Images.getInstance().getImage(childsMat.get(0), 26, 26, true));
         }
         updateButtonPrice();
     }

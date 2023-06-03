@@ -4,8 +4,8 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.managers.resources.Category;
 import me.bounser.nascraft.market.managers.resources.TimeSpan;
 import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.Data;
-import me.bounser.nascraft.tools.NUtils;
+import me.bounser.nascraft.database.JsonManager;
+import me.bounser.nascraft.tools.RoundUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -20,7 +20,7 @@ public class Item {
 
     private final String mat;
     private final String alias;
-    private final Category cat;
+    private final Category category;
 
     private final Price price;
 
@@ -51,13 +51,13 @@ public class Item {
         this.alias = alias;
 
         this.price = new Price(setupPrices(),
-                Data.getInstance().getStock(mat),
+                Config.getInstance().getStock(mat),
                 Config.getInstance().getElasticity(mat, category.getName()),
                 Config.getInstance().getSupport(mat, category.getName()),
                 Config.getInstance().getResistance(mat, category.getName()),
                 Config.getInstance().getNoiseIntensity(mat, category.getName()));
 
-        cat = category;
+        this.category = category;
         operations = 0;
         this.childs = Config.getInstance().getChilds(material, category.getName());
 
@@ -70,10 +70,10 @@ public class Item {
     public String getName() { return alias; }
 
     public float setupPrices() {
-        pricesM = Data.getInstance().getMPrice(mat);
-        pricesH = Data.getInstance().getHPrice(mat);
-        pricesMM = Data.getInstance().getMMPrice(mat);
-        pricesY = Data.getInstance().getYPrice(mat);
+        pricesM = JsonManager.getInstance().getMPrice(mat);
+        pricesH = JsonManager.getInstance().getHPrice(mat);
+        pricesMM = JsonManager.getInstance().getMMPrice(mat);
+        pricesY = JsonManager.getInstance().getYPrice(mat);
 
         return pricesM.get(pricesM.size()-1);
     }
@@ -109,11 +109,11 @@ public class Item {
             }
         }
 
-        econ.withdrawPlayer(player, NUtils.round(price.getBuyPrice()*amount*multiplier, 2));
+        econ.withdrawPlayer(player, RoundUtils.round(price.getBuyPrice()*amount*multiplier));
 
         player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(price.getBuyPrice()*amount*multiplier, 2)).replace("[MATERIAL]", mat)) + Config.getInstance().getCurrency();
+        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getBuyPrice()*amount*multiplier)).replace("[MATERIAL]", mat)) + Config.getInstance().getCurrency();
 
         player.sendMessage(msg);
 
@@ -131,9 +131,9 @@ public class Item {
 
         player.getInventory().removeItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        Nascraft.getEconomy().depositPlayer(player, NUtils.round(price.getSellPrice()*amount*multiplier, 2));
+        Nascraft.getEconomy().depositPlayer(player, RoundUtils.round(price.getSellPrice()*amount*multiplier));
 
-        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(NUtils.round(price.getSellPrice()*amount*multiplier, 2))).replace("[MATERIAL]", mat.replace("_", "")) + Config.getInstance().getCurrency();
+        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getSellPrice()*amount*multiplier))).replace("[MATERIAL]", mat.replace("_", "")) + Config.getInstance().getCurrency();
 
         player.sendMessage(msg);
 
@@ -146,7 +146,7 @@ public class Item {
         pricesMM.remove(0);
         pricesMM.add(price.getValue());
 
-        pricesY = Data.getInstance().getYPrice(mat);
+        pricesY = JsonManager.getInstance().getYPrice(mat);
     }
 
     public String getMaterial() { return mat; }

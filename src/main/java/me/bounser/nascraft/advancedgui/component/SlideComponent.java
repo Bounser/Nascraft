@@ -4,6 +4,7 @@ import me.bounser.nascraft.market.unit.GraphData;
 import me.bounser.nascraft.tools.Config;
 import me.bounser.nascraft.tools.NUtils;
 import me.bounser.nascraft.market.managers.resources.TimeSpan;
+import me.bounser.nascraft.tools.RoundUtils;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
@@ -72,7 +73,7 @@ public class SlideComponent extends RectangularComponent {
 
         NumberFormat formatter = new DecimalFormat("#0.0");
 
-        textslide.setText(NUtils.round(value*multiplier, 2) + Config.getInstance().getCurrency());
+        textslide.setText(RoundUtils.round(value*multiplier) + Config.getInstance().getCurrency());
 
         if (values.get(0) > value) {
             perslide.setColor(new Color(255, 46, 46));

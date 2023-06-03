@@ -4,7 +4,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.managers.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.tools.NUtils;
+import me.bounser.nascraft.tools.RoundUtils;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 
@@ -68,7 +68,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
                     }
 
                     if(timeSpan != null)
-                        return String.valueOf(NUtils.round(-100 + item.getPrice().getValue() *100/item.getPrices(timeSpan).get(0), 1));
+                        return String.valueOf(RoundUtils.roundToOne(-100 + item.getPrice().getValue() *100/item.getPrices(timeSpan).get(0)));
 
                 default: return null;
             }

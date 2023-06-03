@@ -1,7 +1,7 @@
 package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.NUtils;
+import me.bounser.nascraft.tools.RoundUtils;
 
 public class Price {
 
@@ -27,10 +27,10 @@ public class Price {
         this.intensity = intensity;
     }
 
-    public float getValue() { return NUtils.round(value, 2); }
+    public float getValue() { return RoundUtils.round(value); }
 
-    public float getBuyPrice() { return NUtils.round(value * Config.getInstance().getTaxBuy(), 2); }
-    public float getSellPrice() { return NUtils.round(value * Config.getInstance().getTaxSell(), 2); }
+    public float getBuyPrice() { return RoundUtils.round(value * Config.getInstance().getTaxBuy()); }
+    public float getSellPrice() { return RoundUtils.round(value * Config.getInstance().getTaxSell()); }
 
     public void setStock(int stock) { this.stock = stock; }
 
@@ -38,7 +38,7 @@ public class Price {
 
     public void changeStock(int change) {
 
-        value += NUtils.round((float) (value*-change*0.0003*(1 + 0.5/(1+Math.exp(-stock*0.0001)))*elasticity), 5);
+        value += RoundUtils.round((float) (value*-change*0.0003*(1 + 0.5/(1+Math.exp(-stock*0.0001)))*elasticity));
 
         verifyChange();
         stock += change;
@@ -52,11 +52,11 @@ public class Price {
     public void applyNoise() {
 
         if (support != 0 && value < support && Math.random() > 0.8) {
-            value = NUtils.round((float) (value * (0.99 + 0.03 * Math.random() * intensity)), 5);
+            value = RoundUtils.preciseRound((float) (value * (0.99 + 0.03 * Math.random() * intensity)));
         } else if (resistance != 0 && value > resistance && Math.random() > 0.8) {
-            value = NUtils.round((float) (value * (1.01 - 0.03 * Math.random() * intensity)), 5);
+            value = RoundUtils.preciseRound((float) (value * (1.01 - 0.03 * Math.random() * intensity)));
         } else {
-            value = NUtils.round((float) (value * ((1 - 0.01 * intensity + 0.02 * Math.random() * intensity))), 5);
+            value = RoundUtils.preciseRound((float) (value * ((1 - 0.01 * intensity + 0.02 * Math.random() * intensity))));
         }
 
         verifyChange();
