@@ -44,6 +44,11 @@ public final class Nascraft extends JavaPlugin {
             return;
         }
 
+        if(Bukkit.getPluginManager().getPlugin("AdvancedGUI") == null) {
+            getLogger().warning("AdvancedGUI is not installed! Graphs won't work without it!");
+            getLogger().warning("Learn more about AdvancedGUI here: https://www.spigotmc.org/resources/83636/");
+        }
+
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PAPIExpansion(this).register();
         }
