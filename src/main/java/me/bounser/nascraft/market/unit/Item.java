@@ -1,11 +1,13 @@
 package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.market.managers.resources.Category;
-import me.bounser.nascraft.market.managers.resources.TimeSpan;
-import me.bounser.nascraft.tools.Config;
+import me.bounser.nascraft.database.Data;
+import me.bounser.nascraft.market.RoundUtils;
+import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.market.resources.Category;
+import me.bounser.nascraft.market.resources.TimeSpan;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.database.JsonManager;
-import me.bounser.nascraft.tools.RoundUtils;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -38,7 +40,7 @@ public class Item {
     // 30 (0-29) values representing the prices in the last 30 minutes.
     private List<Float> pricesM;
     // 24 (0-23) values representing the prices in all 24 hours of the day.
-    private List<Float> pricesH;
+    private List<Float> pricesD;
     // 30 (0-29) values representing the prices in the last month. *
     private List<Float> pricesMM;
     // 24 (0-23) values representing 2 prices each month. *
@@ -62,7 +64,7 @@ public class Item {
         this.childs = Config.getInstance().getChilds(material, category.getName());
 
         gd1 = new GraphData(TimeSpan.MINUTE, pricesM);
-        gd2 = new GraphData(TimeSpan.DAY, pricesH);
+        gd2 = new GraphData(TimeSpan.DAY, pricesD);
         gd3 = new GraphData(TimeSpan.MONTH, pricesMM);
         gd4 = new GraphData(TimeSpan.YEAR, pricesY);
     }
@@ -70,17 +72,17 @@ public class Item {
     public String getName() { return alias; }
 
     public float setupPrices() {
-        pricesM = JsonManager.getInstance().getMPrice(mat);
-        pricesH = JsonManager.getInstance().getHPrice(mat);
-        pricesMM = JsonManager.getInstance().getMMPrice(mat);
-        pricesY = JsonManager.getInstance().getYPrice(mat);
+        pricesM = Data.getInstance().getPrices(mat, TimeSpan.MINUTE);
+        pricesD = Data.getInstance().getPrices(mat, TimeSpan.DAY);
+        pricesMM = Data.getInstance().getPrices(mat, TimeSpan.MONTH);
+        pricesY = Data.getInstance().getPrices(mat, TimeSpan.YEAR);
 
         return pricesM.get(pricesM.size()-1);
     }
 
-    public void addValueToH(float value) {
-        pricesH.remove(0);
-        pricesH.add(value);
+    public void addValueToD(float value) {
+        pricesD.remove(0);
+        pricesD.add(value);
     }
 
     public void addValueToM(float value) {
@@ -89,6 +91,11 @@ public class Item {
     }
 
     public void buyItem(int amount, Player player, String mat, float multiplier) {
+
+        if(!MarketManager.getInstance().getState()) {
+            player.sendMessage(ChatColor.RED + "Error while buying: Shop is closed");
+            return;
+        }
 
         Economy econ = Nascraft.getEconomy();
 
@@ -113,7 +120,7 @@ public class Item {
 
         player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getBuyPrice()*amount*multiplier)).replace("[MATERIAL]", mat)) + Config.getInstance().getCurrency();
+        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getBuyPrice()*amount*multiplier)).replace("[MATERIAL]", getName())) + Config.getInstance().getCurrency();
 
         player.sendMessage(msg);
 
@@ -124,6 +131,11 @@ public class Item {
 
     public void sellItem(int amount, Player player, String mat, float multiplier) {
 
+        if(!MarketManager.getInstance().getState()) {
+            player.sendMessage(ChatColor.RED + "Error while selling: Shop is closed");
+            return;
+        }
+
         if (!player.getInventory().containsAtLeast(new ItemStack(Material.getMaterial(mat.toUpperCase())), amount)) {
             player.sendMessage(ChatColor.RED + "Not enough items to sell.");
             return;
@@ -133,7 +145,7 @@ public class Item {
 
         Nascraft.getEconomy().depositPlayer(player, RoundUtils.round(price.getSellPrice()*amount*multiplier));
 
-        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getSellPrice()*amount*multiplier))).replace("[MATERIAL]", mat.replace("_", "")) + Config.getInstance().getCurrency();
+        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getSellPrice()*amount*multiplier)).replace("[MATERIAL]", getName())) + Config.getInstance().getCurrency();
 
         player.sendMessage(msg);
 
@@ -156,7 +168,7 @@ public class Item {
     public List<Float> getPrices(TimeSpan timeSpan) {
         switch (timeSpan) {
             case MINUTE: return pricesM;
-            case DAY: return pricesH;
+            case DAY: return pricesD;
             case MONTH: return pricesMM;
             case YEAR: return pricesY;
             default: return null;

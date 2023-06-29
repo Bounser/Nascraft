@@ -1,14 +1,13 @@
 package me.bounser.nascraft.advancedgui;
 
-import me.bounser.nascraft.advancedgui.component.GraphComponent;
-import me.bounser.nascraft.advancedgui.component.SlideComponent;
-import me.bounser.nascraft.market.managers.resources.Category;
+import me.bounser.nascraft.advancedgui.components.GraphComponent;
+import me.bounser.nascraft.advancedgui.components.SlideComponent;
+import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.NUtils;
-import me.bounser.nascraft.market.managers.resources.TimeSpan;
-import me.bounser.nascraft.tools.RoundUtils;
+import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.market.resources.TimeSpan;
+import me.bounser.nascraft.market.RoundUtils;
 import me.leoko.advancedgui.utils.LayoutExtension;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.events.GuiInteractionBeginEvent;

@@ -2,8 +2,8 @@ package me.bounser.nascraft.commands;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.RoundUtils;
+import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.market.RoundUtils;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;

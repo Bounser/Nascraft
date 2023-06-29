@@ -166,9 +166,17 @@ Market_control:
   # Do players need the permission "nascraft.market" to operate directly with commands?
   market_permission: true
 
+Data_storage:
+  # Options: JSON, MYSQL
+  method: "JSON"
+  # Fill the following only if you are using MySQL
+  address: "localhost"
+  port: "3306"
+  database: "nascraft"
+  user: "root"
+  password: "password"
+
 Lang:
-  # Sell message:
-  sellmsg: "You are going to sell [MATERIAL] for an approximate amount of [WORTH]\nWrite "
   # Specify the currency to be used next to prices.
   currency: "€"
 

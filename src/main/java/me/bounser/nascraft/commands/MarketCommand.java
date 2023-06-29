@@ -2,7 +2,7 @@ package me.bounser.nascraft.commands;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.tools.Config;
+import me.bounser.nascraft.config.Config;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;

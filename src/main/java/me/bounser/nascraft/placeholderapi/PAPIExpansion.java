@@ -1,10 +1,10 @@
 package me.bounser.nascraft.placeholderapi;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.market.managers.resources.TimeSpan;
+import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.tools.RoundUtils;
+import me.bounser.nascraft.market.RoundUtils;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 

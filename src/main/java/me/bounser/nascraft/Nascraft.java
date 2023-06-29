@@ -7,12 +7,11 @@ import me.bounser.nascraft.commands.MarketCommand;
 import me.bounser.nascraft.commands.NascraftCommand;
 import me.bounser.nascraft.commands.SellCommand;
 import me.bounser.nascraft.database.Data;
-import me.bounser.nascraft.database.SQLManager;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
-import me.bounser.nascraft.tools.Config;
+import me.bounser.nascraft.config.Config;
 import me.leoko.advancedgui.manager.LayoutManager;
-import me.bounser.nascraft.tools.Metrics;
+import me.bounser.nascraft.bstats.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,7 +24,9 @@ public final class Nascraft extends JavaPlugin {
 
     private static Nascraft main;
     private static Economy econ = null;
-    private SQLManager sqlManager;
+
+    // AdvancedGUI version used to test the plugin.
+    private final String AdvancedGUI_version = "2.2.6";
 
     public static Nascraft getInstance() { return main; }
 
@@ -44,9 +45,11 @@ public final class Nascraft extends JavaPlugin {
             return;
         }
 
-        if(Bukkit.getPluginManager().getPlugin("AdvancedGUI") == null) {
+        if (Bukkit.getPluginManager().getPlugin("AdvancedGUI") == null) {
             getLogger().warning("AdvancedGUI is not installed! Graphs won't work without it!");
             getLogger().warning("Learn more about AdvancedGUI here: https://www.spigotmc.org/resources/83636/");
+        } else if (!Bukkit.getPluginManager().getPlugin("AdvancedGUI").getDescription().getVersion().equals(AdvancedGUI_version)){
+            getLogger().warning("This plugin was made using AdvancedGUI " + AdvancedGUI_version + "! You may encounter errors on other versions");
         }
 
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {

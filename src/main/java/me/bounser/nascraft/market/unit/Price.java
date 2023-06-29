@@ -1,7 +1,7 @@
 package me.bounser.nascraft.market.unit;
 
-import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.RoundUtils;
+import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.market.RoundUtils;
 
 public class Price {
 

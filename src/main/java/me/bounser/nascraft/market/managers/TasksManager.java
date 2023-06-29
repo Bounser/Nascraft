@@ -2,13 +2,15 @@ package me.bounser.nascraft.market.managers;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
+import me.bounser.nascraft.database.Data;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.tools.Config;
-import me.bounser.nascraft.tools.Data;
+import me.bounser.nascraft.config.Config;
 import me.leoko.advancedgui.manager.GuiWallManager;
 import me.leoko.advancedgui.utils.GuiWallInstance;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+
+import java.sql.SQLException;
 
 public class TasksManager {
 
@@ -60,8 +62,13 @@ public class TasksManager {
         // All the prices will be stored each hour
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
-            for (Item item : MarketManager.getInstance().getAllItems()) item.addValueToH(item.getPrice().getValue());
-            Data.getInstance().savePrices();
+            for (Item item : MarketManager.getInstance().getAllItems()) item.addValueToD(item.getPrice().getValue());
+
+            try {
+                Data.getInstance().updateData();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
 
         }, 30000, 72000);
     }

@@ -1,9 +1,9 @@
 package me.bounser.nascraft.market.managers;
 
 import me.bounser.nascraft.database.Data;
-import me.bounser.nascraft.market.managers.resources.Category;
+import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.tools.Config;
+import me.bounser.nascraft.config.Config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,8 @@ public class MarketManager {
 
     private final List<Item> items = new ArrayList<>();
     private final List<Category> categories = new ArrayList<>();
+
+    private boolean active = true;
 
     private static MarketManager instance = null;
 
@@ -53,5 +55,10 @@ public class MarketManager {
     public List<Category> getCategories() { return categories; }
 
     public List<Item> getAllItems() { return items; }
+
+    public void stop() { active = false; }
+    public void resume() { active = true; }
+
+    public boolean getState() { return active; }
 
 }

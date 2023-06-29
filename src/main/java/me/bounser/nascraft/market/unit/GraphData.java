@@ -1,7 +1,7 @@
 package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.market.managers.GraphManager;
-import me.bounser.nascraft.market.managers.resources.TimeSpan;
+import me.bounser.nascraft.market.resources.TimeSpan;
 
 import java.util.Collections;
 import java.util.List;
