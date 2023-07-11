@@ -8,23 +8,28 @@ public class Price {
     // Current neutral price
     private float value;
 
+    // The counter will keep track of the short-term changes on stock.
+    private int counter = 0;
+
+    // Tolerance threshold. Once the stock changes this amount the price will be affected.
+    private final int threshold;
+
     private int stock;
 
     // Advanced metrics
-    private final float elasticity;
     private final float support;
     private final float resistance;
-    private final float intensity;
+    private final float noiseIntensity;
 
-    public Price(float price, int stock, float elasticity, float support, float resistance, float intensity) {
+    public Price(float price, int stock, float elasticity, float support, float resistance, float noiseIntensity) {
         value = price;
 
         this.stock = stock;
-
-        this.elasticity = elasticity;
         this.support = support;
         this.resistance = resistance;
-        this.intensity = intensity;
+        this.noiseIntensity = noiseIntensity;
+
+        threshold = Math.min(Math.round(64*(1/elasticity)), 1);
     }
 
     public float getValue() { return RoundUtils.round(value); }
@@ -38,9 +43,32 @@ public class Price {
 
     public void changeStock(int change) {
 
-        value += RoundUtils.round((float) (value*-change*0.0003*(1 + 0.5/(1+Math.exp(-stock*0.0001)))*elasticity));
+        counter += change;
 
-        verifyChange();
+        while(counter <= -threshold) {
+
+            if(stock <= 0)
+                value += RoundUtils.round((float) (value * 0.01 * Math.log10(-stock+2)));
+            else
+                value += RoundUtils.round((float) (value * 0.01));
+
+            verifyChange();
+
+            counter += threshold;
+        }
+
+        while(counter >= threshold) {
+
+            if(stock > 0)
+                value -= RoundUtils.round((float) (value * 0.01 * Math.log10(stock+2)));
+            else
+                value -= RoundUtils.round((float) (value * 0.01));
+
+            verifyChange();
+
+            counter -= threshold;
+        }
+
         stock += change;
     }
 
@@ -52,14 +80,18 @@ public class Price {
     public void applyNoise() {
 
         if (support != 0 && value < support && Math.random() > 0.8) {
-            value = RoundUtils.preciseRound((float) (value * (0.99 + 0.03 * Math.random() * intensity)));
-        } else if (resistance != 0 && value > resistance && Math.random() > 0.8) {
-            value = RoundUtils.preciseRound((float) (value * (1.01 - 0.03 * Math.random() * intensity)));
-        } else {
-            value = RoundUtils.preciseRound((float) (value * ((1 - 0.01 * intensity + 0.02 * Math.random() * intensity))));
-        }
 
+            value = RoundUtils.preciseRound((float) (value * (0.99 + 0.03 * Math.random() * noiseIntensity)));
+
+        } else if (resistance != 0 && value > resistance && Math.random() > 0.8) {
+
+            value = RoundUtils.preciseRound((float) (value * (1.01 - 0.03 * Math.random() * noiseIntensity)));
+
+        } else {
+
+            value = RoundUtils.preciseRound((float) (value * ((1 - 0.01 * noiseIntensity + 0.02 * Math.random() * noiseIntensity))));
+
+        }
         verifyChange();
     }
-
 }
