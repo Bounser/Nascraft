@@ -2,6 +2,7 @@ package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.RoundUtils;
+import org.bukkit.Bukkit;
 
 public class Price {
 
@@ -29,7 +30,7 @@ public class Price {
         this.resistance = resistance;
         this.noiseIntensity = noiseIntensity;
 
-        threshold = Math.min(Math.round(64*(1/elasticity)), 1);
+        threshold = Math.max(Math.round(64*(1/elasticity)), 1);
     }
 
     public float getValue() { return RoundUtils.round(value); }
@@ -48,9 +49,12 @@ public class Price {
         while(counter <= -threshold) {
 
             if(stock <= 0)
-                value += RoundUtils.round((float) (value * 0.01 * Math.log10(-stock+2)));
+                value += Math.max(RoundUtils.round((float) (value * 0.01 * Math.log10(-stock+10))), 0.01);
             else
-                value += RoundUtils.round((float) (value * 0.01));
+                value += Math.max(RoundUtils.round((float) (value * 0.01)), 0.01);
+
+            Bukkit.broadcastMessage("change with stock: " + (Math.max(RoundUtils.round((float) (value * 0.01 * Math.log10(-stock+10))), 0.01)));
+            Bukkit.broadcastMessage("change without stock: " + (Math.max(RoundUtils.round((float) (value * 0.01)), 0.01)));
 
             verifyChange();
 
@@ -60,9 +64,12 @@ public class Price {
         while(counter >= threshold) {
 
             if(stock > 0)
-                value -= RoundUtils.round((float) (value * 0.01 * Math.log10(stock+2)));
+                value -= Math.max(RoundUtils.round((float) (value * 0.01 * Math.log10(stock+10))), 0.01);
             else
-                value -= RoundUtils.round((float) (value * 0.01));
+                value -= Math.max(RoundUtils.round((float) (value * 0.01)), 0.01);
+
+            Bukkit.broadcastMessage("change with stock: " + (Math.max(RoundUtils.round((float) (value * 0.01 * Math.log10(stock+10))), 0.01)));
+            Bukkit.broadcastMessage("change without stock: " + (Math.max(RoundUtils.round((float) (value * 0.01)), 0.01)));
 
             verifyChange();
 
@@ -70,6 +77,8 @@ public class Price {
         }
 
         stock += change;
+
+        Bukkit.broadcastMessage("counter: " + counter + " threshold: " + threshold + " change: " + change + " stock: " + stock);
     }
 
     public void verifyChange() {

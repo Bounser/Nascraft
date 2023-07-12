@@ -24,7 +24,7 @@ public class Images {
 
         BufferedImage image = null;
         try {
-            InputStream input = Nascraft.getInstance().getResource("Material_Images_1-20-1/" + material + ".png");
+            InputStream input = Nascraft.getInstance().getResource("1-20-1-Images/" + material + ".png");
             assert input != null;
             image = ImageIO.read(input);
         } catch (IOException e) {
