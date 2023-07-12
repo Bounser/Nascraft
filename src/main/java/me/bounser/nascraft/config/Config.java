@@ -206,9 +206,9 @@ public class Config {
     }
 
 
-    public String mode() {
-        return config.getString("Data_storage.method");
-    }
+    // public String mode() { return config.getString("Data_storage.method"); }
+
+    public String mode() { return "JSON"; }
     public String address() {
         return config.getString("Data_storage.address");
     }

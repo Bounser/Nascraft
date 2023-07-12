@@ -22,8 +22,8 @@ Items_quoted:
           # when the price deviates due to player actions.
           support: 0.8
           resistance: 2
-          # OPTIONAL: The elasticity of an item determines the degree of deviation caused by player movements.
-          elasticity: 0.53
+          # OPTIONAL: The elasticity determines the item's predisposition to react to changes in stock.
+          elasticity: 0.65
           # OPTIONAL: The intensity of the noise determines the magnitude of the random fluctuations.
           noise_intensity: 1.4
           # Child items. The price of these items will be determined by their parent item.
@@ -146,7 +146,7 @@ Price_options:
   # Set limits on the minimum and maximum prices.
   limits:
     low: 0.05
-    high: 99999
+    high: 9999
   # With noise enabled, prices will vary over time in a pseudo-random manner.
   noise:
     enabled: true
@@ -165,16 +165,6 @@ Market_control:
     buy: 0.04
   # Do players need the permission "nascraft.market" to operate directly with commands?
   market_permission: true
-
-Data_storage:
-  # Options: JSON, MYSQL
-  method: "JSON"
-  # Fill the following only if you are using MySQL
-  address: "localhost"
-  port: "3306"
-  database: "nascraft"
-  user: "root"
-  password: "password"
 
 Lang:
   # Specify the currency to be used next to prices.

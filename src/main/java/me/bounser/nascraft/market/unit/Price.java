@@ -53,9 +53,6 @@ public class Price {
             else
                 value += Math.max(RoundUtils.round((float) (value * 0.01)), 0.01);
 
-            Bukkit.broadcastMessage("change with stock: " + (Math.max(RoundUtils.round((float) (value * 0.01 * Math.log10(-stock+10))), 0.01)));
-            Bukkit.broadcastMessage("change without stock: " + (Math.max(RoundUtils.round((float) (value * 0.01)), 0.01)));
-
             verifyChange();
 
             counter += threshold;
@@ -68,9 +65,6 @@ public class Price {
             else
                 value -= Math.max(RoundUtils.round((float) (value * 0.01)), 0.01);
 
-            Bukkit.broadcastMessage("change with stock: " + (Math.max(RoundUtils.round((float) (value * 0.01 * Math.log10(stock+10))), 0.01)));
-            Bukkit.broadcastMessage("change without stock: " + (Math.max(RoundUtils.round((float) (value * 0.01)), 0.01)));
-
             verifyChange();
 
             counter -= threshold;
@@ -78,7 +72,6 @@ public class Price {
 
         stock += change;
 
-        Bukkit.broadcastMessage("counter: " + counter + " threshold: " + threshold + " change: " + change + " stock: " + stock);
     }
 
     public void verifyChange() {

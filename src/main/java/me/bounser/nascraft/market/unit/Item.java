@@ -120,7 +120,7 @@ public class Item {
 
         player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
 
-        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getBuyPrice()*amount*multiplier)).replace("[MATERIAL]", getName())) + Config.getInstance().getCurrency();
+        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getBuyPrice()*amount*multiplier))).replace("[MATERIAL]", getName()) + Config.getInstance().getCurrency();
 
         player.sendMessage(msg);
 
@@ -145,7 +145,7 @@ public class Item {
 
         Nascraft.getEconomy().depositPlayer(player, RoundUtils.round(price.getSellPrice()*amount*multiplier));
 
-        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getSellPrice()*amount*multiplier)).replace("[MATERIAL]", getName())) + Config.getInstance().getCurrency();
+        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getSellPrice()*amount*multiplier))).replace("[MATERIAL]", getName()) + Config.getInstance().getCurrency();
 
         player.sendMessage(msg);
 
