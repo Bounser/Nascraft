@@ -6,6 +6,7 @@ import me.bounser.nascraft.config.Config;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Category {
 
     private final String name;
@@ -15,28 +16,16 @@ public class Category {
         this.name = name;
     }
 
-    public void addItem(Item item) {
-        items.add(item);
-    }
+    public void addItem(Item item) { items.add(item); }
 
-    public int getNumOfItems() {
-        return items.size();
-    }
+    public int getNumberOfItems() { return items.size(); }
 
-    public Item getItemOfIndex(int index) {
-        return items.get(index);
-    }
+    public Item getItemOfIndex(int index) { return items.get(index); }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
 
-    public List<Item> getItems() {
-        return items;
-    }
+    public List<Item> getItems() { return items; }
 
-    public String getDisplayName() {
-        return Config.getInstance().getDisplayName(this);
-    }
+    public String getDisplayName() { return Config.getInstance().getDisplayName(this); }
 
 }

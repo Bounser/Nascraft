@@ -1,0 +1,43 @@
+Categories:
+  # Reference of the category. Categories are displayed in the main menu.
+  1:
+    # Display name of the category (cannot be very long).
+    name: "Stone age"
+    # Items within the category.
+    items:
+      # Material of the item.
+      - "cobblestone"
+      - "stone"
+      - "cobbled_deepslate"
+  2:
+    name: "Tech"
+    items:
+      - "redstone"
+      - "redstone_torch"
+      - "repeater"
+      - "comparator"
+      - "piston"
+      - "observer"
+  3:
+    name: "In the woods"
+    items:
+      - "oak_log"
+      - "birch_log"
+  4:
+    name: "Valuables"
+    items:
+      - "diamond"
+      - "emerald"
+      - "raw_gold"
+  5:
+    name: "Utils"
+    items:
+      - "coal"
+      - "leather"
+  6:
+    name: "Ingots"
+    items:
+      - "iron_ingot"
+      - "copper_ingot"
+      - "gold_ingot"
+      - "netherite_ingot"

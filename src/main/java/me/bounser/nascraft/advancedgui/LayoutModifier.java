@@ -9,11 +9,13 @@ import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.RoundUtils;
 import me.leoko.advancedgui.utils.LayoutExtension;
+import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.events.GuiInteractionBeginEvent;
 import me.leoko.advancedgui.utils.events.GuiInteractionExitEvent;
 import me.leoko.advancedgui.utils.events.LayoutLoadEvent;
 
+import me.leoko.advancedgui.utils.interactions.Interaction;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 
@@ -27,7 +29,8 @@ public class LayoutModifier implements LayoutExtension {
     private SlideComponent sc = null;
     private GraphComponent gc = null;
 
-    public HashMap<Player, List<Category>> playerCategory;
+    public HashMap<Player, Category> playerCategory;
+    public HashMap<Player, Integer> playerOffset;
 
     private static LayoutModifier instance;
 
@@ -40,6 +43,7 @@ public class LayoutModifier implements LayoutExtension {
         if (!event.getLayout().getName().equals("Nascraft")) return;
 
         playerCategory = new HashMap<>();
+        playerOffset = new HashMap<>();
 
         GroupComponent cTree = event.getLayout().getTemplateComponentTree();
         GroupComponent TS = cTree.locate("TS1", GroupComponent.class); // Trade Screen
@@ -81,17 +85,11 @@ public class LayoutModifier implements LayoutExtension {
 
         // Arrows
         cTree.locate("ArrowUP").setClickAction((interaction, player, primaryTrigger) -> {
-            List<Category> categories = new ArrayList<>(playerCategory.get(player));
-            Collections.rotate(categories, -1);
-            playerCategory.put(player, new ArrayList<>(categories));
-            updateMainPage(interaction.getComponentTree(), false, player);
+            changeCategory(player, interaction, -1);
         });
 
         cTree.locate("ArrowDOWN").setClickAction((interaction, player, primaryTrigger) -> {
-            List<Category> categories = new ArrayList<>(playerCategory.get(player));
-            Collections.rotate(categories, 1);
-            playerCategory.put(player, new ArrayList<>(categories));
-            updateMainPage(interaction.getComponentTree(), false, player);
+            changeCategory(player, interaction, 1);
         });
 
         // Time Span selectors
@@ -120,8 +118,38 @@ public class LayoutModifier implements LayoutExtension {
                 g.updateButtonPrice();
             });
         }
-
         setLang(cTree);
+    }
+
+    public void changeCategory(Player player, Interaction interaction, int rotateDirection) {
+
+        if (playerCategory.get(player) == null) {
+            playerCategory.put(player, MarketManager.getInstance().getCategories().get(0));
+        } else {
+            Category category = playerCategory.get(player);
+            int indexOfCategory = MarketManager.getInstance().getCategories().indexOf(category);
+            switch (rotateDirection) {
+
+                case -1:
+
+                    if(indexOfCategory > 0) {
+                        playerCategory.put(player, MarketManager.getInstance().getCategories().get(indexOfCategory-1));
+                    } else {
+                        playerCategory.put(player, MarketManager.getInstance().getCategories().get(MarketManager.getInstance().getCategories().size()-1));
+                    }
+                    break;
+                case +1:
+
+                    if(indexOfCategory+2 >= MarketManager.getInstance().getCategories().size()) {
+                        playerCategory.put(player, MarketManager.getInstance().getCategories().get(indexOfCategory+1));
+                    } else {
+                        playerCategory.put(player, MarketManager.getInstance().getCategories().get(0));
+                    }
+                    break;
+            }
+        }
+        playerOffset.put(player, 0);
+        updateMainPage(interaction.getComponentTree(), false, player);
     }
 
     @EventHandler
@@ -129,7 +157,7 @@ public class LayoutModifier implements LayoutExtension {
 
         if (!event.getGuiInstance().getLayout().getName().equals("Nascraft")) return;
 
-        playerCategory.put(event.getPlayer(), MarketManager.getInstance().getCategories());
+        playerCategory.put(event.getPlayer(), MarketManager.getInstance().getCategories().get(0));
 
         updateMainPage(event.getInteraction().getComponentTree(), true, event.getPlayer());
     }
@@ -146,48 +174,105 @@ public class LayoutModifier implements LayoutExtension {
 
         if (allSections) {
             updateTrending(cTree);
-
             updateTopMovers(cTree);
         }
 
-        List<Category> categories;
+        List<Category> categories = new ArrayList<>();
+
         if (player == null) {
             categories = MarketManager.getInstance().getCategories();
         } else {
-            categories = playerCategory.get(player);
+
+            List<Category> defaultCategories = MarketManager.getInstance().getCategories();
+            Category category = playerCategory.get(player);
+            int indexOfCategory = defaultCategories.indexOf(category);
+
+            if(indexOfCategory + 2 <= defaultCategories.size()) {
+
+                categories.add(category);
+                categories.add(defaultCategories.get(indexOfCategory+1));
+                categories.add(defaultCategories.get(indexOfCategory+2));
+
+            } else if (indexOfCategory == defaultCategories.size() - 1) {
+
+                categories.add(category);
+                categories.add(defaultCategories.get(0));
+                categories.add(defaultCategories.get(1));
+
+            } else if (indexOfCategory == defaultCategories.size() - 2) {
+
+                categories.add(category);
+                categories.add(defaultCategories.get(indexOfCategory+1));
+                categories.add(defaultCategories.get(0));
+            }
         }
 
         cTree.locate("description", TextComponent.class).setText(categories.get(0).getDisplayName());
 
-        // Three rows.
         for (int i = 1; i <= 3; i++) {
+            Category category = categories.get(i - 1);
 
-            Category cat = categories.get(i - 1);
-            int numOfItems = cat.getNumOfItems();
+            if (i == 1 && category.getItems().size() > 6) {
 
-            // Six items per row.
-            for (int j = 1; j <= 6; j++) {
+                ImageComponent arrowRight = cTree.locate("ArrowRight", ImageComponent.class);
+                ImageComponent arrowLeft = cTree.locate("ArrowLeft", ImageComponent.class);
 
-                if (j <= numOfItems) {
-
-                    cTree.locate("t" + i + j + "1", TextComponent.class).setText(cat.getItemOfIndex(j-1).getPrice().getValue() + Config.getInstance().getCurrency());
-                    cTree.locate("t" + i + j + "2", TextComponent.class).setText(cat.getItemOfIndex(j-1).getPrice().getValue() + Config.getInstance().getCurrency());
-
-                    ImageComponent ic = cTree.locate("asdi" + i + "" + j, ImageComponent.class);
-                    ic.setImage(Images.getInstance().getImage(cat.getItemOfIndex(j - 1).getMaterial(), 32, 32, false));
-
-                    int finalJ = j;
-                    ic.setClickAction((interaction, p, primaryTrigger) -> {
-
-                        interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("TS1");
-                        interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(cat.getItemOfIndex(finalJ - 1).getMaterial());
-
-                    });
+                if (playerOffset.get(player) == null || playerOffset.get(player) == 0) {
+                    arrowRight.setHidden(false);
+                    arrowLeft.setHidden(true);
+                } else {
+                    if (playerOffset.get(player) >= (category.getItems().size())-6) {
+                        arrowRight.setHidden(true);
+                        arrowLeft.setHidden(false);
+                    } else {
+                        arrowRight.setHidden(false);
+                        arrowLeft.setHidden(false);
+                    }
                 }
-                cTree.locate("asdi" + i + "" + j, ImageComponent.class).setHidden(!(j <= numOfItems));
-                cTree.locate("t" + i + "" + j + "1", TextComponent.class).setHidden(!(j <= numOfItems));
-                cTree.locate("t" + i + "" + j + "2", TextComponent.class).setHidden(!(j <= numOfItems));
+                arrowRight.setClickAction((interaction, player1, primaryTrigger) -> {
+
+                    playerOffset.put(player1, playerOffset.get(player1)+1);
+                    renderRow(cTree, category, playerOffset.get(player1), 1);
+
+                });
+                arrowLeft.setClickAction((interaction, player1, primaryTrigger) -> {
+
+                    playerOffset.put(player1, playerOffset.get(player1)-1);
+                    renderRow(cTree, category, playerOffset.get(player1), 1);
+
+                });
+            } else {
+                renderRow(cTree, category, 0, i);
             }
+        }
+    }
+
+    public void renderRow(GroupComponent componentTree, Category category, int offset, int position) {
+
+        int numberOfItems = category.getItems().size();
+
+        // Six items per row.
+        for (int j = 1; j <= 6; j++) {
+
+            if (j <= numberOfItems) {
+
+                componentTree.locate("t" + position + j + "1", TextComponent.class).setText(category.getItemOfIndex(j-1).getPrice().getValue() + Config.getInstance().getCurrency());
+                componentTree.locate("t" + position + j + "2", TextComponent.class).setText(category.getItemOfIndex(j-1).getPrice().getValue() + Config.getInstance().getCurrency());
+
+                ImageComponent ic = componentTree.locate("asdi" + position + "" + j, ImageComponent.class);
+                ic.setImage(Images.getInstance().getImage(category.getItemOfIndex(j - 1).getMaterial(), 32, 32, false));
+
+                int finalJ = j;
+                ic.setClickAction((interaction, p, primaryTrigger) -> {
+
+                    interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("TS1");
+                    interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(category.getItemOfIndex(finalJ - 1).getMaterial());
+
+                });
+            }
+            componentTree.locate("asdi" + position + j, ImageComponent.class).setHidden(!(j <= numberOfItems));
+            componentTree.locate("t" + position + j + "1", TextComponent.class).setHidden(!(j <= numberOfItems));
+            componentTree.locate("t" + position + j + "2", TextComponent.class).setHidden(!(j <= numberOfItems));
         }
     }
 
