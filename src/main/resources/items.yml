@@ -1,0 +1,117 @@
+items:
+  # Material of the item.
+  cobblestone:
+    # OPTIONAL: Display name of the item. If not specified, the material (with the first letter capitalized and without underscores) will be displayed.
+    alias: "Cobble"
+    # REQUIRED: INITIAL price. This value will be disregarded once the market begins to establish its own valuations.
+    initial_price: 1.2
+    # OPTIONAL: You can have a support level, a resistance level, or both for each item.
+    # In this example, the item will fluctuate randomly between 0,3 - 2 and will try to go again to this range
+    # when the price deviates due to player actions.
+    support: 0.8
+    resistance: 2
+    # OPTIONAL: The elasticity determines the item's predisposition to react to changes in stock.
+    # With lower values items will require more interactions to change, and with higher values items will change more easily.
+    # This is especially useful with common objects such as cobblestone. At lower elasticity, players will have to sell/buy much more to influence the price.
+    elasticity: 0.65
+    # OPTIONAL: The intensity of the noise determines the magnitude of the random fluctuations.
+    noise_intensity: 1.4
+    # Child items. The price of these items will be determined by their parent item.
+    child:
+      cobblestone_slab:
+        # To make a cobblestone slab we only need half of a cobblestone block, so the price of the slab is half the price of the cobblestone.
+        # Therefore, the initial price will be 0.5 times the price of cobblestone, resulting in 0.6 for one slab in this example.
+        multiplier: 0.5
+      cobblestone_stairs:
+        # To make a cobblestone stair, we require six cobblestones, but we only get four stairs.
+        # Therefore, the price will be 6/4 = 3/2 = 1.5 times the price of cobblestone.
+        #
+        # NOTE: Keep in mind that this logic is not necessary, as you could choose to set the price of a stair as ten times the price of cobblestone.
+        # However, this would not make sense and would likely allow people to take advantage of the overvaluation.
+        multiplier: 1.5
+      cobblestone_wall:
+        # Spends 6, gets 6. Therefore, the ratio is 6/6 = 1/1 = 1.
+        multiplier: 1
+  stone:
+    initial_price: 1.5
+    support: 0.9
+    elasticity: 0.3
+    child:
+      stone_stairs:
+        multiplier: 1.5
+      stone_slab:
+        multiplier: 0.5
+      stone_pressure_plate:
+        multiplier: 2
+      stone_button:
+        multiplier: 1
+  cobbled_deepslate:
+    initial_price: 0.7
+    child:
+      cobbled_deepslate_stairs:
+        multiplier: 1.5
+      cobbled_deepslate_slab:
+        multiplier: 0.5
+      cobbled_deepslate_wall:
+        multiplier: 1
+  redstone:
+    initial_price: 2
+    child:
+      redstone_block:
+        multiplier: 9
+  redstone_torch:
+    initial_price: 3
+  repeater:
+    initial_price: 6
+  comparator:
+    initial_price: 10
+  piston:
+    initial_price: 9
+  observer:
+    initial_price: 8
+  oak_log:
+    initial_price: 1
+    child:
+      oak_planks:
+        multiplier: 0.25
+      oak_stairs:
+        multiplier: 0.375
+      oak_slab:
+        multiplier: 0.125
+      stick:
+        multiplier: 0.0625
+  birch_log:
+    initial_price: 1
+    child:
+      birch_planks:
+        multiplier: 0.25
+      birch_stairs:
+        multiplier: 0.375
+      birch_slab:
+        multiplier: 0.125
+      stick:
+        multiplier: 0.0625
+  diamond:
+    initial_price: 100
+    resistance: 300
+  emerald:
+    initial_price: 50
+    resistance: 100
+    support: 30
+  raw_gold:
+    initial_price: 20
+  coal:
+    initial_price: 4
+    child:
+      charcoal:
+        multiplier: 1
+  leather:
+    initial_price: 10
+  iron_ingot:
+    initial_price: 4
+  copper_ingot:
+    initial_price: 3
+  gold_ingot:
+    initial_price: 10
+  netherite_ingot:
+    initial_price: 500

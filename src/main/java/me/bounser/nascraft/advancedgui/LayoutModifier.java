@@ -16,6 +16,7 @@ import me.leoko.advancedgui.utils.events.GuiInteractionExitEvent;
 import me.leoko.advancedgui.utils.events.LayoutLoadEvent;
 
 import me.leoko.advancedgui.utils.interactions.Interaction;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 
@@ -109,12 +110,12 @@ public class LayoutModifier implements LayoutExtension {
         for (int j : Arrays.asList(1,16,64)) {
             cTree.locate("buy" + j).setClickAction((interaction, player, primaryTrigger) -> {
                 GraphComponent g = interaction.getComponentTree().locate("graph1", GraphComponent.class);
-                g.getItem().buyItem(j, player, g.getMat(), g.getMultiplier());
+                g.getItem().buyItem(j, player, g.getMultiplier());
                 g.updateButtonPrice();
             });
             cTree.locate("sell" + j).setClickAction((interaction, player, primaryTrigger) -> {
                 GraphComponent g = interaction.getComponentTree().locate("graph1", GraphComponent.class);
-                g.getItem().sellItem(j, player, g.getMat(), g.getMultiplier());
+                g.getItem().sellItem(j, player, g.getMultiplier());
                 g.updateButtonPrice();
             });
         }
@@ -182,7 +183,6 @@ public class LayoutModifier implements LayoutExtension {
         if (player == null) {
             categories = MarketManager.getInstance().getCategories();
         } else {
-
             List<Category> defaultCategories = MarketManager.getInstance().getCategories();
             Category category = playerCategory.get(player);
             int indexOfCategory = defaultCategories.indexOf(category);
@@ -225,6 +225,7 @@ public class LayoutModifier implements LayoutExtension {
                         arrowRight.setHidden(true);
                         arrowLeft.setHidden(false);
                     } else {
+                        Bukkit.broadcastMessage("Not Hidden");
                         arrowRight.setHidden(false);
                         arrowLeft.setHidden(false);
                     }
@@ -357,27 +358,27 @@ public class LayoutModifier implements LayoutExtension {
 
     public void setLang(GroupComponent cTree) {
 
-        List<String> lang = Config.getInstance().getLang();
+        Config config = Config.getInstance();
         // Title
-        for (int i = 1; i <= 4 ; i++) { cTree.locate("title" + i, TextComponent.class).setText(lang.get(0)); }
+        for (int i = 1; i <= 4 ; i++) { cTree.locate("title" + i, TextComponent.class).setText(config.getTitle()); }
         // Top Movers
-        cTree.locate("w1omKKFS", TextComponent.class).setText(lang.get(1));
+        cTree.locate("w1omKKFS", TextComponent.class).setText(config.getTopMoversText());
         // Sub top movers
-        cTree.locate("ypqwCPVb", TextComponent.class).setText(lang.get(2));
+        cTree.locate("ypqwCPVb", TextComponent.class).setText(config.getSubTopMoversText());
         // Buy
-        cTree.locate("8mbDiOVM", TextComponent.class).setText(lang.get(3));
-        cTree.locate("rK8xOEwj", TextComponent.class).setText(lang.get(3).toUpperCase());
+        cTree.locate("8mbDiOVM", TextComponent.class).setText(config.getBuyText());
+        cTree.locate("rK8xOEwj", TextComponent.class).setText(config.getBuyText());
         // Sell
-        cTree.locate("jEXxBLF2", TextComponent.class).setText(lang.get(4));
-        cTree.locate("ZakfQVQ0", TextComponent.class).setText(lang.get(4).toUpperCase());
+        cTree.locate("jEXxBLF2", TextComponent.class).setText(config.getSellText());
+        cTree.locate("ZakfQVQ0", TextComponent.class).setText(config.getSellText());
         // Price text
-        cTree.locate("EGgOeYza", TextComponent.class).setText(lang.get(5));
-        cTree.locate("EfJrz4vo", TextComponent.class).setText(lang.get(5));
+        cTree.locate("EGgOeYza", TextComponent.class).setText(config.getPriceText());
+        cTree.locate("EfJrz4vo", TextComponent.class).setText(config.getPriceText());
         // Amount
-        cTree.locate("pfFe6Wjt", TextComponent.class).setText(lang.get(6));
-        cTree.locate("ityZyfNt", TextComponent.class).setText(lang.get(6));
+        cTree.locate("pfFe6Wjt", TextComponent.class).setText(config.getAmountSelectionText());
+        cTree.locate("ityZyfNt", TextComponent.class).setText(config.getAmountSelectionText());
         // Trend
-        cTree.locate("pfV4FIy1", TextComponent.class).setText(lang.get(7));
+        cTree.locate("pfV4FIy1", TextComponent.class).setText(config.getTrendText());
     }
 
 }

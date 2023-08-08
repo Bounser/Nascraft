@@ -1,0 +1,19 @@
+lang:
+  # Specify the currency to be used next to prices.
+  currency: "€"
+
+  # Available placeholders: [AMOUNT], [MATERIAL], [WORTH]
+  buy_message: "&7You just bought &d[AMOUNT] &7x &d[MATERIAL] &7worth &6[WORTH]"
+  sell_message: "&7You just sold &d[AMOUNT] &7x &d[MATERIAL] &7worth &6[WORTH]"
+
+  # LAYOUT TEXTS:
+  # Main title.
+  title: "Item Market"
+  # More text:
+  topmovers: "Top Movers"
+  subtop: "in the last 30 min"
+  buy: "Buy"
+  sell: "Sell"
+  price: "Price:"
+  amount_selection: "Select amount:"
+  trend: "Trend:"

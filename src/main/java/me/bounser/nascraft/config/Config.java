@@ -1,73 +1,83 @@
 package me.bounser.nascraft.config;
 
-import de.leonhard.storage.Json;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.managers.MarketManager;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.io.File;
 import java.util.*;
 
 public class Config {
 
     private final FileConfiguration config;
+    private FileConfiguration items;
+    private FileConfiguration categories;
+    private FileConfiguration lang;
+    private FileConfiguration inventorygui;
     private static Config instance;
+    private Nascraft main;
 
+
+    private List<String> langList = new ArrayList<>();
     private float taxBuy = -1;
     private float taxSell = -1;
     private int random0 = 0;
     private int force = -1;
     private int precision = -1;
     private final float[] limit = {-1, -1};
-    private String currency = "0";
-    private String buyMsg = "0";
-    private String sellMsg = "0";
 
     public static Config getInstance() {
         return instance == null ? instance = new Config() : instance;
     }
 
     private Config() {
-        Nascraft.getInstance().saveDefaultConfig();
+        main = Nascraft.getInstance();
+        main.saveDefaultConfig();
         this.config = Nascraft.getInstance().getConfig();
+
+        items = setupFile("items.yml");
+        categories = setupFile("categories.yml");
+        lang = setupFile("lang.yml");
+        inventorygui = setupFile("inventorygui.yml");
+
+        setupLang();
     }
+
+    public YamlConfiguration setupFile(String name) {
+
+        main.saveResource(name, false);
+
+        return YamlConfiguration.loadConfiguration(new File(main.getDataFolder(), name));
+    }
+
+    public void setupLang() {
+
+        langList.add(lang.getString("lang.currency"));
+        langList.add(lang.getString("lang.title"));
+        langList.add(lang.getString("lang.topmovers"));
+        langList.add(lang.getString("lang.subtop"));
+        langList.add(lang.getString("lang.buy_message"));
+        langList.add(lang.getString("lang.sell_message"));
+        langList.add(lang.getString("lang.buy"));
+        langList.add(lang.getString("lang.sell"));
+        langList.add(lang.getString("lang.price"));
+        langList.add(lang.getString("lang.amount_selection"));
+        langList.add(lang.getString("lang.trend"));
+
+    }
+
+    // Config:
 
     public Boolean getCheckResources() {
-        return config.getBoolean("AutoResourcesInjection");
-    }
-
-    public Set<String> getAllMaterials(String category) {
-        return config.getConfigurationSection("Items_quoted.Categories." + category + ".items.").getKeys(false);
-    }
-
-    public Set<String> getCategories() {
-        return config.getConfigurationSection("Items_quoted.Categories.").getKeys(false);
-    }
-
-    public float getInitialPrice(String mat) {
-
-        for (Category cat : MarketManager.getInstance().getCategories()) {
-
-            for (String item : config.getConfigurationSection("Items_quoted.Categories." + cat.getName() + ".items.").getKeys(false)) {
-                if (mat.equals(item)){
-                    return (float) config.getDouble("Items_quoted.Categories." + cat.getName() + ".items." + item + ".initial_price");
-                }
-            }
-        }
-        return 1;
-    }
-
-    public String getCurrency() {
-        if (currency.equals("0")) {
-            return currency = config.getString("Lang.currency");
-        }
-        return currency;
+        return config.getBoolean("auto_resources_injection");
     }
 
     public boolean getPriceNoise() {
 
         if (random0 == 0) {
-            if (config.getBoolean("Price_options.noise.enabled")) {
+            if (config.getBoolean("price_options.noise.enabled")) {
                 random0 = 1;
             } else {
                 random0 = 0;
@@ -80,7 +90,7 @@ public class Config {
         if (taxBuy != -1) {
             return taxBuy;
         } else {
-            return taxBuy = 1 + (float) config.getDouble("Market_control.taxation.buy");
+            return taxBuy = 1 + (float) config.getDouble("market_control.taxation.buy");
         }
     }
 
@@ -88,24 +98,39 @@ public class Config {
         if (taxSell != -1) {
             return taxSell;
         } else {
-            return taxSell = 1 - (float) config.getDouble("Market_control.taxation.sell");
+            return taxSell = 1 - (float) config.getDouble("market_control.taxation.sell");
         }
     }
 
-    public int getStock(String mat) {
-
-        Json json = new Json("Price-History-" + mat, Nascraft.getInstance().getDataFolder().getPath() + "/data");
-
-        if (json.contains(mat + ".lastSaveD")) {
-            return json.getInt(mat + ".history." + json.getInt(mat + ".lastSaveD") + ".stock");
-        } else {
-            return 0;
+    public float[] getLimits() {
+        if ((limit[0] == -1) && (limit[1] == -1)) {
+            limit[0] = (float) config.getDouble("price_options.limits.low");
+            limit[1] = (float) config.getDouble("price_options.limits.high");
+            return limit;
         }
+        return limit;
+    }
+
+    public boolean getMarketPermissionRequirement() { return config.getBoolean("market_control.market_permission"); }
+
+    // Items:
+
+    public Set<String> getAllMaterials() {
+        return items.getConfigurationSection("items.").getKeys(false);
+    }
+
+    public float getInitialPrice(String mat) {
+        for (String item : getAllMaterials()) {
+            if (mat.equalsIgnoreCase(item)){
+                return (float) items.getDouble("items." + item + ".initial_price");
+            }
+        }
+        return 1;
     }
 
     public HashMap<String, Float> getChilds(String mat, String cat) {
 
-        if (!config.contains("Items_quoted.Categories." + cat + ".items." + mat + ".child")){
+        if (!items.contains("items." + mat + ".child")){
             return null;
         }
 
@@ -113,102 +138,76 @@ public class Config {
 
         childs.put(mat, 1f);
 
-        Set<String> section = config.getConfigurationSection("Items_quoted.Categories." + cat + ".items." + mat + ".child.").getKeys(false);
+        Set<String> section = items.getConfigurationSection("items." + mat + ".child.").getKeys(false);
 
         if (section.size() == 0) return null;
         for (String childMat : section){
-            childs.put(childMat, (float) config.getDouble("Items_quoted.Categories." + cat + ".items." + mat + ".child." + childMat + ".multiplier"));
+            childs.put(childMat, (float) items.getDouble("items." + mat + ".child." + childMat + ".multiplier"));
         }
         return childs;
     }
 
+    public String getAlias(String material) {
+        if(!items.contains("items." + material + ".alias")) {
+            return (Character.toUpperCase(material.charAt(0)) + material.substring(1)).replace("_", " ");
+        } else {
+            return items.getString("items." + material + ".alias");
+        }
+    }
+
+    public float getSupport(String material) {
+        if(items.contains("items." + material + ".support")) {
+            return (float) items.getDouble("items." + material + ".support");
+        }
+        return 0;
+    }
+
+    public float getResistance(String material) {
+        if(items.contains("items." + material + ".resistance")) {
+            return (float) items.getDouble("items." + material + ".resistance");
+        }
+        return 0;
+    }
+
+    public float getElasticity(String material) {
+        if(items.contains("items." + material + ".elasticity")) {
+            return (float) items.getDouble("items." + material + ".elasticity");
+        }
+        return 1;
+    }
+
+    public float getNoiseIntensity(String material) {
+        if(items.contains("items." + material + ".noise_intensity")) {
+            return (float) items.getDouble("items." + material + ".noise_intensity");
+        }
+        return 1;
+    }
+
+    // Categories:
+
+    public Set<String> getCategories() {
+        return categories.getConfigurationSection("categories.").getKeys(false);
+    }
+
     public String getDisplayName(Category cat ){
-        return config.getString("Items_quoted.Categories." + cat.getName() + ".name");
+        return categories.getString("categories." + cat.getName() + ".display_name");
     }
 
-    public float[] getLimits() {
-        if ((limit[0] == -1) && (limit[1] == -1)) {
-            limit[0] = (float) config.getDouble("Price_options.limits.low");
-            limit[1] = (float) config.getDouble("Price_options.limits.high");
-            return limit;
+    public Category getCategoryFromMaterial(String material) {
+
+        for(Category category : MarketManager.getInstance().getCategories()) {
+            if(categories.getList("categories." + category.getName() + ".items").contains(material)) {
+                return category;
+            }
         }
-        return limit;
+        return null;
     }
-
-    public List<String> getLang() {
-
-        List<String> msg = new ArrayList<>();
-        msg.add(config.getString("Lang.title"));
-        msg.add(config.getString("Lang.topmovers"));
-        msg.add(config.getString("Lang.subtop"));
-        msg.add(config.getString("Lang.buy"));
-        msg.add(config.getString("Lang.sell"));
-        msg.add(config.getString("Lang.price"));
-        msg.add(config.getString("Lang.amount_selection"));
-        msg.add(config.getString("Lang.trend"));
-
-        return msg;
-    }
-
-    public String getBuyMessage() {
-        if (buyMsg.equals( "0")) {
-            return buyMsg = config.getString("Lang.buy_message");
-        } else {
-            return buyMsg;
-        }
-    }
-
-    public String getSellMessage() {
-        if (sellMsg.equals( "0")) {
-            return sellMsg = config.getString("Lang.sell_message");
-        } else {
-            return sellMsg;
-        }
-    }
-
-    public boolean getMarketPermissionRequirement() {
-        return config.getBoolean("Market_control.market_permission");
-    }
-
-    public String getAlias(String mat, String category) {
-        if(!config.contains("Items_quoted.Categories." + category + ".items." + mat + ".alias")) {
-            return (Character.toUpperCase(mat.charAt(0)) + mat.substring(1)).replace("_", " ");
-        }
-        return config.getString("Items_quoted.Categories." + category + ".items." + mat + ".alias");
-    }
-
-    public float getSupport(String mat, String category) {
-        if(config.contains("Items_quoted.Categories." + category + ".items." + mat + ".resistance")) {
-            return (float) config.getDouble("Items_quoted.Categories." + category + ".items." + mat + ".support");
-        }
-        return 0;
-    }
-
-    public float getResistance(String mat, String category) {
-        if(config.contains("Items_quoted.Categories." + category + ".items." + mat + ".resistance")) {
-            return (float) config.getDouble("Items_quoted.Categories." + category + ".items." + mat + ".resistance");
-        }
-        return 0;
-    }
-
-    public float getElasticity(String mat, String category) {
-        if(config.contains("Items_quoted.Categories." + category + ".items." + mat + ".elasticity")) {
-            return (float) config.getDouble("Items_quoted.Categories." + category + ".items." + mat + ".elasticity");
-        }
-        return 1;
-    }
-
-    public float getNoiseIntensity(String mat, String category) {
-        if(config.contains("Items_quoted.Categories." + category + ".items." + mat + ".elasticity")) {
-            return (float) config.getDouble("Items_quoted.Categories." + category + ".items." + mat + ".noise_intensity");
-        }
-        return 1;
-    }
-
 
     // public String mode() { return config.getString("Data_storage.method"); }
 
     public String mode() { return "JSON"; }
+
+    /*
     public String address() {
         return config.getString("Data_storage.address");
     }
@@ -221,6 +220,53 @@ public class Config {
     }
     public String password() {
         return config.getString("Data_storage.password");
+    }
+     */
+
+    // Lang:
+
+    public String getCurrency() {
+        return langList.get(0);
+    }
+
+    public String getTitle() {
+        return langList.get(1);
+    }
+
+    public String getTopMoversText() {
+        return langList.get(2);
+    }
+
+    public String getSubTopMoversText() {
+        return langList.get(3);
+    }
+
+    public String getBuyMessage() {
+        return langList.get(4);
+    }
+
+    public String getSellMessage() {
+        return langList.get(5);
+    }
+
+    public String getBuyText() {
+        return langList.get(6);
+    }
+
+    public String getSellText() {
+        return langList.get(7);
+    }
+
+    public String getPriceText() {
+        return langList.get(8);
+    }
+
+    public String getAmountSelectionText() {
+        return langList.get(9);
+    }
+
+    public String getTrendText() {
+        return langList.get(10);
     }
 
 }

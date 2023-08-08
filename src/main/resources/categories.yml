@@ -1,8 +1,8 @@
-Categories:
+categories:
   # Reference of the category. Categories are displayed in the main menu.
   1:
     # Display name of the category (cannot be very long).
-    name: "Stone age"
+    display_name: "Stone age"
     # Items within the category.
     items:
       # Material of the item.
@@ -10,7 +10,7 @@ Categories:
       - "stone"
       - "cobbled_deepslate"
   2:
-    name: "Tech"
+    display_name: "Tech"
     items:
       - "redstone"
       - "redstone_torch"
@@ -19,23 +19,23 @@ Categories:
       - "piston"
       - "observer"
   3:
-    name: "In the woods"
+    display_name: "In the woods"
     items:
       - "oak_log"
       - "birch_log"
   4:
-    name: "Valuables"
+    display_name: "Valuables"
     items:
       - "diamond"
       - "emerald"
       - "raw_gold"
   5:
-    name: "Utils"
+    display_name: "Utils"
     items:
       - "coal"
       - "leather"
   6:
-    name: "Ingots"
+    display_name: "Ingots"
     items:
       - "iron_ingot"
       - "copper_ingot"
