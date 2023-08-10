@@ -17,7 +17,7 @@ public class SellAllTabCompleter implements TabCompleter {
 
     public SellAllTabCompleter() {
         materials = MarketManager.getInstance().getAllMaterials();
-        // materials.add(0, "everything");
+        materials.add("everything");
     }
 
     @Nullable
