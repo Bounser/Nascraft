@@ -5,7 +5,11 @@ import de.leonhard.storage.util.FileUtils;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.commands.MarketCommand;
 import me.bounser.nascraft.commands.NascraftCommand;
-import me.bounser.nascraft.commands.SellCommand;
+import me.bounser.nascraft.commands.SellHandCommand;
+import me.bounser.nascraft.commands.sellall.SellAllCommand;
+import me.bounser.nascraft.commands.sellall.SellAllTabCompleter;
+import me.bounser.nascraft.commands.sellinv.InventoryListener;
+import me.bounser.nascraft.commands.sellinv.SellInvCommand;
 import me.bounser.nascraft.database.Data;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
@@ -19,11 +23,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import net.milkbowl.vault.economy.Economy;
 
 import java.io.*;
+import java.util.List;
 
 public final class Nascraft extends JavaPlugin {
 
     private static Nascraft main;
-    private static Economy econ = null;
+    private static Economy economy = null;
 
     // AdvancedGUI version used to test the plugin.
     private final String AdvancedGUI_version = "2.2.6";
@@ -62,7 +67,15 @@ public final class Nascraft extends JavaPlugin {
 
         getCommand("nascraft").setExecutor(new NascraftCommand());
         getCommand("market").setExecutor(new MarketCommand());
-        getCommand("sell").setExecutor(new SellCommand());
+
+        List<String> commands = Config.getInstance().getCommands();
+        if(commands.contains("sellhand")) getCommand("sellhand").setExecutor(new SellHandCommand());
+        if(commands.contains("sellall")) getCommand("sellall").setExecutor(new SellAllCommand());
+        if(commands.contains("sell")) getCommand("sellinv").setExecutor(new SellInvCommand());
+
+        getCommand("sellall").setTabCompleter(new SellAllTabCompleter());
+
+        Bukkit.getPluginManager().registerEvents(new InventoryListener(), this);
 
         LayoutManager.getInstance().registerLayoutExtension(LayoutModifier.getInstance(), this);
     }
@@ -70,7 +83,7 @@ public final class Nascraft extends JavaPlugin {
     @Override
     public void onDisable() { Data.getInstance().shutdownDatabase(); }
 
-    public static Economy getEconomy() { return econ; }
+    public static Economy getEconomy() { return economy; }
 
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) { return false; }
@@ -78,14 +91,14 @@ public final class Nascraft extends JavaPlugin {
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) { return false; }
 
-        econ = rsp.getProvider();
-        return econ != null;
+        economy = rsp.getProvider();
+        return economy != null;
     }
 
     public void checkResources() {
 
         getLogger().info("Checking required layouts... ");
-        getLogger().info("If you want to disable this procedure, set AutoLayoutInjection to false in the config.yml file.");
+        getLogger().info("If you want to disable this procedure, set auto_resources_injection to false in the config.yml file.");
 
         File toLayout0 = new File(getDataFolder().getParent() + "/AdvancedGUI/layout/Nascraft.json");
 

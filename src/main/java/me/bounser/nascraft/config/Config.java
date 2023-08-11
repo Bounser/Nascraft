@@ -40,32 +40,56 @@ public class Config {
         items = setupFile("items.yml");
         categories = setupFile("categories.yml");
         lang = setupFile("lang.yml");
-        inventorygui = setupFile("inventorygui.yml");
+        // inventorygui = setupFile("inventorygui.yml");
 
         setupLang();
     }
 
     public YamlConfiguration setupFile(String name) {
 
-        main.saveResource(name, false);
+        File file = new File(main.getDataFolder(), name);
 
-        return YamlConfiguration.loadConfiguration(new File(main.getDataFolder(), name));
+        if (!file.exists()) main.saveResource(name, false);
+
+        return YamlConfiguration.loadConfiguration(file);
     }
 
     public void setupLang() {
 
         langList.add(lang.getString("lang.currency"));
+        // Layout
         langList.add(lang.getString("lang.title"));
         langList.add(lang.getString("lang.topmovers"));
         langList.add(lang.getString("lang.subtop"));
-        langList.add(lang.getString("lang.buy_message"));
-        langList.add(lang.getString("lang.sell_message"));
+        langList.add(lang.getString("lang.buy_message").replace("&","§"));
+        langList.add(lang.getString("lang.sell_message").replace("&","§"));
         langList.add(lang.getString("lang.buy"));
         langList.add(lang.getString("lang.sell"));
         langList.add(lang.getString("lang.price"));
         langList.add(lang.getString("lang.amount_selection"));
         langList.add(lang.getString("lang.trend"));
+        // Commands
+        langList.add(lang.getString("lang.permission_text").replace("&","§"));
+        langList.add(lang.getString("lang.sellall_everything").replace("&","§"));
+        langList.add(lang.getString("lang.sellall_everything_error").replace("&","§"));
+        langList.add(lang.getString("lang.sellall").replace("&","§"));
+        langList.add(lang.getString("lang.sellall_error_without_item").replace("&","§"));
+        langList.add(lang.getString("lang.sellall_error_wrong_material").replace("&","§"));
+        langList.add(lang.getString("lang.estimated_value").replace("&","§"));
+        langList.add(lang.getString("lang.click_to_confirm").replace("&","§"));
 
+        langList.add(lang.getString("lang.sell_title").replace("&","§"));
+        langList.add(lang.getString("lang.sell_close").replace("&","§"));
+        langList.add(lang.getString("lang.sell_button_name").replace("&","§"));
+        langList.add(lang.getString("lang.sell_button_lore").replace("&","§"));
+        langList.add(lang.getString("lang.sell_remove_item").replace("&","§"));
+        langList.add(lang.getString("lang.sell_action_message").replace("&","§"));
+        langList.add(lang.getString("lang.sell_item_not_allowed").replace("&","§"));
+        langList.add(lang.getString("lang.sell_full").replace("&","§"));
+
+        langList.add(lang.getString("lang.sellhand_invalid").replace("&","§"));
+        langList.add(lang.getString("lang.sellhand_error_hand").replace("&","§"));
+        langList.add(lang.getString("lang.sell_estimated_value").replace("&","§"));
     }
 
     // Config:
@@ -112,6 +136,10 @@ public class Config {
     }
 
     public boolean getMarketPermissionRequirement() { return config.getBoolean("market_control.market_permission"); }
+
+    public List<String> getCommands() {
+        return config.getStringList("commands.enabled");
+    }
 
     // Items:
 
@@ -241,12 +269,12 @@ public class Config {
         return langList.get(3);
     }
 
-    public String getBuyMessage() {
-        return langList.get(4);
+    public String getBuyMessage(String amount, String worth, String material) {
+        return langList.get(4).replace("[AMOUNT]", amount).replace("[WORTH]", worth).replace("[MATERIAL]", material).replace("[CURRENCY]", getCurrency());
     }
 
-    public String getSellMessage() {
-        return langList.get(5);
+    public String getSellMessage(String amount, String worth, String material) {
+        return langList.get(5).replace("[AMOUNT]", amount).replace("[WORTH]", worth).replace("[MATERIAL]", material).replace("[CURRENCY]", getCurrency());
     }
 
     public String getBuyText() {
@@ -268,6 +296,56 @@ public class Config {
     public String getTrendText() {
         return langList.get(10);
     }
+
+    public String getPermissionText() {
+        return langList.get(11);
+    }
+
+    public String getSellallEverythingText(String materials, String worth) {
+        return langList.get(12).replace("[NUM_MATERIALS]", materials).replace("[WORTH]", worth);
+    }
+
+    public String getSellallEverythingErrorText() {
+        return langList.get(13);
+    }
+
+    public String getSellallText(String amount, String material, String worth) {
+        return langList.get(14).replace("[AMOUNT]", amount).replace("[MATERIAL]", material).replace("[WORTH]", worth);
+    }
+
+    public String getSellallErrorWithoutItemText(String material) {
+        return langList.get(15).replace("[MATERIAL]", material);
+    }
+
+    public String getSellallErrorWrongMaterialText() {return langList.get(16); }
+
+    public String getSellallEverythingEstimatedText(String totalWorth) {
+        return langList.get(17).replace("[TOTAL]", totalWorth).replace("[CURRENCY]", getCurrency());
+    }
+
+    public String getClickToConfirmText() { return langList.get(18); }
+
+    public String getSellTitle() { return langList.get(19); }
+
+    public String getSellCloseText() { return langList.get(20); }
+
+    public String getSellButtonName() { return langList.get(21); }
+
+    public String getSellButtonLore(String worth) { return langList.get(22).replace("[WORTH]", worth).replace("[CURRENCY]", getCurrency()); }
+
+    public String getSellRemoveItemText() { return langList.get(23); }
+
+    public String getSellActionText(String worth) { return langList.get(24).replace("[WORTH]", worth).replace("[CURRENCY", getCurrency()); }
+
+    public String getSellItemNotAllowedText() { return langList.get(25); }
+
+    public String getSellFullText() { return langList.get(26); }
+
+    public String getSellHandInvalidItem() { return langList.get(27); }
+
+    public String getSellHandErrorText() { return langList.get(28); }
+
+    public String getSellHandEstimatedValue() { return langList.get(29); }
 
 }
 
