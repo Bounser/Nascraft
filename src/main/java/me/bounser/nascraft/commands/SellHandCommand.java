@@ -16,6 +16,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -47,20 +48,26 @@ public class SellHandCommand implements CommandExecutor {
 
             Item item = MarketManager.getInstance().getItem(handItems.getType().toString());
 
-            if(item != null) {
-
-                String text = ChatColor.GRAY + "Estimated value: \n\n> " + ChatColor.GOLD + item.getName() +" x "+ handItems.getAmount() +" = "+ RoundUtils.round(handItems.getAmount()*item.getPrice().getSellPrice()) + Config.getInstance().getCurrency() + "\n  ";
-
-                TextComponent message = new TextComponent(Config.getInstance().getClickToConfirmText());
-                message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/nsellhand confirm"));
-                message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(text).create()));
-
-                player.spigot().sendMessage(message);
-                players.put(player, handItems);
-
-            } else {
-                player.sendMessage(ChatColor.RED + "Hold a valid item!");
+            if(item == null) {
+                player.sendMessage(lang.getSellHandInvalidItem());
+                return false;
             }
+
+            ItemMeta meta = handItems.getItemMeta();
+
+            if(meta.hasDisplayName() || meta.hasEnchants() || meta.hasLore() || meta.hasAttributeModifiers() || meta.hasCustomModelData()) {
+                player.sendMessage(lang.getSellHandInvalidItem());
+                return false;
+            }
+
+            String text = lang.getSellHandEstimatedValue() + ChatColor.GRAY + "\n> " + ChatColor.GOLD + item.getName() +" x "+ handItems.getAmount() +" = "+ RoundUtils.round(handItems.getAmount()*item.getPrice().getSellPrice()) + Config.getInstance().getCurrency() + "\n  ";
+
+            TextComponent message = new TextComponent(Config.getInstance().getClickToConfirmText());
+            message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/nsellhand confirm"));
+            message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(text).create()));
+
+            player.spigot().sendMessage(message);
+            players.put(player, handItems);
 
         } else if (args[0].equalsIgnoreCase("confirm")) {
 
@@ -69,7 +76,7 @@ public class SellHandCommand implements CommandExecutor {
 
                 item.sellItem(handItems.getAmount(), player, 1);
             } else {
-                Bukkit.broadcastMessage(ChatColor.RED + "Error. Don't change the items in your hand when confirming");
+                Bukkit.broadcastMessage(lang.getSellHandErrorText());
             }
         }
 

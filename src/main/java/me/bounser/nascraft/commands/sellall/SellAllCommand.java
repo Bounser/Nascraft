@@ -9,7 +9,6 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -67,17 +66,17 @@ public class SellAllCommand implements CommandExecutor {
             HashMap<Item, Integer> items = new HashMap<>();
             Item nascraftItem = MarketManager.getInstance().getItem(args[0].toLowerCase());
 
-            for(ItemStack item : inventory) {
+            for(ItemStack itemStack : inventory) {
 
-                if(item != null && item.getType().toString().equals(args[0].toUpperCase())) {
+                if(itemStack != null && itemStack.equals(new ItemStack(Material.valueOf(args[0].toUpperCase())))) {
 
                     if(items.get(nascraftItem) != null) {
 
-                        items.put(nascraftItem, items.get(nascraftItem) + item.getAmount());
+                        items.put(nascraftItem, items.get(nascraftItem) + itemStack.getAmount());
 
                     } else {
 
-                        items.put(nascraftItem, item.getAmount());
+                        items.put(nascraftItem, itemStack.getAmount());
 
                     }
                 }
@@ -92,7 +91,7 @@ public class SellAllCommand implements CommandExecutor {
 
                 String text = ChatColor.GRAY + "Estimated value: \n\n> " + ChatColor.GOLD + nascraftItem.getName() +" x "+ items.get(nascraftItem) +" = "+ RoundUtils.round(nascraftItem.getPrice().getSellPrice()*items.get(nascraftItem)) + Config.getInstance().getCurrency() + "\n  ";
 
-                TextComponent message = new TextComponent("\n " + ChatColor.GOLD + "[ Click here to confirm ]\n");
+                TextComponent message = new TextComponent(lang.getClickToConfirmText());
                 message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/nsellall " + nascraftItem.getMaterial() + " confirm"));
                 message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(text).create()));
 
