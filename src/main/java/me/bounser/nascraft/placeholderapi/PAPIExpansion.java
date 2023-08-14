@@ -5,6 +5,7 @@ import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.RoundUtils;
+import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
 
@@ -12,43 +13,43 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
     private final Nascraft main;
 
-    public PAPIExpansion(Nascraft main) {
-        this.main = main;
-    }
+    public PAPIExpansion(Nascraft main) { this.main = main; }
 
     @Override
-    public String getAuthor() {
-        return "Bounser";
-    }
+    public String getAuthor() { return "Bounser"; }
 
     @Override
-    public String getIdentifier() {
-        return "nascraft";
-    }
+    public String getIdentifier() { return "nascraft"; }
 
     @Override
-    public String getVersion() {
-        return "1.0";
-    }
+    public String getVersion() { return "1.3.3"; }
 
     @Override
-    public boolean persist() {
-        return true;
-    }
+    public boolean persist() { return true; }
 
     @Override
-    public String onRequest(OfflinePlayer player, String params) {
+    public String onRequest(OfflinePlayer player, String identifier) {
+
+        // Parses placeholders between braces
+        String params = PlaceholderAPI.setBracketPlaceholders(player, identifier);
 
         Item item;
 
-        if(params.substring(0, params.indexOf("_")).equalsIgnoreCase("change")) {
+        if (params.substring(0, params.indexOf("_")).equalsIgnoreCase("change")) {
+
             item = MarketManager.getInstance().getItem(params.substring(params.indexOf("_", params.indexOf("_") + 1) + 1));
+
+        } else if(params.substring(params.indexOf("_") + 1).equalsIgnoreCase("mainhand")) {
+
+            item = MarketManager.getInstance().getItem(player.getPlayer().getInventory().getItemInMainHand().getType().toString());
+
         } else {
+
             item = MarketManager.getInstance().getItem(params.substring(params.indexOf("_") + 1));
         }
 
         if (item == null) {
-            return "Error: Material not recognized.";
+            return "0.00";
         } else {
             TimeSpan timeSpan = null;
 
@@ -70,7 +71,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
                     if(timeSpan != null)
                         return String.valueOf(RoundUtils.roundToOne(-100 + item.getPrice().getValue() *100/item.getPrices(timeSpan).get(0)));
 
-                default: return null;
+                default: return "0.00";
             }
         }
     }
