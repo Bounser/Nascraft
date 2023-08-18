@@ -13,6 +13,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Objects;
 
 public class ImageBuilder implements ImageObserver{
@@ -43,7 +45,7 @@ public class ImageBuilder implements ImageObserver{
 
         for(Item item : MarketManager.getInstance().getTopGainers(4)) {
 
-            setSegment(item.getMaterial(), offset, graphics, new Color(20, intensity, 20));
+            setSegment(item.getMaterial(), offset, graphics, new Color(10, intensity, 10));
 
             intensity -= 20;
             offset[1] += 128;
@@ -55,7 +57,7 @@ public class ImageBuilder implements ImageObserver{
 
         for(Item item : MarketManager.getInstance().getMostTraded(4)) {
 
-            setSegment(item.getMaterial(), offset, graphics, new Color(20, 20, intensity));
+            setSegment(item.getMaterial(), offset, graphics, new Color(10, 10, intensity));
 
             intensity -= 20;
             offset[1] += 128;
@@ -67,7 +69,7 @@ public class ImageBuilder implements ImageObserver{
 
         for(Item item : MarketManager.getInstance().getTopDippers(4)) {
 
-            setSegment(item.getMaterial(), offset, graphics, new Color(intensity, 20, 20));
+            setSegment(item.getMaterial(), offset, graphics, new Color(intensity, 10, 10));
 
             intensity -= 20;
             offset[1] += 128;
@@ -177,7 +179,17 @@ public class ImageBuilder implements ImageObserver{
         graphics.setColor(new Color(100, 255, 100));
         graphics.setFont(new Font("Arial", Font.BOLD, 35));
 
-        graphics.drawString(item.getPrice().getValue() + Config.getInstance().getCurrency(), 20, 470);
+        graphics.drawString(item.getPrice().getValue() + Config.getInstance().getCurrency(), 20, 440);
+
+        graphics.setFont(new Font("Arial", Font.BOLD, 24));
+        graphics.setColor(new Color(80, 155, 80));
+
+        graphics.drawString("Buy: " + item.getPrice().getBuyPrice() + Config.getInstance().getCurrency(), 25, 473);
+
+        graphics.setColor(new Color(155, 80, 80));
+
+        graphics.drawString("Sell: " + item.getPrice().getSellPrice() + Config.getInstance().getCurrency(), 25, 500);
+
 
         graphics.setFont(new Font("Arial", Font.BOLD, 45));
 
@@ -186,14 +198,13 @@ public class ImageBuilder implements ImageObserver{
 
         graphics.setFont(new Font("Arial", Font.BOLD, 22));
 
-        graphics.drawString("1 day low: " + item.getLow(TimeSpan.DAY) + Config.getInstance().getCurrency(), 250, 431);
-        graphics.drawString("1 day high: " + item.getHigh(TimeSpan.DAY) + Config.getInstance().getCurrency(), 250, 465);
-        graphics.drawString("Historical high: " + RoundUtils.round(item.getPrices(TimeSpan.DAY).get(23)*3) + Config.getInstance().getCurrency(), 250, 499);
-        graphics.drawString("Volume (24h): " + item.getVolume(), 650, 431);
-        graphics.drawString("Position in market: #10", 650, 465);
-        graphics.drawString("Trend (24h): +24.3%" , 650, 499);
-
-        graphics.setColor(new Color(150, 150, 255));
+        graphics.drawString("1 day high: " + RoundUtils.round(item.getPrice().getDayHigh()) + Config.getInstance().getCurrency(), 250, 431);
+        graphics.drawString("1 day low: " + RoundUtils.round(item.getPrice().getDayLow()) + Config.getInstance().getCurrency(), 250, 465);
+        graphics.drawString("Historical high: " + RoundUtils.round(item.getHistoricalHigh()) + Config.getInstance().getCurrency(), 250, 499);
+        graphics.drawString("Volume (24h): " + RoundUtils.round(item.getVolume()) + Config.getInstance().getCurrency(), 650, 431);
+        graphics.drawString("Position in market: " + MarketManager.getInstance().getPositionByVolume(item), 650, 465);
+        NumberFormat formatter = new DecimalFormat("#0.0");
+        graphics.drawString("Trend (24h): " + formatter.format((-100 + item.getPrice().getValue()*100/item.getPrices(TimeSpan.DAY).get(0))) + "%" , 650, 499);
 
         graphics.dispose();
 
