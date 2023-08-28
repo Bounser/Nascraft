@@ -1,13 +1,16 @@
 package me.bounser.nascraft.discord;
 
 import jdk.javadoc.internal.doclets.toolkit.taglets.snippet.Style;
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.discord.linking.LinkManager;
+import me.bounser.nascraft.market.RoundUtils;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -17,8 +20,13 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.FileUpload;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.inventory.ItemStack;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
@@ -26,6 +34,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 
@@ -61,7 +70,7 @@ public class DiscordListener extends ListenerAdapter {
                 long time = System.currentTimeMillis();
                 event.reply("Pong!").setEphemeral(true)
                         .flatMap(v ->
-                                event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time) // then edit original
+                                event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time)
                         ).queue();
                 break;
             case "inventory":
@@ -87,27 +96,69 @@ public class DiscordListener extends ListenerAdapter {
                     default:
                         event.reply("error").setEphemeral(true).queue();
                         break;
-
                 }
+
             case "link":
 
-                if (!LinkManager.getInstance().getUUID(event.getUser()).equals("-1")) {
-                    event.reply("Already linked! (With UUID " + LinkManager.getInstance().getUUID(event.getUser()) + ")").setEphemeral(true).queue(message -> {
-                        message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS);
-                    });
+                if (LinkManager.getInstance().getUUID(event.getUser()) != null) {
+
+                    event.reply(":link: Already linked! (With UUID " + LinkManager.getInstance().getUUID(event.getUser()) + ")")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
                 }
 
                 if (LinkManager.getInstance().redeemCode(event.getOption("code").getAsInt(), event.getUser())) {
-                    event.reply("Success! Account linked.").setEphemeral(true).queue(message -> {
-                        message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS);
-                    });
+
+                    event.reply(":white_check_mark: Success! Account linked.")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
                 } else {
-                    event.reply("Error! Something went wrong.").setEphemeral(true).queue(message -> {
-                        message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS);
-                    });
+
+                    event.reply(":negative_squared_cross_mark: Error! Something went wrong while retrieving your code.")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                }
+                break;
+
+            case "balance":
+
+                if (LinkManager.getInstance().getUUID(event.getUser()) != null) {
+
+                    OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(LinkManager.getInstance().getUUID(event.getUser())));
+
+                    event.reply(":coin: You have: **" + RoundUtils.round((float) Nascraft.getEconomy().getBalance(player)) + Config.getInstance().getCurrency() + "**")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
+                } else {
+                    event.reply(":x: You don't have any account linked!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                }
+                break;
+
+            case "alerts":
+
+                if (DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()) == null ||
+                        DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).size() < 1) {
+                    event.reply(":x: You don't have any alert setup!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    return;
                 }
 
+                String alerts = ":bell: Active alerts:\n ";
+
+                for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
+                    alerts = alerts + "\n" + item.getName() + " at price: **" + Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)) + Config.getInstance().getCurrency() + "**";
+
+                event.reply(alerts)
+                        .setEphemeral(true)
+                        .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
+                break;
         }
     }
 
@@ -127,12 +178,12 @@ public class DiscordListener extends ListenerAdapter {
 
             List<ItemComponent> componentList = new ArrayList<>();
 
-            if(LinkManager.getInstance().getUUID(event.getUser()).equals("-1")) {
+            if(LinkManager.getInstance().getUUID(event.getUser()) == null) {
                 componentList.add(Button.success("b01" + item.getMaterial(), "BUY 1").asDisabled());
                 componentList.add(Button.success("b32" + item.getMaterial(), "BUY 32").asDisabled());
                 componentList.add(Button.danger("s32" + item.getMaterial(), "SELL 32").asDisabled());
                 componentList.add(Button.danger("s01" + item.getMaterial(), "SELL 1").asDisabled());
-                componentList.add(Button.secondary("info" + item.getMaterial(), "Not linked!"));
+                componentList.add(Button.secondary("info" + item.getMaterial(), "Not linked!").withEmoji(Emoji.fromFormatted("U+1F517")));
             } else {
                 componentList.add(Button.success("b01" + item.getMaterial(), "BUY 1"));
                 componentList.add(Button.success("b32" + item.getMaterial(), "BUY 32"));
@@ -150,7 +201,9 @@ public class DiscordListener extends ListenerAdapter {
 
                 EmbedBuilder embedBuilder = new EmbedBuilder();
 
-                embedBuilder.setTitle(":warning: Caution: information outdated!");
+                embedBuilder.setTitle(":warning: Caution: information outdated! :warning:");
+
+                embedBuilder.setColor(new Color(200, 50, 50));
 
                 message.editOriginalEmbeds(embedBuilder.build()).queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS);
 
@@ -161,34 +214,68 @@ public class DiscordListener extends ListenerAdapter {
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
 
-        if (LinkManager.getInstance().getUUID(event.getUser()).equals("-1")) {
-            event.reply("Your account is not linked! Run ``/link`` in-game to start the process of linking accounts.").setEphemeral(true).queue(message -> {
+        if (LinkManager.getInstance().getUUID(event.getUser()) == null) {
+            event.reply(":exclamation: Your account is not linked! Run ``/link`` in-game to start the process of linking accounts.").setEphemeral(true).queue(message -> {
                 message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS);
             });
             return;
         }
 
         Item item = MarketManager.getInstance().getItem(event.getComponentId().substring(3));
+        int quantity = Integer.parseInt(event.getComponentId().substring(1, 3));
+        float value;
 
         LocalTime timeNow = LocalTime.now();
 
         LocalTime nextMinute = timeNow.plusMinutes(1).withSecond(0);
         Duration timeRemaining = Duration.between(timeNow, nextMinute);
 
+        OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(LinkManager.getInstance().getUUID(event.getUser())));
+        double balance = Nascraft.getEconomy().getBalance(player);
+
         switch (String.valueOf(event.getComponentId().charAt(0))) {
 
             case "b":
 
                 item.ghostBuyItem(Integer.parseInt(event.getComponentId().substring(1, 3)));
-                event.reply("You just bought " + event.getComponentId().substring(1, 3) + " of " + item.getName() + " worth " + (item.getPrice().getBuyPrice()*Integer.valueOf(event.getComponentId().substring(1, 3))) + Config.getInstance().getCurrency()).setEphemeral(true)
-                        .queue(message -> { message.deleteOriginal().queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS); });
+
+                value = item.getPrice().getBuyPrice()*quantity;
+
+                if (balance < value) {
+
+                    event.reply(":x: Not enough money! Your current balance is: **" + RoundUtils.round((float) balance) + Config.getInstance().getCurrency() + "** and you need at least **" + value + Config.getInstance().getCurrency() + "**")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS));
+
+                    return;
+                }
+
+                Nascraft.getEconomy().withdrawPlayer(player, value);
+
+                event.reply(":inbox_tray: You just bought **" + quantity + "** of **" + item.getName() + "** worth **" + value + Config.getInstance().getCurrency() + "**" +
+                                "\n\n:coin: Your balance is now: **" + RoundUtils.round((float) Nascraft.getEconomy().getBalance(player)) + Config.getInstance().getCurrency() + "**")
+                        .setEphemeral(true)
+                        .queue(message -> message.deleteOriginal().queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS));
+
+                item.ghostBuyItem(quantity);
+
+                player.getPlayer().getInventory().addItem(new ItemStack(Material.valueOf(item.getMaterial().toUpperCase()), quantity));
+
                 break;
 
             case "s":
 
+                value = item.getPrice().getSellPrice()*quantity;
+
+                Nascraft.getEconomy().depositPlayer(player, value);
+
                 item.ghostSellItem(Integer.parseInt(event.getComponentId().substring(1, 3)));
-                event.reply("You just sold " + event.getComponentId().substring(1, 3) + " of " + item.getName() + " worth " + (item.getPrice().getSellPrice()*Integer.valueOf(event.getComponentId().substring(1, 3))) + Config.getInstance().getCurrency()).setEphemeral(true)
-                        .queue(message -> { message.deleteOriginal().queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS); });
+                event.reply(":outbox_tray: You just sold **" + event.getComponentId().substring(1, 3) + "** of **" + item.getName() + "** worth **" + (item.getPrice().getSellPrice()*Integer.valueOf(event.getComponentId().substring(1, 3))) + Config.getInstance().getCurrency() + "** " +
+                                "\n\n:coin: Your balance is now: **" + RoundUtils.round((float) Nascraft.getEconomy().getBalance(player)) + Config.getInstance().getCurrency() + "**").setEphemeral(true)
+                        .queue(message -> message.deleteOriginal().queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS));
+
+                item.ghostSellItem(quantity);
+
                 break;
 
         }
