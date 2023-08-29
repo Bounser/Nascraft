@@ -40,21 +40,10 @@ import java.util.concurrent.TimeUnit;
 
 public class DiscordListener extends ListenerAdapter {
 
-    private DiscordBot discordBot;
-
-    private String messageID;
-
-    private Guild guild;
-
-    private TextChannel channel;
 
     public static DiscordListener instance;
 
-    public DiscordListener(DiscordBot discordBot) {
-
-        this.discordBot = discordBot;
-        instance = this;
-    }
+    public DiscordListener() { instance = this; }
 
     public static DiscordListener getInstance() { return instance; }
 
@@ -73,28 +62,89 @@ public class DiscordListener extends ListenerAdapter {
                                 event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time)
                         ).queue();
                 break;
-            case "inventory":
 
-
-                break;
             case "alert":
 
-                switch (DiscordAlerts.getInstance().setAlert(event.getUser(), event.getOption("material").getAsString(), (float) event.getOption("price").getAsDouble())) {
+                switch (DiscordAlerts.getInstance().setAlert(event.getUser().getId(), event.getOption("material").getAsString(), (float) event.getOption("price").getAsDouble())) {
 
                     case "success":
-                        event.reply("Success!").setEphemeral(true).queue();
+                        event.reply("Success! You will receive a DM when the price reaches the price.")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
 
                     case "repeated":
-                        event.reply("That item is already on you watchlist!").setEphemeral(true).queue();
+                        event.reply("That item is already on you watchlist!")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
 
                     case "not_valid":
-                        event.reply("Item not recognized!").setEphemeral(true).queue();
+                        event.reply("Item not recognized!")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
 
                     default:
-                        event.reply("error").setEphemeral(true).queue();
+                        event.reply("Error")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                        break;
+                }
+
+            case "alerts":
+
+                if (DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()) == null ||
+                        DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).size() < 1) {
+                    event.reply(":x: You don't have any alert setup!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    return;
+                }
+
+                String alerts = ":bell: Active alerts:\n ";
+
+                for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
+                    alerts = alerts + "\n**" + item.getName() + "** at price: **" + Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)) + Config.getInstance().getCurrency() + "**";
+
+                event.reply(alerts)
+                        .setEphemeral(true)
+                        .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
+                break;
+
+            case "remove-alert":
+
+                if (DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()) == null ||
+                        DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).size() < 1) {
+                    event.reply(":x: You don't have any alert setup already!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    return;
+                }
+
+                Item item = MarketManager.getInstance().getItem(event.getOption("material").getAsString().replace(" ", "_"));
+
+                if (item == null) {
+                    event.reply(":x: Item not recognized.")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    return;
+                }
+
+                switch (DiscordAlerts.getInstance().removeAlert(event.getUser().getId(), item)) {
+
+                    case "not_found":
+                        event.reply(":x: Item is not in your watchlist.")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                        break;
+
+                    case "success":
+                        event.reply(":no_bell: Alert for **" + event.getOption("material").getAsString().replace(" ", "_") + "** removed.")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
                         break;
                 }
 
@@ -139,26 +189,35 @@ public class DiscordListener extends ListenerAdapter {
                 }
                 break;
 
-            case "alerts":
+            case "inventory":
 
-                if (DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()) == null ||
-                        DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).size() < 1) {
-                    event.reply(":x: You don't have any alert setup!")
+                if (LinkManager.getInstance().getUUID(event.getUser()) == null) {
+                    event.reply(":x: You don't have any account linked!")
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
                 }
 
-                String alerts = ":bell: Active alerts:\n ";
+                if (DiscordInventories.getInstance().getInventory(event.getUser().getId()) == null ||
+                        DiscordInventories.getInstance().getInventory(event.getUser().getId()).size() == 0) {
+                    event.reply(":jar: Your " + DiscordInventories.getInstance().getCapacity(event.getUser().getId()) + " slots are all empty!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    return;
+                }
 
-                for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
-                    alerts = alerts + "\n" + item.getName() + " at price: **" + Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)) + Config.getInstance().getCurrency() + "**";
+                String inventory = ":package: Your inventory:\n ";
 
-                event.reply(alerts)
+                for (Item inventoryItem : DiscordInventories.getInstance().getInventory(event.getUser().getId()).keySet())
+                    if (inventoryItem != null)
+                        inventory = inventory + "\n**" + inventoryItem.getName() + "** x **" + DiscordInventories.getInstance().getInventory(event.getUser().getId()).get(inventoryItem) + "** ";
+
+                event.reply(inventory)
                         .setEphemeral(true)
                         .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
 
                 break;
+
         }
     }
 
@@ -225,11 +284,6 @@ public class DiscordListener extends ListenerAdapter {
         int quantity = Integer.parseInt(event.getComponentId().substring(1, 3));
         float value;
 
-        LocalTime timeNow = LocalTime.now();
-
-        LocalTime nextMinute = timeNow.plusMinutes(1).withSecond(0);
-        Duration timeRemaining = Duration.between(timeNow, nextMinute);
-
         OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(LinkManager.getInstance().getUUID(event.getUser())));
         double balance = Nascraft.getEconomy().getBalance(player);
 
@@ -237,15 +291,21 @@ public class DiscordListener extends ListenerAdapter {
 
             case "b":
 
-                item.ghostBuyItem(Integer.parseInt(event.getComponentId().substring(1, 3)));
-
                 value = item.getPrice().getBuyPrice()*quantity;
 
                 if (balance < value) {
 
                     event.reply(":x: Not enough money! Your current balance is: **" + RoundUtils.round((float) balance) + Config.getInstance().getCurrency() + "** and you need at least **" + value + Config.getInstance().getCurrency() + "**")
                             .setEphemeral(true)
-                            .queue(message -> message.deleteOriginal().queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS));
+                            .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
+
+                    return;
+                }
+
+                if (!DiscordInventories.getInstance().hasSpace(event.getUser().getId(), item)) {
+                    event.reply(":x: Not enough space in your discord inventory!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
 
                     return;
                 }
@@ -255,15 +315,22 @@ public class DiscordListener extends ListenerAdapter {
                 event.reply(":inbox_tray: You just bought **" + quantity + "** of **" + item.getName() + "** worth **" + value + Config.getInstance().getCurrency() + "**" +
                                 "\n\n:coin: Your balance is now: **" + RoundUtils.round((float) Nascraft.getEconomy().getBalance(player)) + Config.getInstance().getCurrency() + "**")
                         .setEphemeral(true)
-                        .queue(message -> message.deleteOriginal().queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS));
+                        .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
 
                 item.ghostBuyItem(quantity);
-
-                player.getPlayer().getInventory().addItem(new ItemStack(Material.valueOf(item.getMaterial().toUpperCase()), quantity));
+                DiscordInventories.getInstance().addItem(event.getUser().getId(), item, quantity);
 
                 break;
 
             case "s":
+
+                if (!DiscordInventories.getInstance().hasItem(event.getUser().getId(), item, quantity)) {
+                    event.reply(":x: You don't have this item in your discord inventory!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
+
+                    return;
+                }
 
                 value = item.getPrice().getSellPrice()*quantity;
 
@@ -272,9 +339,10 @@ public class DiscordListener extends ListenerAdapter {
                 item.ghostSellItem(Integer.parseInt(event.getComponentId().substring(1, 3)));
                 event.reply(":outbox_tray: You just sold **" + event.getComponentId().substring(1, 3) + "** of **" + item.getName() + "** worth **" + (item.getPrice().getSellPrice()*Integer.valueOf(event.getComponentId().substring(1, 3))) + Config.getInstance().getCurrency() + "** " +
                                 "\n\n:coin: Your balance is now: **" + RoundUtils.round((float) Nascraft.getEconomy().getBalance(player)) + Config.getInstance().getCurrency() + "**").setEphemeral(true)
-                        .queue(message -> message.deleteOriginal().queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS));
+                        .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
 
                 item.ghostSellItem(quantity);
+                DiscordInventories.getInstance().removeItem(event.getUser().getId(), item, quantity);
 
                 break;
 

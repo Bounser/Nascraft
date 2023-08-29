@@ -15,25 +15,39 @@ public class DiscordAlerts {
     public static DiscordAlerts getInstance() { return instance == null ? instance = new DiscordAlerts() : instance; }
 
 
-    public String setAlert(User user, String material, Float price) {
+    public String setAlert(String userID, String material, Float price) {
 
         Item item = MarketManager.getInstance().getItem(material.replace(" ", "_"));
 
         if (item == null) return "not_valid";
 
-        if (alerts.containsKey(user.getId()) && alerts.get(user.getId()).containsKey(item)) return "repeated";
+        if (alerts.containsKey(userID) && alerts.get(userID).containsKey(item)) return "repeated";
 
         HashMap<Item, Float> content;
-        if (alerts.get(user.getId()) == null) {
+        if (alerts.get(userID) == null) {
             content = new HashMap<>();
         } else {
-            content = alerts.get(user.getId());
+            content = alerts.get(userID);
         }
 
         if (price < item.getPrice().getValue()) { content.put(item, -price); } else { content.put(item, price); }
 
-        alerts.put(user.getId(), content);
+        alerts.put(userID, content);
 
+        return "success";
+    }
+
+    public String removeAlert(String userID, Item item) {
+
+        HashMap<Item, Float> content = alerts.get(userID);
+
+        if (!content.containsKey(item)) {
+            return "not_found";
+        }
+
+        content.remove(item);
+
+        alerts.put(userID, content);
         return "success";
     }
 
@@ -45,13 +59,12 @@ public class DiscordAlerts {
 
                 if (alerts.get(userID).get(item) < 0) {
 
-                    if (!(item.getPrice().getValue() < Math.abs(alerts.get(userID).get(item)))) { return; }
+                    if (!(item.getPrice().getValue() < Math.abs(alerts.get(userID).get(item)))) return;
 
-                    DiscordBot.getInstance().getJDA().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
-
-                        privateChannel.sendMessage("Alert reached (low) for item: " + item.getName() + " with price: " + item.getPrice().getValue()).queue();
-
-                    });
+                    DiscordBot.getInstance().getJDA().retrieveUserById(userID).queue(user ->
+                            user.openPrivateChannel()
+                                    .queue(privateChannel -> privateChannel
+                                            .sendMessage("Alert reached (low) for item: " + item.getName() + " with price: " + item.getPrice().getValue()).queue()));
 
                     alerts.get(userID).remove(item);
 
@@ -59,11 +72,11 @@ public class DiscordAlerts {
 
                     if (!(item.getPrice().getValue() > alerts.get(userID).get(item))) return;
 
-                    DiscordBot.getInstance().getJDA().getUserById(userID).openPrivateChannel().queue(privateChannel -> {
+                    DiscordBot.getInstance().getJDA().retrieveUserById(userID).queue(user ->
+                            user.openPrivateChannel()
+                                    .queue(privateChannel -> privateChannel
+                                            .sendMessage("Alert reached (high) for item: " + item.getName() + " with price: " + item.getPrice().getValue()).queue()));
 
-                        privateChannel.sendMessage("Alert reached (high) for item: " + item.getName() + " with price: " + item.getPrice().getValue()).queue();
-
-                    });
 
                     alerts.get(userID).remove(item);
                 }

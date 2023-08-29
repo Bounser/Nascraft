@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -20,25 +21,33 @@ import java.util.concurrent.TimeUnit;
 
 public class DiscordBot {
 
-    private JDA jda;
+    private final JDA jda;
 
     static DiscordBot instance;
 
-    public DiscordBot(String botToken) throws InterruptedException {
+    public DiscordBot() {
 
         instance = this;
 
-        jda = JDABuilder.createLight(botToken, Collections.emptyList())
-                .addEventListeners(new DiscordListener(this))
+        jda = JDABuilder.createLight(Config.getInstance().getToken(), Collections.emptyList())
+                .addEventListeners(new DiscordListener())
                 .setActivity(Activity.watching("prices move."))
                 .setStatus(OnlineStatus.ONLINE)
                 .build();
 
         jda.updateCommands().addCommands(
-                Commands.slash("ping", "Calculate ping of the bot")
+                Commands.slash("ping", "Calculate ping of the bot."),
+                Commands.slash("alert", "Setup an alert based on prices changes!")
+                        .addOption(OptionType.STRING, "material", "Material name of the item.")
+                        .addOption(OptionType.NUMBER, "price", "Price at which you will receive a mention."),
+                Commands.slash("alerts", "List all your current alerts."),
+                Commands.slash("remove-alert", "Remove an alert.")
+                        .addOption(OptionType.STRING, "material", "Material name of the item to remove."),
+                Commands.slash("link", "Link a minecraft account using the code received in-game with /link")
+                        .addOption(OptionType.INTEGER, "code", "Code received using /link in minecraft."),
+                Commands.slash("balance", "Checks available balance."),
+                Commands.slash("inventory", "Check your inventory.")
         ).queue();
-
-        update();
     }
 
     public JDA getJDA() { return jda; }
@@ -76,13 +85,13 @@ public class DiscordBot {
 
         EmbedBuilder eb = new EmbedBuilder();
 
-        eb.setTitle("Live item market");
+        eb.setTitle(":green_circle:  Live item market");
 
         eb.setImage("attachment://image.png");
 
-        eb.setFooter("Select an item to get more details and to operate (Buy/sell) with it.");
+        eb.setFooter("Select an item to get more details and to operate (Buy/sell) with it. \nPrices in operations may vary.");
 
-        eb.setColor(new Color(43,45,49));
+        eb.setColor(new Color(43,200,109));
 
         return eb.build();
     }
@@ -91,10 +100,28 @@ public class DiscordBot {
 
         StringSelectMenu.Builder builder = StringSelectMenu.create("menu:id");
 
-        for(Item item : MarketManager.getInstance().getAllItemsInAlphabeticalOrder()) {
+        for(Item item : MarketManager.getInstance().getAllItemsInAlphabeticalOrder())
             builder.addOption(item.getName(), item.getMaterial(), item.getPrice().getValue() + Config.getInstance().getCurrency());
-        }
+
         return builder.build();
+    }
+
+    public void removeLastMessage() {
+
+        jda.getGuilds().forEach(guild -> {
+            TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
+
+            if (textChannel == null) {
+                Nascraft.getInstance().getLogger().info("textChannel is null");
+                return;
+            }
+
+            String lastMessageID = textChannel.getLatestMessageId();
+
+            textChannel.retrieveMessageById(lastMessageID).queue(message -> {
+                message.delete().queue();
+            });
+        });
     }
 
 }
