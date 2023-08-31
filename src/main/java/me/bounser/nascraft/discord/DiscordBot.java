@@ -16,6 +16,8 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
@@ -31,6 +33,7 @@ public class DiscordBot {
 
         jda = JDABuilder.createLight(Config.getInstance().getToken(), Collections.emptyList())
                 .addEventListeners(new DiscordListener())
+                .addEventListeners(new DiscordCommands())
                 .setActivity(Activity.watching("prices move."))
                 .setStatus(OnlineStatus.ONLINE)
                 .build();
@@ -48,6 +51,8 @@ public class DiscordBot {
                 Commands.slash("balance", "Checks available balance."),
                 Commands.slash("inventory", "Check your inventory.")
         ).queue();
+
+        removeLastMessage();
     }
 
     public JDA getJDA() { return jda; }
@@ -91,7 +96,7 @@ public class DiscordBot {
 
         eb.setFooter("Select an item to get more details and to operate (Buy/sell) with it. \nPrices in operations may vary.");
 
-        eb.setColor(new Color(43,200,109));
+        eb.setColor(new Color(120, 176, 88));
 
         return eb.build();
     }
@@ -100,7 +105,13 @@ public class DiscordBot {
 
         StringSelectMenu.Builder builder = StringSelectMenu.create("menu:id");
 
-        for(Item item : MarketManager.getInstance().getAllItemsInAlphabeticalOrder())
+        List<Item> items = new ArrayList<>();
+
+        for (Item item : MarketManager.getInstance().getTopGainers(8)) if(!items.contains(item)) items.add(item);
+        for (Item item : MarketManager.getInstance().getMostTraded(8)) if(!items.contains(item)) items.add(item);
+        for (Item item : MarketManager.getInstance().getTopDippers(8)) if(!items.contains(item)) items.add(item);
+
+        for (Item item : items)
             builder.addOption(item.getName(), item.getMaterial(), item.getPrice().getValue() + Config.getInstance().getCurrency());
 
         return builder.build();
@@ -108,20 +119,29 @@ public class DiscordBot {
 
     public void removeLastMessage() {
 
-        jda.getGuilds().forEach(guild -> {
-            TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
+        try {
 
-            if (textChannel == null) {
-                Nascraft.getInstance().getLogger().info("textChannel is null");
-                return;
-            }
+            jda.awaitReady().getGuilds().forEach(guild -> {
+                TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
 
-            String lastMessageID = textChannel.getLatestMessageId();
+                if (textChannel == null) {
+                    Nascraft.getInstance().getLogger().info("textChannel is null");
+                    return;
+                }
 
-            textChannel.retrieveMessageById(lastMessageID).queue(message -> {
-                message.delete().queue();
+                textChannel.getHistory().size();
+
+                String lastMessageID = textChannel.getLatestMessageId();
+
+                textChannel.getHistory().retrievePast(1).queue(messages -> {
+                    if (!messages.isEmpty())
+                        textChannel.retrieveMessageById(lastMessageID).queue(message ->{ message.delete().queue(); });
+                });
+
             });
-        });
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

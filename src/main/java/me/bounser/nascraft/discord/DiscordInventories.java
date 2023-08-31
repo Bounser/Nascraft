@@ -2,14 +2,19 @@ package me.bounser.nascraft.discord;
 
 import de.leonhard.storage.Json;
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.market.RoundUtils;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import net.dv8tion.jda.api.entities.User;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class DiscordInventories {
 
-    public HashMap<String, HashMap<Item, Integer>> inventories = new HashMap<>();
+
+    public HashMap<String, LinkedHashMap<Item, Integer>> inventories = new HashMap<>();
 
     public HashMap<String, Integer> capacity = new HashMap<>();
 
@@ -23,7 +28,7 @@ public class DiscordInventories {
 
         Json inventoryFile = new Json("inventory-" + userID, Nascraft.getInstance().getDataFolder().getPath() + "/data/inventories");
 
-        HashMap<Item, Integer> content = new HashMap<>();
+        LinkedHashMap<Item, Integer> content = new LinkedHashMap<>();
 
         for (String item : inventoryFile.getSection(userID + ".items").keySet()) {
 
@@ -38,7 +43,7 @@ public class DiscordInventories {
         if (capacity.get(userID) == null) {
             Json inventoryFile = new Json("inventory-" + userID, Nascraft.getInstance().getDataFolder().getPath() + "/data/inventories");
 
-            if (!inventoryFile.contains(userID + ".capacity")) { inventoryFile.set(userID + ".capacity", 10); }
+            if (!inventoryFile.contains(userID + ".capacity")) { inventoryFile.set(userID + ".capacity", Config.getInstance().getDefaultSlots()); }
 
             capacity.put(userID, inventoryFile.getInt(userID + ".capacity"));
         }
@@ -50,11 +55,10 @@ public class DiscordInventories {
 
             Json inventoryFile = new Json("inventory-" + userID, Nascraft.getInstance().getDataFolder().getPath() + "/data/inventories");
 
-            for (Item item : inventories.get(userID).keySet()) {
-
+            for (Item item : inventories.get(userID).keySet())
                 inventoryFile.set(userID + ".items." + item.getMaterial(), inventories.get(userID).get(item));
 
-            }
+            inventoryFile.set(userID + ".capacity", capacity.get(userID));
         }
 
         inventories.clear();
@@ -67,21 +71,24 @@ public class DiscordInventories {
 
     public int getCapacity(String userID) { retrieveCapacity(userID); return capacity.get(userID); }
 
-    public boolean hasSpace(String userID, Item item) {
+    public void increaseCapacity(String userID) { capacity.put(userID, capacity.get(userID) + 1); }
+
+    public boolean hasSpace(String userID, Item item, int amount) {
 
         retrieveInventory(userID);
         retrieveCapacity(userID);
 
-        return capacity.get(userID) > inventories.get(userID).keySet().size() || inventories.get(userID).containsKey(item);
+        return (capacity.get(userID) > inventories.get(userID).keySet().size() && !inventories.get(userID).containsKey(item)) ||
+                (inventories.get(userID).containsKey(item) && inventories.get(userID).get(item)+amount <= 999);
     }
 
     public void addItem(String userID, Item item, int amount) {
 
         retrieveInventory(userID);
 
-        HashMap<Item, Integer> content = inventories.get(userID);
+        LinkedHashMap<Item, Integer> content = inventories.get(userID);
 
-        if (content == null) content = new HashMap<>();
+        if (content == null) content = new LinkedHashMap<>();
 
         if (content.get(item) == null) content.put(item, amount);
         else content.put(item, content.get(item)+amount);
@@ -103,7 +110,7 @@ public class DiscordInventories {
 
         retrieveInventory(userID);
 
-        HashMap<Item, Integer> content = inventories.get(userID);
+        LinkedHashMap<Item, Integer> content = inventories.get(userID);
 
         if (content != null && content.containsKey(item)) {
             content.put(item, content.get(item)-amount);
@@ -112,4 +119,23 @@ public class DiscordInventories {
             inventories.put(userID, content);
         }
     }
+
+    public float getInventoryValue(User user) {
+
+        float value = 0;
+
+        for (Item item : inventories.get(user.getId()).keySet()) {
+
+            value += item.getPrice().getValue()*inventories.get(user.getId()).get(item);
+        }
+
+        return RoundUtils.round(value);
+    }
+
+    public float getNextSlotPrice(User user) {
+
+        return Config.getInstance().getSlotPriceBase() + Config.getInstance().getSlotPriceFactor()*(capacity.get(user.getId())+1);
+
+    }
+
 }
