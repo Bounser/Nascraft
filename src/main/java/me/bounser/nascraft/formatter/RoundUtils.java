@@ -1,4 +1,4 @@
-package me.bounser.nascraft.market;
+package me.bounser.nascraft.formatter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,4 +22,5 @@ public class RoundUtils {
         bd = bd.setScale(1, RoundingMode.HALF_UP);
         return bd.floatValue();
     }
+
 }
