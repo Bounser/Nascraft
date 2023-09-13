@@ -13,7 +13,7 @@ import java.util.List;
 
 public class SellAllTabCompleter implements TabCompleter {
 
-    List<String> materials;
+    private final List<String> materials;
 
     public SellAllTabCompleter() {
         materials = MarketManager.getInstance().getAllMaterials();
