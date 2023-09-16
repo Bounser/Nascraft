@@ -1,11 +1,14 @@
 package me.bounser.nascraft.formatter;
 
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 
 public class Formatter {
 
     private static Separator separator;
+
+    private static final boolean after = Lang.get().after();
 
     public static String format(float number, Style style) {
 
@@ -26,13 +29,18 @@ public class Formatter {
                 break;
         }
 
+        if (after)
+            formattedText = formattedText + Lang.get().message(Message.CURRENCY);
+        else
+            formattedText = Lang.get().message(Message.CURRENCY) + formattedText;
+
         switch (separator) {
 
             case COMMA:
-                return formattedText.replace(".", ",") + Lang.get().message(Message.CURRENCY);
+                return formattedText.replace(".", ",");
 
             default:
-            case POINT: return formattedText + Lang.get().message(Message.CURRENCY);
+            case POINT: return formattedText;
         }
     }
 
