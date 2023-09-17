@@ -6,7 +6,7 @@ public enum Style {
     ROUND_TO_TWO,
     // #.#
     ROUND_TO_ONE,
-    BIG_NUMBER_SMALL,
+    REDUCED_LENGTH,
     BIG_NUMBER_BIG
 
 }
