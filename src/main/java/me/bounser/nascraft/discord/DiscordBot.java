@@ -2,14 +2,25 @@ package me.bounser.nascraft.discord;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.discord.inventories.DiscordInventories;
+import me.bounser.nascraft.discord.inventories.DiscordInventory;
+import me.bounser.nascraft.discord.linking.LinkManager;
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.components.ItemComponent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.FileUpload;
 
@@ -75,11 +86,18 @@ public class DiscordBot {
                 throw new RuntimeException(e);
             }
 
-            textChannel.sendMessageEmbeds(getEmbedded()).addFiles(FileUpload.fromData(outputfile, "image.png")).addActionRow(getOptionsList()).queue(message -> {
+            List<ItemComponent> componentList = new ArrayList<>();
 
-                message.delete().queueAfter(60, TimeUnit.SECONDS);
+            componentList.add(Button.secondary("inventory", "Inventory").withEmoji(Emoji.fromFormatted("U+1F392")).asEnabled());
+            componentList.add(Button.secondary("balance", "Balance").withEmoji(Emoji.fromFormatted("U+1FA99")).asEnabled());
+            componentList.add(Button.secondary("alerts", "Alerts").withEmoji(Emoji.fromFormatted("U+1F514")).asEnabled());
+            componentList.add(Button.secondary("1info", "Info").withEmoji(Emoji.fromFormatted("U+2139")).asEnabled());
 
-            });
+            textChannel.sendMessageEmbeds(getEmbedded())
+                    .addFiles(FileUpload.fromData(outputfile, "image.png"))
+                    .addActionRow(componentList)
+                    .addActionRow(getOptionsList())
+                    .queue(message -> message.delete().queueAfter(60, TimeUnit.SECONDS));
 
         });
     }
@@ -90,11 +108,11 @@ public class DiscordBot {
 
         EmbedBuilder eb = new EmbedBuilder();
 
-        eb.setTitle(":green_circle:  Live item market");
+        eb.setTitle(Lang.get().message(Message.DISCORD_MAIN_TITLE));
 
         eb.setImage("attachment://image.png");
 
-        eb.setFooter("Select an item to get more details and to operate (Buy/sell) with it. \nPrices in operations may vary.");
+        eb.setFooter(Lang.get().message(Message.DISCORD_MAIN_FOOTER));
 
         eb.setColor(new Color(120, 176, 88));
 
@@ -107,12 +125,16 @@ public class DiscordBot {
 
         List<Item> items = new ArrayList<>();
 
-        for (Item item : MarketManager.getInstance().getTopGainers(8)) if(!items.contains(item)) items.add(item);
-        for (Item item : MarketManager.getInstance().getMostTraded(8)) if(!items.contains(item)) items.add(item);
-        for (Item item : MarketManager.getInstance().getTopDippers(8)) if(!items.contains(item)) items.add(item);
+        if (MarketManager.getInstance().getAllItems().size() > 25) {
+            for (Item item : MarketManager.getInstance().getTopGainers(8)) if(!items.contains(item)) items.add(item);
+            for (Item item : MarketManager.getInstance().getMostTraded(8)) if(!items.contains(item)) items.add(item);
+            for (Item item : MarketManager.getInstance().getTopDippers(8)) if(!items.contains(item)) items.add(item);
+        } else {
+            items = MarketManager.getInstance().getAllItemsInAlphabeticalOrder();
+        }
 
         for (Item item : items)
-            builder.addOption(item.getName(), item.getMaterial(), item.getPrice().getValue() + Config.getInstance().getCurrency());
+            builder.addOption(item.getName(), item.getMaterial(), Formatter.format(item.getPrice().getValue(), Style.ROUND_TO_TWO) + " - Buy: " + Formatter.format(item.getPrice().getBuyPrice(), Style.ROUND_TO_TWO)+ " Sell: " + Formatter.format(item.getPrice().getSellPrice(), Style.ROUND_TO_TWO));
 
         return builder.build();
     }
@@ -135,10 +157,11 @@ public class DiscordBot {
 
                 textChannel.getHistory().retrievePast(1).queue(messages -> {
                     if (!messages.isEmpty())
-                        textChannel.retrieveMessageById(lastMessageID).queue(message ->{ message.delete().queue(); });
+                        textChannel.retrieveMessageById(lastMessageID).queue(message -> message.delete().queue());
                 });
 
             });
+
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

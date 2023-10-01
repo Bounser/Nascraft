@@ -2,7 +2,6 @@ package me.bounser.nascraft.discord;
 
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
-import net.dv8tion.jda.api.entities.User;
 
 import java.util.HashMap;
 
@@ -41,7 +40,7 @@ public class DiscordAlerts {
 
         HashMap<Item, Float> content = alerts.get(userID);
 
-        if (!content.containsKey(item)) {
+        if (content == null ||!content.containsKey(item)) {
             return "not_found";
         }
 
