@@ -2,6 +2,10 @@ package me.bounser.nascraft.discord.linking;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.discord.DiscordBot;
+import net.dv8tion.jda.api.entities.User;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -12,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Random;
 
 public class LinkCommand implements CommandExecutor {
-
-    private Config lang = Config.getInstance();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
@@ -26,25 +28,43 @@ public class LinkCommand implements CommandExecutor {
         Player player = (Player) sender;
 
         if (!player.hasPermission("nascraft.linkable")) {
-            player.sendMessage(lang.getPermissionText());
+            Lang.get().message(player, Message.NO_PERMISSION);
             return false;
         }
 
-        if (!LinkManager.getInstance().getUserDiscordID(player).equals("-1")) {
+        if (LinkManager.getInstance().getUserDiscordID(player.getUniqueId().toString()) != null) {
             player.sendMessage(ChatColor.GRAY + "Already linked!");
             return false;
         }
 
-        if (LinkManager.getInstance().isLinking(player)) {
-            player.sendMessage(ChatColor.GRAY + "You are already in the process of linking! The code is " + LinkManager.getInstance().getCodeFromPlayer(player));
+        if (args.length != 1) {
+            player.sendMessage(ChatColor.GRAY + "Wrong use of the command!");
             return false;
         }
 
-        int randomNumber = new Random().nextInt(100000) + 100;
+        int code;
 
-        LinkManager.getInstance().addCode(randomNumber, player.getUniqueId());
+        try {
+            code = Integer.parseInt(args[0]);
+        } catch (NumberFormatException e) {
+            player.sendMessage(ChatColor.GRAY + "Wrong code format!");
+            return false;
+        }
 
-        player.sendMessage(ChatColor.GRAY + "Your code is: " + randomNumber + "  Use /link " + randomNumber + " to link accounts!");
+        if (!LinkManager.getInstance().codeExists(code)) {
+            player.sendMessage(ChatColor.GRAY + "No linking process found with that code.");
+            return false;
+        }
+
+        DiscordBot.getInstance().getJDA().retrieveUserById(LinkManager.getInstance().getUserFromCode(code))
+                .queue(user -> {
+                    if (LinkManager.getInstance().redeemCode(code, ((Player) sender).getUniqueId())) {
+                        player.sendMessage(ChatColor.GRAY + "Linked successfully with user " + user.getName());
+                    }
+                    user.openPrivateChannel().queue(privateChannel -> {
+                        privateChannel.sendMessage(":link: Your discords account has been successfully linked to the minecraft user: ``" + player.getName() + "``").queue();
+                    });
+                });
 
         return false;
     }

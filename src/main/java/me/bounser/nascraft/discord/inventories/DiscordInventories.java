@@ -11,10 +11,6 @@ public class DiscordInventories {
 
     public static DiscordInventories getInstance() { return instance == null ? instance = new DiscordInventories() : instance; }
 
-    public void saveInventories() {
-        for (DiscordInventory discordInventory : inventories.values()) discordInventory.save();
-    }
-
     public DiscordInventory getInventory(String userID) {
 
         if (inventories.containsKey(userID)) return inventories.get(userID);

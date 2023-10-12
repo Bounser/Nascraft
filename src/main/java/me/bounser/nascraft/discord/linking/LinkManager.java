@@ -1,80 +1,92 @@
 package me.bounser.nascraft.discord.linking;
 
-import de.leonhard.storage.Json;
-import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.database.SQLite;
 import net.dv8tion.jda.api.entities.User;
-import org.bukkit.entity.Player;
 
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 public class LinkManager {
 
-    HashMap<String, String> playerToUser;
+    private HashMap<String, String> userToUUID = new HashMap<>();
 
-    HashMap<Integer, UUID> confirmingCodes = new HashMap<>();
+    private HashMap<Integer, String> confirmingCodes = new HashMap<>();
 
     private static LinkManager instance;
 
     public static LinkManager getInstance() { return instance == null ? instance = new LinkManager() : instance; }
 
-    public LinkManager() {
-        Json links = new Json("users-links", Nascraft.getInstance().getDataFolder().getPath() + "/data/links");
-
-        playerToUser = (HashMap<String, String>) links.getMap("linked");
-    }
-
-    public void saveLinks() {
-        Json links = new Json("users-links", Nascraft.getInstance().getDataFolder().getPath() + "/data/links");
-
-        links.set("linked", playerToUser);
-    }
-
-    public String getUserDiscordID(Player player) {
-        if (playerToUser.containsKey(String.valueOf(player.getUniqueId()))) {
-            return playerToUser.get(String.valueOf(player.getUniqueId()));
-        }
-        return "-1";
+    public String getUserDiscordID(String uuid) {
+        return SQLite.getInstance().getUserId(uuid);
     }
 
     public String getUUID(User user) {
 
-        if (playerToUser.values().contains(user.getId())) {
+        if (userToUUID.containsKey(user.getId())) {
 
-            for (String UUIDKey : playerToUser.keySet()) {
-                if (playerToUser.get(UUIDKey).equals(user.getId())) {
-                    return UUIDKey;
-                }
+            return userToUUID.get(user.getId());
+
+        } else {
+
+            String uuid = SQLite.getInstance().getUUID(user.getId());
+
+            if (uuid != null) {
+                userToUUID.put(user.getId(), uuid);
+
+                return uuid;
             }
         }
-        return "-1";
+
+        return null;
     }
 
-    public void addCode(int code, UUID uuid) { confirmingCodes.put(code, uuid); }
+    public boolean codeExists(int code) { return confirmingCodes.containsKey(code); }
 
-    public boolean isLinking(Player player) { return confirmingCodes.values().contains(player.getUniqueId()); }
+    public int startLinkingProcess(String userId) {
 
-    public int getCodeFromPlayer(Player player) {
+        int retrievedCode = getCodeFromUser(userId);
 
-        for (int code : confirmingCodes.keySet()) {
+        if (retrievedCode != -1) return retrievedCode;
 
-            if(confirmingCodes.get(code).equals(player.getUniqueId())) return code;
+        int randomNumber = new Random().nextInt(100000) + 100;
 
-        }
+        addCode(randomNumber, userId);
+
+        return randomNumber;
+    }
+
+    public void addCode(int code, String userId) { confirmingCodes.put(code, userId); }
+
+    public int getCodeFromUser(String userId) {
+
+        for (int code : confirmingCodes.keySet())
+            if(confirmingCodes.get(code).equals(userId)) return code;
 
         return -1;
     }
 
-    public boolean redeemCode(int code, User user) {
+    public String getUserFromCode(int code) {
+
+        if (confirmingCodes.containsKey(code))
+            return confirmingCodes.get(code);
+
+        return "-1";
+    }
+
+    public boolean redeemCode(int code, UUID uuid) {
 
         if (confirmingCodes.keySet().contains(code)) {
 
-            playerToUser.put(String.valueOf(confirmingCodes.get(code)), user.getId());
+            userToUUID.put(String.valueOf(confirmingCodes.get(code)), uuid.toString());
+
+            SQLite.getInstance().saveLink(String.valueOf(confirmingCodes.get(code)), uuid.toString());
+
+            confirmingCodes.remove(code);
 
             return true;
         }
 
         return false;
     }
-
 }
