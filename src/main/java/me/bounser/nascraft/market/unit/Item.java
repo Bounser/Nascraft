@@ -1,26 +1,29 @@
 package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.database.Data;
-import me.bounser.nascraft.market.RoundUtils;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.database.SQLite;
+import me.bounser.nascraft.database.playerinfo.PlayerInfoManager;
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.config.Config;
-import me.bounser.nascraft.database.JsonManager;
+import me.bounser.nascraft.formatter.Style;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Item {
 
-    private final String mat;
+    private final Material material;
     private final String alias;
     private final Category category;
 
@@ -28,178 +31,296 @@ public class Item {
 
     private int operations;
 
+    private float volume;
+
+    private float collectedTaxes;
+
     // 30 min
-    private final GraphData gd1;
+    private final GraphData gdMinutes;
     // 1 day
-    private final GraphData gd2;
+    private final GraphData gdHours;
     // 1 month
-    private final GraphData gd3;
+    private final GraphData gdDays;
     // 1 year
-    private final GraphData gd4;
+    private final GraphData gdMonth;
 
-    // 30 (0-29) values representing the prices in the last 30 minutes.
-    private List<Float> pricesM;
+    private final PlotData plotData;
+
+    // 60 (0-59) values representing the prices in the last 60 minutes.
+    private List<Float> pricesHour;
     // 24 (0-23) values representing the prices in all 24 hours of the day.
-    private List<Float> pricesD;
+    private List<Float> pricesDay;
     // 30 (0-29) values representing the prices in the last month. *
-    private List<Float> pricesMM;
+    private List<Float> pricesMonth;
     // 24 (0-23) values representing 2 prices each month. *
-    private List<Float> pricesY;
+    private List<Float> pricesYear;
 
-    private final HashMap<String, Float> childs;
+    private final HashMap<Material, Float> childs;
 
-    public Item(String material, String alias, Category category){
-        mat = material;
+    public Item(Material material, String alias, Category category){
+        this.material = material;
         this.alias = alias;
 
-        this.price = new Price(setupPrices(),
-                Config.getInstance().getStock(mat),
-                Config.getInstance().getElasticity(mat, category.getName()),
-                Config.getInstance().getSupport(mat, category.getName()),
-                Config.getInstance().getResistance(mat, category.getName()),
-                Config.getInstance().getNoiseIntensity(mat, category.getName()));
+        this.price = new Price(
+                Config.getInstance().getInitialPrice(material),
+                Config.getInstance().getElasticity(material),
+                Config.getInstance().getSupport(material),
+                Config.getInstance().getResistance(material),
+                Config.getInstance().getNoiseIntensity(material));
+
+        SQLite.getInstance().retrievePrices(this);
+        SQLite.getInstance().retrieveItem(this);
+
+        float lastPrice = SQLite.getInstance().retrieveLastPrice(this);
+        pricesHour = new ArrayList<>(Collections.nCopies(60, lastPrice));
+
+        if (pricesDay == null) {
+            pricesDay = new ArrayList<>(Collections.nCopies(48, lastPrice));
+            pricesMonth = new ArrayList<>(Collections.nCopies(30, lastPrice));
+            pricesYear = new ArrayList<>(Collections.nCopies(51, lastPrice));
+        }
 
         this.category = category;
         operations = 0;
-        this.childs = Config.getInstance().getChilds(material, category.getName());
+        this.childs = Config.getInstance().getChilds(this.material);
 
-        gd1 = new GraphData(TimeSpan.MINUTE, pricesM);
-        gd2 = new GraphData(TimeSpan.DAY, pricesD);
-        gd3 = new GraphData(TimeSpan.MONTH, pricesMM);
-        gd4 = new GraphData(TimeSpan.YEAR, pricesY);
+        gdMinutes = new GraphData(TimeSpan.HOUR, pricesHour);
+        gdHours = new GraphData(TimeSpan.DAY, pricesDay);
+        gdDays = new GraphData(TimeSpan.MONTH, pricesMonth);
+        gdMonth = new GraphData(TimeSpan.YEAR, pricesYear);
+
+        plotData = new PlotData(this);
     }
 
     public String getName() { return alias; }
 
-    public float setupPrices() {
-        pricesM = Data.getInstance().getPrices(mat, TimeSpan.MINUTE);
-        pricesD = Data.getInstance().getPrices(mat, TimeSpan.DAY);
-        pricesMM = Data.getInstance().getPrices(mat, TimeSpan.MONTH);
-        pricesY = Data.getInstance().getPrices(mat, TimeSpan.YEAR);
-
-        return pricesM.get(pricesM.size()-1);
-    }
-
-    public void addValueToD(float value) {
-        pricesD.remove(0);
-        pricesD.add(value);
-    }
-
-    public void addValueToM(float value) {
-        pricesM.remove(0);
-        pricesM.add(value);
-    }
-
-    public void buyItem(int amount, Player player, String mat, float multiplier) {
-
-        if(!MarketManager.getInstance().getState()) {
-            player.sendMessage(ChatColor.RED + "Error while buying: Shop is closed");
-            return;
+    public void setPrice(TimeSpan timeSpan, List<Float> prices) {
+        switch (timeSpan) {
+            case HOUR: pricesHour = prices; break;
+            case DAY: pricesDay = prices; break;
+            case MONTH: pricesMonth = prices; break;
+            case YEAR: pricesYear = prices; break;
         }
+    }
+
+    public void addValueToDay(float value) {
+        pricesDay.remove(0);
+        pricesDay.add(value);
+    }
+
+    public void addValueToHour(float value) {
+        pricesHour.remove(0);
+        pricesHour.add(value);
+    }
+
+    public void buyItem(int amount, UUID uuid, boolean feedback) {
+
+        Player player = Bukkit.getPlayer(uuid);
+        Player offlinePlayer = Bukkit.getPlayer(uuid);
+
+
+        if(!MarketManager.getInstance().getState()) { Lang.get().message(player, Message.SHOP_CLOSED); return; }
 
         Economy econ = Nascraft.getEconomy();
 
-        if (!econ.has(player, price.getBuyPrice()*amount*multiplier)) {
-            player.sendMessage(ChatColor.RED + "You can't afford to pay that!");
+        if (!econ.has(player, price.getBuyPrice()*amount*childs.get(material))) {
+            if (player != null && feedback) Lang.get().message(player, Message.NOT_ENOUGH_MONEY);
             return;
         }
 
         boolean hasSpace = false;
 
-        if (player.getInventory().firstEmpty() == -1) {
+        if (player != null && player.getInventory().firstEmpty() == -1) {
             for (ItemStack is : player.getInventory()) {
-                if(is != null && is.getType().toString().equals(mat.toUpperCase()) && amount < is.getMaxStackSize() - is.getAmount()) { hasSpace = true; }
+                if(is != null && is.getType().toString().equals(material) && amount < is.getMaxStackSize() - is.getAmount()) { hasSpace = true; }
             }
-            if (!hasSpace) {
-                player.sendMessage(ChatColor.RED + "Not enough space in inventory!");
+            if (!hasSpace && feedback) {
+                Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
                 return;
             }
         }
 
-        econ.withdrawPlayer(player, RoundUtils.round(price.getBuyPrice()*amount*multiplier));
+        int maxSize = material.getMaxStackSize();
+        int orderSize = amount / maxSize;
+        int excess = amount % maxSize;
 
-        player.getInventory().addItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
+        float totalCost = 0;
+        float totalTaxes = 0;
 
-        String msg = Config.getInstance().getBuyMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getBuyPrice()*amount*multiplier))).replace("[MATERIAL]", getName()) + Config.getInstance().getCurrency();
+        for (int i = 0 ; i < orderSize ; i++) {
 
-        player.sendMessage(msg);
+            totalCost += price.getBuyPrice()*64*childs.get(material);
+            totalTaxes += Math.abs(price.getValue()*64*childs.get(material))-totalCost;
 
+            price.changeStock(-maxSize);
+
+            if (player != null  && feedback) player.getInventory().addItem(new ItemStack(material, maxSize));
+        }
+
+        if (excess > 0) {
+
+            totalCost += price.getBuyPrice()*excess*childs.get(material);
+            totalTaxes += Math.abs(price.getValue()*excess*childs.get(material)-totalCost);
+
+            price.changeStock(-excess);
+
+            if (player != null  && feedback) player.getInventory().addItem(new ItemStack(material, excess));
+        }
+
+        totalCost = RoundUtils.round(totalCost);
+        totalTaxes = RoundUtils.round(totalTaxes);
+
+        econ.withdrawPlayer(offlinePlayer, totalCost);
+
+        if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(totalCost, Style.ROUND_TO_TWO), String.valueOf(amount), alias);
+
+        operations += amount;
+
+        volume += RoundUtils.round(amount*price.getValue());
+
+        collectedTaxes += totalTaxes;
+
+        SQLite.getInstance().saveTrade(uuid, this, amount, totalCost, true, false);
+
+        PlayerInfoManager.getInstance().getPlayerReport(uuid).update(1, -totalCost, totalTaxes);
+    }
+
+    public float sellItem(int amount, UUID uuid, boolean feedback) {
+
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+        Player player = Bukkit.getPlayer(uuid);
+
+        if (!MarketManager.getInstance().getState()) {
+            if (player != null && feedback) Lang.get().message(player, Message.SHOP_CLOSED);
+            return -1;
+        }
+
+        if (player != null &&  feedback && !player.getInventory().containsAtLeast(new ItemStack(material), amount)) {
+            Lang.get().message(player, Message.NOT_ENOUGH_ITEMS);
+            return -1;
+        }
+
+        int maxSize = material.getMaxStackSize();
+        int orderSize = amount / maxSize;
+        int excess = amount % maxSize;
+
+        float totalWorth = 0;
+        float totalTaxes = 0;
+
+        for (int i = 0 ; i < orderSize ; i++) {
+
+            totalWorth += price.getSellPrice()*64*childs.get(material);
+            totalTaxes += Math.abs(price.getValue()*64*childs.get(material)-totalWorth);
+
+            price.changeStock(maxSize);
+
+            if (player != null && feedback) player.getInventory().removeItem(new ItemStack(material, maxSize));
+        }
+
+        if (excess > 0) {
+
+            totalWorth += price.getSellPrice()*excess*childs.get(material);
+            totalTaxes += Math.abs(price.getSellPrice()*excess*childs.get(material)-totalWorth);
+
+            price.changeStock(excess);
+
+            if (player != null && feedback) player.getInventory().removeItem(new ItemStack(material, excess));
+        }
+
+        totalWorth = RoundUtils.round(totalWorth);
+        totalTaxes = RoundUtils.round(totalTaxes);
+
+        operations += amount;
+
+        volume += RoundUtils.round(amount*price.getSellPrice());
+
+        collectedTaxes += totalTaxes;
+
+        Nascraft.getEconomy().depositPlayer(offlinePlayer, RoundUtils.round(price.getSellPrice()*amount*amount*childs.get(material)));
+
+        if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(totalWorth, Style.ROUND_TO_TWO), String.valueOf(amount), alias);
+
+        SQLite.getInstance().saveTrade(uuid, this, amount, totalWorth, false, false);
+
+        PlayerInfoManager.getInstance().getPlayerReport(uuid).update(1, totalWorth, totalTaxes);
+
+        return totalWorth;
+    }
+
+    public void ghostBuyItem(int amount) {
         price.changeStock(-amount);
-
+        volume += RoundUtils.round(amount*price.getBuyPrice());
         operations += amount;
     }
 
-    public void sellItem(int amount, Player player, String mat, float multiplier) {
-
-        if(!MarketManager.getInstance().getState()) {
-            player.sendMessage(ChatColor.RED + "Error while selling: Shop is closed");
-            return;
-        }
-
-        if (!player.getInventory().containsAtLeast(new ItemStack(Material.getMaterial(mat.toUpperCase())), amount)) {
-            player.sendMessage(ChatColor.RED + "Not enough items to sell.");
-            return;
-        }
-
-        player.getInventory().removeItem(new ItemStack(Material.getMaterial(mat.toUpperCase()), amount));
-
-        Nascraft.getEconomy().depositPlayer(player, RoundUtils.round(price.getSellPrice()*amount*multiplier));
-
-        String msg = Config.getInstance().getSellMessage().replace("&", "§").replace("[AMOUNT]", String.valueOf(amount)).replace("[WORTH]", String.valueOf(RoundUtils.round(price.getSellPrice()*amount*multiplier))).replace("[MATERIAL]", getName()) + Config.getInstance().getCurrency();
-
-        player.sendMessage(msg);
-
-        price.changeStock(amount);
-
+    public void ghostSellItem(int amount) {
         operations += amount;
+        volume += RoundUtils.round(amount*price.getSellPrice());
+        price.changeStock(amount);
     }
 
     public void dailyUpdate() {
-        pricesMM.remove(0);
-        pricesMM.add(price.getValue());
-
-        pricesY = JsonManager.getInstance().getYPrice(mat);
+        pricesMonth.remove(0);
+        pricesMonth.add(price.getValue());
     }
 
-    public String getMaterial() { return mat; }
+    public Material getMaterial() { return material; }
+
+    public List<Material> getParentAndChildsMaterials() {
+        List materials = new ArrayList();
+        materials.add(material);
+        materials.add(childs.keySet());
+
+        return materials;
+    }
 
     public Price getPrice() { return price; }
 
     public List<Float> getPrices(TimeSpan timeSpan) {
         switch (timeSpan) {
-            case MINUTE: return pricesM;
-            case DAY: return pricesD;
-            case MONTH: return pricesMM;
-            case YEAR: return pricesY;
+            case HOUR: return pricesHour;
+            case DAY: return pricesDay;
+            case MONTH: return pricesMonth;
+            case YEAR: return pricesYear;
             default: return null;
         }
     }
 
-    public HashMap<String, Float> getChilds() { return childs; }
+    public HashMap<Material, Float> getChilds() { return childs; }
 
     public int getOperations() { return operations; }
 
     public void lowerOperations() {
         if (operations > 10) {
-            operations -= Math.round((float) operations/10f);
-            operations -= 5;
+            operations -= Math.round((float) operations/60f);
+            operations -= 3;
         } else if (operations > 1){
             operations -= 1;
         }
     }
 
-    public List<GraphData> getGraphData() {
-        return Arrays.asList(gd1, gd2, gd3, gd4);
-    }
+    public List<GraphData> getGraphData() { return Arrays.asList(gdMinutes, gdHours, gdDays, gdMonth); }
 
     public GraphData getGraphData(TimeSpan timeSpan) {
         switch (timeSpan) {
-            case MINUTE: return gd1;
-            case DAY: return gd2;
-            case MONTH: return gd3;
-            case YEAR: return gd4;
+            case HOUR: return gdMinutes;
+            case DAY: return gdHours;
+            case MONTH: return gdDays;
+            case YEAR: return gdMonth;
             default: return null;
         }
     }
+
+    public PlotData getPlotData() { return plotData; }
+
+    public float getVolume() { return volume; }
+
+    public float getLow(TimeSpan timeSpan) { return Collections.min(getPrices(timeSpan)); }
+
+    public float getHigh(TimeSpan timeSpan) { return Collections.max(getPrices(timeSpan)); }
+
+    public float getCollectedTaxes() { return collectedTaxes; }
+
+    public void setCollectedTaxes(float newCollectedTaxes) { collectedTaxes = newCollectedTaxes; }
 
 }
