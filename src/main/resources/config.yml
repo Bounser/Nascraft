@@ -1,19 +1,25 @@
-# Nascraft config - 1.2.1
+# Nascraft config.yml - ${project.version}
 
-# Verify whether the required layout is present (and in the correct version), and if it is not, place it in the layout folder of AdvancedGUI.
-auto_resources_injection: true
+# Language file to use. Available: en_US es_ES ca_ES
+language: 'en_US'
+
+database:
+  # How many days should the trade's log last in the database?
+  # With the option 60, all trades older than 60 days will be automatically removed.
+  # Use -1 to disable (Keep all trades logged).
+  days-until-history-removed: 60
 
 price_options:
   # Set limits on the minimum and maximum prices.
   limits:
-    low: 0.05
-    high: 999
+    low: 0.001
+    high: 9999999
   # With noise enabled, prices will vary over time in a pseudo-random manner.
   noise:
     enabled: true
 
 market_control:
-  # Although taxation is separated for buying and selling actions separately, the total tax paid is the same regardless of how it is split
+  # Although taxation gets applied for buying and selling actions separately, the total tax paid is the same regardless of how it is split
   # The spread is determined by the deviation in both actions. In the default case, it is 6% for selling and 4% for buying, resulting in a total spread of 10%.
 
   # To avoid strengthening the underground economy, try to keep the taxation as low as possible.
@@ -30,6 +36,45 @@ market_control:
 commands:
   # Available commands: sell, sellall, sellhand
   enabled:
-    - "sell"
-    - "sellall"
-    - "sellhand"
+    - 'sell'
+    - 'sellall'
+    - 'sellhand'
+
+# FEATURE IN BETA AS OF ${project.version}
+# Use with caution.
+discord_bot:
+  enabled: false
+  # Available methods: NATIVE
+  link-method: 'NATIVE'
+  token: 'TOKEN-ID'
+  channel: 'TEXTCHANNEL-ID'
+  # Default size of discord's virtual inventories.
+  default_inventory: 3
+  # Formula to calculate the price of then next slot. slot_price_factor * #slot + slot_price_base = price
+  # For example, to buy the slot nº6 the price will be (1000 * 6) + 100 = 6100$
+  slot_price_factor: 1000
+  slot_price_base: 100
+
+# Currently (${project.version}) they can only be hired through discord.
+brokers:
+  aggressive:
+    enabled: true
+    daily-fee: 0.05
+    market-sensibility: 1.5
+    volatility: 0.005
+    positive-return: 1.01
+  conservative:
+    enabled: true
+    daily-fee: 0.005
+    market-sensibility: 0.5
+    volatility: 0.001
+    positive-return: 1.01
+  lazy:
+    enabled: true
+    daily-fee: 0.001
+    market-sensibility: 0.98
+    volatility: 0
+    positive-return: 0
+
+# Verify whether the AdvancedGUI's layout is present (and in the correct version), and if it is not, place it in the layout folder of AdvancedGUI.
+auto_resources_injection: true
