@@ -6,14 +6,21 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.database.Trade;
+import me.bounser.nascraft.discord.images.BalanceImage;
+import me.bounser.nascraft.discord.images.BrokerImage;
 import me.bounser.nascraft.discord.images.InventoryImage;
 import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.market.brokers.Broker;
+import me.bounser.nascraft.market.brokers.BrokerType;
+import me.bounser.nascraft.market.managers.BrokersManager;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -30,10 +37,12 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
@@ -56,10 +65,10 @@ public class DiscordButtons extends ListenerAdapter {
         switch (event.getComponentId()) {
 
             case "alerts":
-                HashMap<Item, Float> alerts = DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId().toString());
+                HashMap<Item, Float> alerts = DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId());
 
                 if (alerts == null || alerts.size() == 0) {
-                    event.reply("No alerts setup! You can setup an alert to receive a DM when the price of an item reaches a limit")
+                    event.reply(Lang.get().message(Message.DISCORD_ALERT_NOT_SETUPPED))
                             .setEphemeral(true)
                             .addActionRow(Arrays.asList(Button.success("addalert", "Add Alert").withEmoji(Emoji.fromFormatted("U+1F514")), Button.danger("removealert", "Remove Alert").withEmoji(Emoji.fromFormatted("U+1F515"))))
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
@@ -67,10 +76,10 @@ public class DiscordButtons extends ListenerAdapter {
                     return;
                 }
 
-                String alertsMessage = "Alerts :bell:\n\n";
+                String alertsMessage = Lang.get().message(Message.DISCORD_ALERT_HEADER);
 
-                for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId().toString()).keySet()) {
-                    alertsMessage = alertsMessage + "> " + item.getName() + " at price: " + Formatter.format(Math.abs(alerts.get(item)), Style.ROUND_TO_TWO) + "\n";
+                for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet()) {
+                    alertsMessage = alertsMessage + "> " + item.getName() + " at price: " + Formatter.format(Math.abs(alerts.get(item)), Style.ROUND_BASIC) + "\n";
                 }
 
                 event.reply(alertsMessage)
@@ -113,7 +122,7 @@ public class DiscordButtons extends ListenerAdapter {
                 StringSelectMenu.Builder builder = StringSelectMenu.create("menu:id");
 
                 for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
-                    builder.addOption(item.getName(), "alert-" + item.getMaterial(), "At price: " + Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_TO_TWO));
+                    builder.addOption(item.getName(), "alert-" + item.getMaterial(), "At price: " + Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC));
 
                 event.reply("Select the alert that you want to remove.")
                         .setEphemeral(true)
@@ -142,15 +151,20 @@ public class DiscordButtons extends ListenerAdapter {
                 List<ItemComponent> brokers = new ArrayList<>();
 
                 brokers.add(Button.primary("data-broker", Emoji.fromFormatted("U+2754")));
-                brokers.add(Button.primary("brokeraggresive", "Aggresive Broker").withEmoji(Emoji.fromFormatted("U+1F4BC")));
-                brokers.add(Button.primary("brokerregular", "Regular Broker").withEmoji(Emoji.fromFormatted("U+1F4BC")));
-                brokers.add(Button.primary("brokerlazy", "Lazy Broker").withEmoji(Emoji.fromFormatted("U+1F4BC")));
+                if (Config.getInstance().getBrokers().contains(BrokerType.AGGRESSIVE)) brokers.add(Button.secondary("brokerAGGRESSIVE", "Aggresive Broker").withEmoji(Emoji.fromFormatted("U+1F4BC")));
+                if (Config.getInstance().getBrokers().contains(BrokerType.CONSERVATIVE)) brokers.add(Button.secondary("brokerCONSERVATIVE", "Conservative Broker").withEmoji(Emoji.fromFormatted("U+1F4BC")));
+                if (Config.getInstance().getBrokers().contains(BrokerType.LAZY)) brokers.add(Button.secondary("brokerLAZY", "Lazy Broker").withEmoji(Emoji.fromFormatted("U+1F4BC")));
 
-                String brokerText = "## Brokers:\n> :man_office_worker: **Aggresive broker**: Assing a quantity of money to him and he will automatically try to earn more, doing even complex operations with derivatives. He charges a comission of **10% a day**. No profits are guaranteed and you can loss all money invested.\n" +
-                        "\n> " +
-                        ":man_teacher:  **Regular broker**: Assing a quantity of money to him and he will automatically try to earn more in a conservating way. He charges a comission of **4% a day**. No profits are guaranteed and you can loss all money invested.\n" +
-                        "\n> " +
-                        " :man_technologist:**Lazy broker**: Assing a quantity of money to him will guarantee the market returns (Average) minus a **1% comission**.";
+                String brokerText = "## Available brokers:\n" +
+                        "> :man_office_worker: **Aggresive broker**: Assing a quantity of money to him and he will automatically try to earn more, doing even complex operations with derivatives. \n" +
+                        "> **Fee**: 5% daily\n" +
+                        "\n" +
+                        "> :man_teacher: **Regular broker**: Assing a quantity of money to him and he will automatically try to earn more in a conservative manner. \n" +
+                        "> **Fee**: 1% daily\n" +
+                        "\n" +
+                        "> :man_technologist: **Lazy broker**: Assing a quantity of money to him will guarantee the market returns (Average).\n" +
+                        "> **Fee**: 0.4% daily" +
+                        "\n\n:warning: **The value of your investment may fall as well as rise and you may get back less than you originally invested.**";
 
                 event.reply(brokerText)
                         .addActionRow(brokers)
@@ -310,7 +324,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                 if (discordInventory.getCapacity() < 40) {
 
-                    List actionRow = new ArrayList();
+                    List<Button> actionRow = new ArrayList<>();
 
                     actionRow.add(Button.success("i_buy", "Buy slot for " + discordInventory.getNextSlotPrice() + Lang.get().message(Message.CURRENCY)));
                     actionRow.add(Button.danger("all", "Sell all"));
@@ -318,62 +332,67 @@ public class DiscordButtons extends ListenerAdapter {
                     event.replyFiles(FileUpload.fromData(outputfile , "image.png"))
                             .setEphemeral(true)
                             .addActionRow(actionRow)
-                            .queue(message -> {
-                                message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS);
-                            });
+                            .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
                 } else {
 
                     event.replyFiles(FileUpload.fromData(outputfile , "image.png"))
                             .setEphemeral(true)
-                            .queue(message -> {
-                                message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS);
-                            });
+                            .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
                 }
                 return;
 
             case "all":
-                event.editButton(Button.danger("allconfirmed", "Confirm")).queue(); return;
-            case "allconfirmed":
 
-                DiscordInventory discordInventoryToSell = DiscordInventories.getInstance().getInventory(uuid);
+                event.editButton(Button.danger("sellallconfirmed", "Confirm")).queue(); return;
 
-                OfflinePlayer player1 = Bukkit.getOfflinePlayer(uuid);
+            case "sellallconfirmed":
 
-                float totalValue = 0;
+                float value = DiscordInventories.getInstance().getInventory(uuid).sellAll();
 
-                for (Item item : discordInventoryToSell.getContent().keySet()) {
-                    totalValue += item.sellItem(discordInventoryToSell.getContent().get(item), uuid, false);
-                    discordInventoryToSell.removeItem(item, discordInventoryToSell.getContent().get(item));
-                }
-
-                String value = Formatter.format(totalValue, Style.ROUND_TO_TWO);
-
-                Nascraft.getEconomy().depositPlayer(player1, totalValue);
-
-                event.reply("You just sold everything for: " + value)
+                event.reply("You just sold everything for: " + Formatter.format(value, Style.ROUND_BASIC))
                         .setEphemeral(true)
-                        .queue(message -> {
-                            message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS);
-                        });
+                        .queue(message -> message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS));
+                return;
 
             case "balance":
                 OfflinePlayer player2 = Bukkit.getOfflinePlayer(uuid);
 
                 double purse = Nascraft.getEconomy().getBalance(player2);
                 float inventory = DiscordInventories.getInstance().getInventory(event.getUser().getId()).getInventoryValue();
-                float broker = 0;
+                float brokerValue = 60000;
+                double total = purse + inventory + brokerValue;
 
-                String text = ":coin:  **Balance**:\n" +
-                        "\n> :dollar: **Purse** (Minecraft): ``" + Formatter.formatDouble(purse, Style.ROUND_TO_TWO) +
-                        "``\n> :school_satchel: **Discord Inventory**: ``" + Formatter.format(inventory, Style.ROUND_TO_TWO) +
-                        "``\n> :man_office_worker: **Broker-Managed**: ``" + Formatter.format(broker, Style.ROUND_TO_TWO) +
+                String text =
+                        "\n> :green_circle: :dollar: **Purse** (Minecraft): ``" + Formatter.formatDouble(purse) +
+                        "``\n> :yellow_circle: :school_satchel: **Discord Inventory**: ``" + Formatter.format(inventory, Style.ROUND_BASIC) +
+                        "``\n> :red_circle: :man_office_worker: **Broker-Managed**: ``" + Formatter.format(brokerValue, Style.ROUND_BASIC) +
                         "``\n> \n" +
-                        ">  :abacus: **Total**: ``" + Formatter.formatDouble(purse + inventory + broker, Style.ROUND_TO_TWO) + "``";
+                        ">  :abacus: **Total**: ``" + Formatter.formatDouble(total) + "``\n";
 
-                event.reply(text)
+                File balanceFile = new File("image.png");
+                try {
+                    ImageIO.write(BalanceImage.getImage(event.getUser()), "png", balanceFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                EmbedBuilder eb = new EmbedBuilder();
+
+                eb.setImage("attachment://image.png");
+
+                eb.setTitle(":coin:  **Balance**:");
+
+                eb.setFooter("Purse: " + RoundUtils.roundToOne((float) (purse*100/total)) + "% Inventory: " + RoundUtils.roundToOne((float) (inventory*100/total)) + "% Broker: " + RoundUtils.roundToOne((float) (brokerValue*100/total)) + "%");
+
+                eb.setDescription(text);
+
+                eb.setColor(new Color(240, 200, 80));
+
+                event.replyEmbeds(eb.build())
+                        .addFiles(FileUpload.fromData(balanceFile , "image.png"))
                         .setEphemeral(true)
-                        .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                        .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
                 return;
 
             case "hback":
@@ -392,17 +411,16 @@ public class DiscordButtons extends ListenerAdapter {
 
                 List<Trade> trades = SQLite.getInstance().retrieveTrades(uuid, 15*offset);
 
-
-                String history = ":scroll: **Trade history:** Page " +  (1 + offset)  + " (" + (trades.size() == 16 ? 15 : trades.size()) + " trades. Max 15)\n";
+                String history = ":scroll: **Trade history:** Page " +  (1 + offset)  + " (" + (trades.size() == 16 ? 15 : trades.size()) + "/15)\n";
 
                 for (int i = 0; i < trades.size()-1; i++) {
 
                     Trade trade = trades.get(i);
                     if (trade.getItem() != null) {
                         if (trade.isBuy())
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **BUY " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** for **" + Formatter.format(trade.getValue(), Style.ROUND_TO_TWO) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **BUY " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** for **-" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
                         else
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **SELL " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** for **-" + Formatter.format(trade.getValue(), Style.ROUND_TO_TWO) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **SELL " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** for **+" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
 
                         if (trade.throughDiscord()) {
                             history = history + " (Discord)";
@@ -439,6 +457,40 @@ public class DiscordButtons extends ListenerAdapter {
                         .queue();
 
                 return;
+
+            case "brokerAGGRESSIVE":
+            case "brokerCONSERVATIVE":
+            case "brokerLAZY":
+
+                Broker broker = BrokersManager.getInstance().getBroker(BrokerType.valueOf(event.getComponentId().substring(6)));
+
+                File brokerFile = new File("image.png");
+                try {
+                    ImageIO.write(BrokerImage.getImage(broker), "png", brokerFile);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                List<Button> actionRow = new ArrayList<>();
+
+                actionRow.add(Button.success("brokerBuy1", "Buy 1 Share"));
+                actionRow.add(Button.success("brokerBuy2", "Buy 10 Shares"));
+                actionRow.add(Button.danger("brokerSell1", "Sell 1 Shares"));
+                actionRow.add(Button.danger("brokerSell2", "Sell 10 Shares"));
+                actionRow.add(Button.primary("brokerCustomAmount", "Custom Amount").withEmoji(Emoji.fromFormatted("U+1F58A")));
+
+                event.replyFiles(FileUpload.fromData(brokerFile , "image.png"))
+                        .addActionRow(actionRow)
+                        .setEphemeral(true)
+                        .queue();
+
+                return;
+
+            case "brokerBuy":
+            case "brokerSell":
+
+
+                return;
         }
 
         String initial = String.valueOf(event.getComponentId().charAt(0));
@@ -469,8 +521,8 @@ public class DiscordButtons extends ListenerAdapter {
                 if (balance < value) {
 
                     event.reply(lang.message(Message.DISCORD_INSUFFICIENT_BALANCE)
-                                    .replace("[VALUE1]", Formatter.format((float) balance, Style.ROUND_TO_TWO))
-                                    .replace("[VALUE2]", Formatter.format(value, Style.ROUND_TO_TWO)))
+                                    .replace("[VALUE1]", Formatter.format((float) balance, Style.ROUND_BASIC))
+                                    .replace("[VALUE2]", Formatter.format(value, Style.ROUND_BASIC)))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
 
@@ -490,11 +542,11 @@ public class DiscordButtons extends ListenerAdapter {
 
                 String buyText;
                 if (quantity == 1) {
-                    buyText = ":inbox_tray: You just bought **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_TO_TWO) + "**" +
-                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_TO_TWO) + "**";
+                    buyText = ":inbox_tray: You just bought **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_BASIC) + "**" +
+                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
                 } else {
-                    buyText = ":inbox_tray: You just bought **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_TO_TWO) + "** (" + Formatter.format(value/quantity, Style.ROUND_TO_TWO) + " each)" +
-                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_TO_TWO) + "**";
+                    buyText = ":inbox_tray: You just bought **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_BASIC) + "** (" + Formatter.format(value/quantity, Style.ROUND_BASIC) + " each)" +
+                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
                 }
 
                 SQLite.getInstance().saveTrade(uuid, item, quantity, value, true, true);
@@ -526,11 +578,11 @@ public class DiscordButtons extends ListenerAdapter {
 
                 String sellText;
                 if(quantity == 1) {
-                    sellText = ":outbox_tray: You just sold **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_TO_TWO) + "**" +
-                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_TO_TWO) + "**";
+                    sellText = ":outbox_tray: You just sold **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_BASIC) + "**" +
+                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
                 } else {
-                    sellText = ":outbox_tray: You just sold **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_TO_TWO) + "** (" + Formatter.format(value/quantity, Style.ROUND_TO_TWO) + " each)" +
-                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_TO_TWO) + "**";
+                    sellText = ":outbox_tray: You just sold **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_BASIC) + "** (" + Formatter.format(value/quantity, Style.ROUND_BASIC) + " each)" +
+                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
                 }
 
                 SQLite.getInstance().saveTrade(uuid, item, quantity, value, false, true);
@@ -550,7 +602,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                 if (balance < price) {
 
-                    event.reply(":x: You don't have enough money to buy another slot! You need **" +  Formatter.format(price, Style.ROUND_TO_TWO) + "**")
+                    event.reply(":x: You don't have enough money to buy another slot! You need **" +  Formatter.format(price, Style.ROUND_BASIC) + "**")
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
                     return;
@@ -587,3 +639,4 @@ public class DiscordButtons extends ListenerAdapter {
     }
 
 }
+
