@@ -1,33 +1,39 @@
 package me.bounser.nascraft.discord.inventories;
 
+import me.bounser.nascraft.commands.discord.DiscordInventoryInGame;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.market.unit.Item;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.UUID;
 
 
 public class DiscordInventory {
 
     private int capacity;
 
-    private final String userId;
+    private final UUID uuid;
 
     private LinkedHashMap<Item, Integer> inventory = new LinkedHashMap<>();
 
-    public DiscordInventory(String userID) {
-        this.userId = userID;
+    public DiscordInventory(UUID uuid) {
+        this.uuid = uuid;
         retrieveInventory();
         retrieveCapacity();
     }
 
-    public void retrieveInventory() { inventory = SQLite.getInstance().retrieveInventory(userId); }
+    public void retrieveInventory() { inventory = SQLite.getInstance().retrieveInventory(uuid); }
 
-    public void retrieveCapacity() { capacity = SQLite.getInstance().retrieveCapacity(userId); }
+    public void retrieveCapacity() { capacity = SQLite.getInstance().retrieveCapacity(uuid); }
 
     public void increaseCapacity() {
-        capacity++; SQLite.getInstance().updateCapacity(userId, capacity);
+        capacity++;
+        SQLite.getInstance().updateCapacity(uuid, capacity);
+        updateInventoryInGame();
     }
 
     public int getCapacity() { return capacity; }
@@ -39,7 +45,8 @@ public class DiscordInventory {
 
     public void addItem(Item item, int amount) {
         inventory.merge(item, amount, Integer::sum);
-        SQLite.getInstance().updateItem(userId, item, inventory.get(item));
+        SQLite.getInstance().updateItem(uuid, item, inventory.get(item));
+        updateInventoryInGame();
     }
 
     public boolean hasItem(Item item, int amount) {
@@ -52,11 +59,12 @@ public class DiscordInventory {
         if (inventory != null && inventory.containsKey(item)) {
             inventory.put(item, inventory.get(item)-amount);
 
-            if (inventory.get(item) == 0) {
+            if (inventory.get(item) <= 0) {
                 inventory.remove(item);
-                SQLite.getInstance().removeItem(userId, item);
-
+                SQLite.getInstance().removeItem(uuid, item);
             }
+
+            updateInventoryInGame();
         }
     }
 
@@ -77,5 +85,29 @@ public class DiscordInventory {
     }
 
     public HashMap<Item, Integer> getContent() { return inventory; }
+
+    private void updateInventoryInGame() {
+
+        Player player = Bukkit.getPlayer(uuid);
+
+        if (player != null) {
+            DiscordInventoryInGame.getInstance().updateDiscordInventory(player);
+        }
+
+    }
+
+    public float sellAll() {
+
+        float value = 0;
+
+        for (Item item : inventory.keySet()) {
+            if (item != null)
+                value += item.sellItem(inventory.get(item), uuid, false);
+        }
+
+        inventory.clear();
+        SQLite.getInstance().clearInventory(uuid);
+        return value;
+    }
 
 }

@@ -244,17 +244,17 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "data":
 
-                String info = "## :information_source: Market information \n> Using this channel you will be able to **buy/sell items and much more without being inside the server!** To start using this you have to link your discord's account, to do so just press the :link: **Account linking** button and  follow instructions. \n## Click on a category to learn more:";
+                String info = "## :information_source: Market information \n> Using this channel you will be able to **buy/sell items and much more without being in the game!** To start using this you have to link your discord account, to do so just press the :link: **Account linking** button and  follow instructions. \n## Click on a category to learn more:";
 
                 List<ItemComponent> componentListData1 = new ArrayList<>();
                 List<ItemComponent> componentListData2 = new ArrayList<>();
 
                 componentListData1.add(Button.primary("data-inventory", "Inventory").withEmoji(Emoji.fromFormatted("U+1F392")));
                 componentListData1.add(Button.primary("data-balance", "Balance").withEmoji(Emoji.fromFormatted("U+1FA99")));
-                componentListData1.add(Button.primary("data-alerts", "Alerts").withEmoji(Emoji.fromFormatted("U+1F514")));
-                componentListData2.add(Button.primary("data-dynamic", "Dynamic Orders").withEmoji(Emoji.fromFormatted("U+1F3AF")));
-                componentListData2.add(Button.primary("data-session", "Sessions").withEmoji(Emoji.fromFormatted("U+1F5A5")));
-                componentListData2.add(Button.primary("data-broker", "Brokers").withEmoji(Emoji.fromFormatted("U+1F4BC")));
+                componentListData1.add(Button.primary("data-alerts", "Alerts").withEmoji(Emoji.fromFormatted("U+1F514")).asDisabled());
+                componentListData2.add(Button.primary("data-dynamic", "Dynamic Orders").withEmoji(Emoji.fromFormatted("U+1F3AF")).asDisabled());
+                componentListData2.add(Button.primary("data-session", "Sessions").withEmoji(Emoji.fromFormatted("U+1F5A5")).asDisabled());
+                componentListData2.add(Button.primary("data-broker", "Brokers").withEmoji(Emoji.fromFormatted("U+1F4BC")).asDisabled());
 
                 event.reply(info)
                         .addActionRow(componentListData1)
@@ -265,20 +265,20 @@ public class DiscordButtons extends ListenerAdapter {
                 return;
 
             case "data-inventory":
-                String inventory = "## :school_satchel: Inventory\n> Once you link your account, **you're in-game money will be shared with your discord account** and vice versa, and **you will receive a virtual inventory of three slots**, in which you will be able to store the items you buy through discord. Each slot can store **up to 999 of a unique type of item**, and two slots can't store the same type of material. You can buy more slots and check the contents and value pressing the button :school_satchel:\uFEFF **Inventory**.";
-                sendMessage(event, inventory, 25); return;
+                String inventory = "## :school_satchel: Inventory\n> Once you link your account, **you're in-game money will be shared with your discord account** and vice versa, and **you will receive a virtual inventory of three slots**, in which you will be able to store the items you buy through discord. Each slot can store **up to 999 of a unique type of item**. Two slots can't store the same type of material. You can buy more slots and check the contents and value pressing the button :school_satchel:\uFEFF **Inventory**.";
+                sendMessage(event, inventory, 35); return;
 
             case "data-balance":
                 String balance = "## :coin: Balance\n> If you are linked, the :coin: **Balance** button will show you some statistics on how is your financial state. It will display the **purse shared between your discord and minecraft accounts**, and other information as the current **value of your discord inventory** and the money **under brokers management**.";
-                sendMessage(event, balance, 25); return;
+                sendMessage(event, balance, 35); return;
 
             case "data-alerts":
                 String alertsData = "## :bell: Alerts\n> If you are interested in a certain item you can set up an **alert** to get a **DM when the price of an item reaches a threshold** that you previously register. To set up your own alerts use :bell:**Alerts**";
-                sendMessage(event, alertsData, 25); return;
+                sendMessage(event, alertsData, 35); return;
 
             case "data-dynamic":
                 String dynamic = "## :dart: Dynamic orders\n> Set orders that can react to the price of the asset. You can place Limit orders, to buy/sell an asset when it reaches a certain price, or take profit/stoploss, in which you will sell your position once a price gets reached. To access this functionality, press :bar_chart: **Advanced Options** and then :dart: **Dynamic Orders**.";
-                sendMessage(event, dynamic, 25); return;
+                sendMessage(event, dynamic, 35); return;
 
             case "data-session":
                 String session = "## :desktop:  **Sessions**: \n" +
@@ -287,7 +287,7 @@ public class DiscordButtons extends ListenerAdapter {
                         "\n\n> :chart_with_downwards_trend: **Short price**: Bet against the price increasing. Is the inverse of the long. Same principle, with a factor of 2. You will earn a 10% if the price falls 5%, and loss everything if the prices goes up 50%." +
                         "\n\n> :bookmark_tabs: **Futures**: They are a contracts in which you can define a future operation with todays prices, paying a comission. If you don't have money right now and want to buy or sell, for example diamonds, if you think that todays price is good, you can sign a future contract, paying 10% in advance, and you will have the right of buying the item in a week (10% comission) or in a month (20% comission) with todays price." +
                         "\n\n> :date: **Programmed actions**: With this option you will be able to sell/buy items regularly in a fixed time interval. For example, you can buy 64 diamonds each week or sell 200 iron ingots a day.";
-                sendMessage(event, session, 25); return;
+                sendMessage(event, session, 35); return;
 
             case "data-broker":
                 String broker = "## :man_office_worker: Brokers:\n" +
@@ -350,7 +350,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                 float value = DiscordInventories.getInstance().getInventory(uuid).sellAll();
 
-                event.reply("You just sold everything for: " + Formatter.format(value, Style.ROUND_BASIC))
+                event.reply("You just sold everything for: **" + Formatter.format(value, Style.ROUND_BASIC) + "**")
                         .setEphemeral(true)
                         .queue(message -> message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS));
                 return;
@@ -360,7 +360,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                 double purse = Nascraft.getEconomy().getBalance(player2);
                 float inventory = DiscordInventories.getInstance().getInventory(event.getUser().getId()).getInventoryValue();
-                float brokerValue = 60000;
+                float brokerValue = 0;
                 double total = purse + inventory + brokerValue;
 
                 String text =
@@ -387,7 +387,11 @@ public class DiscordButtons extends ListenerAdapter {
 
                 eb.setDescription(text);
 
-                eb.setColor(new Color(240, 200, 80));
+
+                eb.setColor(mixColors(new Color(100,250,100),
+                                      new Color(250,250,100),
+                                      new Color(250,100,100),
+                                      purse/total, inventory/total, brokerValue/total));
 
                 event.replyEmbeds(eb.build())
                         .addFiles(FileUpload.fromData(balanceFile , "image.png"))
@@ -636,6 +640,17 @@ public class DiscordButtons extends ListenerAdapter {
         event.reply(text)
                 .setEphemeral(true)
                 .queue(message -> message.deleteOriginal().queueAfter(delay, TimeUnit.SECONDS));
+    }
+
+    public static Color mixColors(Color color1, Color color2, Color color3, double weight1, double weight2, double weight3) {
+
+        double totalWeight = weight1 + weight2 + weight3;
+
+        double red = (color1.getRed() * weight1 + color2.getRed() * weight2 + color3.getRed() * weight3) / totalWeight;
+        double green = (color1.getGreen() * weight1 + color2.getGreen() * weight2 + color3.getGreen() * weight3) / totalWeight;
+        double blue = (color1.getBlue() * weight1 + color2.getBlue() * weight2 + color3.getBlue() * weight3) / totalWeight;
+
+        return new Color((int) Math.round(red), (int) Math.round(green), (int) Math.round(blue));
     }
 
 }

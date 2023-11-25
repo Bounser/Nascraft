@@ -121,7 +121,7 @@ public class DiscordInventoryInGame implements Listener {
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) head.getItemMeta();
         meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Discord Inventory");
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GOLD + Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getInventoryValue(), Style.ROUND_TO_TWO)));
+        meta.setLore(Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GOLD + Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getInventoryValue(), Style.ROUND_BASIC)));
         meta.setOwnerProfile(profile);
         head.setItemMeta(meta);
 
@@ -133,7 +133,7 @@ public class DiscordInventoryInGame implements Listener {
         ItemStack filler = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta meta = filler.getItemMeta();
         meta.setDisplayName(ChatColor.RED + "LOCKED");
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "Click to buy next slot for: ", ChatColor.GOLD + Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getNextSlotPrice(), Style.ROUND_TO_TWO)));
+        meta.setLore(Arrays.asList(ChatColor.GRAY + "Click to buy next slot for: ", ChatColor.GOLD + Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getNextSlotPrice(), Style.ROUND_BASIC)));
         filler.setItemMeta(meta);
 
         for(int i = 9 + SQLite.getInstance().retrieveCapacity(uuid); i < 40 ; i++) {

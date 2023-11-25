@@ -1,7 +1,10 @@
 package me.bounser.nascraft.discord;
 
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import org.bukkit.Material;
 
 import java.util.HashMap;
 
@@ -16,7 +19,7 @@ public class DiscordAlerts {
 
     public String setAlert(String userID, String material, Float price) {
 
-        Item item = MarketManager.getInstance().getItem(material.replace(" ", "_"));
+        Item item = MarketManager.getInstance().getItem(Material.getMaterial(material.replace(" ", "_").toUpperCase()));
 
         if (item == null) return "not_valid";
 
@@ -60,23 +63,14 @@ public class DiscordAlerts {
 
                     if (!(item.getPrice().getValue() < Math.abs(alerts.get(userID).get(item)))) return;
 
-                    DiscordBot.getInstance().getJDA().retrieveUserById(userID).queue(user ->
-                            user.openPrivateChannel()
-                                    .queue(privateChannel -> privateChannel
-                                            .sendMessage("Alert reached (low) for item: " + item.getName() + " with price: " + item.getPrice().getValue()).queue()));
-
+                    reachedMessage(userID, item, Math.abs(alerts.get(userID).get(item)), ":chart_with_downwards_trend:" );
                     alerts.get(userID).remove(item);
 
                 } else {
 
                     if (!(item.getPrice().getValue() > alerts.get(userID).get(item))) return;
 
-                    DiscordBot.getInstance().getJDA().retrieveUserById(userID).queue(user ->
-                            user.openPrivateChannel()
-                                    .queue(privateChannel -> privateChannel
-                                            .sendMessage("Alert reached (high) for item: " + item.getName() + " with price: " + item.getPrice().getValue()).queue()));
-
-
+                    reachedMessage(userID, item, Math.abs(alerts.get(userID).get(item)), ":chart_with_upwards_trend:" );
                     alerts.get(userID).remove(item);
                 }
             }
@@ -84,4 +78,15 @@ public class DiscordAlerts {
     }
 
     public HashMap<String, HashMap<Item, Float>> getAlerts() { return alerts; }
+
+    public void reachedMessage(String userId, Item item, float price, String emoji) {
+
+        DiscordBot.getInstance().getJDA().retrieveUserById(userId).queue(user ->
+                user.openPrivateChannel()
+                        .queue(privateChannel -> privateChannel
+                                .sendMessage(":bell: " + emoji + " Alert reached for item: ``" + item.getName() + " (" + Formatter.format(price, Style.ROUND_BASIC) + ")`` with current price: ``" + Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC) + "``").queue()));
+
+
+    }
+
 }

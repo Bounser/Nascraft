@@ -4,10 +4,11 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.discord.inventories.DiscordInventories;
-import me.bounser.nascraft.discord.inventories.DiscordInventory;
+import me.bounser.nascraft.discord.images.ItemBasicImage;
+import me.bounser.nascraft.discord.images.MainImage;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
@@ -17,6 +18,8 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
@@ -27,6 +30,8 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.*;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
@@ -43,9 +48,11 @@ public class DiscordBot {
         instance = this;
 
         jda = JDABuilder.createLight(Config.getInstance().getToken(), Collections.emptyList())
-                .addEventListeners(new DiscordListener())
+                .addEventListeners(new DiscordButtons())
                 .addEventListeners(new DiscordCommands())
-                .setActivity(Activity.watching("prices move."))
+                .addEventListeners(new DiscordSelection())
+                .addEventListeners(new DiscordModal())
+                .setActivity(Activity.watching("how prices move."))
                 .setStatus(OnlineStatus.ONLINE)
                 .build();
 
@@ -63,7 +70,7 @@ public class DiscordBot {
                 Commands.slash("inventory", "Check your inventory.")
         ).queue();
 
-        removeLastMessage();
+        removeAllMessages();
     }
 
     public JDA getJDA() { return jda; }
@@ -79,27 +86,44 @@ public class DiscordBot {
                 return;
             }
 
+            if (Math.random() > 0.95) {
+                textChannel.purgeMessages();
+            }
+
             File outputfile = new File("image.png");
             try {
-                ImageIO.write(ImageBuilder.getInstance().getMainImage(), "png", outputfile);
+                ImageIO.write(MainImage.getImage(), "png", outputfile);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
-            List<ItemComponent> componentList = new ArrayList<>();
+            List<ItemComponent> componentList1 = new ArrayList<>();
+            List<ItemComponent> componentList2 = new ArrayList<>();
 
-            componentList.add(Button.secondary("inventory", "Inventory").withEmoji(Emoji.fromFormatted("U+1F392")).asEnabled());
-            componentList.add(Button.secondary("balance", "Balance").withEmoji(Emoji.fromFormatted("U+1FA99")).asEnabled());
-            componentList.add(Button.secondary("alerts", "Alerts").withEmoji(Emoji.fromFormatted("U+1F514")).asEnabled());
-            componentList.add(Button.secondary("1info", "Info").withEmoji(Emoji.fromFormatted("U+2139")).asEnabled());
+            componentList1.add(Button.primary("data", Emoji.fromFormatted("U+2754")));
+            componentList1.add(Button.secondary("search", "Search Item").withEmoji(Emoji.fromFormatted("U+1F50D")));
+            componentList1.add(Button.secondary("history", "Trades History").withEmoji(Emoji.fromFormatted("U+1F4DC")));
+            componentList1.add(Button.secondary("advanced", "Advanced").withEmoji(Emoji.fromFormatted("U+1F4CA")).asDisabled());
+
+            componentList2.add(Button.secondary("link", "Link Account").withEmoji(Emoji.fromFormatted("U+1F517")));
+            componentList2.add(Button.secondary("inventory", "Inventory").withEmoji(Emoji.fromFormatted("U+1F392")));
+            componentList2.add(Button.secondary("balance", "Balance").withEmoji(Emoji.fromFormatted("U+1FA99")));
+            componentList2.add(Button.secondary("manager", "Brokers").withEmoji(Emoji.fromFormatted("U+1F4BC")).asDisabled());
+            //componentList2.add(Button.secondary("alerts", "Alerts").withEmoji(Emoji.fromFormatted("U+1F514")));
+
+            //componentList2.add(Button.secondary("balance", "Check balance").withEmoji(Emoji.fromFormatted("U+1FA99")));
+            //componentList2.add(Button.secondary("limit", "Limit orders").withEmoji(Emoji.fromFormatted("U+1F3AF")));
+            //componentList2.add(Button.secondary("info", "Information").withEmoji(Emoji.fromFormatted("U+2139")));
 
             textChannel.sendMessageEmbeds(getEmbedded())
                     .addFiles(FileUpload.fromData(outputfile, "image.png"))
-                    .addActionRow(componentList)
                     .addActionRow(getOptionsList())
+                    .addActionRow(componentList1)
+                    .addActionRow(componentList2)
                     .queue(message -> message.delete().queueAfter(60, TimeUnit.SECONDS));
 
         });
+
     }
 
     public static DiscordBot getInstance() { return instance; }
@@ -110,13 +134,37 @@ public class DiscordBot {
 
         eb.setTitle(Lang.get().message(Message.DISCORD_MAIN_TITLE));
 
+        eb.setDescription("Avg change (1h): " + RoundUtils.roundToTwo(MarketManager.getInstance().getChange1h()) + "%");
+
         eb.setImage("attachment://image.png");
 
         eb.setFooter(Lang.get().message(Message.DISCORD_MAIN_FOOTER));
 
-        eb.setColor(new Color(120, 176, 88));
+        eb.setColor(getColorByValue(MarketManager.getInstance().getChange1h()));
 
         return eb.build();
+    }
+
+    public Color getColorByValue(float value) {
+        value = Math.min(3, Math.max(-3, value));
+
+        Color redColor = new Color(220, 70, 70);
+        Color whiteColor = new Color(155, 125, 255);
+        Color greenColor = new Color(70, 220, 70);
+
+        int r = calculateIntermediateValue(redColor.getRed(), whiteColor.getRed(), greenColor.getRed(), value);
+        int g = calculateIntermediateValue(redColor.getGreen(), whiteColor.getGreen(), greenColor.getGreen(), value);
+        int b = calculateIntermediateValue(redColor.getBlue(), whiteColor.getBlue(), greenColor.getBlue(), value);
+
+        return new Color(r, g, b);
+    }
+
+    private int calculateIntermediateValue(int start, int middle, int end, float value) {
+        if (value < 0) {
+            return (int) (start + (middle - start) * (1.0 + value / 3.0));
+        } else {
+            return (int) (middle + (end - middle) * (value / 3.0));
+        }
     }
 
     public StringSelectMenu getOptionsList() {
@@ -134,37 +182,112 @@ public class DiscordBot {
         }
 
         for (Item item : items)
-            builder.addOption(item.getName(), item.getMaterial(), Formatter.format(item.getPrice().getValue(), Style.ROUND_TO_TWO) + " - Buy: " + Formatter.format(item.getPrice().getBuyPrice(), Style.ROUND_TO_TWO)+ " Sell: " + Formatter.format(item.getPrice().getSellPrice(), Style.ROUND_TO_TWO));
+            builder.addOption(item.getName(), item.getMaterial().toString(), Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC) + " - Buy: " + Formatter.format(item.getPrice().getBuyPrice(), Style.ROUND_BASIC)+ " Sell: " + Formatter.format(item.getPrice().getSellPrice(), Style.ROUND_BASIC));
 
         return builder.build();
     }
 
-    public void removeLastMessage() {
+    public void removeAllMessages() {
 
         try {
-
             jda.awaitReady().getGuilds().forEach(guild -> {
                 TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
-
                 if (textChannel == null) {
                     Nascraft.getInstance().getLogger().info("textChannel is null");
                     return;
                 }
 
-                textChannel.getHistory().size();
-
-                String lastMessageID = textChannel.getLatestMessageId();
-
-                textChannel.getHistory().retrievePast(1).queue(messages -> {
-                    if (!messages.isEmpty())
-                        textChannel.retrieveMessageById(lastMessageID).queue(message -> message.delete().queue());
+                textChannel.getHistory().retrievePast(10).queue(messages -> {
+                    if (!messages.isEmpty()) {
+                        textChannel.purgeMessages(messages);
+                        removeAllMessages();
+                    }
                 });
-
             });
-
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void sendClosedMessage() {
+
+        jda.getGuilds().forEach(guild -> {
+            TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
+            if (textChannel == null) {
+                Nascraft.getInstance().getLogger().info("textChannel is null"); return;
+            }
+            textChannel.sendMessage(":pause_button: Market paused! Will be resumed once the servers gets online again.").queue();
+        });
+
+    }
+
+    public void sendBasicScreen(Item item, User user, ModalInteractionEvent mEvent, StringSelectInteractionEvent sEvent) {
+
+        Lang lang = Lang.get();
+
+        File outputfile = new File("image.png");
+        try {
+            ImageIO.write(ItemBasicImage.getImage(item), "png", outputfile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        List<ItemComponent> componentList = new ArrayList<>();
+
+        if (LinkManager.getInstance().getUUID(user.getId()) == null) {
+            componentList.add(Button.success("b01" + item.getMaterial(), lang.message(Message.DISCORD_BUY) + " 1 x " + Formatter.format(item.getPrice().getBuyPrice(), Style.REDUCED_LENGTH)).asDisabled());
+            componentList.add(Button.success("b32" + item.getMaterial(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.format(item.getPrice().getBuyPrice()*32, Style.REDUCED_LENGTH)).asDisabled());
+            componentList.add(Button.danger("s32" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.format(item.getPrice().getSellPrice()*32, Style.REDUCED_LENGTH)).asDisabled());
+            componentList.add(Button.danger("s01" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 1 x " + Formatter.format(item.getPrice().getSellPrice(), Style.REDUCED_LENGTH)).asDisabled());
+            componentList.add(Button.secondary("info" + item.getMaterial(), "Not linked!").withEmoji(Emoji.fromFormatted("U+1F517")));
+        } else {
+            componentList.add(Button.success("b01" + item.getMaterial(), lang.message(Message.DISCORD_BUY) + " 1 x " + Formatter.format(item.getPrice().getBuyPrice(), Style.REDUCED_LENGTH)));
+            componentList.add(Button.success("b32" + item.getMaterial(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.format(item.getPrice().getBuyPrice()*32, Style.REDUCED_LENGTH)));
+            componentList.add(Button.danger("s32" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.format(item.getPrice().getSellPrice()*32, Style.REDUCED_LENGTH)));
+            componentList.add(Button.danger("s01" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 1 x " + Formatter.format(item.getPrice().getSellPrice(), Style.REDUCED_LENGTH)));
+        }
+
+        if (mEvent != null)
+            mEvent.replyFiles(FileUpload.fromData(outputfile , "image.png"))
+                    .setEphemeral(true)
+                    .addActionRow(componentList)
+                    .queue(message -> {
+
+                        LocalTime timeNow = LocalTime.now();
+
+                        LocalTime nextMinute = timeNow.plusMinutes(1).withSecond(0);
+                        Duration timeRemaining = Duration.between(timeNow, nextMinute);
+
+                        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+                        embedBuilder.setTitle(lang.message(Message.DISCORD_OUTDATED));
+
+                        embedBuilder.setColor(new Color(200, 50, 50));
+
+                        message.editOriginalEmbeds(embedBuilder.build()).queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS);
+
+                    });
+
+        if (sEvent != null)
+            sEvent.replyFiles(FileUpload.fromData(outputfile , "image.png"))
+                    .setEphemeral(true)
+                    .addActionRow(componentList)
+                    .queue(message -> {
+
+                        LocalTime timeNow = LocalTime.now();
+
+                        LocalTime nextMinute = timeNow.plusMinutes(1).withSecond(0);
+                        Duration timeRemaining = Duration.between(timeNow, nextMinute);
+
+                        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+                        embedBuilder.setTitle(lang.message(Message.DISCORD_OUTDATED));
+
+                        embedBuilder.setColor(new Color(200, 50, 50));
+
+                        message.editOriginalEmbeds(embedBuilder.build()).queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS);
+
+                    });
     }
 
 }

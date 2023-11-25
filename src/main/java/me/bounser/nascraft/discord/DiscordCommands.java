@@ -1,25 +1,26 @@
 package me.bounser.nascraft.discord;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.discord.images.InventoryImage;
+import me.bounser.nascraft.discord.inventories.DiscordInventories;
+import me.bounser.nascraft.discord.inventories.DiscordInventory;
 import me.bounser.nascraft.discord.linking.LinkManager;
-import me.bounser.nascraft.market.RoundUtils;
+import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class DiscordCommands extends ListenerAdapter {
@@ -27,6 +28,7 @@ public class DiscordCommands extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
         switch (event.getName()) {
+
             case "ping":
                 long time = System.currentTimeMillis();
                 event.reply("Pong!").setEphemeral(true)
@@ -77,7 +79,7 @@ public class DiscordCommands extends ListenerAdapter {
                 String alerts = ":bell: Active alerts:\n ";
 
                 for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
-                    alerts = alerts + "\n**" + item.getName() + "** at price: **" + Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)) + Config.getInstance().getCurrency() + "**";
+                    alerts = alerts + "\n**" + item.getName() + "** at price: **" + Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)) + Lang.get().message(Message.CURRENCY) + "**";
 
                 event.reply(alerts)
                         .setEphemeral(true)
@@ -95,7 +97,7 @@ public class DiscordCommands extends ListenerAdapter {
                     return;
                 }
 
-                Item item = MarketManager.getInstance().getItem(event.getOption("material").getAsString().replace(" ", "_"));
+                Item item = MarketManager.getInstance().getItem(Material.getMaterial(event.getOption("material").getAsString().replace(" ", "_").toUpperCase()));
 
                 if (item == null) {
                     event.reply(":x: Item not recognized.")
@@ -122,23 +124,15 @@ public class DiscordCommands extends ListenerAdapter {
 
             case "link":
 
-                if (LinkManager.getInstance().getUUID(event.getUser()) != null) {
+                if (LinkManager.getInstance().getUUID(event.getUser().getId()) != null) {
 
-                    event.reply(":link: Already linked! (With UUID " + LinkManager.getInstance().getUUID(event.getUser()) + ")")
+                    event.reply(":link: Already linked! (With UUID " + LinkManager.getInstance().getUUID(event.getUser().getId()) + ")")
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
-                }
-
-                if (LinkManager.getInstance().redeemCode(event.getOption("code").getAsInt(), event.getUser())) {
-
-                    event.reply(":white_check_mark: Success! Account linked.")
-                            .setEphemeral(true)
-                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
-
                 } else {
 
-                    event.reply(":negative_squared_cross_mark: Error! Something went wrong while retrieving your code.")
+                    event.reply(":link: Link your account using ``/link " + LinkManager.getInstance().startLinkingProcess(event.getUser().getId()) + "`` in-game!")
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                 }
@@ -146,11 +140,11 @@ public class DiscordCommands extends ListenerAdapter {
 
             case "balance":
 
-                if (LinkManager.getInstance().getUUID(event.getUser()) != null) {
+                if (LinkManager.getInstance().getUUID(event.getUser().getId()) != null) {
 
-                    OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(LinkManager.getInstance().getUUID(event.getUser())));
+                    OfflinePlayer player = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(event.getUser().getId()));
 
-                    event.reply(":coin: You have: **" + RoundUtils.round((float) Nascraft.getEconomy().getBalance(player)) + Config.getInstance().getCurrency() + "**")
+                    event.reply(":coin: You have: **" + RoundUtils.round((float) Nascraft.getEconomy().getBalance(player)) + Lang.get().message(Message.CURRENCY) + "**")
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
 
@@ -163,25 +157,27 @@ public class DiscordCommands extends ListenerAdapter {
 
             case "inventory":
 
-                if (LinkManager.getInstance().getUUID(event.getUser()) == null) {
+                if (LinkManager.getInstance().getUUID(event.getUser().getId()) == null) {
                     event.reply(":x: You don't have any account linked!")
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
                 }
 
+                DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(LinkManager.getInstance().getUUID(event.getUser().getId()));
+
                 File outputfile = new File("image.png");
                 try {
-                    ImageIO.write(ImageBuilder.getInstance().getInventory(event.getUser()), "png", outputfile);
+                    ImageIO.write(InventoryImage.getImage(discordInventory), "png", outputfile);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
 
-                if (DiscordInventories.getInstance().getCapacity(event.getUser().getId()) < 40) {
+                if (discordInventory.getCapacity() < 40) {
 
                     event.replyFiles(FileUpload.fromData(outputfile , "image.png"))
                             .setEphemeral(true)
-                            .addActionRow(Button.success("i_buy", "Buy slot for " + DiscordInventories.getInstance().getNextSlotPrice(event.getUser()) + Config.getInstance().getCurrency()))
+                            .addActionRow(Button.success("i_buy", "Buy slot for " + discordInventory.getNextSlotPrice() + Lang.get().message(Message.CURRENCY)))
                             .queue(message -> {
                                 message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS);
                             });
@@ -194,8 +190,6 @@ public class DiscordCommands extends ListenerAdapter {
                                 message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS);
                             });
                 }
-
         }
     }
-
 }
