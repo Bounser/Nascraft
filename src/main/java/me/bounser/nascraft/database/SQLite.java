@@ -2,12 +2,16 @@ package me.bounser.nascraft.database;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.brokers.BrokerType;
+import me.bounser.nascraft.market.managers.BrokersManager;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.managers.TasksManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -27,6 +31,8 @@ public class SQLite {
     public static SQLite getInstance() { return instance == null ? instance = new SQLite() : instance; }
 
     private SQLite() {
+
+        createDatabaseIfNotExists();
 
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:" + PATH);
@@ -86,9 +92,32 @@ public class SQLite {
                 "id INTEGER PRIMARY KEY, " +
                         "broker TEXT NOT NULL," +
                         "day INT NOT NULL," +
-                        "lastvalue TEXT NOT NULL," +
-                        "values24h TEXT NOT NULL");
+                        "lastvalue TEXT NOT NULL");
 
+
+        purgeHistory();
+    }
+
+    private void createDatabaseIfNotExists() {
+        File databaseFile = new File(PATH);
+        if (!databaseFile.exists()) {
+            try {
+                File parentDir = databaseFile.getParentFile();
+                if (!parentDir.exists()) {
+                    boolean dirsCreated = parentDir.mkdirs();
+                    if (!dirsCreated) {
+                        throw new RuntimeException("Failed to create directories for the database file.");
+                    }
+                }
+
+                boolean fileCreated = databaseFile.createNewFile();
+                if (!fileCreated) {
+                    throw new RuntimeException("Failed to create the database file.");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void createTable(Connection connection, String tableName, String columns) {
@@ -147,15 +176,15 @@ public class SQLite {
 
                 PreparedStatement insertPrep = connection.prepareStatement(sqlinsert);
                 insertPrep.setString(1, item.getMaterial().toString());
-                insertPrep.setFloat(2, Config.getInstance().getInitialPrice(item.getMaterial().toString()));
-                insertPrep.setFloat(3, Config.getInstance().getInitialPrice(item.getMaterial().toString()));
-                insertPrep.setFloat(4, Config.getInstance().getInitialPrice(item.getMaterial().toString()));
+                insertPrep.setFloat(2, Config.getInstance().getInitialPrice(item.getMaterial()));
+                insertPrep.setFloat(3, Config.getInstance().getInitialPrice(item.getMaterial()));
+                insertPrep.setFloat(4, Config.getInstance().getInitialPrice(item.getMaterial()));
                 insertPrep.setFloat(5, 0);
                 insertPrep.setFloat(6, 0);
 
                 item.getPrice().setStock(0);
-                item.getPrice().setHistoricalHigh(Config.getInstance().getInitialPrice(item.getMaterial().toString()));
-                item.getPrice().setHistoricalLow(Config.getInstance().getInitialPrice(item.getMaterial().toString()));
+                item.getPrice().setHistoricalHigh(Config.getInstance().getInitialPrice(item.getMaterial()));
+                item.getPrice().setHistoricalLow(Config.getInstance().getInitialPrice(item.getMaterial()));
                 item.setCollectedTaxes(0);
 
                 insertPrep.executeUpdate();
@@ -224,9 +253,9 @@ public class SQLite {
 
                 statement.setString(1, item.getMaterial().toString());
                 statement.setString(2, formatDateTime(LocalDateTime.now()));
-                statement.setString(3, Collections.nCopies(48, Config.getInstance().getInitialPrice(item.getMaterial().toString())).toString());
-                statement.setString(4, Collections.nCopies(30, Config.getInstance().getInitialPrice(item.getMaterial().toString())).toString());
-                statement.setString(5, Collections.nCopies(51, Config.getInstance().getInitialPrice(item.getMaterial().toString())).toString());
+                statement.setString(3, Collections.nCopies(48, Config.getInstance().getInitialPrice(item.getMaterial())).toString());
+                statement.setString(4, Collections.nCopies(30, Config.getInstance().getInitialPrice(item.getMaterial())).toString());
+                statement.setString(5, Collections.nCopies(51, Config.getInstance().getInitialPrice(item.getMaterial())).toString());
 
                 statement.executeUpdate();
             }
@@ -250,7 +279,7 @@ public class SQLite {
             if (resultSet.next()) {
                 return resultSet.getFloat("lastprice");
             } else {
-                return Config.getInstance().getInitialPrice(item.getMaterial().toString());
+                return Config.getInstance().getInitialPrice(item.getMaterial());
             }
 
         } catch (SQLException e) {
@@ -284,7 +313,7 @@ public class SQLite {
         return LocalDateTime.parse(dateTimeString, formatter);
     }
 
-    public void saveTrade(UUID uuid, Item item, int amount, float price, boolean buy, boolean discord) {
+    public void saveTrade(UUID uuid, Item item, int amount, float value, boolean buy, boolean discord) {
         try {
             String selectSQL = "INSERT INTO trade_log (uuid, day, date, material, amount, value, buy, discord) VALUES (?,?,?,?,?,?,?,?);";
             PreparedStatement statement = connection.prepareStatement(selectSQL);
@@ -294,7 +323,7 @@ public class SQLite {
             statement.setString(3, formatDateTime(LocalDateTime.now()));
             statement.setString(4, item.getMaterial().toString());
             statement.setInt(5, amount);
-            statement.setFloat(6, price);
+            statement.setFloat(6, RoundUtils.round(value));
             statement.setBoolean(7, buy);
             statement.setBoolean(8, discord);
 
@@ -345,7 +374,7 @@ public class SQLite {
 
     public void saveLink(String userId, UUID uuid, String nickname) {
         try {
-            String sql = "REPLACE INTO discord_links (userid, uuid, nickname) VALUES (?,?,?);";
+            String sql = "INSERT INTO discord_links (userid, uuid, nickname) VALUES (?,?,?);";
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, userId);
             prep.setString(2, uuid.toString());
@@ -398,11 +427,11 @@ public class SQLite {
         }
     }
 
-    public String getUserId(String uuid) {
+    public String getUserId(UUID uuid) {
         try {
             String sql = "SELECT userid FROM discord_links WHERE uuid=?";
             PreparedStatement prep = connection.prepareStatement(sql);
-            prep.setString(1, uuid);
+            prep.setString(1, uuid.toString());
             ResultSet resultSet = prep.executeQuery();
 
             if (resultSet.next()) {
@@ -450,6 +479,17 @@ public class SQLite {
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, uuid.toString());
             prep.setString(2, item.getMaterial().toString());
+            prep.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void clearInventory(UUID uuid) {
+        try {
+            String sql = "DELETE FROM inventories WHERE uuid=?;";
+            PreparedStatement prep = connection.prepareStatement(sql);
+            prep.setString(1, uuid.toString());
             prep.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -511,16 +551,16 @@ public class SQLite {
         }
     }
 
-    public double getBrokerSharePrice(BrokerType brokerType) {
+    public float getBrokerSharePrice(BrokerType brokerType) {
 
         try {
-            String sql = "SELECT * FROM shares_value WHERE broker=?";
+            String sql = "SELECT lastvalue FROM shares_value WHERE broker=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, brokerType.toString().toLowerCase());
             ResultSet resultSet = prep.executeQuery();
 
             if (resultSet.next()) {
-                return resultSet.getDouble("lastvalue");
+                return resultSet.getFloat("lastvalue");
             } else {
                 String sql2 = "INSERT INTO shares_value (broker, day, lastvalue) VALUES (?,?,?);";
                 PreparedStatement prep2 =  connection.prepareStatement(sql2);
@@ -537,16 +577,86 @@ public class SQLite {
     }
 
     public void updateSharePrice(BrokerType brokerType, double value) {
+
         try {
+            double price = value;
+            if (value <= 0) {
+                price = 1;
+                BrokersManager.getInstance().getBroker(brokerType).setValue(1);
+                try {
+                    String delete = "DELETE FROM broker_shares WHERE broker=?;";
+                    PreparedStatement deletePrep = connection.prepareStatement(delete);
+                    deletePrep.setString(1, brokerType.toString());
+                    deletePrep.executeUpdate();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             String sql = "UPDATE shares_value SET lastvalue=? WHERE broker=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
-            prep.setDouble(1, value);
-            prep.setString(2, brokerType.toString().toLowerCase());
+            prep.setDouble(1, price);
+            prep.setString(2, brokerType.toString());
             prep.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public double retrieveShares(BrokerType brokerType, UUID uuid) {
+        try {
+            String sql = "SELECT quantity FROM broker_shares WHERE uuid=?;";
+            PreparedStatement prep = connection.prepareStatement(sql);
+            prep.setString(1, uuid.toString());
+            ResultSet resultSet = prep.executeQuery();
+
+            return resultSet.next() ? resultSet.getDouble("lastvalue") : 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public double retrieveCost(BrokerType brokerType, UUID uuid) {
+        try {
+            String sql = "SELECT cost FROM broker_shares WHERE uuid=?;";
+            PreparedStatement prep = connection.prepareStatement(sql);
+            prep.setString(1, uuid.toString());
+            ResultSet resultSet = prep.executeQuery();
+
+            return resultSet.next() ? resultSet.getDouble("lastvalue") : 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+    public void updateShares(UUID uuid, double quantity, float cost) {
+        try {
+            String sql = "UPDATE broker_shares SET quantity=?, cost=? WHERE uuid=?;";
+            PreparedStatement prep = connection.prepareStatement(sql);
+            prep.setDouble(1, quantity);
+            prep.setFloat(2, cost);
+            prep.setString(2, uuid.toString());
+            prep.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void purgeHistory() {
+
+        int offset = Config.getInstance().getDatabasePurgeDays();
+        if (offset == -1) return;
+
+        try {
+            String sql = "DELETE FROM trade_log WHERE day<?;";
+            PreparedStatement prep = connection.prepareStatement(sql);
+            prep.setDouble(1, getDays() - offset);
+            prep.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void shutdown() {
