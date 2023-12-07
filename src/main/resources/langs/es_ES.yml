@@ -1,0 +1,96 @@
+# Nascraft es_ES - ${project.version}
+
+# ¿Qué simbolo debería usarse junto a los precios?
+currency: "€"
+# El precio debe ir después (true -> 50€) o antes (false -> €50)
+after: true
+# Separador decimal. Disponibles: point (.), comma (,)
+separator: "comma"
+
+# Placeholders disponibles: [AMOUNT], [MATERIAL], [WORTH]
+buy_message: "<gradient:#00E3FB:#F9ABFD>Has comprado <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> por </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+sell_message: "<gradient:#00E3FB:#F9ABFD>Has vendido <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> por </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+
+not_enough_money: "<gradient:#FB6363:#C4B3FD>No tienes suficiente dinero!</gradient>"
+not_enough_items: "<gradient:#FB6363:#C4B3FD>No tienes suficientes items!</gradient>"
+not_enough_space: "<gradient:#FB6363:#C4B3FD>No tienes suficiente espacio en el inventario!</gradient>"
+shop_closed: "<gradient:#FB6363:#C4B3FD>Error al comprar: La tienda esta cerrada</gradient>"
+
+# Comandos
+no_permission: "<gradient:#FB6363:#C4B3FD>Permiso requerido.</gradient>"
+click_to_confirm: "\n<gold>[ <gradient:#F5FFD5:#FFA200:#F5FFD5>Clic aquí para confirmar</gradient> ]</gold>\n"
+list_segment: "\n<gray>> <gradient:#FF00CD:#DA58FF>[MATERIAL] x [AMOUNT] = [WORTH]</gradient>"
+
+# nsellall
+sellall_everything: "<gradient:#FF00CD:#DA58FF>Has vendido <bold><light_purple>[AMOUNT]</light_purple></bold> distintos tipos de objetos por <green>[WORTH]</green></gradient>"
+sellall_everything_error: "<gradient:#FF0000:#FF7E7E:#FF0000>No tienes nada que vender!</gradient>"
+sellall: "<gradient:#FF00CD:#DA58FF>Has vendido <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[MATERIAL]</light_purple></bold> por <green>[WORTH]</green></gradient>"
+sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>No tienes nada de [MATERIAL] para vender!</gradient>"
+sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>Material no reconocido. Usa: /sellall [material]</gradient>"
+sellall_estimated_value: "<gray>Valor estimado:</gray> <green>[WORTH]</green>"
+
+# nsell
+sell_title: "&8&lMenu de venta"
+sell_close: "&cCERRAR"
+sell_button_name: "&6VENDER"
+sell_button_lore: "&eVender por aproximadamente: &l[WORTH]"
+sell_remove_item: "&cClic para quitar de la lista"
+sell_action_message: "<gradient:#FF00CD:#DA58FF>Has vendido items por valor de <bold><light_purple>[WORTH]</light_purple></bold></gradient>"
+sell_item_not_allowed: "<gradient:#FB6363:#C4B3FD>No puedes vender ese objeto!</gradient>"
+sell_full: "<gradient:#FB6363:#C4B3FD>¡El inventario de venta está lleno!</gradient>"
+# sellhand
+sellhand_invalid: "<gradient:#FF0000:#FF7E7E:#FF0000>¡Sostén un item válido!</gradient>"
+sellhand_error_hand: "<gradient:#FF0000:#FF7E7E:#FF0000>¡Error! No cambies el item de tu mano antes de confirmar</gradient>"
+sellhand_estimated_value: "<gray>Valor estimado:</gray> \n"
+# alert - Actualemente esta desactivado.
+alert_invalid_use: "<gradient:#FB6363:#C4B3FD>Uso incorrecto del comando. /alert [material] [precio]</gradient>"
+alert_not_linked: "<gradient:#FB6363:#C4B3FD>¡Tienes que enlazar tu cuenta para usar eso!</gradient>"
+alert_in_watchlist: "<gradient:#FB6363:#C4B3FD>Ya tienes una alerta para ese objeto.</gradient>"
+alert_invalid_price: "<gradient:#FB6363:#C4B3FD>Uso inválido. El precio debe ser un numero. (Ejemplo 120.90)</gradient>"
+alert_not_recognized: "<gradient:#FB6363:#C4B3FD>Objeto no reconocido.</gradient>"
+alert_setup: "Alerta establecida correctamente! Recibirás un privado cuando se alcance el preico deseado."
+# alerts
+alerts_empty: "&cNo tienes ninguna alerta activa."
+alerts_header: "&3Alertas activas:\n"
+alerts_list_segment: "\n&5> [MATERIAL] a precio [WORTH]"
+
+# DISCORD - Sin soporte para MiniMessage.
+
+discord_status: "el precio de los objetos."
+
+discord_main_title: ":green_circle:  Mercado en tiempo real"
+discord_main_footer: "Selecciona un item para operar (Comprar/Vender) con el. \nLos precios en las operaciones pueden variar."
+discord_top_gainers: "Mayores ganadores"
+discord_most_popular: "Más populares"
+discord_big_dippers: "Grandes perdedores"
+discord_buy: "COM "
+discord_sell: "VEN "
+discord_outdated: ":warning: CUIDADO: Información desactualizada!"
+discord_day_high: "Alto del día: "
+discord_day_low: "Bajo del día: "
+discord_historical_high: "Alto histórico: "
+discord_daily_volume: "Volúmen (24h): "
+discord_position: "Posicion en mercado: "
+discord_trend: "Tendencia (24h): "
+discord_inventory_value: "Valor: "
+discord_buy_slot: "Comprar ranura por "
+
+discord_not_linked_short: "No enlazado!"
+discord_not_linked: ":exclamation: Tu cuenta no está enlazada! Escribe ``/link`` en el juego para comenzar el proceso de enlazado.."
+discord_insufficient_balance: ":x: No tienes suficiente dinero! Tienes: **[VALUE1]** y necesitas al menos **[VALUE2]**"
+discord_without_space: ":x: No tienes espacio suficiente en tu inventario de discord!"
+
+discord_alert_not_setupped: "No alerts setup! You can setup an alert to receive a DM when the price of an item reaches a limit"
+discord_alert_header: "Alerts :bell:\n\n"
+
+# LAYOUT TEXTS:
+# Main title.
+advancedgui_title: "Mercado"
+# More text:
+advancedgui_top_movers: "Más Movido"
+advancedgui_subtop: "en la última hora"
+advancedgui_buy: "Com"
+advancedgui_sell: "Ven"
+advancedgui_price: "Precio:"
+advancedgui_amount_selection: "Selecciona cantidad:"
+advancedgui_trend: "Popular"
