@@ -128,14 +128,24 @@ public class Item {
             return;
         }
 
-        boolean hasSpace = false;
-
         if (player != null && player.getInventory().firstEmpty() == -1) {
             for (ItemStack is : player.getInventory()) {
-                if(is != null && is.getType().toString().equals(material) && amount < is.getMaxStackSize() - is.getAmount()) { hasSpace = true; }
+                if(is != null && is.getType().equals(material)) {
+                    if (amount > (is.getMaxStackSize() - is.getAmount())) {
+                        if (feedback) Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
+                        return;
+                    }
+                }
             }
-            if (!hasSpace && feedback) {
-                Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
+        } else {
+            int itemsInInventory = 0;
+
+            if (player != null)
+                for (ItemStack content : player.getInventory().getStorageContents())
+                    if (content != null && !content.getType().equals(Material.AIR)) itemsInInventory++;
+
+            if (player != null && (36 - itemsInInventory) < (amount/material.getMaxStackSize())) {
+                if (feedback) Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
                 return;
             }
         }
@@ -172,7 +182,7 @@ public class Item {
 
         econ.withdrawPlayer(offlinePlayer, totalCost);
 
-        if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(totalCost, Style.ROUND_TO_TWO), String.valueOf(amount), alias);
+        if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(totalCost, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
         operations += amount;
 
@@ -181,8 +191,6 @@ public class Item {
         collectedTaxes += totalTaxes;
 
         SQLite.getInstance().saveTrade(uuid, this, amount, totalCost, true, false);
-
-        PlayerInfoManager.getInstance().getPlayerReport(uuid).update(1, -totalCost, totalTaxes);
     }
 
     public float sellItem(int amount, UUID uuid, boolean feedback) {
@@ -236,13 +244,11 @@ public class Item {
 
         collectedTaxes += totalTaxes;
 
-        Nascraft.getEconomy().depositPlayer(offlinePlayer, RoundUtils.round(price.getSellPrice()*amount*amount*childs.get(material)));
+        Nascraft.getEconomy().depositPlayer(offlinePlayer, totalWorth);
 
-        if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(totalWorth, Style.ROUND_TO_TWO), String.valueOf(amount), alias);
+        if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(totalWorth, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
         SQLite.getInstance().saveTrade(uuid, this, amount, totalWorth, false, false);
-
-        PlayerInfoManager.getInstance().getPlayerReport(uuid).update(1, totalWorth, totalTaxes);
 
         return totalWorth;
     }

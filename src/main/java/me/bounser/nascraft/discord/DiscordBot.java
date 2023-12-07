@@ -19,13 +19,17 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.api.utils.FileUpload;
+import net.dv8tion.jda.internal.requests.restaction.interactions.ReplyCallbackActionImpl;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -52,22 +56,22 @@ public class DiscordBot {
                 .addEventListeners(new DiscordCommands())
                 .addEventListeners(new DiscordSelection())
                 .addEventListeners(new DiscordModal())
-                .setActivity(Activity.watching("how prices move."))
+                .setActivity(Activity.watching(Lang.get().message(Message.DISCORD_STATUS)))
                 .setStatus(OnlineStatus.ONLINE)
                 .build();
 
         jda.updateCommands().addCommands(
-                Commands.slash("ping", "Calculate ping of the bot."),
-                Commands.slash("alert", "Setup an alert based on prices changes!")
+                /*Commands.slash("alert", "Set up an alert based on prices changes!")
                         .addOption(OptionType.STRING, "material", "Material name of the item.")
                         .addOption(OptionType.NUMBER, "price", "Price at which you will receive a mention."),
                 Commands.slash("alerts", "List all your current alerts."),
                 Commands.slash("remove-alert", "Remove an alert.")
-                        .addOption(OptionType.STRING, "material", "Material name of the item to remove."),
-                Commands.slash("link", "Link a minecraft account using the code received in-game with /link")
-                        .addOption(OptionType.INTEGER, "code", "Code received using /link in minecraft."),
+                        .addOption(OptionType.STRING, "material", "Material name of the item to remove."),*/
+                Commands.slash("link", "Link a minecraft account to use all the functionalities"),
                 Commands.slash("balance", "Checks available balance."),
-                Commands.slash("inventory", "Check your inventory.")
+                Commands.slash("inventory", "Check your inventory."),
+                Commands.slash("search", "Search an item by name to operate with it.")
+                        .addOption(OptionType.STRING, "material", "Name (material) of the item.")
         ).queue();
 
         removeAllMessages();
@@ -216,12 +220,12 @@ public class DiscordBot {
             if (textChannel == null) {
                 Nascraft.getInstance().getLogger().info("textChannel is null"); return;
             }
-            textChannel.sendMessage(":pause_button: Market paused! Will be resumed once the servers gets online again.").queue();
+            textChannel.sendMessage(":pause_button: Market paused! Will be resumed once the server gets online again.").queue();
         });
 
     }
 
-    public void sendBasicScreen(Item item, User user, ModalInteractionEvent mEvent, StringSelectInteractionEvent sEvent) {
+    public void sendBasicScreen(Item item, User user, ModalInteractionEvent mEvent, StringSelectInteractionEvent sEvent, SlashCommandInteractionEvent cEvent) {
 
         Lang lang = Lang.get();
 
@@ -231,6 +235,14 @@ public class DiscordBot {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        /*List<ItemComponent> timeComponents = new ArrayList<>();
+
+        timeComponents.add(Button.secondary("time" + item.getMaterial(), "Change Time: ").asDisabled());
+        timeComponents.add(Button.secondary("time1" + item.getMaterial(), "1 Hour"));
+        timeComponents.add(Button.secondary("time2" + item.getMaterial(), "1 Day"));
+        timeComponents.add(Button.secondary("time3" + item.getMaterial(), "1 Month"));
+        timeComponents.add(Button.secondary("time4" + item.getMaterial(), "1 Year"));*/
 
         List<ItemComponent> componentList = new ArrayList<>();
 
@@ -247,47 +259,83 @@ public class DiscordBot {
             componentList.add(Button.danger("s01" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 1 x " + Formatter.format(item.getPrice().getSellPrice(), Style.REDUCED_LENGTH)));
         }
 
-        if (mEvent != null)
-            mEvent.replyFiles(FileUpload.fromData(outputfile , "image.png"))
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+
+        embedBuilder.setColor(new Color(100, 50, 150));
+
+        embedBuilder.setImage("attachment://image.png");
+
+        if (mEvent != null) {
+
+            mEvent.replyEmbeds(embedBuilder.build())
+                    .addFiles(FileUpload.fromData(outputfile, "image.png"))
                     .setEphemeral(true)
+                    //.addActionRow(timeComponents)
                     .addActionRow(componentList)
                     .queue(message -> {
 
-                        LocalTime timeNow = LocalTime.now();
-
-                        LocalTime nextMinute = timeNow.plusMinutes(1).withSecond(0);
-                        Duration timeRemaining = Duration.between(timeNow, nextMinute);
-
-                        EmbedBuilder embedBuilder = new EmbedBuilder();
-
-                        embedBuilder.setTitle(lang.message(Message.DISCORD_OUTDATED));
-
-                        embedBuilder.setColor(new Color(200, 50, 50));
-
-                        message.editOriginalEmbeds(embedBuilder.build()).queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS);
+                        message.editOriginalEmbeds(getBasicEditedEmbedded()).queueAfter(getSecondsRemainingToUpdate(), TimeUnit.SECONDS);
 
                     });
+        }
 
         if (sEvent != null)
-            sEvent.replyFiles(FileUpload.fromData(outputfile , "image.png"))
+            sEvent.replyEmbeds(embedBuilder.build())
+                    .addFiles(FileUpload.fromData(outputfile, "image.png"))
                     .setEphemeral(true)
+                    //.addActionRow(timeComponents)
                     .addActionRow(componentList)
                     .queue(message -> {
 
-                        LocalTime timeNow = LocalTime.now();
-
-                        LocalTime nextMinute = timeNow.plusMinutes(1).withSecond(0);
-                        Duration timeRemaining = Duration.between(timeNow, nextMinute);
-
-                        EmbedBuilder embedBuilder = new EmbedBuilder();
-
-                        embedBuilder.setTitle(lang.message(Message.DISCORD_OUTDATED));
-
-                        embedBuilder.setColor(new Color(200, 50, 50));
-
-                        message.editOriginalEmbeds(embedBuilder.build()).queueAfter(timeRemaining.getSeconds(), TimeUnit.SECONDS);
+                        message.editOriginalEmbeds(getBasicEditedEmbedded()).queueAfter(getSecondsRemainingToUpdate(), TimeUnit.SECONDS);
 
                     });
+
+        if (cEvent != null)
+            cEvent.replyEmbeds(embedBuilder.build())
+                    .addFiles(FileUpload.fromData(outputfile, "image.png"))
+                    .setEphemeral(true)
+                    //.addActionRow(timeComponents)
+                    .addActionRow(componentList)
+                    .queue(message -> {
+
+                        message.editOriginalEmbeds(getBasicEditedEmbedded()).queueAfter(getSecondsRemainingToUpdate(), TimeUnit.SECONDS);
+
+                    });
+    }
+
+    private MessageEmbed getBasicEditedEmbedded() {
+
+        EmbedBuilder newEmbedBuilder = new EmbedBuilder();
+
+        newEmbedBuilder.setTitle(Lang.get().message(Message.DISCORD_OUTDATED));
+
+        newEmbedBuilder.setImage("attachment://image.png");
+
+        newEmbedBuilder.setColor(new Color(200, 50, 50));
+
+        return newEmbedBuilder.build();
+    }
+
+    private int getSecondsRemainingToUpdate() {
+        LocalTime timeNow = LocalTime.now();
+
+        LocalTime nextMinute = timeNow.plusMinutes(1).withSecond(0);
+        Duration timeRemaining = Duration.between(timeNow, nextMinute);
+
+        return (int) timeRemaining.getSeconds();
+    }
+
+
+    public static Color mixColors(Color color1, Color color2, Color color3, double weight1, double weight2, double weight3) {
+
+        double totalWeight = weight1 + weight2 + weight3;
+
+        double red = (color1.getRed() * weight1 + color2.getRed() * weight2 + color3.getRed() * weight3) / totalWeight;
+        double green = (color1.getGreen() * weight1 + color2.getGreen() * weight2 + color3.getGreen() * weight3) / totalWeight;
+        double blue = (color1.getBlue() * weight1 + color2.getBlue() * weight2 + color3.getBlue() * weight3) / totalWeight;
+
+        return new Color((int) Math.round(red), (int) Math.round(green), (int) Math.round(blue));
     }
 
 }

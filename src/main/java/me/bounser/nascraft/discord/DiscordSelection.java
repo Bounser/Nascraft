@@ -34,7 +34,7 @@ public class DiscordSelection extends ListenerAdapter {
 
             Item item = MarketManager.getInstance().getItem(event.getValues().get(0));
 
-            DiscordBot.getInstance().sendBasicScreen(item, event.getUser(), null, event);
+            DiscordBot.getInstance().sendBasicScreen(item, event.getUser(), null, event, null);
         }
     }
 

@@ -25,7 +25,7 @@ public class ItemAdvancedImage {
         graphics.fillRoundRect(0,3*128+9,8*128-1, 102, 20, 20);
 
         int[] xPositions = item.getPlotData().getXPositions(8*128-3, -11, false);
-        int[] yPositions = item.getPlotData().getYPositions(3*128-5, 5, false);
+        int[] yPositions = item.getPlotData().getYPositions(3*128-5, 5, false, true);
 
         int prevY = yPositions[0];
         for (int i = 1; i < 60 ; i++) {
@@ -68,7 +68,7 @@ public class ItemAdvancedImage {
         graphics.drawImage(Images.getInstance().getImage(item.getMaterial(), 90, 90, false), 18, 3*128+15, 90, 90, null);
         graphics.setFont(new Font("Arial", Font.BOLD, 41));
         graphics.setColor(new Color(250, 250, 250));
-        graphics.drawString(item.getName() + " | " + Formatter.format(item.getPrice().getValue(), Style.ROUND_TO_TWO), 135, 3*128+75);
+        graphics.drawString(item.getName() + " | " + Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC), 135, 3*128+75);
 
         graphics.dispose();
 

@@ -1,29 +1,31 @@
+# Nascraft items.yml - ${project.version}
+
 items:
   # Material of the item.
   cobblestone:
     # OPTIONAL: Display name of the item. If not specified, the material (with the first letter capitalized and without underscores) will be displayed.
-    alias: "Cobble"
+    alias: 'Cobble'
     # REQUIRED: INITIAL price. This value will be disregarded once the market begins to establish its own valuations.
-    initial_price: 1.2
+    initial_price: 0.05
     # OPTIONAL: You can have a support level, a resistance level, or both for each item.
     # In this example, the item will fluctuate randomly between 0,3 - 2 and will try to go again to this range
     # when the price deviates due to player actions.
-    support: 0.8
-    resistance: 2
+    support: 0.01
+    resistance: 0.1
     # OPTIONAL: The elasticity determines the item's predisposition to react to changes in stock.
     # With lower values items will require more interactions to change, and with higher values items will change more easily.
     # This is especially useful with common objects such as cobblestone. At lower elasticity, players will have to sell/buy much more to influence the price.
-    elasticity: 0.65
+    elasticity: 0.45
     # OPTIONAL: The intensity of the noise determines the magnitude of the random fluctuations.
     noise_intensity: 1.4
-    # Child items. The price of these items will be determined by their parent item.
+    # OPTIONAL: Child items. The price of these items will be determined by their parent item.
     child:
       cobblestone_slab:
         # To make a cobblestone slab we only need half of a cobblestone block, so the price of the slab is half the price of the cobblestone.
-        # Therefore, the initial price will be 0.5 times the price of cobblestone, resulting in 0.6 for one slab in this example.
+        # Therefore, the initial price will be 0.5 times the price of cobblestone, resulting in 0.05*0.5 = 0.025 for one slab in this example.
         multiplier: 0.5
       cobblestone_stairs:
-        # To make a cobblestone stair, we require six cobblestones, but we only get four stairs.
+        # To make a cobblestone stair, we require six blocks of cobblestone, but we only get four stairs.
         # Therefore, the price will be 6/4 = 3/2 = 1.5 times the price of cobblestone.
         #
         # NOTE: Keep in mind that this logic is not necessary, as you could choose to set the price of a stair as ten times the price of cobblestone.
@@ -33,9 +35,9 @@ items:
         # Spends 6, gets 6. Therefore, the ratio is 6/6 = 1/1 = 1.
         multiplier: 1
   stone:
-    initial_price: 1.5
-    support: 0.9
-    elasticity: 0.3
+    initial_price: 0.1
+    support: 0.05
+    elasticity: 0.5
     child:
       stone_stairs:
         multiplier: 1.5
@@ -45,8 +47,20 @@ items:
         multiplier: 2
       stone_button:
         multiplier: 1
+  andesite:
+    initial_price: 0.1
+    elasticity: 0.8
+  diorite:
+    initial_price: 0.1
+    elasticity: 0.8
+  granite:
+    initial_price: 0.1
+    elasticity: 0.8
+
   cobbled_deepslate:
-    initial_price: 0.7
+    initial_price: 0.1
+    elasticity: 0.6
+    alias: 'Deep cobble'
     child:
       cobbled_deepslate_stairs:
         multiplier: 1.5
@@ -54,21 +68,80 @@ items:
         multiplier: 0.5
       cobbled_deepslate_wall:
         multiplier: 1
+  deepslate:
+    initial_price: 0.1
+    elasticity: 0.6
+  obsidian:
+    initial_price: 350
+    support: 100
+  amethyst_shard:
+    initial_price: 50
+  sculk:
+    initial_price: 50
+
+  basalt:
+    initial_price: 0.5
+  blackstone:
+    initial_price: 0.5
+  ghast_tear:
+    initial_price: 1000
+  blaze_rod:
+    initial_price: 250
+  glowstone_dust:
+    initial_price: 25
+  nether_wart:
+    initial_price: 80
+  magma_cream:
+    initial_price: 25
+  quartz:
+    initial_price: 50
+  soul_sand:
+    initial_price: 5
+
+  end_stone:
+    initial_price: 8
+  purpur_block:
+    initial_price: 20
+  shulker_shell:
+    initial_price: 15000
+    elasticity: 2
+    noise_intensity: 0.5
+  ender_pearl:
+    initial_price: 100
+  chorus_fruit:
+    initial_price: 100
+
+  sand:
+    initial_price: 0.5
+  prismarine_shard:
+    initial_price: 10
+  prismarine_crystals:
+    initial_price: 15
+  ink_sac:
+    initial_price: 100
+  glow_ink_sac:
+    initial_price: 500
+  cooked_cod:
+    initial_price: 10
+
   redstone:
     initial_price: 2
     child:
       redstone_block:
         multiplier: 9
-  redstone_torch:
-    initial_price: 3
-  repeater:
-    initial_price: 6
-  comparator:
-    initial_price: 10
+  hopper:
+    initial_price: 500
+  redstone_lamp:
+    initial_price: 100
+  tnt:
+    initial_price: 500
   piston:
-    initial_price: 9
-  observer:
-    initial_price: 8
+    initial_price: 90
+  dispenser:
+    initial_price: 100
+  sculk_sensor:
+    initial_price: 40
+
   oak_log:
     initial_price: 1
     child:
@@ -91,27 +164,82 @@ items:
         multiplier: 0.125
       stick:
         multiplier: 0.0625
+  spruce_log:
+    initial_price: 1
+  jungle_log:
+    initial_price: 1
+  acacia_log:
+    initial_price: 1
+  dark_oak_log:
+    initial_price: 1
+  mangrove_log:
+    initial_price: 1
+  cherry_log:
+    initial_price: 1
+
   diamond:
-    initial_price: 100
-    resistance: 300
+    initial_price: 800
+    resistance: 1000
+    support: 150
   emerald:
     initial_price: 50
     resistance: 100
-    support: 30
-  raw_gold:
-    initial_price: 20
+    support: 10
+  nether_star:
+    initial_price: 15000
+    support: 5000
+    elasticity: 5
+    noise_intensity: 0.5
+
+  name_tag:
+    initial_price: 5000
+    elasticity: 3
+    noise_intensity: 0.5
+  totem_of_undying:
+    initial_price: 8000
+    elasticity: 1.5
+    noise_intensity: 0.5
+  leather:
+    initial_price: 5
+  golden_apple:
+    initial_price: 50
+  slime_ball:
+    support: 50
+    initial_price: 150
+  gunpowder:
+    initial_price: 50
+
   coal:
     initial_price: 4
     child:
       charcoal:
         multiplier: 1
-  leather:
-    initial_price: 10
+  dried_kelp_block:
+    initial_price: 75
+
   iron_ingot:
-    initial_price: 4
-  copper_ingot:
-    initial_price: 3
-  gold_ingot:
     initial_price: 10
+  copper_ingot:
+    initial_price: 5
+  gold_ingot:
+    initial_price: 50
   netherite_ingot:
-    initial_price: 500
+    support: 5000
+    initial_price: 10000
+    elasticity: 3
+    noise_intensity: 0.5
+  brick:
+    initial_price: 50
+  nether_brick:
+    initial_price: 5
+
+  apple:
+    initial_price: 15
+  carrot:
+    initial_price: 1
+  potato:
+    initial_price: 0.8
+  wheat:
+    initial_price: 0.8
+  honey_bottle:
+    initial_price: 80

@@ -1,9 +1,12 @@
 package me.bounser.nascraft.advancedgui.components;
 
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.GraphData;
-import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.resources.TimeSpan;
-import me.bounser.nascraft.market.RoundUtils;
+import me.bounser.nascraft.formatter.RoundUtils;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
@@ -72,19 +75,19 @@ public class SlideComponent extends RectangularComponent {
 
         NumberFormat formatter = new DecimalFormat("#0.0");
 
-        textslide.setText(RoundUtils.round(value*multiplier) + Config.getInstance().getCurrency());
+        textslide.setText(Formatter.format(value*multiplier, Style.ROUND_BASIC));
 
         if (values.get(0) > value) {
             perslide.setColor(new Color(255, 46, 46));
-            perslide.setText("    " + formatter.format((-100 + value*100/values.get(0))*-1) + "%");
+            perslide.setText("§r   " + formatter.format((-100 + value*100/values.get(0))*-1) + "%");
             up.apply(graphic, player, cursor);
         } else if (values.get(0) < value) {
             perslide.setColor((new Color(51, 238, 25)));
-            perslide.setText("    " + formatter.format((-100 + value*100/values.get(0))) + "%");
+            perslide.setText("§r   " + formatter.format((-100 + value*100/values.get(0))) + "%");
             down.apply(graphic, player, cursor);
         } else {
             perslide.setColor((new Color(250, 250, 250)));
-            perslide.setText("~ 0%");
+            perslide.setText("~  0%");
         }
 
         timetext.setText(TimeSpan.getTime(graphData.getTimeSpan(), (x + width - point)/(float) width));
@@ -124,8 +127,6 @@ public class SlideComponent extends RectangularComponent {
         return -1;
     }
 
-    public void setGraphData(GraphData graphData) {
-        this.graphData = graphData;
-    }
+    public void setGraphData(GraphData graphData) { this.graphData = graphData; }
 
 }

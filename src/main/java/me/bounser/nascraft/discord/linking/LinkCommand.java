@@ -32,7 +32,7 @@ public class LinkCommand implements CommandExecutor {
             return false;
         }
 
-        if (LinkManager.getInstance().getUserDiscordID(player.getUniqueId().toString()) != null) {
+        if (LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null) {
             player.sendMessage(ChatColor.GRAY + "Already linked!");
             return false;
         }
@@ -58,7 +58,7 @@ public class LinkCommand implements CommandExecutor {
 
         DiscordBot.getInstance().getJDA().retrieveUserById(LinkManager.getInstance().getUserFromCode(code))
                 .queue(user -> {
-                    if (LinkManager.getInstance().redeemCode(code, ((Player) sender).getUniqueId())) {
+                    if (LinkManager.getInstance().redeemCode(code, ((Player) sender).getUniqueId(), player.getName())) {
                         player.sendMessage(ChatColor.GRAY + "Linked successfully with user " + user.getName());
                     }
                     user.openPrivateChannel().queue(privateChannel -> {

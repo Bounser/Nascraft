@@ -1,18 +1,20 @@
 package me.bounser.nascraft.advancedgui.components;
 
 import me.bounser.nascraft.advancedgui.Images;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.market.unit.GraphData;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.resources.TimeSpan;
-import me.bounser.nascraft.market.RoundUtils;
+import me.bounser.nascraft.formatter.RoundUtils;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
@@ -25,8 +27,8 @@ public class GraphComponent extends RectangularComponent {
 
     private GraphData graphData;
 
-    private List<String> childsMat;
-    private HashMap<String, Float> childs;
+    private List<Material> childsMat;
+    private HashMap<Material, Float> childs;
     public int width, height, yc, xc;
 
     private final ViewComponent background;
@@ -64,13 +66,10 @@ public class GraphComponent extends RectangularComponent {
         graphic.setColor(bgcolor);
 
         graphic.drawPolyline(graphData.getXPositions(), graphData.getYPositions(), graphData.getLength());
-
     }
 
     @Override
-    public String getState(Player player, GuiPoint cursor) {
-        return graphData.getGraphState();
-    }
+    public String getState(Player player, GuiPoint cursor) { return graphData.getGraphState(); }
 
     @Override
     public Component clone(Interaction interaction) {
@@ -117,47 +116,47 @@ public class GraphComponent extends RectangularComponent {
         GroupComponent ct = interaction.getComponentTree();
         if (childs == null) {
             for (int i : Arrays.asList(1, 16, 64)) {
-                ct.locate("buyprice" + i, TextComponent.class).setText(getItem().getPrice().getBuyPrice()*i + Config.getInstance().getCurrency());
-                ct.locate("sellprice" + i, TextComponent.class).setText(getItem().getPrice().getSellPrice()*i + Config.getInstance().getCurrency());
+                ct.locate("buyprice" + i, TextComponent.class).setText(getItem().getPrice().getBuyPrice()*i + Lang.get().message(Message.CURRENCY));
+                ct.locate("sellprice" + i, TextComponent.class).setText(getItem().getPrice().getSellPrice()*i + Lang.get().message(Message.CURRENCY));
             }
         } else {
             for (int i : Arrays.asList(1, 16, 64)) {
-                ct.locate("buyprice" + i, TextComponent.class).setText(RoundUtils.round(getItem().getPrice().getBuyPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
-                ct.locate("sellprice" + i, TextComponent.class).setText(RoundUtils.round(getItem().getPrice().getSellPrice()*i*childs.get(childsMat.get(0))) + Config.getInstance().getCurrency());
+                ct.locate("buyprice" + i, TextComponent.class).setText(RoundUtils.round(getItem().getPrice().getBuyPrice()*i*childs.get(childsMat.get(0))) + Lang.get().message(Message.CURRENCY));
+                ct.locate("sellprice" + i, TextComponent.class).setText(RoundUtils.round(getItem().getPrice().getSellPrice()*i*childs.get(childsMat.get(0))) + Lang.get().message(Message.CURRENCY));
             }
         }
     }
 
-    public void changeMat(String mat) {
+    public void changeMat(Material material) {
 
         if(slideComponent == null) { slideComponent = this.interaction.getComponentTree().locate("slide1", SlideComponent.class); }
 
         childComponents = interaction.getComponentTree().locate("childC", GroupComponent.class);
 
-        item = MarketManager.getInstance().getItem(mat);
+        item = MarketManager.getInstance().getItem(material);
         this.childs = item.getChilds();
 
-        graphData = item.getGraphData(TimeSpan.MINUTE);
+        graphData = item.getGraphData(TimeSpan.HOUR);
 
         ImageComponent ic = childComponents.locate("MainImage", ImageComponent.class);
-        ic.setImage(Images.getInstance().getImage(mat, 60, 60, true));
+        ic.setImage(Images.getInstance().getImage(material, 60, 60, true));
 
         mainText.setText(item.getName());
 
-        setGraphData(MarketManager.getInstance().getItem(mat).getGraphData(TimeSpan.MINUTE));
+        setGraphData(MarketManager.getInstance().getItem(material).getGraphData(TimeSpan.HOUR));
 
         if (childs == null) {
             childComponents.locate("childs").setHidden(true);
             childComponents.locate("minichild").setHidden(true);
             childsMat = new ArrayList<>();
-            childsMat.add(0, mat);
+            childsMat.add(0, material);
         } else {
             childComponents.locate("childs").setHidden(false);
             childComponents.locate("minichild").setHidden(false);
 
             childsMat = new ArrayList<>(childs.keySet());
 
-            while (!childsMat.get(0).equals(mat)) {
+            while (!(childsMat.get(0) == material)) {
                 Collections.rotate(childsMat, 1);
             }
 
@@ -168,12 +167,12 @@ public class GraphComponent extends RectangularComponent {
                 updateChilds(childs);
             });
         }
-        setTimeFrame(TimeSpan.MINUTE);
+        setTimeFrame(TimeSpan.HOUR);
 
         graphData.changeState();
     }
 
-    public void updateChilds(HashMap<String, Float> childs) {
+    public void updateChilds(HashMap<Material, Float> childs) {
 
         for (int i = 1; i <= 8 ; i++) {
 
@@ -195,15 +194,11 @@ public class GraphComponent extends RectangularComponent {
         updateButtonPrice();
     }
 
-    public void changeChildsOrder() {
-        Collections.rotate(childsMat, -1);
-    }
+    public void changeChildsOrder() { Collections.rotate(childsMat, -1); }
 
-    public Item getItem() {
-        return item;
-    }
+    public Item getItem() { return item; }
 
-    public String getMat() {
+    public Material getMaterial() {
         if (childsMat == null) return item.getMaterial();
         else return childsMat.get(0);
     }

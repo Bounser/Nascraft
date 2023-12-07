@@ -1,8 +1,6 @@
 package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.config.Config;
-import me.bounser.nascraft.formatter.RoundUtils;
-import org.bukkit.Bukkit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +9,8 @@ public class Price {
 
     // Current neutral price
     private float value;
+
+    private float previousValue;
 
     private float initialValue;
 
@@ -31,14 +31,13 @@ public class Price {
     private final List<Float> dayHigh = new ArrayList<>();
     private final List<Float> dayLow = new ArrayList<>();
 
-    public Price(float initialValue, int stock, float historicalHigh, float elasticity, float support, float resistance, float noiseIntensity) {
+    public Price(float initialValue, float elasticity, float support, float resistance, float noiseIntensity) {
 
         value = (float) (initialValue * Math.exp(-0.0005 * elasticity * stock));
+        previousValue = value;
 
         this.initialValue = initialValue;
 
-        this.stock = stock;
-        this.historicalHigh = historicalHigh;
         hourHigh = value;
         hourLow = value;
         dayHigh.add(hourHigh);
@@ -49,12 +48,12 @@ public class Price {
         this.elasticity = elasticity;
     }
 
-    public float getValue() { return RoundUtils.round(value); }
+    public float getValue() { return value; }
 
     public float getBuyPrice() {
 
-        if (value * Config.getInstance().getTaxBuy() < 0.01) {
-            return (float) (value + 0.01);
+        if (value * Config.getInstance().getTaxBuy() < 0.005) {
+            return (float) (value + 0.002);
         } else {
             return value * Config.getInstance().getTaxBuy();
         }
@@ -62,8 +61,9 @@ public class Price {
 
     public float getSellPrice() {
 
-        if (value - value*Config.getInstance().getTaxSell() < 0.01) {
-            return (float) (value - 0.01);
+        if (value - value*Config.getInstance().getTaxSell() < 0.005) {
+            if (value - 0.002 <= 0) return value;
+            return (float) (value - 0.002);
         } else {
             return value * Config.getInstance().getTaxSell();
         }
@@ -74,11 +74,9 @@ public class Price {
     public float getStock() { return stock; }
 
     public void changeStock(int change) {
-        stock += change;
+        stock += change * elasticity;
 
-        value = (float) (initialValue * Math.exp(-0.0005 * elasticity * stock));
-
-        updateLimits();
+        updateValue();
     }
 
     public void verifyChange() {
@@ -86,7 +84,8 @@ public class Price {
         value = Math.max(value, Config.getInstance().getLimits()[0]);
     }
 
-    public void applyNoise() {
+    public float applyNoise() {
+
 
         if (support != 0 && value < support && Math.random() > 0.8) {
 
@@ -101,11 +100,12 @@ public class Price {
             stock += (10 - 20 * Math.random()) * noiseIntensity;
 
         }
+        updateValue();
 
-        value = (float) (initialValue * Math.exp(-0.0005 * elasticity * stock));
-        verifyChange();
+        float change = -100 + 100*value/previousValue;
+        previousValue = value;
 
-        updateLimits();
+        return change;
     }
 
     public float getHistoricalHigh() { return historicalHigh; }
@@ -133,6 +133,14 @@ public class Price {
         for (float value : dayLow) if (low > value) low = value;
 
         return Math.min(hourLow, low);
+    }
+
+    public void updateValue() {
+
+        value = (float) (initialValue * Math.exp(-0.0004 * stock));
+        verifyChange();
+        updateLimits();
+
     }
 
     public void updateLimits() {

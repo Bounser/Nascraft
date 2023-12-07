@@ -50,6 +50,8 @@ public class BrokerImage {
         graphics.drawString("Change (60m): " + RoundUtils.preciseRound(-100 + 100*broker.getPrices().get(59)/broker.getPrices().get(0)), 630, 100);
         graphics.drawString("Benchmark (60m): " + RoundUtils.preciseRound((-100 + (MarketManager.getInstance().getBenchmark1h(100).get(59)))), 630, 130);
 
+        graphics.dispose();
+
         return image;
     }
 

@@ -10,7 +10,6 @@ import me.bounser.nascraft.market.unit.Item;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
 
 public class MainImage {
 
@@ -109,19 +108,20 @@ public class MainImage {
             graphics.setColor(new Color(250, 10, 10));
         }
 
-        graphics.drawPolyline(item.getPlotData().getXPositions(295, offset[0] + 2, false) , item.getPlotData().getYPositions(90, 30+ offset[1], false), item.getPlotData().getNPoints(false));
-        graphics.drawPolyline(item.getPlotData().getXPositions(295, offset[0] + 3, false) , item.getPlotData().getYPositions(90, 30+ offset[1], false), item.getPlotData().getNPoints(false));
-        graphics.drawPolyline(item.getPlotData().getXPositions(295, offset[0] + 2, false) , item.getPlotData().getYPositions(90, 31+ offset[1], false), item.getPlotData().getNPoints(false));
-
-        graphics.drawImage(Images.getInstance().getImage(item.getMaterial(), 45, 45, false), offset[0]+2, offset[1], 45, 45, null);
+        graphics.drawPolyline(item.getPlotData().getXPositions(295, offset[0] + 2, false) , item.getPlotData().getYPositions(90, 30+ offset[1], false, false), item.getPlotData().getNPoints(false));
+        graphics.drawPolyline(item.getPlotData().getXPositions(295, offset[0] + 3, false) , item.getPlotData().getYPositions(90, 30+ offset[1], false, false), item.getPlotData().getNPoints(false));
+        graphics.drawPolyline(item.getPlotData().getXPositions(295, offset[0] + 2, false) , item.getPlotData().getYPositions(90, 31+ offset[1], false, false), item.getPlotData().getNPoints(false));
 
         graphics.setColor(new Color(255, 255, 255));
 
         graphics.setFont(new Font("Arial", Font.BOLD, 18));
 
-        graphics.drawString(item.getName(), offset[0] + 50,  30 + offset[1]);
+        graphics.drawString(item.getName(), 55 + offset[0],  20 + offset[1]);
 
-        graphics.drawString(Formatter.format(item.getPrice().getValue(), Style.ROUND_TO_TWO), 8 + offset[0], 110 + offset[1]);
+        graphics.drawString(Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC), 55 + offset[0], 50 + offset[1]);
+
+        graphics.drawLine(52 + offset[0], 30 + offset[1], 150 + offset[0], 30 + offset[1]);
+        graphics.drawLine(52 + offset[0], 29 + offset[1], 150 + offset[0], 29 + offset[1]);
 
         if(item.getPlotData().isGoingUp()) {
             graphics.setColor(new Color(100, 250, 100));
@@ -131,13 +131,15 @@ public class MainImage {
 
         graphics.setFont(new Font("Arial", Font.BOLD, 15));
 
-        graphics.drawString(item.getPlotData().getChange(), 255- (int) Math.round(item.getPlotData().getChange().getBytes().length*3.5) + offset[0], 110 + offset[1]);
+        graphics.drawString(item.getPlotData().getChange(), 15 + offset[0], 110 + offset[1]);
 
         graphics.setColor(color);
 
         graphics.drawRoundRect(offset[0], offset[1], 300, 120, 15, 15);
         graphics.drawRoundRect(offset[0]+1, offset[1]+1, 298, 118, 15, 15);
         graphics.drawRoundRect(offset[0]+2, offset[1]+2, 296, 116, 15, 15);
+
+        graphics.drawImage(Images.getInstance().getImage(item.getMaterial(), 48, 48, false), offset[0]+2, offset[1], 48, 48, null);
 
     }
 

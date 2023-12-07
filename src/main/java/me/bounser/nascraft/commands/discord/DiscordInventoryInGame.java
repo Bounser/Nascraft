@@ -40,7 +40,7 @@ public class DiscordInventoryInGame implements Listener {
     @EventHandler
     public void onClickInventory(InventoryClickEvent event) {
 
-        if (event.getView().getTopInventory().getSize() != 45 || !event.getView().getTitle().equals("Discord Inventory")) { return; }
+        if (event.getClickedInventory() == null || event.getView().getTopInventory().getSize() != 45 || !event.getView().getTitle().equals("Discord Inventory")) { return; }
 
         if (event.getClickedInventory().getSize() == 45 || event.isShiftClick() || event.isRightClick()) { event.setCancelled(true); }
 

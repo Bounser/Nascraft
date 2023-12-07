@@ -1,7 +1,9 @@
 package me.bounser.nascraft.discord.linking;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.database.SQLite;
-import net.dv8tion.jda.api.entities.User;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.Random;
@@ -9,7 +11,7 @@ import java.util.UUID;
 
 public class LinkManager {
 
-    private HashMap<String, String> userToUUID = new HashMap<>();
+    private HashMap<String, UUID> userToUUID = new HashMap<>();
 
     private HashMap<Integer, String> confirmingCodes = new HashMap<>();
 
@@ -17,22 +19,20 @@ public class LinkManager {
 
     public static LinkManager getInstance() { return instance == null ? instance = new LinkManager() : instance; }
 
-    public String getUserDiscordID(String uuid) {
-        return SQLite.getInstance().getUserId(uuid);
-    }
+    public String getUserDiscordID(UUID uuid) { return SQLite.getInstance().getUserId(uuid); }
 
-    public String getUUID(User user) {
+    public UUID getUUID(String userId) {
 
-        if (userToUUID.containsKey(user.getId())) {
+        if (userToUUID.containsKey(userId)) {
 
-            return userToUUID.get(user.getId());
+            return userToUUID.get(userId);
 
         } else {
 
-            String uuid = SQLite.getInstance().getUUID(user.getId());
+            UUID uuid = SQLite.getInstance().getUUID(userId);
 
             if (uuid != null) {
-                userToUUID.put(user.getId(), uuid);
+                userToUUID.put(userId, uuid);
 
                 return uuid;
             }
@@ -49,7 +49,7 @@ public class LinkManager {
 
         if (retrievedCode != -1) return retrievedCode;
 
-        int randomNumber = new Random().nextInt(100000) + 100;
+        int randomNumber = new Random().nextInt(100000) + 1000;
 
         addCode(randomNumber, userId);
 
@@ -74,13 +74,13 @@ public class LinkManager {
         return "-1";
     }
 
-    public boolean redeemCode(int code, UUID uuid) {
+    public boolean redeemCode(int code, UUID uuid, String nickname) {
 
         if (confirmingCodes.keySet().contains(code)) {
 
-            userToUUID.put(String.valueOf(confirmingCodes.get(code)), uuid.toString());
+            userToUUID.put(String.valueOf(confirmingCodes.get(code)), uuid);
 
-            SQLite.getInstance().saveLink(String.valueOf(confirmingCodes.get(code)), uuid.toString());
+            SQLite.getInstance().saveLink(String.valueOf(confirmingCodes.get(code)), uuid, nickname);
 
             confirmingCodes.remove(code);
 
@@ -88,5 +88,22 @@ public class LinkManager {
         }
 
         return false;
+    }
+
+    public boolean unlink(String userId) {
+
+        if (!userToUUID.containsKey(userId)) {
+            return false;
+        }
+
+        SQLite.getInstance().removeLink(userId);
+
+        Player player = Bukkit.getPlayer(userToUUID.get(userId));
+        if (player != null && player.getOpenInventory().getTitle().equals("Discord Inventory"))
+            Bukkit.getScheduler().runTask(Nascraft.getInstance(), () -> player.closeInventory());
+
+        userToUUID.remove(userId);
+
+        return true;
     }
 }

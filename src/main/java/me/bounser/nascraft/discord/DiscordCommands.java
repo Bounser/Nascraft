@@ -3,13 +3,17 @@ package me.bounser.nascraft.discord;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.discord.images.BalanceImage;
 import me.bounser.nascraft.discord.images.InventoryImage;
 import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
 import me.bounser.nascraft.discord.linking.LinkManager;
+import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
+import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -19,8 +23,10 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class DiscordCommands extends ListenerAdapter {
@@ -140,19 +146,57 @@ public class DiscordCommands extends ListenerAdapter {
 
             case "balance":
 
-                if (LinkManager.getInstance().getUUID(event.getUser().getId()) != null) {
+                UUID uuid = LinkManager.getInstance().getUUID(event.getUser().getId());
 
-                    OfflinePlayer player = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(event.getUser().getId()));
+                if (uuid != null) {
 
-                    event.reply(":coin: You have: **" + RoundUtils.round((float) Nascraft.getEconomy().getBalance(player)) + Lang.get().message(Message.CURRENCY) + "**")
+                    OfflinePlayer player2 = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(event.getUser().getId()));
+
+                    double purse = Nascraft.getEconomy().getBalance(player2);
+                    float inventory = DiscordInventories.getInstance().getInventory(event.getUser().getId()).getInventoryValue();
+                    float brokerValue = 0;
+                    double total = purse + inventory + brokerValue;
+
+                    String text =
+                            "\n> :green_circle: :dollar: **Purse** (Minecraft): ``" + Formatter.formatDouble(purse) +
+                                    "``\n> :yellow_circle: :school_satchel: **Discord Inventory**: ``" + Formatter.format(inventory, Style.ROUND_BASIC) +
+                                    "``\n> :red_circle: :man_office_worker: **Broker-Managed**: ``" + Formatter.format(brokerValue, Style.ROUND_BASIC) +
+                                    "``\n> \n" +
+                                    ">  :abacus: **Total**: ``" + Formatter.formatDouble(total) + "``\n";
+
+                    File balanceFile = new File("image.png");
+                    try {
+                        ImageIO.write(BalanceImage.getImage(event.getUser()), "png", balanceFile);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    EmbedBuilder eb = new EmbedBuilder();
+
+                    eb.setImage("attachment://image.png");
+
+                    eb.setTitle(":coin:  **Balance**:");
+
+                    eb.setFooter("Purse: " + RoundUtils.roundToOne((float) (purse*100/total)) + "% Inventory: " + RoundUtils.roundToOne((float) (inventory*100/total)) + "% Broker: " + RoundUtils.roundToOne((float) (brokerValue*100/total)) + "%");
+
+                    eb.setDescription(text);
+
+
+                    eb.setColor(DiscordBot.mixColors(new Color(100,250,100),
+                            new Color(250,250,100),
+                            new Color(250,100,100),
+                            purse/total, inventory/total, brokerValue/total));
+
+                    event.replyEmbeds(eb.build())
+                            .addFiles(FileUpload.fromData(balanceFile , "image.png"))
                             .setEphemeral(true)
-                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                            .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
-                } else {
+                } else
                     event.reply(":x: You don't have any account linked!")
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
-                }
+
                 break;
 
             case "inventory":
@@ -190,6 +234,29 @@ public class DiscordCommands extends ListenerAdapter {
                                 message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS);
                             });
                 }
+                break;
+
+            case "search":
+
+                Item itemSearched = null;
+
+                for (Item itemCandidate : MarketManager.getInstance().getAllItems()) {
+                    if (itemCandidate.getMaterial().toString().equalsIgnoreCase(event.getOption("material").getAsString()) ||
+                            itemCandidate.getName().equalsIgnoreCase(event.getOption("material").getAsString())) {
+                        itemSearched = itemCandidate; break;
+                    }
+                }
+
+                if (itemSearched == null) {
+                    event.reply("Item not recognized!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                } else {
+                    DiscordBot.getInstance().sendBasicScreen(itemSearched, event.getUser(), null, null, event);
+                }
+
+                break;
+
         }
     }
 }

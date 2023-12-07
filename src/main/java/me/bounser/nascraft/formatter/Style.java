@@ -3,7 +3,7 @@ package me.bounser.nascraft.formatter;
 public enum Style {
 
     // #.##
-    ROUND_TO_TWO,
+    ROUND_BASIC,
     // #.#
     ROUND_TO_ONE,
     REDUCED_LENGTH,

@@ -20,15 +20,15 @@ public class PlayerInfoManager {
 
     }
 
-    public PlayerReport getPlayerReport(Player player) {
+    public PlayerReport getPlayerReport(UUID playerUUID) {
 
-        if(playerReports.get(player.getUniqueId()) == null) {
+        if(playerReports.get(playerUUID) == null) {
 
-            playerReports.put(player.getUniqueId(), new PlayerReport(player.getUniqueId()));
-            return playerReports.get(player.getUniqueId());
+            playerReports.put(playerUUID, new PlayerReport(playerUUID));
+            return playerReports.get(playerUUID);
 
         }
-        return playerReports.get(player.getUniqueId());
+        return playerReports.get(playerUUID);
     }
 
     public void saveEverything() {

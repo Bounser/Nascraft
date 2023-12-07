@@ -2,8 +2,6 @@ package me.bounser.nascraft;
 
 import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.commands.*;
-import me.bounser.nascraft.commands.alert.SetAlertCommand;
-import me.bounser.nascraft.commands.alert.AlertsCommand;
 import me.bounser.nascraft.commands.discord.DiscordCommand;
 import me.bounser.nascraft.commands.discord.DiscordInventoryInGame;
 import me.bounser.nascraft.commands.sellall.SellAllCommand;
@@ -74,8 +72,8 @@ public final class Nascraft extends JavaPlugin {
             getLogger().info("Enabling discord integration!");
 
             getCommand("link").setExecutor(new LinkCommand());
-            getCommand("setalert").setExecutor(new SetAlertCommand());
-            getCommand("alerts").setExecutor(new AlertsCommand());
+            //getCommand("setalert").setExecutor(new SetAlertCommand());
+            //("alerts").setExecutor(new AlertsCommand());
             getCommand("discord").setExecutor(new DiscordCommand());
 
             Bukkit.getPluginManager().registerEvents(new DiscordInventoryInGame(), this);

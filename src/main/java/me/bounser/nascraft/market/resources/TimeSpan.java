@@ -5,8 +5,8 @@ import java.util.Calendar;
 
 public enum TimeSpan {
 
-    MINUTE, // 30 minutes
-    DAY, // 1 day
+    HOUR, // 60 minutes
+    DAY, // 24 hours
     MONTH, // 1 month
     YEAR; // 1 year
 
@@ -17,9 +17,9 @@ public enum TimeSpan {
 
         switch (timeFrame) {
             // 30 min
-            case MINUTE:
+            case HOUR:
                 sdf = new SimpleDateFormat("HH:mm");
-                cal.add(Calendar.MINUTE, Math.round(-30 * subtract));
+                cal.add(Calendar.MINUTE, Math.round(-60 * subtract));
                 break;
             // 1 day
             case DAY:

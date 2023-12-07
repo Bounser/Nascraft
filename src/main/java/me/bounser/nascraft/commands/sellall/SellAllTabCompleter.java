@@ -13,10 +13,10 @@ import java.util.List;
 
 public class SellAllTabCompleter implements TabCompleter {
 
-    private final List<String> materials;
+    private final List<String> materials = new ArrayList<>();
 
     public SellAllTabCompleter() {
-        materials = MarketManager.getInstance().getAllMaterials();
+        MarketManager.getInstance().getAllMaterials().forEach(material -> materials.add(material.toString().toLowerCase()));
         materials.add("everything");
     }
 

@@ -4,10 +4,10 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.Images;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.Item;
-import net.dv8tion.jda.api.entities.User;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -19,11 +19,10 @@ import java.util.List;
 
 public class InventoryImage {
 
-    private static Lang lang = Lang.get();
+    private static final Lang lang = Lang.get();
 
-    public static BufferedImage getImage(User user) {
+    public static BufferedImage getImage(DiscordInventory discordInventory) {
 
-        DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(user.getId());
         HashMap<Item, Integer> inventory = discordInventory.getContent();
 
         int capacity = discordInventory.getCapacity();
@@ -38,10 +37,10 @@ public class InventoryImage {
             throw new RuntimeException(e);
         }
 
-        graphics.setFont(new Font("Helvetica", Font.BOLD, 33));
+        graphics.setFont(new Font("Helvetica", Font.BOLD, 32));
         graphics.setColor(new Color(64,65,65));
 
-        graphics.drawString(lang.message(Message.DISCORD_INVENTORY_VALUE) + discordInventory.getInventoryValue() + Lang.get().message(Message.CURRENCY), 30, 53);
+        graphics.drawString(lang.message(Message.DISCORD_INVENTORY_VALUE) + Formatter.format(discordInventory.getInventoryValue(), Style.ROUND_BASIC), 30, 53);
 
         List<Item> items = new ArrayList<>(inventory.keySet());
 
@@ -67,14 +66,16 @@ public class InventoryImage {
 
                         graphics.setFont(new Font("Garamond", Font.BOLD, 26));
                         graphics.setColor(new Color(0, 0, 0));
-                        graphics.drawString(inventory.get(item).toString(), i*79+113-inventory.get(item).toString().length()*22, j*81+188);
+                        graphics.drawString(inventory.get(item).toString(), i*79+110-inventory.get(item).toString().length()*20, j*81+188);
 
                         graphics.setColor(new Color(255, 255, 255));
-                        graphics.drawString(inventory.get(item).toString(), i*79+110-inventory.get(item).toString().length()*22, j*81+185);
+                        graphics.drawString(inventory.get(item).toString(), i*79+107-inventory.get(item).toString().length()*20, j*81+185);
                     }
                 }
             }
         }
+
+        graphics.dispose();
 
         return image;
     }

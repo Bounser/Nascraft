@@ -2,17 +2,22 @@
 
 # Specify the currency to be used next to prices.
 currency: "$"
-# Should the symbol of the currency be before or after the price? ($50 or 50$)
+# Should the symbol of the currency be after (or before) the price? ($50 or 50$)
 after: false
-# Available: point (.), comma (,)
+# Decimal separator. Available: point (.), comma (,)
 separator: "point"
 
 # Available placeholders: [AMOUNT], [MATERIAL], [WORTH]
-buy_message: "<gradient:#FF00CD:#DA58FF>You just bought <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[MATERIAL]</light_purple></bold> worth <green>[WORTH]</green></gradient>"
-sell_message: "<gradient:#FF00CD:#DA58FF>You just sold <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[MATERIAL]</light_purple></bold> worth <green>[WORTH]</green></gradient>"
+buy_message: "<gradient:#00E3FB:#F9ABFD>You just bought <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> worth </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+sell_message: "<gradient:#00E3FB:#F9ABFD>You just sold <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> worth </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+
+not_enough_money: "<gradient:#FB6363:#C4B3FD>You can't afford to pay that!</gradient>"
+not_enough_items: "<gradient:#FB6363:#C4B3FD>Not enough items to sell!</gradient>"
+not_enough_space: "<gradient:#FB6363:#C4B3FD>Not enough space in inventory!</gradient>"
+shop_closed: "<gradient:#FB6363:#C4B3FD>Error while buying: Shop is closed</gradient>"
 
 # Commands
-no_permission: "<gradient:#FF0000:#FF7E7E:#FF0000>Permission required.</gradient>"
+no_permission: "<gradient:#FB6363:#C4B3FD>Permission required.</gradient>"
 click_to_confirm: "\n<gold>[ <gradient:#F5FFD5:#FFA200:#F5FFD5>Click here to confirm</gradient> ]</gold>\n"
 list_segment: "\n<gray>> <gradient:#FF00CD:#DA58FF>[MATERIAL] x [AMOUNT] = [WORTH]</gradient>"
 
@@ -24,34 +29,59 @@ sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>You don't have an
 sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>Material not recognized. Usage: /sellall [material]</gradient>"
 sellall_estimated_value: "<gray>Estimated value:</gray> <green>[WORTH]</green>"
 
-
 # nsell
 sell_title: "&8&lSelling menu"
 sell_close: "&cCLOSE"
 sell_button_name: "&6SELL CONTENT"
 sell_button_lore: "&eSell for approximately: &l[WORTH]"
 sell_remove_item: "&cClick to remove from sell list"
-sell_action_message: "&7You just sold &6[WORTH] &7worth of items"
-sell_item_not_allowed: "&cThat's not a valid item!"
-sell_full: "&cSell inventory is full!"
+sell_action_message: "<gradient:#FF00CD:#DA58FF>You just sold <bold><light_purple>[WORTH]</light_purple></bold> worth of items</gradient>"
+sell_item_not_allowed: "<gradient:#FB6363:#C4B3FD>That's not a valid item!</gradient>"
+sell_full: "<gradient:#FB6363:#C4B3FD>Sell inventory is full!</gradient>"
 # sellhand
 sellhand_invalid: "<gradient:#FF0000:#FF7E7E:#FF0000>Hold a valid item!</gradient>"
 sellhand_error_hand: "<gradient:#FF0000:#FF7E7E:#FF0000>Error! Don't change your hand before confirming</gradient>"
 sellhand_estimated_value: "<gray>Estimated value:</gray> \n"
-# alert
-alert_invalid_use: "&cInvalid use of command. /alert [material] [price]"
-alert_not_linked: "&cYou have to link your account to use this command!"
-alert_in_watchlist: "&cItem already on your watchlist."
-alert_invalid_price: "&cInvalid use of command. Price must be a number. (Ex 120.90)"
-alert_not_recognized: "&cItem not recognized."
+# alert - Currently not activated.
+alert_invalid_use: "<gradient:#FB6363:#C4B3FD>Invalid use of command. /alert [material] [price]</gradient>"
+alert_not_linked: "<gradient:#FB6363:#C4B3FD>You have to link your account to use this command!</gradient>"
+alert_in_watchlist: "<gradient:#FB6363:#C4B3FD>Item already on your watchlist.</gradient>"
+alert_invalid_price: "<gradient:#FB6363:#C4B3FD>Invalid use of command. Price must be a number. (Ex 120.90)</gradient>"
+alert_not_recognized: "<gradient:#FB6363:#C4B3FD>Item not recognized.</gradient>"
 alert_setup: "Alert setup correctly! You'll receive a DM when the price is reached."
-# alerts
-alerts_empty: "&cNo don't have any alert setup."
+# alerts - Currently not activated.
+alerts_empty: "&cYou don't have any alert setup."
 alerts_header: "&3Active alerts:\n"
 alerts_list_segment: "\n&5> [MATERIAL] at price [WORTH]"
 
 # DISCORD - No MiniMessage support.
 
+discord_status: "how prices move"
+
+discord_main_title: ":green_circle:  Live item market"
+discord_main_footer: "Select an item to get more details and to operate (Buy/sell) with it. \nPrices in operations may vary."
+discord_top_gainers: "Top gainers"
+discord_most_popular: "Most popular"
+discord_big_dippers: "Big dippers"
+discord_buy: "BUY "
+discord_sell: "SELL "
+discord_outdated: ":warning: Caution: Information outdated!"
+discord_day_high: "1 day high: "
+discord_day_low: "1 day low: "
+discord_historical_high: "Historical high: "
+discord_daily_volume: "Volume (24h): "
+discord_position: "Position in market: "
+discord_trend: "Trend (24h): "
+discord_inventory_value: "Value: "
+discord_buy_slot: "Buy slot for "
+
+discord_not_linked_short: "Not linked!"
+discord_not_linked: ":exclamation: Your account is not linked! Run ``/link`` in-game to start the process of linking accounts."
+discord_insufficient_balance: ":x: Not enough money! Your current balance is: **[VALUE1]** and you need at least **[VALUE2]**"
+discord_without_space: ":x: Not enough space in your discord inventory!"
+
+discord_alert_not_setupped: "No alerts setup! You can setup an alert to receive a DM when the price of an item reaches a limit"
+discord_alert_header: "Alerts :bell:\n\n"
 
 # LAYOUT TEXTS:
 # Main title.

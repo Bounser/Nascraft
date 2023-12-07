@@ -2,6 +2,8 @@ package me.bounser.nascraft.commands.sellinv;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -32,11 +34,11 @@ public class SellInvCommand implements CommandExecutor {
         Player player = (Player) sender;
 
         if (!player.hasPermission("nascraft.sellinv")) {
-            player.sendMessage(lang.getPermissionText());
+            player.sendMessage(Lang.get().message(Message.NO_PERMISSION));
             return false;
         }
 
-        Inventory inventory = Bukkit.createInventory(player, 45, lang.getSellTitle());
+        Inventory inventory = Bukkit.createInventory(player, 45, Lang.get().message(Message.SELL_TITLE));
 
         insertFillingPanes(inventory);
         insertSellButton(inventory);
@@ -62,8 +64,8 @@ public class SellInvCommand implements CommandExecutor {
 
         ItemStack sellButton = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
         ItemMeta meta = sellButton.getItemMeta();
-        meta.setDisplayName(lang.getSellButtonName());
-        meta.setLore(Collections.singletonList(lang.getSellButtonLore("0")));
+        meta.setDisplayName(Lang.get().message(Message.SELL_BUTTON_NAME));
+        meta.setLore(Collections.singletonList(Lang.get().message(Message.SELL_BUTTON_LORE, "0", "", "")));
         sellButton.setItemMeta(meta);
 
         inventory.setItem(40, sellButton);
@@ -73,7 +75,7 @@ public class SellInvCommand implements CommandExecutor {
 
         ItemStack closeButton = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta meta = closeButton.getItemMeta();
-        meta.setDisplayName(lang.getSellCloseText());
+        meta.setDisplayName(Lang.get().message(Message.SELL_CLOSE));
         closeButton.setItemMeta(meta);
 
         inventory.setItem(8, closeButton);

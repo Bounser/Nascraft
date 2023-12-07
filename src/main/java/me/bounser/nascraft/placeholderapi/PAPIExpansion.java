@@ -1,9 +1,10 @@
 package me.bounser.nascraft.placeholderapi;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.market.RoundUtils;
+import me.bounser.nascraft.formatter.RoundUtils;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
@@ -17,7 +18,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
     public String getIdentifier() { return "nascraft"; }
 
     @Override
-    public String getVersion() { return "${project.version}"; }
+    public String getVersion() { return Nascraft.getInstance().getDescription().getVersion(); }
 
     @Override
     public boolean persist() { return true; }
@@ -33,11 +34,13 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
         if (params.substring(0, params.indexOf("_")).equalsIgnoreCase("change")) {
 
-            if (params.substring(params.indexOf("_", params.indexOf("_") + 1) + 1).equalsIgnoreCase("mainhand")) {
+            String argument = params.substring(params.indexOf("_", params.indexOf("_") + 1) + 1);
+
+            if (argument.equalsIgnoreCase("mainhand")) {
                 item = MarketManager.getInstance().getItem(player.getPlayer().getInventory().getItemInMainHand().getType().toString());
                 quantity = player.getPlayer().getInventory().getItemInMainHand().getAmount();
             } else {
-                item = MarketManager.getInstance().getItem(params.substring(params.indexOf("_", params.indexOf("_") + 1) + 1));
+                item = MarketManager.getInstance().getItem(argument);
             }
 
         } else if (params.substring(params.indexOf("_") + 1).equalsIgnoreCase("mainhand")) {
@@ -64,7 +67,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
                 switch (params.substring(params.indexOf("_") + 1, params.indexOf("_", params.indexOf("_") + 1)).toLowerCase()) {
 
-                    case "30m": timeSpan = TimeSpan.HALFHOUR; break;
+                    case "1h": timeSpan = TimeSpan.HOUR; break;
                     case "1d": timeSpan = TimeSpan.DAY; break;
                     case "1m": timeSpan = TimeSpan.MONTH; break;
                     case "1y": timeSpan = TimeSpan.YEAR; break;

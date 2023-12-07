@@ -1,43 +1,111 @@
+# Nascraft categories.yml - ${project.version}
+
 categories:
   # Reference of the category. Categories are displayed in the main menu.
   1:
     # Display name of the category (cannot be very long).
-    display_name: "Stone age"
+    display_name: 'Stone age'
     # Items within the category.
     items:
       # Material of the item.
-      - "cobblestone"
-      - "stone"
-      - "cobbled_deepslate"
+      - 'cobblestone'
+      - 'stone'
+      - 'andesite'
+      - 'diorite'
+      - 'granite'
   2:
-    display_name: "Tech"
+    display_name: 'In the depths'
     items:
-      - "redstone"
-      - "redstone_torch"
-      - "repeater"
-      - "comparator"
-      - "piston"
-      - "observer"
+      - 'cobbled_deepslate'
+      - 'deepslate'
+      - 'obsidian'
+      - 'amethyst_shard'
+      - 'sculk'
   3:
-    display_name: "In the woods"
+    display_name: 'Even deeper'
     items:
-      - "oak_log"
-      - "birch_log"
+      - 'basalt'
+      - 'blackstone'
+      - 'ghast_tear'
+      - 'blaze_rod'
+      - 'glowstone_dust'
+      - 'nether_wart'
+      - 'magma_cream'
+      - 'quartz'
+      - 'soul_sand'
   4:
-    display_name: "Valuables"
+    display_name: 'The End'
     items:
-      - "diamond"
-      - "emerald"
-      - "raw_gold"
+      - 'end_stone'
+      - 'purpur_block'
+      - 'shulker_shell'
+      - 'ender_pearl'
+      - 'chorus_fruit'
   5:
-    display_name: "Utils"
+    display_name: 'Wet'
     items:
-      - "coal"
-      - "leather"
+      - 'sand'
+      - 'prismarine_shard'
+      - 'prismarine_crystals'
+      - 'ink_sac'
+      - 'glow_ink_sac'
+      - 'cooked_cod'
   6:
-    display_name: "Ingots"
+    display_name: 'Tech'
     items:
-      - "iron_ingot"
-      - "copper_ingot"
-      - "gold_ingot"
-      - "netherite_ingot"
+      - 'redstone'
+      - 'hopper'
+      - 'redstone_lamp'
+      - 'tnt'
+      - 'dispenser'
+      - 'piston'
+      - 'sculk_sensor'
+  7:
+    display_name: 'In the woods'
+    items:
+      - 'oak_log'
+      - 'birch_log'
+      - 'spruce_log'
+      - 'jungle_log'
+      - 'acacia_log'
+      - 'dark_oak_log'
+      - 'mangrove_log'
+      - 'cherry_log'
+  8:
+    display_name: 'Valuables'
+    items:
+      - 'diamond'
+      - 'emerald'
+      - 'nether_star'
+  9:
+    display_name: 'Utils'
+    items:
+      - 'name_tag'
+      - 'totem_of_undying'
+      - 'leather'
+      - 'golden_apple'
+      - 'golden_carrot'
+      - 'slime_ball'
+      - 'gunpowder'
+  10:
+    display_name: 'Fuel'
+    items:
+      - 'coal'
+      - 'dried_kelp_block'
+  11:
+    display_name: 'Ingots & Bricks'
+    items:
+      - 'iron_ingot'
+      - 'copper_ingot'
+      - 'gold_ingot'
+      - 'netherite_ingot'
+      - 'brick'
+      - 'nether_brick'
+  12:
+    display_name: 'In the farm'
+    items:
+      - 'apple'
+      - 'carrot'
+      - 'potato'
+      - 'wheat'
+      - 'honey_bottle'

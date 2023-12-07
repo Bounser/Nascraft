@@ -16,8 +16,32 @@ commands:
     description: Interact with the market wherever you are!
     aliases:
       - mk
-  sell:
+  sellhand:
+    description: Sell items directly to the market
+    aliases:
+      - nsellhand
+  sellall:
+    description: Sell items directly to the market
+    aliases:
+      - nsellall
+  sellinv:
     description: Sell items directly to the market
     aliases:
       - nsell
+  link:
+    description: Link accounts (Discord-Minecraft)
+    aliases:
+      - nlink
+  setalert:
+    description: Setup alerts
+    aliases:
+      - nsetalert
+  alerts:
+    description: View all alerts
+    aliases:
+      - nalerts
+  discord:
+    description: Discord command.
+    aliases:
+      - dis
 

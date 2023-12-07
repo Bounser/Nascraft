@@ -1,10 +1,11 @@
 package me.bounser.nascraft.commands;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.database.Data;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.database.JsonManager;
 import me.leoko.advancedgui.manager.GuiWallManager;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -21,24 +22,19 @@ public class NascraftCommand implements CommandExecutor {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 
         if (!sender.hasPermission("nascraft.admin") && sender instanceof Player) {
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "You are not allowed to use this command!");
+            Lang.get().message((Player) sender, Message.NO_PERMISSION);
             return false;
         }
 
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: force | save | info | status");
+            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: save | info | stop | resume");
             return false;
         }
 
         switch(args[0]){
             case "save":
 
-                try {
-                    Data.getInstance().updateData();
-                } catch (SQLException e) {
-                    Nascraft.getInstance().getLogger().warning("Error trying to save the data!");
-                    e.printStackTrace();
-                }
+                SQLite.getInstance().saveEverything();
                 sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Data saved.");
                 break;
             case "info":
@@ -50,7 +46,7 @@ public class NascraftCommand implements CommandExecutor {
                 sender.sendMessage(String.valueOf(GuiWallManager.getInstance().getActiveInstances((Player) sender).get(0).getInteraction((Player) sender).getComponentTree().locate(args[1]).getState((Player) sender, GuiWallManager.getInstance().getActiveInstances((Player) sender).get(0).getCursor((Player) sender))));
                 break;
 
-            case "close":
+            case "stop":
                 if(MarketManager.getInstance().getState()) {
                     MarketManager.getInstance().stop();
                     sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Shop stopped. Resume it with /nascraft resume.");

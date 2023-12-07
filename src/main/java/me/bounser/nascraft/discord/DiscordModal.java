@@ -118,7 +118,7 @@ public class DiscordModal extends ListenerAdapter {
                         .setEphemeral(true)
                         .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
             } else {
-                DiscordBot.getInstance().sendBasicScreen(item, event.getUser(), event, null);
+                DiscordBot.getInstance().sendBasicScreen(item, event.getUser(), event, null, null);
             }
         }
     }

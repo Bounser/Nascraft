@@ -60,7 +60,7 @@ public class SellHandCommand implements CommandExecutor {
                     "\"" + Lang.get().message(Message.SELLHAND_ESTIMATED_VALUE) +
                     Lang.get().message(Message.LIST_SEGMENT,
                                        Formatter.format(handItems.getAmount()*item.getPrice().getSellPrice(),
-                                                        Style.ROUND_TO_TWO),
+                                                        Style.ROUND_BASIC),
                                                         String.valueOf(handItems.getAmount()),
                                                         item.getName()) + "\">" +
                     "<click:run_command:\"/nsellhand confirm\">" +
@@ -76,13 +76,11 @@ public class SellHandCommand implements CommandExecutor {
             if(player.getInventory().getItemInMainHand().equals(players.get(player))) {
                 Item item = MarketManager.getInstance().getItem(player.getInventory().getItemInMainHand().getType().toString());
 
-                item.sellItem(handItems.getAmount(), player, item.getMaterial(), false);
+                item.sellItem(handItems.getAmount(), player.getUniqueId(), true);
             } else {
                 Lang.get().message(player, Message.SELLHAND_ERROR_HAND);
             }
         }
-
-
         return false;
     }
 

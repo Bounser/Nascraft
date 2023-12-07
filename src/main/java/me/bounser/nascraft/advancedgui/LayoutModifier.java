@@ -2,21 +2,23 @@ package me.bounser.nascraft.advancedgui;
 
 import me.bounser.nascraft.advancedgui.components.GraphComponent;
 import me.bounser.nascraft.advancedgui.components.SlideComponent;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.resources.TimeSpan;
-import me.bounser.nascraft.market.RoundUtils;
+import me.bounser.nascraft.formatter.RoundUtils;
 import me.leoko.advancedgui.utils.LayoutExtension;
-import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.events.GuiInteractionBeginEvent;
 import me.leoko.advancedgui.utils.events.GuiInteractionExitEvent;
 import me.leoko.advancedgui.utils.events.LayoutLoadEvent;
 
 import me.leoko.advancedgui.utils.interactions.Interaction;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 
@@ -127,12 +129,12 @@ public class LayoutModifier implements LayoutExtension {
         for (int j : Arrays.asList(1,16,64)) {
             cTree.locate("buy" + j).setClickAction((interaction, player, primaryTrigger) -> {
                 GraphComponent g = interaction.getComponentTree().locate("graph1", GraphComponent.class);
-                g.getItem().buyItem(j, player, g.getMultiplier());
+                g.getItem().buyItem(j, player.getUniqueId(), true);
                 g.updateButtonPrice();
             });
             cTree.locate("sell" + j).setClickAction((interaction, player, primaryTrigger) -> {
                 GraphComponent g = interaction.getComponentTree().locate("graph1", GraphComponent.class);
-                g.getItem().sellItem(j, player, g.getMultiplier());
+                g.getItem().sellItem(j, player.getUniqueId(), true);
                 g.updateButtonPrice();
             });
         }
@@ -246,8 +248,8 @@ public class LayoutModifier implements LayoutExtension {
 
                 Item item = category.getItemOfIndex(j-1+offset);
 
-                componentTree.locate("t" + position + j + "1", TextComponent.class).setText(item.getPrice().getValue() + Config.getInstance().getCurrency());
-                componentTree.locate("t" + position + j + "2", TextComponent.class).setText(item.getPrice().getValue() + Config.getInstance().getCurrency());
+                componentTree.locate("t" + position + j + "1", TextComponent.class).setText(Formatter.format(item.getPrice().getValue(), Style.REDUCED_LENGTH));
+                componentTree.locate("t" + position + j + "2", TextComponent.class).setText(Formatter.format(item.getPrice().getValue(), Style.REDUCED_LENGTH));
 
                 ImageComponent ic = componentTree.locate("asdi" + position + "" + j, ImageComponent.class);
                 ic.setImage(Images.getInstance().getImage(item.getMaterial(), 32, 32, false));
@@ -316,10 +318,10 @@ public class LayoutModifier implements LayoutExtension {
             Item imax = items.get(0);
             for (Item item : items) {
 
-                float variation = RoundUtils.roundToOne(-100 + 100*(item.getPrice().getValue()/item.getPrices(TimeSpan.MINUTE).get(0)));
+                float variation = RoundUtils.roundToOne(-100 + 100*(item.getPrice().getValue()/item.getPrices(TimeSpan.HOUR).get(0)));
 
                 if (variation != 0) {
-                    if (abs(variation) > abs(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.MINUTE).get(0)))){
+                    if (abs(variation) > abs(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.HOUR).get(0)))){
                         imax = item;
                     }
                 }
@@ -339,7 +341,7 @@ public class LayoutModifier implements LayoutExtension {
                 interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(finalImax.getMaterial());
             });
 
-            float fvar = RoundUtils.roundToOne(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.MINUTE).get(0)));
+            float fvar = RoundUtils.roundToOne(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.HOUR).get(0)));
 
             if (fvar != 0){
                 if (fvar > 0) {
@@ -363,25 +365,24 @@ public class LayoutModifier implements LayoutExtension {
 
         Config config = Config.getInstance();
         // Title
-        for (int i = 1; i <= 4 ; i++) { cTree.locate("title" + i, TextComponent.class).setText(config.getTitle()); }
+        for (int i = 1; i <= 4 ; i++) { cTree.locate("title" + i, TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_TITLE)); }
         // Top Movers
-        cTree.locate("w1omKKFS", TextComponent.class).setText(config.getTopMoversText());
+        cTree.locate("w1omKKFS", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_TOP_MOVERS));
         // Sub top movers
-        cTree.locate("ypqwCPVb", TextComponent.class).setText(config.getSubTopMoversText());
+        cTree.locate("ypqwCPVb", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_SUBTOP));
         // Buy
-        cTree.locate("8mbDiOVM", TextComponent.class).setText(config.getBuyText());
-        cTree.locate("rK8xOEwj", TextComponent.class).setText(config.getBuyText());
+        cTree.locate("8mbDiOVM", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_BUY));
+        cTree.locate("rK8xOEwj", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_BUY));
         // Sell
-        cTree.locate("jEXxBLF2", TextComponent.class).setText(config.getSellText());
-        cTree.locate("ZakfQVQ0", TextComponent.class).setText(config.getSellText());
+        cTree.locate("jEXxBLF2", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_SELL));
+        cTree.locate("ZakfQVQ0", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_SELL));
         // Price text
-        cTree.locate("EGgOeYza", TextComponent.class).setText(config.getPriceText());
-        cTree.locate("EfJrz4vo", TextComponent.class).setText(config.getPriceText());
+        cTree.locate("EGgOeYza", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_PRICE));
+        cTree.locate("EfJrz4vo", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_PRICE));
         // Amount
-        cTree.locate("pfFe6Wjt", TextComponent.class).setText(config.getAmountSelectionText());
-        cTree.locate("ityZyfNt", TextComponent.class).setText(config.getAmountSelectionText());
+        cTree.locate("pfFe6Wjt", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_AMOUNT_SELECTION));
+        cTree.locate("ityZyfNt", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_AMOUNT_SELECTION));
         // Trend
-        cTree.locate("pfV4FIy1", TextComponent.class).setText(config.getTrendText());
+        cTree.locate("pfV4FIy1", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_TREND));
     }
-
 }

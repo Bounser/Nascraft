@@ -1,6 +1,6 @@
 # Nascraft config.yml - ${project.version}
 
-# Language file to use. Available: en_US es_ES ca_ES
+# Language file to use. Available: en_US es_ES
 language: 'en_US'
 
 database:
@@ -55,26 +55,5 @@ discord_bot:
   slot_price_factor: 1000
   slot_price_base: 100
 
-# Currently (${project.version}) they can only be hired through discord.
-brokers:
-  aggressive:
-    enabled: true
-    daily-fee: 0.05
-    market-sensibility: 1.5
-    volatility: 0.005
-    positive-return: 1.01
-  conservative:
-    enabled: true
-    daily-fee: 0.005
-    market-sensibility: 0.5
-    volatility: 0.001
-    positive-return: 1.01
-  lazy:
-    enabled: true
-    daily-fee: 0.001
-    market-sensibility: 0.98
-    volatility: 0
-    positive-return: 0
-
-# Verify whether the AdvancedGUI's layout is present (and in the correct version), and if it is not, place it in the layout folder of AdvancedGUI.
+# Verify whether the AdvancedGUI's layout is present, and if it is not, place it in the layout folder of AdvancedGUI.
 auto_resources_injection: true

@@ -388,7 +388,7 @@ public class DiscordButtons extends ListenerAdapter {
                 eb.setDescription(text);
 
 
-                eb.setColor(mixColors(new Color(100,250,100),
+                eb.setColor(DiscordBot.mixColors(new Color(100,250,100),
                                       new Color(250,250,100),
                                       new Color(250,100,100),
                                       purse/total, inventory/total, brokerValue/total));
@@ -640,17 +640,6 @@ public class DiscordButtons extends ListenerAdapter {
         event.reply(text)
                 .setEphemeral(true)
                 .queue(message -> message.deleteOriginal().queueAfter(delay, TimeUnit.SECONDS));
-    }
-
-    public static Color mixColors(Color color1, Color color2, Color color3, double weight1, double weight2, double weight3) {
-
-        double totalWeight = weight1 + weight2 + weight3;
-
-        double red = (color1.getRed() * weight1 + color2.getRed() * weight2 + color3.getRed() * weight3) / totalWeight;
-        double green = (color1.getGreen() * weight1 + color2.getGreen() * weight2 + color3.getGreen() * weight3) / totalWeight;
-        double blue = (color1.getBlue() * weight1 + color2.getBlue() * weight2 + color3.getBlue() * weight3) / totalWeight;
-
-        return new Color((int) Math.round(red), (int) Math.round(green), (int) Math.round(blue));
     }
 
 }

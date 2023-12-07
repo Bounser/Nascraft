@@ -8,6 +8,8 @@ import java.util.List;
 
 public class GraphData {
 
+    // Object intrinsically related to the GraphComponent.
+
     private int[] x;
     private int[] y;
     private int[] px;
@@ -66,20 +68,18 @@ public class GraphData {
 
         // X points
         if(x == null || px == null) {
-            int z = Math.round(size[0]/(values.size()-1));
+            float z = (float) size[0] /(values.size()-1);
 
             x = new int[values.size()];
             px = new int[values.size() + 2];
 
             int j;
-            for (j = 0; j < (values.size()-1); j++) {
-                x[j] = (int) (z*j + Math.round(j*0.5) + offset[0]);
+            for (j = 0; j < (values.size()); j++) {
+                x[j] = Math.round(z*j + offset[0]);
                 px[j] = x[j];
             }
 
-            x[j] = offset[0] + size[0] + 1;
-            px[j++] = offset[0] + size[0] + 2;
-            px[j++] = offset[0] + size[0] + 2;
+            px[j++] = offset[0] + size[0];
             px[j] = offset[0];
         }
     }
