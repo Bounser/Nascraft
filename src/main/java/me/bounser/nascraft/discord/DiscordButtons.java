@@ -348,6 +348,13 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "sellallconfirmed":
 
+                if (!MarketManager.getInstance().getActive()) {
+                    event.reply(":lock: Market is currently closed!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS));
+                    return;
+                }
+
                 float value = DiscordInventories.getInstance().getInventory(uuid).sellAll();
 
                 event.reply("You just sold everything for: **" + Formatter.format(value, Style.ROUND_BASIC) + "**")
@@ -495,6 +502,13 @@ public class DiscordButtons extends ListenerAdapter {
 
 
                 return;
+        }
+
+        if (!MarketManager.getInstance().getActive()) {
+            event.reply(":lock: Market is currently closed!")
+                    .setEphemeral(true)
+                    .queue(message -> message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS));
+            return;
         }
 
         String initial = String.valueOf(event.getComponentId().charAt(0));

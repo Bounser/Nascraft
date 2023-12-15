@@ -47,7 +47,7 @@ public class NascraftCommand implements CommandExecutor {
                 break;
 
             case "stop":
-                if(MarketManager.getInstance().getState()) {
+                if(MarketManager.getInstance().getActive()) {
                     MarketManager.getInstance().stop();
                     sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Shop stopped. Resume it with /nascraft resume.");
                 } else {
@@ -55,7 +55,7 @@ public class NascraftCommand implements CommandExecutor {
                 }
                 break;
             case "resume":
-                if(!MarketManager.getInstance().getState()) {
+                if(!MarketManager.getInstance().getActive()) {
                     MarketManager.getInstance().resume();
                     sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Shop resumed.");
                 } else {

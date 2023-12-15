@@ -1,6 +1,5 @@
 package me.bounser.nascraft.market.managers;
 
-import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.Plot;
 import me.bounser.nascraft.market.resources.Category;
@@ -100,7 +99,7 @@ public class MarketManager {
     public void stop() { active = false; }
     public void resume() { active = true; }
 
-    public boolean getState() { return active; }
+    public boolean getActive() { return active; }
 
     public List<Item> getTopGainers(int quantity) {
 

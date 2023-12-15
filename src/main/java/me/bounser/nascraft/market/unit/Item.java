@@ -119,7 +119,7 @@ public class Item {
         Player offlinePlayer = Bukkit.getPlayer(uuid);
 
 
-        if(!MarketManager.getInstance().getState()) { Lang.get().message(player, Message.SHOP_CLOSED); return; }
+        if(!MarketManager.getInstance().getActive()) { Lang.get().message(player, Message.SHOP_CLOSED); return; }
 
         Economy econ = Nascraft.getEconomy();
 
@@ -198,7 +198,7 @@ public class Item {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
         Player player = Bukkit.getPlayer(uuid);
 
-        if (!MarketManager.getInstance().getState()) {
+        if (!MarketManager.getInstance().getActive()) {
             if (player != null && feedback) Lang.get().message(player, Message.SHOP_CLOSED);
             return -1;
         }
