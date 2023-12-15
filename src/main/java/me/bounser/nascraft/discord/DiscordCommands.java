@@ -1,6 +1,7 @@
 package me.bounser.nascraft.discord;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.images.BalanceImage;
@@ -14,6 +15,7 @@ import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -26,6 +28,8 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -257,6 +261,135 @@ public class DiscordCommands extends ListenerAdapter {
 
                 break;
 
+            case "stop":
+            case "resume":
+                if (!event.getMember().getRoles().stream().anyMatch(role -> role.getId().equals(Config.getInstance().getAdminRoleID()))) {
+                    event.reply(":exclamation: You are not allowed to use this command!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    return;
+                }
+
+                if (event.getName().equalsIgnoreCase("stop"))
+                    if (MarketManager.getInstance().getActive()) {
+                        MarketManager.getInstance().stop();
+                        event.reply(":lock: Market has been stopped successfully!")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    } else {
+                        event.reply(":lock: Market is already closed!")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    }
+
+                if (event.getName().equalsIgnoreCase("resume"))
+                    if (!MarketManager.getInstance().getActive()) {
+                        MarketManager.getInstance().resume();
+                        event.reply(":unlock: Market has been resumed successfully!")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    } else {
+                        event.reply(":unlock: Market is already resumed!")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    }
+                break;
+
+            case "seeinv":
+            case "seebal":
+
+                if (!event.getMember().getRoles().stream().anyMatch(role -> role.getId().equals(Config.getInstance().getAdminRoleID()))) {
+                    event.reply(":exclamation: You are not allowed to use this command!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    return;
+                }
+
+                try {
+                    DiscordBot.getInstance().getJDA().retrieveUserById(event.getOption("userid").getAsString()).queue(
+
+                            user -> {
+
+                                if (user == null) {
+                                    event.reply(":exclamation: There is no user with ID ``" + event.getOption("userid").getAsString() + "`` !")
+                                            .setEphemeral(true)
+                                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                                    return;
+                                }
+
+                                File outputFile = new File("image.png");
+
+                                switch (event.getName()) {
+
+                                    case "seeinv":
+                                        DiscordInventory discordInventory1 = DiscordInventories.getInstance().getInventory(event.getOption("userid").getAsString());
+
+                                        File outputInventoryFile = new File("image.png");
+                                        try {
+                                            ImageIO.write(InventoryImage.getImage(discordInventory1), "png", outputInventoryFile);
+                                        } catch (IOException e) {
+                                            throw new RuntimeException(e);
+                                        }
+
+                                        event.reply("## Displaying inventory of user: ``" + user.getName() + "``")
+                                                .setFiles(FileUpload.fromData(outputFile, "image.png"))
+                                                .setEphemeral(true)
+                                                .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
+
+                                    case "seebal":
+
+                                        OfflinePlayer player2 = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(user.getId()));
+
+                                        double purse = Nascraft.getEconomy().getBalance(player2);
+                                        float inventory = DiscordInventories.getInstance().getInventory(event.getUser().getId()).getInventoryValue();
+                                        float brokerValue = 0;
+                                        double total = purse + inventory + brokerValue;
+
+                                        String text =
+                                                "\n> :green_circle: :dollar: **Purse** (Minecraft): ``" + Formatter.formatDouble(purse) +
+                                                        "``\n> :yellow_circle: :school_satchel: **Discord Inventory**: ``" + Formatter.format(inventory, Style.ROUND_BASIC) +
+                                                        "``\n> :red_circle: :man_office_worker: **Broker-Managed**: ``" + Formatter.format(brokerValue, Style.ROUND_BASIC) +
+                                                        "``\n> \n" +
+                                                        ">  :abacus: **Total**: ``" + Formatter.formatDouble(total) + "``\n";
+
+                                        File balanceFile = new File("image.png");
+                                        try {
+                                            ImageIO.write(BalanceImage.getImage(event.getUser()), "png", balanceFile);
+                                        } catch (IOException e) {
+                                            throw new RuntimeException(e);
+                                        }
+
+                                        EmbedBuilder eb = new EmbedBuilder();
+
+                                        eb.setImage("attachment://image.png");
+
+                                        eb.setTitle(":coin:  **Balance**:");
+
+                                        eb.setFooter("Purse: " + RoundUtils.roundToOne((float) (purse*100/total)) + "% Inventory: " + RoundUtils.roundToOne((float) (inventory*100/total)) + "% Broker: " + RoundUtils.roundToOne((float) (brokerValue*100/total)) + "%");
+
+                                        eb.setDescription(text);
+
+
+                                        eb.setColor(DiscordBot.mixColors(new Color(100,250,100),
+                                                new Color(250,250,100),
+                                                new Color(250,100,100),
+                                                purse/total, inventory/total, brokerValue/total));
+
+                                        event.reply("## Displaying balance of user: ``" + user.getName() + "``")
+                                                .addEmbeds(eb.build())
+                                                .addFiles(FileUpload.fromData(balanceFile , "image.png"))
+                                                .setEphemeral(true)
+                                                .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
+
+                                }
+                            }
+                    );
+                } catch (NumberFormatException e) {
+
+                    event.reply("Invalid user id! Make sure its in a valid format. Example of a valid ID (yours): ``" + event.getUser().getId() + "``")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
+                }
         }
     }
 }

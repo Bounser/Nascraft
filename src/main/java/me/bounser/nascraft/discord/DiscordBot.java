@@ -71,7 +71,13 @@ public class DiscordBot {
                 Commands.slash("balance", "Checks available balance."),
                 Commands.slash("inventory", "Check your inventory."),
                 Commands.slash("search", "Search an item by name to operate with it.")
-                        .addOption(OptionType.STRING, "material", "Name (material) of the item.")
+                        .addOption(OptionType.STRING, "material", "Name (material) of the item."),
+                Commands.slash("stop", "While the market is stopped no one will be able to buy or sell."),
+                Commands.slash("resume", "Resume the market functionalities."),
+                Commands.slash("seeinv", "See discord inventories of players by their discord ID.")
+                        .addOption(OptionType.STRING, "userid", "ID of the discord user"),
+                Commands.slash("seebal", "See discord balances of players by their discord ID.")
+                        .addOption(OptionType.STRING, "userid", "ID of the discord user")
         ).queue();
 
         removeAllMessages();
