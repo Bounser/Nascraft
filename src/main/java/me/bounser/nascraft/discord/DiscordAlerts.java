@@ -1,9 +1,13 @@
 package me.bounser.nascraft.discord;
 
+import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
 import java.util.HashMap;
@@ -23,16 +27,16 @@ public class DiscordAlerts {
 
         if (item == null) return "not_valid";
 
+        if (alerts.containsKey(userID) && alerts.get(userID).size() > 20) return "limit_reached";
+
         if (alerts.containsKey(userID) && alerts.get(userID).containsKey(item)) return "repeated";
 
         HashMap<Item, Float> content;
-        if (alerts.get(userID) == null) {
-            content = new HashMap<>();
-        } else {
-            content = alerts.get(userID);
-        }
+        if (alerts.get(userID) == null) content = new HashMap<>();
+        else content = alerts.get(userID);
 
-        if (price < item.getPrice().getValue()) { content.put(item, -price); } else { content.put(item, price); }
+        if (price < item.getPrice().getValue()) content.put(item, -price);
+        else content.put(item, price);
 
         alerts.put(userID, content);
 
@@ -84,8 +88,12 @@ public class DiscordAlerts {
         DiscordBot.getInstance().getJDA().retrieveUserById(userId).queue(user ->
                 user.openPrivateChannel()
                         .queue(privateChannel -> privateChannel
-                                .sendMessage(":bell: " + emoji + " Alert reached for item: ``" + item.getName() + " (" + Formatter.format(price, Style.ROUND_BASIC) + ")`` with current price: ``" + Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC) + "``").queue()));
-
+                                .sendMessage(Lang.get().message(Message.DISCORD_ALERT_REACHED_SEGMENT)
+                                        .replace("[EMOJI]", emoji)
+                                        .replace("[MATERIAL]", item.getName())
+                                        .replace("[PRICE1]", Formatter.format(price, Style.ROUND_BASIC))
+                                        .replace("[PRICE2]", Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC)))
+                                .queue()));
 
     }
 

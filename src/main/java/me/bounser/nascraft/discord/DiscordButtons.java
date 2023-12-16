@@ -68,10 +68,12 @@ public class DiscordButtons extends ListenerAdapter {
                 HashMap<Item, Float> alerts = DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId());
 
                 if (alerts == null || alerts.size() == 0) {
-                    event.reply(Lang.get().message(Message.DISCORD_ALERT_NOT_SETUPPED))
+                    event.reply(Lang.get().message(Message.DISCORD_NO_ALERTS_SETUP))
                             .setEphemeral(true)
-                            .addActionRow(Arrays.asList(Button.success("addalert", "Add Alert").withEmoji(Emoji.fromFormatted("U+1F514")), Button.danger("removealert", "Remove Alert").withEmoji(Emoji.fromFormatted("U+1F515"))))
-                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                            .addActionRow(Arrays.asList(
+                                    Button.success("addalert", Lang.get().message(Message.DISCORD_ADD_ALERT_BUTTON)).withEmoji(Emoji.fromFormatted("U+1F514")),
+                                    Button.danger("removealert", Lang.get().message(Message.DISCORD_REMOVE_ALERT_BUTTON)).withEmoji(Emoji.fromFormatted("U+1F515"))))
+                            .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
                     return;
                 }
@@ -79,30 +81,34 @@ public class DiscordButtons extends ListenerAdapter {
                 String alertsMessage = Lang.get().message(Message.DISCORD_ALERT_HEADER);
 
                 for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet()) {
-                    alertsMessage = alertsMessage + "> " + item.getName() + " at price: " + Formatter.format(Math.abs(alerts.get(item)), Style.ROUND_BASIC) + "\n";
+                    alertsMessage = alertsMessage + Lang.get().message(Message.DISCORD_ALERT_SEGMENT)
+                            .replace("[MATERIAL]", item.getName())
+                            .replace("[PRICE]", Formatter.format(Math.abs(alerts.get(item)), Style.ROUND_BASIC)) + "\n";
                 }
 
                 event.reply(alertsMessage)
                         .setEphemeral(true)
-                        .addActionRow(Arrays.asList(Button.success("addalert", "Add Alert").withEmoji(Emoji.fromFormatted("U+1F514")), Button.danger("removealert", "Remove Alert").withEmoji(Emoji.fromFormatted("U+1F515"))))
-                        .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                        .addActionRow(Arrays.asList(
+                                Button.success("addalert", Lang.get().message(Message.DISCORD_ADD_ALERT_BUTTON)).withEmoji(Emoji.fromFormatted("U+1F514")),
+                                Button.danger("removealert", Lang.get().message(Message.DISCORD_REMOVE_ALERT_BUTTON)).withEmoji(Emoji.fromFormatted("U+1F515"))))
+                        .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
                 return;
 
             case "addalert":
 
-                TextInput material = TextInput.create("material", "Item material", TextInputStyle.SHORT)
-                        .setPlaceholder("Material of the item to track.")
+                TextInput material = TextInput.create("material", Lang.get().message(Message.MATERIAL), TextInputStyle.SHORT)
+                        .setPlaceholder(Lang.get().message(Message.DISCORD_ADD_ALERT_ARGUMENT_MATERIAL))
                         .setRequiredRange(1, 40)
                         .build();
 
-                TextInput price = TextInput.create("price", "Price", TextInputStyle.SHORT)
-                        .setPlaceholder("Price at which you want to be notified when reached.")
+                TextInput price = TextInput.create("price", Lang.get().message(Message.PRICE), TextInputStyle.SHORT)
+                        .setPlaceholder(Lang.get().message(Message.DISCORD_ADD_ALERT_ARGUMENT_PRICE))
                         .setMinLength(1)
                         .setMaxLength(10)
                         .build();
 
-                Modal modal = Modal.create("createalert", "Create alert")
+                Modal modal = Modal.create("createalert", Lang.get().message(Message.DISCORD_CREATE_ALERT))
                         .addComponents(ActionRow.of(material), ActionRow.of(price))
                         .build();
 
@@ -113,7 +119,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                 if (DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()) == null ||
                         DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).size() == 0) {
-                    event.reply("You don't have any alerts currently setup.")
+                    event.reply(Lang.get().message(Message.DISCORD_NO_ALERTS_SETUP))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
                     return;
@@ -122,9 +128,11 @@ public class DiscordButtons extends ListenerAdapter {
                 StringSelectMenu.Builder builder = StringSelectMenu.create("menu:id");
 
                 for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
-                    builder.addOption(item.getName(), "alert-" + item.getMaterial(), "At price: " + Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC));
+                    builder.addOption(item.getName(), "alert-" + item.getMaterial(),
+                            Lang.get().message(Message.DISCORD_ALERT_AT_PRICE)
+                                    .replace("PRICE", Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC)));
 
-                event.reply("Select the alert that you want to remove.")
+                event.reply(Lang.get().message(Message.DISCORD_ALERT_REMOVE_SELECT))
                         .setEphemeral(true)
                         .addActionRow(builder.build())
                         .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
@@ -134,12 +142,12 @@ public class DiscordButtons extends ListenerAdapter {
 
                 List<ItemComponent> componentList = new ArrayList<>();
 
-                componentList.add(Button.secondary("limit", "Limit orders").withEmoji(Emoji.fromFormatted("U+1F3AF")));
-                componentList.add(Button.secondary("opensession", "Open session").withEmoji(Emoji.fromFormatted("U+1F5A5")));
-                componentList.add(Button.secondary("alerts", "Alerts").withEmoji(Emoji.fromFormatted("U+1F514")));
-                componentList.add(Button.secondary("ositions", "Open positions").withEmoji(Emoji.fromFormatted("U+231B")));
+                componentList.add(Button.secondary("limit", "Limit orders").withEmoji(Emoji.fromFormatted("U+1F3AF")).asDisabled());
+                componentList.add(Button.secondary("opensession", "Open session").withEmoji(Emoji.fromFormatted("U+1F5A5")).asDisabled());
+                componentList.add(Button.secondary("alerts", Lang.get().message(Message.DISCORD_ALERTS_NAME)).withEmoji(Emoji.fromFormatted("U+1F514")));
+                componentList.add(Button.secondary("ositions", "Open positions").withEmoji(Emoji.fromFormatted("U+231B")).asDisabled());
 
-                event.reply(":bar_chart: Advanced Mode: Select an option. \n\n:warning: Caution! In this section you may find complex operations that can involve a total loss of invested money! ")
+                event.reply(":bar_chart: Advanced Mode: Select an option.")
                         .addActionRow(componentList)
                         .setEphemeral(true)
                         .queue();
@@ -229,7 +237,7 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "search":
 
-                TextInput material2 = TextInput.create("material", "Item material", TextInputStyle.SHORT)
+                TextInput material2 = TextInput.create("material", Lang.get().message(Message.MATERIAL), TextInputStyle.SHORT)
                         .setPlaceholder("Material of the item you want to operate with.")
                         .setRequiredRange(1, 40)
                         .build();

@@ -7,6 +7,10 @@ after: false
 # Decimal separator. Available: point (.), comma (,)
 separator: "point"
 
+# General:
+price: "Price"
+material: "Item Material"
+
 # Available placeholders: [AMOUNT], [MATERIAL], [WORTH]
 buy_message: "<gradient:#00E3FB:#F9ABFD>You just bought <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> worth </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
 sell_message: "<gradient:#00E3FB:#F9ABFD>You just sold <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> worth </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
@@ -48,11 +52,11 @@ alert_not_linked: "<gradient:#FB6363:#C4B3FD>You have to link your account to us
 alert_in_watchlist: "<gradient:#FB6363:#C4B3FD>Item already on your watchlist.</gradient>"
 alert_invalid_price: "<gradient:#FB6363:#C4B3FD>Invalid use of command. Price must be a number. (Ex 120.90)</gradient>"
 alert_not_recognized: "<gradient:#FB6363:#C4B3FD>Item not recognized.</gradient>"
-alert_setup: "Alert setup correctly! You'll receive a DM when the price is reached."
+alert_setup: "<gradient:#00E3FB:#F9ABFD>Alert setup correctly! You'll receive a DM when the price is reached.</gradient>"
 # alerts - Currently not activated.
-alerts_empty: "&cYou don't have any alert setup."
-alerts_header: "&3Active alerts:\n"
-alerts_list_segment: "\n&5> [MATERIAL] at price [WORTH]"
+alerts_empty: "<gradient:#FB6363:#C4B3FD>You don't have any alert setup.</gradient>"
+alerts_header: "&eActive alerts:\n"
+alerts_list_segment: "\n&6> &l[MATERIAL] &r&eat price &l[WORTH]"
 
 # DISCORD - No MiniMessage support.
 
@@ -80,8 +84,24 @@ discord_not_linked: ":exclamation: Your account is not linked! Run ``/link`` in-
 discord_insufficient_balance: ":x: Not enough money! Your current balance is: **[VALUE1]** and you need at least **[VALUE2]**"
 discord_without_space: ":x: Not enough space in your discord inventory!"
 
-discord_alert_not_setupped: "No alerts setup! You can setup an alert to receive a DM when the price of an item reaches a limit"
+discord_alert_name: "Alert"
+discord_alerts_name: "Alerts"
+discord_no_alerts_setup: "You don't have any alert setup!"
 discord_alert_header: "Alerts :bell:\n\n"
+discord_alert_segment: "> ``[MATERIAL]`` at price: [PRICE]"
+discord_add_alert_button: "Add Alert"
+discord_remove_alert_button: "Remove Alert"
+discord_add_alert_argument_material: "Material of the item to track."
+discord_add_alert_argument_price: "Price at which you want to be notified when reached."
+discord_create_alert: "Create Alert"
+discord_alert_at_price: "At price: [PRICE]"
+discord_alert_remove_select: "Select the alert that you want to remove."
+discord_alert_invalid_material: "That material is not valid!"
+discord_alert_invalid_price: "That price is not valid!"
+discord_alert_success: "Success! You will receive a DM when the price reaches the price."
+discord_alert_limit_reached: "Limit of alerts reached! Remove alerts before creating new ones."
+discord_alert_already_listed: "That item is already on you watchlist!"
+discord_alert_reached_segment: ":bell: [EMOJI] Alert reached for item: ``[MATERIAL] ([PRICE1])`` with current price: ``[PRICE2]``"
 
 # LAYOUT TEXTS:
 # Main title.

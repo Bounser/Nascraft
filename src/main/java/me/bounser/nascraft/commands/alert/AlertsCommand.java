@@ -46,7 +46,7 @@ public class AlertsCommand implements CommandExecutor {
         String alerts = Lang.get().message(Message.ALERTS_HEADER);
 
         for (Item item : DiscordAlerts.getInstance().getAlerts().get(userID).keySet())
-            alerts = alerts + Lang.get().message(Message.ALERTS_LIST_SEGMENT, Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(userID).get(item)), Style.ROUND_BASIC), null, item.getName());
+            alerts = alerts + Lang.get().message(Message.ALERTS_LIST_SEGMENT, Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(userID).get(item)), Style.ROUND_BASIC), "0", item.getName());
 
         player.sendMessage(alerts);
 

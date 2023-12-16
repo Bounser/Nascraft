@@ -61,12 +61,12 @@ public class DiscordBot {
                 .build();
 
         jda.updateCommands().addCommands(
-                /*Commands.slash("alert", "Set up an alert based on prices changes!")
+                Commands.slash("alert", "Set up an alert based on prices changes!")
                         .addOption(OptionType.STRING, "material", "Material name of the item.")
                         .addOption(OptionType.NUMBER, "price", "Price at which you will receive a mention."),
                 Commands.slash("alerts", "List all your current alerts."),
                 Commands.slash("remove-alert", "Remove an alert.")
-                        .addOption(OptionType.STRING, "material", "Material name of the item to remove."),*/
+                        .addOption(OptionType.STRING, "material", "Material name of the item to remove."),
                 Commands.slash("link", "Link a minecraft account to use all the functionalities"),
                 Commands.slash("balance", "Checks available balance."),
                 Commands.slash("inventory", "Check your inventory."),
@@ -113,7 +113,7 @@ public class DiscordBot {
             componentList1.add(Button.primary("data", Emoji.fromFormatted("U+2754")));
             componentList1.add(Button.secondary("search", "Search Item").withEmoji(Emoji.fromFormatted("U+1F50D")));
             componentList1.add(Button.secondary("history", "Trades History").withEmoji(Emoji.fromFormatted("U+1F4DC")));
-            componentList1.add(Button.secondary("advanced", "Advanced").withEmoji(Emoji.fromFormatted("U+1F4CA")).asDisabled());
+            componentList1.add(Button.secondary("advanced", "Advanced").withEmoji(Emoji.fromFormatted("U+1F4CA")));
 
             componentList2.add(Button.secondary("link", "Link Account").withEmoji(Emoji.fromFormatted("U+1F517")));
             componentList2.add(Button.secondary("inventory", "Inventory").withEmoji(Emoji.fromFormatted("U+1F392")));

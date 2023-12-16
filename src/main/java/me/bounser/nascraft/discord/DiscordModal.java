@@ -1,5 +1,7 @@
 package me.bounser.nascraft.discord;
 
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.images.ItemAdvancedImage;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
@@ -35,7 +37,7 @@ public class DiscordModal extends ListenerAdapter {
             }
 
             if (item == null) {
-                event.reply("That material is not valid")
+                event.reply(Lang.get().message(Message.DISCORD_ALERT_INVALID_MATERIAL))
                         .setEphemeral(true)
                         .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
                 return;
@@ -46,7 +48,7 @@ public class DiscordModal extends ListenerAdapter {
             try {
                 price = Float.parseFloat(event.getValue("price").getAsString());
             } catch (NumberFormatException e) {
-                event.reply("That price is not valid!")
+                event.reply(Lang.get().message(Message.DISCORD_ALERT_INVALID_PRICE))
                         .setEphemeral(true)
                         .queue(message -> message.deleteOriginal().queueAfter(5, TimeUnit.SECONDS));
                 return;
@@ -55,19 +57,25 @@ public class DiscordModal extends ListenerAdapter {
             switch (DiscordAlerts.getInstance().setAlert(event.getUser().getId(), item.getMaterial().toString(), price)) {
 
                 case "success":
-                    event.reply("Success! You will receive a DM when the price reaches the price.")
+                    event.reply(Lang.get().message(Message.DISCORD_ALERT_SUCCESS))
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    break;
+
+                case "limit_reached":
+                    event.reply(Lang.get().message(Message.DISCORD_ALERT_LIMIT_REACHED))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     break;
 
                 case "repeated":
-                    event.reply("That item is already on you watchlist!")
+                    event.reply(Lang.get().message(Message.DISCORD_ALERT_ALREADY_LISTED))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     break;
 
                 case "not_valid":
-                    event.reply("Item not recognized!")
+                    event.reply(Lang.get().message(Message.DISCORD_ALERT_INVALID_MATERIAL))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     break;
@@ -93,7 +101,7 @@ public class DiscordModal extends ListenerAdapter {
             }
 
             if (item == null) {
-                event.reply("Item not recognized!")
+                event.reply(Lang.get().message(Message.DISCORD_ALERT_INVALID_MATERIAL))
                         .setEphemeral(true)
                         .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
             } else {
@@ -114,7 +122,7 @@ public class DiscordModal extends ListenerAdapter {
             }
 
             if (item == null) {
-                event.reply("Item not recognized!")
+                event.reply(Lang.get().message(Message.DISCORD_ALERT_INVALID_MATERIAL))
                         .setEphemeral(true)
                         .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
             } else {
