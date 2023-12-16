@@ -4,7 +4,6 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.SQLite;
-import me.bounser.nascraft.database.playerinfo.PlayerInfoManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.managers.MarketManager;
@@ -191,6 +190,7 @@ public class Item {
         collectedTaxes += totalTaxes;
 
         SQLite.getInstance().saveTrade(uuid, this, amount, totalCost, true, false);
+        MarketManager.getInstance().addOperation();
     }
 
     public float sellItem(int amount, UUID uuid, boolean feedback) {
@@ -249,6 +249,7 @@ public class Item {
         if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(totalWorth, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
         SQLite.getInstance().saveTrade(uuid, this, amount, totalWorth, false, false);
+        MarketManager.getInstance().addOperation();
 
         return totalWorth;
     }
@@ -257,12 +258,14 @@ public class Item {
         price.changeStock(-amount);
         volume += RoundUtils.round(amount*price.getBuyPrice());
         operations += amount;
+        MarketManager.getInstance().addOperation();
     }
 
     public void ghostSellItem(int amount) {
         operations += amount;
         volume += RoundUtils.round(amount*price.getSellPrice());
         price.changeStock(amount);
+        MarketManager.getInstance().addOperation();
     }
 
     public void dailyUpdate() {

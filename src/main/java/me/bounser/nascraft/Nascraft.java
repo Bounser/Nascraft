@@ -19,9 +19,11 @@ import me.leoko.advancedgui.AdvancedGUI;
 import me.leoko.advancedgui.manager.GuiItemManager;
 import me.leoko.advancedgui.manager.GuiWallManager;
 import me.leoko.advancedgui.manager.LayoutManager;
-import me.bounser.nascraft.bstats.Metrics;
 import me.leoko.advancedgui.utils.VersionMediator;
 import org.apache.commons.io.FileUtils;
+import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
+import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -46,9 +48,9 @@ public final class Nascraft extends JavaPlugin {
 
         main = this;
 
-        new Metrics(this, 18404);
-
         Config config = Config.getInstance();
+
+        setupMetrics();
 
         if (!setupEconomy()) {
             getLogger().severe("Nascraft failed to load! Vault is required.");
@@ -59,8 +61,11 @@ public final class Nascraft extends JavaPlugin {
         if (Bukkit.getPluginManager().getPlugin("AdvancedGUI") == null) {
             getLogger().warning("AdvancedGUI is not installed! You won't have graphs in-game without it!");
             getLogger().warning("Learn more about AdvancedGUI here: https://www.spigotmc.org/resources/83636/");
-        } else if (!Bukkit.getPluginManager().getPlugin("AdvancedGUI").getDescription().getVersion().equals(AdvancedGUI_version)){
-            getLogger().warning("This plugin was made using AdvancedGUI " + AdvancedGUI_version + "! You may encounter errors on other versions");
+        } else {
+            if (config.getCheckResources()) checkResources();
+            LayoutManager.getInstance().registerLayoutExtension(LayoutModifier.getInstance(), this);
+            if (!Bukkit.getPluginManager().getPlugin("AdvancedGUI").getDescription().getVersion().equals(AdvancedGUI_version))
+                getLogger().warning("This plugin was made using AdvancedGUI " + AdvancedGUI_version + "! You may encounter errors on other versions");
         }
 
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -81,12 +86,8 @@ public final class Nascraft extends JavaPlugin {
             new DiscordBot();
         }
 
-        if (config.getCheckResources()) checkResources();
-
         MarketManager.getInstance();
         BrokersManager.getInstance();
-
-        LayoutManager.getInstance().registerLayoutExtension(LayoutModifier.getInstance(), this);
 
         getCommand("nascraft").setExecutor(new NascraftCommand());
         getCommand("market").setExecutor(new MarketCommand());
@@ -115,6 +116,14 @@ public final class Nascraft extends JavaPlugin {
             DiscordBot.getInstance().sendClosedMessage();
             DiscordBot.getInstance().getJDA().shutdown();
         }
+    }
+
+    public void setupMetrics() {
+        Metrics metrics = new Metrics(this, 18404);
+
+        metrics.addCustomChart(new SimplePie("discord_bridge", () -> String.valueOf(Config.getInstance().getDiscordEnabled())));
+        metrics.addCustomChart(new SimplePie("used_with_advancedgui", () -> String.valueOf(Bukkit.getPluginManager().getPlugin("AdvancedGUI") != null)));
+        metrics.addCustomChart(new SingleLineChart("operations_per_hour", () -> MarketManager.getInstance().getOperationsLastHour()));
     }
 
     public static Economy getEconomy() { return economy; }

@@ -1,11 +1,14 @@
 package me.bounser.nascraft.market.managers;
 
+import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.Plot;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
 import java.util.ArrayList;
@@ -25,6 +28,8 @@ public class MarketManager {
     private List<Float> marketChanges24h;
 
     private float lastChange;
+
+    private int operationsLastHour = 0;
 
     private static MarketManager instance = null;
 
@@ -229,6 +234,17 @@ public class MarketManager {
 
     public int[] getBenchmarkY(int ySize, int offset) {
         return Plot.getYPositions(ySize, offset, false, getBenchmark1h(100));
+    }
+
+    public int getOperationsLastHour() {
+        return operationsLastHour;
+    }
+
+    public void addOperation() {
+        operationsLastHour++;
+
+        Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), () -> operationsLastHour--, 72000); // 1 hour
+
     }
 
 }
