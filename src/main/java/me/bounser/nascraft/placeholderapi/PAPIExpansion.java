@@ -1,6 +1,7 @@
 package me.bounser.nascraft.placeholderapi;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.managers.MarketManager;
@@ -27,6 +28,15 @@ public class PAPIExpansion extends PlaceholderExpansion {
     public String onRequest(OfflinePlayer player, String identifier) {
 
         String params = PlaceholderAPI.setBracketPlaceholders(player, identifier);
+
+        switch (params) {
+            case "linked":
+                return String.valueOf(LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null);
+            case "discord_id":
+                String id = LinkManager.getInstance().getUserDiscordID(player.getUniqueId());
+                if (id == null) return "Not linked";
+                return LinkManager.getInstance().getUserDiscordID(player.getUniqueId());
+        }
 
         Item item;
 
