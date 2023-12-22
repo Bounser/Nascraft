@@ -1,7 +1,6 @@
 package me.bounser.nascraft.discord.images;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.advancedgui.Images;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
@@ -16,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class ItemBasicImage {
@@ -89,6 +89,13 @@ public class ItemBasicImage {
             drawCenteredString(graphics, Formatter.format(high[0], Style.ROUND_BASIC), Math.round(high[1]), 135, 8*128);
             drawCenteredString(graphics, Formatter.format(low[0], Style.ROUND_BASIC), Math.round(low[1]), 475, 8*128);
         }
+        graphics.setColor(new Color(120, 120, 125));
+        LocalDateTime localDateTime = LocalDateTime.now();
+        drawCenteredString(graphics, String.format("%d:%02d", localDateTime.getHour(), localDateTime.getMinute()), 8*128, 505, 8*128);
+        LocalDateTime past30mlocalDateTime = localDateTime.minusMinutes(60);
+        drawCenteredString(graphics, String.format("%d:%02d", past30mlocalDateTime.getHour(), past30mlocalDateTime.getMinute()), 0, 505, 8*128);
+        LocalDateTime past1hmlocalDateTime = localDateTime.minusMinutes(30);
+        drawCenteredString(graphics, String.format("%d:%02d", past1hmlocalDateTime.getHour(), past1hmlocalDateTime.getMinute()), 8*128/2, 505, 8*128);
 
         graphics.setColor(new Color(69, 69, 79));
         graphics.fillRoundRect(5, 0, 8*128-5, 100, 40, 40);
@@ -98,7 +105,7 @@ public class ItemBasicImage {
         graphics.fillRoundRect(0, 0, 110, 100, 40, 40);
         graphics.fillRoundRect(0, 195*2+128, 270, 61*2, 40, 40);
 
-        graphics.drawImage(Images.getInstance().getImage(item.getMaterial(), 100, 100, false), 5, 0, 100, 100, null);
+        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial(), 100, 100, false), 5, 0, 100, 100, null);
 
         graphics.setFont(new Font("Arial", Font.BOLD, 26));
         graphics.setColor(new Color(150, 255, 150));
