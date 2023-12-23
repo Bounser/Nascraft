@@ -105,7 +105,7 @@ public class ItemBasicImage {
         graphics.fillRoundRect(0, 0, 110, 100, 40, 40);
         graphics.fillRoundRect(0, 195*2+128, 270, 61*2, 40, 40);
 
-        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial(), 100, 100, false), 5, 0, 100, 100, null);
+        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial()), 5, 0, 100, 100, null);
 
         graphics.setFont(new Font("Arial", Font.BOLD, 26));
         graphics.setColor(new Color(150, 255, 150));
