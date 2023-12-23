@@ -13,6 +13,7 @@ import me.bounser.nascraft.commands.sellinv.SellInvCommand;
 import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.linking.LinkCommand;
+import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.market.managers.BrokersManager;
 import me.bounser.nascraft.market.managers.MarketManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
@@ -22,18 +23,26 @@ import me.leoko.advancedgui.manager.GuiItemManager;
 import me.leoko.advancedgui.manager.GuiWallManager;
 import me.leoko.advancedgui.manager.LayoutManager;
 import me.leoko.advancedgui.utils.VersionMediator;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.apache.commons.io.FileUtils;
 import org.bstats.bukkit.Metrics;
+import org.bstats.charts.AdvancedPie;
 import org.bstats.charts.SimplePie;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.milkbowl.vault.economy.Economy;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 
 public final class Nascraft extends JavaPlugin {
@@ -42,6 +51,8 @@ public final class Nascraft extends JavaPlugin {
     private static Economy economy = null;
 
     private static final String AdvancedGUI_version = "2.2.7";
+
+    private BukkitAudiences adventure;
 
     public static Nascraft getInstance() { return main; }
 
@@ -54,13 +65,20 @@ public final class Nascraft extends JavaPlugin {
 
         setupMetrics();
 
+        this.adventure = BukkitAudiences.create(this);
+
         if (!setupEconomy()) {
             getLogger().severe("Nascraft failed to load! Vault is required.");
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
 
-        if (Bukkit.getPluginManager().getPlugin("AdvancedGUI") == null) {
+        getLogger().info(AdvancedGUI.getInstance() + " ");
+
+        Plugin AGUI = Bukkit.getPluginManager().getPlugin("AdvancedGUI");
+        getLogger().info("Enabled: " + AGUI.isEnabled());
+
+        if (AGUI == null || !AGUI.isEnabled()) {
             getLogger().warning("AdvancedGUI is not installed! You won't have graphs in-game without it!");
             getLogger().warning("Learn more about AdvancedGUI here: https://www.spigotmc.org/resources/83636/");
         } else {
@@ -118,6 +136,11 @@ public final class Nascraft extends JavaPlugin {
             DiscordBot.getInstance().sendClosedMessage();
             DiscordBot.getInstance().getJDA().shutdown();
         }
+
+        if(this.adventure != null) {
+            this.adventure.close();
+            this.adventure = null;
+        }
     }
 
     public void setupMetrics() {
@@ -126,6 +149,24 @@ public final class Nascraft extends JavaPlugin {
         metrics.addCustomChart(new SimplePie("discord_bridge", () -> String.valueOf(Config.getInstance().getDiscordEnabled())));
         metrics.addCustomChart(new SimplePie("used_with_advancedgui", () -> String.valueOf(Bukkit.getPluginManager().getPlugin("AdvancedGUI") != null)));
         metrics.addCustomChart(new SingleLineChart("operations_per_hour", () -> MarketManager.getInstance().getOperationsLastHour()));
+        metrics.addCustomChart(new AdvancedPie("players_linked_with_discord", new Callable<Map<String, Integer>>() {
+            @Override
+            public Map<String, Integer> call() {
+                Map<String, Integer> valueMap = new HashMap<>();
+                int linkedPlayers = getLinkedPlayers();
+                valueMap.put("Linked", linkedPlayers);
+                valueMap.put("Not linked", Bukkit.getOnlinePlayers().size() - linkedPlayers);
+                return valueMap;
+            }
+
+            private int getLinkedPlayers() {
+                int counter = 0;
+                for (Player player : Bukkit.getOnlinePlayers())
+                    if (LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null) counter++;
+
+                return counter;
+            }
+        }));
     }
 
     public static Economy getEconomy() { return economy; }
@@ -138,6 +179,13 @@ public final class Nascraft extends JavaPlugin {
 
         economy = rsp.getProvider();
         return economy != null;
+    }
+
+    public @NonNull BukkitAudiences adventure() {
+        if(this.adventure == null) {
+            throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
+        }
+        return this.adventure;
     }
 
     public void checkResources() {

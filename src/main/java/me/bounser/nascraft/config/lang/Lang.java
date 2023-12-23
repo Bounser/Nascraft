@@ -4,7 +4,6 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Separator;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.configuration.file.YamlConfiguration;

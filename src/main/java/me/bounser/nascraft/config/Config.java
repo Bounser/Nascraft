@@ -1,6 +1,7 @@
 package me.bounser.nascraft.config;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.discord.linking.LinkingMethod;
 import me.bounser.nascraft.market.brokers.BrokerType;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.managers.MarketManager;
@@ -44,46 +45,50 @@ public class Config {
 
     // Config:
 
-    public Boolean getCheckResources() { return config.getBoolean("auto_resources_injection"); }
+    public Boolean getCheckResources() { return config.getBoolean("auto-resources-injection"); }
 
     public int getDatabasePurgeDays() { return config.getInt("database.days-until-history-removed"); }
 
     public String getSelectedLanguage() { return config.getString("language"); }
 
     public boolean getPriceNoise() {
-        return config.getBoolean("price_options.noise.enabled");
+        return config.getBoolean("price-options.noise.enabled");
     }
 
     public float getTaxBuy() {
-        return 1 + (float) config.getDouble("market_control.taxation.buy");
+        return 1 + (float) config.getDouble("market-control.taxation.buy");
     }
 
     public float getTaxSell() {
-        return 1 - (float) config.getDouble("market_control.taxation.sell");
+        return 1 - (float) config.getDouble("market-control.taxation.sell");
     }
 
     public float[] getLimits() {
         float[] limit = new float[2];
-            limit[0] = (float) config.getDouble("price_options.limits.low");
-            limit[1] = (float) config.getDouble("price_options.limits.high");
+            limit[0] = (float) config.getDouble("price-options.limits.low");
+            limit[1] = (float) config.getDouble("price-options.limits.high");
             return limit;
     }
 
-    public boolean getMarketPermissionRequirement() { return config.getBoolean("market_control.market_permission"); }
+    public boolean getMarketPermissionRequirement() { return config.getBoolean("market-control.market-permission"); }
 
     public List<String> getCommands() { return config.getStringList("commands.enabled"); }
 
-    public boolean getDiscordEnabled() { return config.getBoolean("discord_bot.enabled"); }
+    public boolean getDiscordEnabled() { return config.getBoolean("discord-bot.enabled"); }
 
-    public String getToken() { return config.getString("discord_bot.token"); }
+    public LinkingMethod getLinkingMethod() { return LinkingMethod.valueOf(config.getString("discord-bot.link-method").toUpperCase()); }
 
-    public String getChannel() { return config.getString("discord_bot.channel"); }
+    public String getToken() { return config.getString("discord-bot.token"); }
 
-    public int getDefaultSlots() { return config.getInt("discord_bot.default_inventory"); }
+    public String getChannel() { return config.getString("discord-bot.channel"); }
 
-    public float getSlotPriceFactor() { return (float) config.getDouble("discord_bot.slot_price_factor"); }
+    public String getAdminRoleID() { return config.getString("discord-bot.admin-role-id"); }
 
-    public float getSlotPriceBase() { return (float) config.getDouble("discord_bot.slot_price_base"); }
+    public int getDefaultSlots() { return config.getInt("discord-bot.default-inventory"); }
+
+    public float getSlotPriceFactor() { return (float) config.getDouble("discord-bot.slot-price-factor"); }
+
+    public float getSlotPriceBase() { return (float) config.getDouble("discord-bot.slot-price-base"); }
 
 
     // Items:
@@ -95,7 +100,7 @@ public class Config {
     public float getInitialPrice(Material material) {
         for (String item : getAllMaterials()) {
             if (material.toString().equalsIgnoreCase(item)){
-                return (float) items.getDouble("items." + item + ".initial_price");
+                return (float) items.getDouble("items." + item + ".initial-price");
             }
         }
         return 1;
@@ -151,8 +156,8 @@ public class Config {
     }
 
     public float getNoiseIntensity(Material material) {
-        if(items.contains("items." + material + ".noise_intensity")) {
-            return (float) items.getDouble("items." + material.toString().toLowerCase() + ".noise_intensity");
+        if(items.contains("items." + material + ".noise-intensity")) {
+            return (float) items.getDouble("items." + material.toString().toLowerCase() + ".noise-intensity");
         }
         return 1;
     }

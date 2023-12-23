@@ -9,7 +9,7 @@ database:
   # Use -1 to disable (Keep all trades logged).
   days-until-history-removed: 60
 
-price_options:
+price-options:
   # Set limits on the minimum and maximum prices.
   limits:
     low: 0.001
@@ -18,7 +18,7 @@ price_options:
   noise:
     enabled: true
 
-market_control:
+market-control:
   # Although taxation gets applied for buying and selling actions separately, the total tax paid is the same regardless of how it is split
   # The spread is determined by the deviation in both actions. In the default case, it is 6% for selling and 4% for buying, resulting in a total spread of 10%.
 
@@ -31,7 +31,7 @@ market_control:
     # 4% taxation when players buy items.
     buy: 0.04
   # Do players need the permission "nascraft.market" to operate directly with commands?
-  market_permission: true
+  market-permission: true
 
 commands:
   # Available commands: sell, sellall, sellhand
@@ -42,18 +42,21 @@ commands:
 
 # FEATURE IN BETA AS OF ${project.version}
 # Use with caution.
-discord_bot:
+discord-bot:
   enabled: false
-  # Available methods: NATIVE
+  # Available methods: NATIVE, DISCORDSRV
   link-method: 'NATIVE'
   token: 'TOKEN-ID'
   channel: 'TEXTCHANNEL-ID'
+  # Role requiered to execute admin commands through discord.
+  # Current commands: /stop, /resume, /seeinv [ID], /seebal [ID]
+  admin-role-id: 'ROLE-ID'
   # Default size of discord's virtual inventories.
-  default_inventory: 3
+  default-inventory: 5
   # Formula to calculate the price of then next slot. slot_price_factor * #slot + slot_price_base = price
-  # For example, to buy the slot nº6 the price will be (1000 * 6) + 100 = 6100$
-  slot_price_factor: 1000
-  slot_price_base: 100
+  # For example, to buy the slot nº6 the price will be (1000 * 6) + 10000 = 16000$
+  slot-price-factor: 1000
+  slot-price-base: 10000
 
 # Verify whether the AdvancedGUI's layout is present, and if it is not, place it in the layout folder of AdvancedGUI.
-auto_resources_injection: true
+auto-resources-injection: true

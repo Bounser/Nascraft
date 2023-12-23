@@ -1,5 +1,6 @@
 package me.bounser.nascraft.discord;
 
+import github.scarsz.discordsrv.DiscordSRV;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
@@ -197,23 +198,46 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "link":
 
-                if (LinkManager.getInstance().getUUID(event.getUser().getId()) == null) {
+                switch (LinkManager.getInstance().getLinkingMethod()) {
 
-                    event.reply(":link: To be able to interact with the market you have to link your minecraft and discord's account." +
-                            "\nLink your account using ``/link " + LinkManager.getInstance().startLinkingProcess(event.getUser().getId()) + "`` in-game!")
-                            .setEphemeral(true)
-                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    case DISCORDSRV:
 
-                } else {
+                        if (DiscordSRV.getPlugin().getAccountLinkManager().getUuid(event.getUser().getId()) == null) {
 
-                    event.reply(":link: You have your account linked with the user: ``" + SQLite.getInstance().getNickname(event.getUser().getId()) + "``")
-                            .setEphemeral(true)
-                            .addActionRow(Button.danger("unlink", "Unlink account"))
-                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                            event.reply(":link: To be able to interact with the market you have to link your minecraft and discord's account." +
+                                            "\nTo start the process use ``/discord link`` in-game!")
+                                    .setEphemeral(true)
+                                    .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
 
+                        } else {
+
+                            event.reply(":link: You have your account linked with the user: ``" + DiscordSRV.getPlugin().getAccountLinkManager().getUuid(event.getUser().getId()) + "``")
+                                    .setEphemeral(true)
+                                    .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
+                        }
+
+                        return;
+
+                    case NATIVE:
+
+                        if (LinkManager.getInstance().getUUID(event.getUser().getId()) == null) {
+
+                            event.reply(":link: To be able to interact with the market you have to link your minecraft and discord's account." +
+                                            "\nLink your account using ``/link " + LinkManager.getInstance().startLinkingProcess(event.getUser().getId()) + "`` in-game!")
+                                    .setEphemeral(true)
+                                    .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
+                        } else {
+
+                            event.reply(":link: You have your account linked with the user: ``" + SQLite.getInstance().getNickname(event.getUser().getId()) + "``")
+                                    .setEphemeral(true)
+                                    .addActionRow(Button.danger("unlink", "Unlink account"))
+                                    .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
+                        }
+                        return;
                 }
-
-                return;
 
             case "unlink":
 
@@ -309,10 +333,22 @@ public class DiscordButtons extends ListenerAdapter {
 
         if (LinkManager.getInstance().getUUID(event.getUser().getId()) == null) {
 
-            event.reply(":link: Link your account using ``/link " + LinkManager.getInstance().startLinkingProcess(event.getUser().getId()) + "`` in-game!")
-                    .setEphemeral(true)
-                    .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
-            return;
+            switch (LinkManager.getInstance().getLinkingMethod()) {
+
+                case DISCORDSRV:
+                    event.reply(":link: Use ``/link `` in-game to start the linking process!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    return;
+
+
+                case NATIVE:
+                    event.reply(":link: Link your account using ``/link " + LinkManager.getInstance().startLinkingProcess(event.getUser().getId()) + "`` in-game!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    return;
+
+            }
         }
 
         UUID uuid = LinkManager.getInstance().getUUID(event.getUser().getId());

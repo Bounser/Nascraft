@@ -1,6 +1,8 @@
 package me.bounser.nascraft.discord.linking;
 
+import github.scarsz.discordsrv.DiscordSRV;
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.database.SQLite;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -17,28 +19,60 @@ public class LinkManager {
 
     private static LinkManager instance;
 
+    private final LinkingMethod linkingMethod;
+
     public static LinkManager getInstance() { return instance == null ? instance = new LinkManager() : instance; }
 
-    public String getUserDiscordID(UUID uuid) { return SQLite.getInstance().getUserId(uuid); }
+    private LinkManager () { linkingMethod = Config.getInstance().getLinkingMethod(); }
+
+    public String getUserDiscordID(UUID uuid) {
+
+        switch (linkingMethod) {
+
+            case DISCORDSRV:
+
+                if (DiscordSRV.getPlugin().getAccountLinkManager().isInCache(uuid)) {
+                    return DiscordSRV.getPlugin().getAccountLinkManager().getDiscordIdFromCache(uuid);
+                }
+                return DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(uuid);
+
+            case NATIVE:
+                return SQLite.getInstance().getUserId(uuid);
+
+            default: return null;
+        }
+    }
 
     public UUID getUUID(String userId) {
 
-        if (userToUUID.containsKey(userId)) {
+        switch (linkingMethod) {
 
-            return userToUUID.get(userId);
+            case DISCORDSRV:
 
-        } else {
+                if (DiscordSRV.getPlugin().getAccountLinkManager().isInCache(userId)) {
+                    return DiscordSRV.getPlugin().getAccountLinkManager().getUuidFromCache(userId);
+                }
+                return DiscordSRV.getPlugin().getAccountLinkManager().getUuid(userId);
 
-            UUID uuid = SQLite.getInstance().getUUID(userId);
+            case NATIVE:
 
-            if (uuid != null) {
-                userToUUID.put(userId, uuid);
+                if (userToUUID.containsKey(userId)) {
 
-                return uuid;
-            }
+                    return userToUUID.get(userId);
+
+                } else {
+
+                    UUID uuid = SQLite.getInstance().getUUID(userId);
+
+                    if (uuid != null) {
+                        userToUUID.put(userId, uuid);
+
+                        return uuid;
+                    }
+                }
+
+            default: return null;
         }
-
-        return null;
     }
 
     public boolean codeExists(int code) { return confirmingCodes.containsKey(code); }
@@ -92,18 +126,31 @@ public class LinkManager {
 
     public boolean unlink(String userId) {
 
-        if (!userToUUID.containsKey(userId)) {
-            return false;
+        switch (linkingMethod) {
+
+            case DISCORDSRV:
+
+                if (DiscordSRV.getPlugin().getAccountLinkManager().getUuid(userId) != null) return false;
+
+                DiscordSRV.getPlugin().getAccountLinkManager().unlink(userId); return true;
+
+            case NATIVE:
+                if (!userToUUID.containsKey(userId)) {
+                    return false;
+                }
+
+                SQLite.getInstance().removeLink(userId);
+
+                Player player = Bukkit.getPlayer(userToUUID.get(userId));
+                if (player != null && player.getOpenInventory().getTitle().equals("Discord Inventory"))
+                    Bukkit.getScheduler().runTask(Nascraft.getInstance(), () -> player.closeInventory());
+
+                userToUUID.remove(userId);
         }
-
-        SQLite.getInstance().removeLink(userId);
-
-        Player player = Bukkit.getPlayer(userToUUID.get(userId));
-        if (player != null && player.getOpenInventory().getTitle().equals("Discord Inventory"))
-            Bukkit.getScheduler().runTask(Nascraft.getInstance(), () -> player.closeInventory());
-
-        userToUUID.remove(userId);
 
         return true;
     }
+
+    public LinkingMethod getLinkingMethod() { return linkingMethod; }
+
 }

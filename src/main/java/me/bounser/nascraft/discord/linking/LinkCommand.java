@@ -1,19 +1,15 @@
 package me.bounser.nascraft.discord.linking;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.DiscordBot;
-import net.dv8tion.jda.api.entities.User;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Random;
 
 public class LinkCommand implements CommandExecutor {
 

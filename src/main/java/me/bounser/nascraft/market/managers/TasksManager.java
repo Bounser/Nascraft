@@ -50,7 +50,8 @@ public class TasksManager {
 
             MarketManager.getInstance().updateMarketChange1h(allChanges/MarketManager.getInstance().getAllItems().size());
 
-            if (GuiWallManager.getInstance().getActiveInstances() != null)
+            if (Bukkit.getPluginManager().getPlugin("AdvancedGUI") != null &&
+                    GuiWallManager.getInstance().getActiveInstances() != null)
 
                 for (GuiWallInstance instance : GuiWallManager.getInstance().getActiveInstances()) {
 

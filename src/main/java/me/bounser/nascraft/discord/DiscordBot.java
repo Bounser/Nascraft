@@ -21,15 +21,12 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.CommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
-import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.dv8tion.jda.internal.requests.restaction.interactions.ReplyCallbackActionImpl;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -119,11 +116,6 @@ public class DiscordBot {
             componentList2.add(Button.secondary("inventory", "Inventory").withEmoji(Emoji.fromFormatted("U+1F392")));
             componentList2.add(Button.secondary("balance", "Balance").withEmoji(Emoji.fromFormatted("U+1FA99")));
             componentList2.add(Button.secondary("manager", "Brokers").withEmoji(Emoji.fromFormatted("U+1F4BC")).asDisabled());
-            //componentList2.add(Button.secondary("alerts", "Alerts").withEmoji(Emoji.fromFormatted("U+1F514")));
-
-            //componentList2.add(Button.secondary("balance", "Check balance").withEmoji(Emoji.fromFormatted("U+1FA99")));
-            //componentList2.add(Button.secondary("limit", "Limit orders").withEmoji(Emoji.fromFormatted("U+1F3AF")));
-            //componentList2.add(Button.secondary("info", "Information").withEmoji(Emoji.fromFormatted("U+2139")));
 
             textChannel.sendMessageEmbeds(getEmbedded())
                     .addFiles(FileUpload.fromData(outputfile, "image.png"))
@@ -242,13 +234,13 @@ public class DiscordBot {
             throw new RuntimeException(e);
         }
 
-        /*List<ItemComponent> timeComponents = new ArrayList<>();
+        List<ItemComponent> timeComponents = new ArrayList<>();
 
         timeComponents.add(Button.secondary("time" + item.getMaterial(), "Change Time: ").asDisabled());
         timeComponents.add(Button.secondary("time1" + item.getMaterial(), "1 Hour"));
         timeComponents.add(Button.secondary("time2" + item.getMaterial(), "1 Day"));
         timeComponents.add(Button.secondary("time3" + item.getMaterial(), "1 Month"));
-        timeComponents.add(Button.secondary("time4" + item.getMaterial(), "1 Year"));*/
+        timeComponents.add(Button.secondary("time4" + item.getMaterial(), "1 Year"));
 
         List<ItemComponent> componentList = new ArrayList<>();
 
@@ -276,7 +268,7 @@ public class DiscordBot {
             mEvent.replyEmbeds(embedBuilder.build())
                     .addFiles(FileUpload.fromData(outputfile, "image.png"))
                     .setEphemeral(true)
-                    //.addActionRow(timeComponents)
+                    .addActionRow(timeComponents)
                     .addActionRow(componentList)
                     .queue(message -> {
 

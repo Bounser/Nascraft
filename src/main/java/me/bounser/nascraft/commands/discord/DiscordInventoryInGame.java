@@ -60,12 +60,12 @@ public class DiscordInventoryInGame implements Listener {
             Item item = MarketManager.getInstance().getItem(material.toString());
             int quantity = discordInventory.getContent().get(item);
 
-            if (quantity <= 64) {
+            if (quantity <= material.getMaxStackSize()) {
                 discordInventory.removeItem(item, quantity);
                 event.getWhoClicked().setItemOnCursor(new ItemStack(material, quantity));
             } else {
-                discordInventory.removeItem(item, 64);
-                event.getWhoClicked().setItemOnCursor(new ItemStack(material, 64));
+                discordInventory.removeItem(item, material.getMaxStackSize());
+                event.getWhoClicked().setItemOnCursor(new ItemStack(material, material.getMaxStackSize()));
             }
             return;
         }
