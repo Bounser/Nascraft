@@ -1,6 +1,5 @@
 package me.bounser.nascraft.discord.images;
 
-import me.bounser.nascraft.advancedgui.Images;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.Item;
@@ -65,7 +64,7 @@ public class ItemAdvancedImage {
         }
         graphics.drawPolyline(xPositions, smoothPath, 60);
 
-        graphics.drawImage(Images.getInstance().getImage(item.getMaterial(), 90, 90, false), 18, 3*128+15, 90, 90, null);
+        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial()), 18, 3*128+15, 90, 90, null);
         graphics.setFont(new Font("Arial", Font.BOLD, 41));
         graphics.setColor(new Color(250, 250, 250));
         graphics.drawString(item.getName() + " | " + Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC), 135, 3*128+75);

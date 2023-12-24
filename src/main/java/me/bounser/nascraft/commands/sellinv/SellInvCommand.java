@@ -34,7 +34,7 @@ public class SellInvCommand implements CommandExecutor {
         Player player = (Player) sender;
 
         if (!player.hasPermission("nascraft.sellinv")) {
-            player.sendMessage(Lang.get().message(Message.NO_PERMISSION));
+            Lang.get().message(player, Message.NO_PERMISSION);
             return false;
         }
 

@@ -1,7 +1,6 @@
 package me.bounser.nascraft.discord.images;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.advancedgui.Images;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
@@ -62,7 +61,7 @@ public class InventoryImage {
                     if (items.size() >= slot) {
                         Item item = items.get(slot-1);
 
-                        graphics.drawImage(Images.getInstance().getImage(item.getMaterial(), 63, 63, false), i*79+40, j*81+124, 63, 63, null);
+                        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial()), i*79+40, j*81+124, 63, 63, null);
 
                         graphics.setFont(new Font("Garamond", Font.BOLD, 26));
                         graphics.setColor(new Color(0, 0, 0));

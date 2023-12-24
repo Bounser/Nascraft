@@ -89,15 +89,15 @@ public class Price {
 
         if (support != 0 && value < support && Math.random() > 0.8) {
 
-            stock -= (8 - 12 * Math.random()) * noiseIntensity;
+            stock -= (float) ((8 - 12 * Math.random()) * noiseIntensity);
 
         } else if (resistance != 0 && value > resistance && Math.random() > 0.8) {
 
-            stock += (8 - 12 * Math.random()) * noiseIntensity;
+            stock += (float) ((8 - 12 * Math.random()) * noiseIntensity);
 
         } else {
 
-            stock += (10 - 20 * Math.random()) * noiseIntensity;
+            stock += (float) ((10 - 20 * Math.random()) * noiseIntensity);
 
         }
         updateValue();

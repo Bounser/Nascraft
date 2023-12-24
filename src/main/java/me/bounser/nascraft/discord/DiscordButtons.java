@@ -468,14 +468,13 @@ public class DiscordButtons extends ListenerAdapter {
 
                 String history = ":scroll: **Trade history:** Page " +  (1 + offset)  + " (" + (trades.size() == 16 ? 15 : trades.size()) + "/15)\n";
 
-                for (int i = 0; i < trades.size()-1; i++) {
+                for (Trade trade : trades) {
 
-                    Trade trade = trades.get(i);
                     if (trade.getItem() != null) {
                         if (trade.isBuy())
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **BUY " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** for **-" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **BUY " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **-" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
                         else
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **SELL " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** for **+" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **SELL " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **+" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
 
                         if (trade.throughDiscord()) {
                             history = history + " (Discord)";

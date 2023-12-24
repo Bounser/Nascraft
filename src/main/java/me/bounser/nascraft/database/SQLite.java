@@ -6,7 +6,6 @@ import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.brokers.BrokerType;
 import me.bounser.nascraft.market.managers.BrokersManager;
 import me.bounser.nascraft.market.managers.MarketManager;
-import me.bounser.nascraft.market.managers.TasksManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 
@@ -41,44 +40,50 @@ public class SQLite {
         }
 
         createTable(connection, "items",
-                    "material TEXT PRIMARY KEY, " +
-                    "lastprice DOUBLE, " +
-                    "lowest DOUBLE, " +
-                    "highest DOUBLE, " +
-                    "stock DOUBLE DEFAULT 0, " +
-                    "taxes DOUBLE");
+                "material TEXT PRIMARY KEY, " +
+                        "lastprice DOUBLE, " +
+                        "lowest DOUBLE, " +
+                        "highest DOUBLE, " +
+                        "stock DOUBLE DEFAULT 0, " +
+                        "taxes DOUBLE");
 
-            createTable(connection, "prices",
-                    "material TEXT PRIMARY KEY," +
-                            "date TEXT," +
-                            "dayprices TEXT," + // 48
-                            "monthprices TEXT," + // 30
-                            "yearprices TEXT");
+        createTable(connection, "prices",
+                "material TEXT PRIMARY KEY," +
+                        "date TEXT," +
+                        "dayprices TEXT," + // 48
+                        "monthprices TEXT," + // 30
+                        "yearprices TEXT");
 
-            createTable(connection, "inventories",
-                    "uuid VARCHAR(36) NOT NULL," +
-                            "material TEXT," +
-                            "amount INT");
+        createTable(connection, "prices_history",
+                "material TEXT  ," +
+                        "day INT," +
+                        "price DOUBLE," +
+                        "PRIMARY KEY (material, day)");
 
-            createTable(connection, "capacities",
-                    "uuid VARCHAR(36) PRIMARY KEY," +
-                            "capacity INT");
+        createTable(connection, "inventories",
+                "uuid VARCHAR(36) NOT NULL," +
+                        "material TEXT," +
+                        "amount INT");
 
-            createTable(connection, "discord_links",
-                    "userid VARCHAR(18) NOT NULL," +
-                            "uuid VARCHAR(36) NOT NULL," +
-                            "nickname TEXT NOT NULL");
+        createTable(connection, "capacities",
+                "uuid VARCHAR(36) PRIMARY KEY," +
+                        "capacity INT");
 
-            createTable(connection, "trade_log",
-                    "id INTEGER PRIMARY KEY, " +
-                            "uuid VARCHAR(36) NOT NULL," +
-                            "day INT NOT NULL," +
-                            "date TEXT NOT NULL," +
-                            "material TEXT NOT NULL," +
-                            "amount INT NOT NULL," +
-                            "value TEXT NOT NULL," +
-                            "buy INT NOT NULL, " +
-                            "discord INT NOT NULL");
+        createTable(connection, "discord_links",
+                "userid VARCHAR(18) NOT NULL," +
+                        "uuid VARCHAR(36) NOT NULL," +
+                        "nickname TEXT NOT NULL");
+
+        createTable(connection, "trade_log",
+                "id INTEGER PRIMARY KEY, " +
+                        "uuid VARCHAR(36) NOT NULL," +
+                        "day INT NOT NULL," +
+                        "date TEXT NOT NULL," +
+                        "material TEXT NOT NULL," +
+                        "amount INT NOT NULL," +
+                        "value TEXT NOT NULL," +
+                        "buy INT NOT NULL, " +
+                        "discord INT NOT NULL");
 
         createTable(connection, "broker_shares",
                 "id INTEGER PRIMARY KEY, " +
@@ -132,6 +137,7 @@ public class SQLite {
 
     public void saveEverything() {
         for (Item item : MarketManager.getInstance().getAllItems()) {
+            saveHistoryPrices(item);
             saveItem(item);
             savePrices(item);
         }
@@ -209,6 +215,35 @@ public class SQLite {
             preparedStatement.setString(5, item.getMaterial().toString());
 
             preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void saveHistoryPrices(Item item) {
+
+        try {
+            String select = "SELECT price FROM prices_history WHERE material=? AND day=?;";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(select);
+
+            preparedStatement.setString(1, item.getMaterial().toString());
+            preparedStatement.setInt(2, getDays());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                String insert = "INSERT INTO prices_history (material, day, price) VALUES (?,?,?);";
+
+                PreparedStatement insertStatement = connection.prepareStatement(insert);
+
+                insertStatement.setString(1, item.getMaterial().toString());
+                insertStatement.setInt(2, getDays());
+                insertStatement.setDouble(3, item.getPrice().getValue());
+
+                insertStatement.executeUpdate();
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -660,8 +695,7 @@ public class SQLite {
     }
 
     public void shutdown() {
-        TasksManager.getInstance().save();
-
+        saveEverything();
         try {
             if (connection != null) connection.close();
         } catch (SQLException e) {

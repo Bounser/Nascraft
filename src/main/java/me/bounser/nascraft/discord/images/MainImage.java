@@ -1,6 +1,5 @@
 package me.bounser.nascraft.discord.images;
 
-import me.bounser.nascraft.advancedgui.Images;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
@@ -139,13 +138,13 @@ public class MainImage {
         graphics.drawRoundRect(offset[0]+1, offset[1]+1, 298, 118, 15, 15);
         graphics.drawRoundRect(offset[0]+2, offset[1]+2, 296, 116, 15, 15);
 
-        graphics.drawImage(Images.getInstance().getImage(item.getMaterial(), 48, 48, false), offset[0]+2, offset[1], 48, 48, null);
+        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial()), offset[0]+2, offset[1], 48, 48, null);
 
     }
 
     public static void setItem(Item item, int[] offset, int intraOffset, Graphics graphics, Color color) {
 
-        graphics.drawImage(Images.getInstance().getImage(item.getMaterial(), 45, 45, false), offset[0]+7+intraOffset, offset[1], 45, 45, null);
+        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial()), offset[0]+7+intraOffset, offset[1], 45, 45, null);
 
         graphics.setColor(color);
         graphics.drawString(item.getPlotData().getChange(), 15 - Math.round(item.getPlotData().getChange().getBytes().length) + offset[0] + intraOffset, offset[1]+60);
