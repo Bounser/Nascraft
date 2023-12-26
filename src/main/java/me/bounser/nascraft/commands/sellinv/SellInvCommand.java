@@ -1,7 +1,6 @@
 package me.bounser.nascraft.commands.sellinv;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import org.bukkit.Bukkit;
@@ -14,28 +13,45 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.profile.PlayerProfile;
+import org.bukkit.profile.PlayerTextures;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
 
 public class SellInvCommand implements CommandExecutor {
-
-    private Config lang = Config.getInstance();
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
 
+        Player player;
 
         if(!(sender instanceof Player)) {
-            Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console.");
-            return false;
-        }
 
-        Player player = (Player) sender;
+            if (args.length != 1) {
+                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Wrong usage of command. /nsell [playerName]");
+                return false;
+            }
 
-        if (!player.hasPermission("nascraft.sellinv")) {
-            Lang.get().message(player, Message.NO_PERMISSION);
-            return false;
+            player = Bukkit.getPlayer(args[0]);
+
+            if (player == null) {
+                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Player not found");
+                return false;
+            }
+
+        } else {
+            player = (Player) sender;
+
+            if (!player.hasPermission("nascraft.sellinv")) {
+                Lang.get().message(player, Message.NO_PERMISSION);
+                return false;
+            }
         }
 
         Inventory inventory = Bukkit.createInventory(player, 45, Lang.get().message(Message.SELL_TITLE));
@@ -43,6 +59,7 @@ public class SellInvCommand implements CommandExecutor {
         insertFillingPanes(inventory);
         insertSellButton(inventory);
         insertCloseButton(inventory);
+        insertHelpHead(inventory);
 
         player.openInventory(inventory);
         return false;
@@ -81,4 +98,32 @@ public class SellInvCommand implements CommandExecutor {
         inventory.setItem(8, closeButton);
     }
 
+    public void insertHelpHead(Inventory inventory) {
+
+        String TEXTURE = "bc8ea1f51f253ff5142ca11ae45193a4ad8c3ab5e9c6eec8ba7a4fcb7bac40";
+
+        PlayerProfile profile = getProfile(TEXTURE);
+        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        SkullMeta meta = (SkullMeta) head.getItemMeta();
+        meta.setDisplayName(Lang.get().message(Message.SELL_HELP_TITLE));
+        meta.setLore(Arrays.asList(Lang.get().message(Message.SELL_HELP_LORE).split("\\n")));
+        meta.setOwnerProfile(profile);
+        head.setItemMeta(meta);
+
+        inventory.setItem(4, head);
+    }
+
+    private static PlayerProfile getProfile(String texture) {
+        PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
+        PlayerTextures textures = profile.getTextures();
+        URL urlObject;
+        try {
+            urlObject = new URL("https://textures.minecraft.net/texture/" + texture);
+        } catch (MalformedURLException exception) {
+            throw new RuntimeException("Invalid URL", exception);
+        }
+        textures.setSkin(urlObject);
+        profile.setTextures(textures);
+        return profile;
+    }
 }

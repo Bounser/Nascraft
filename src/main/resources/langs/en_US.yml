@@ -42,6 +42,8 @@ sell_remove_item: "&cClick to remove from sell list"
 sell_action_message: "<gradient:#FF00CD:#DA58FF>You just sold <bold><light_purple>[WORTH]</light_purple></bold> worth of items</gradient>"
 sell_item_not_allowed: "<gradient:#FB6363:#C4B3FD>That's not a valid item!</gradient>"
 sell_full: "<gradient:#FB6363:#C4B3FD>Sell inventory is full!</gradient>"
+sell_help_title: "&dHow does this work?"
+sell_help_lore: " \n&7Select all items you want to sell.\n \n&7Estimated value isn't guaranteed and will\n&7change once the operation is finished."
 # sellhand
 sellhand_invalid: "<gradient:#FF0000:#FF7E7E:#FF0000>Hold a valid item!</gradient>"
 sellhand_error_hand: "<gradient:#FF0000:#FF7E7E:#FF0000>Error! Don't change your hand before confirming</gradient>"
