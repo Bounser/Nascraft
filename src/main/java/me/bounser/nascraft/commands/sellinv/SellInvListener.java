@@ -5,7 +5,7 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.formatter.Style;
 import org.bukkit.Material;
@@ -42,44 +42,46 @@ public class SellInvListener implements Listener {
             if (itemClicked == null) return;
 
             if (playerItems.get(player) != null && playerItems.get(player).size() >= 27) {
-                player.sendMessage(Lang.get().message(Message.SELL_FULL));
+                Lang.get().message(player, Message.SELL_FULL);
                 return;
             }
 
-            if (MarketManager.getInstance().getAllMaterials().contains(itemClicked.getType())){
-                for (Material material: MarketManager.getInstance().getAllMaterials()) {
-                    if (material == itemClicked.getType()) {
+            if (isValid(itemClicked)) {
 
-                        List<ItemStack> items = playerItems.get(player);
+                List<ItemStack> items = playerItems.get(player);
 
-                        if (items == null) items = new ArrayList<>();
+                if (items == null) items = new ArrayList<>();
 
-                        ItemMeta itemMeta = event.getCurrentItem().getItemMeta();
+                if (event.isShiftClick()) {
 
-                        if(itemMeta.hasDisplayName() || itemMeta.hasEnchants() || itemMeta.hasLore() || itemMeta.hasAttributeModifiers() || itemMeta.hasCustomModelData()) {
-                            Lang.get().message(player, Message.SELL_ITEM_NOT_ALLOWED);
-                            return;
+                    for (int i = 0; i < event.getClickedInventory().getSize(); i++) {
+                        ItemStack itemStack = event.getClickedInventory().getItem(i);
+
+                        if (itemStack != null && itemStack.getType().equals(itemClicked.getType()) && isValid(itemStack)) {
+
+                            items.add(itemStack);
+                            event.getClickedInventory().setItem(i, new ItemStack(Material.AIR));
+
                         }
-
-                        items.add(event.getCurrentItem());
-
-                        playerItems.put(player, items);
-                        event.getClickedInventory().setItem(event.getSlot(), new ItemStack(Material.AIR));
-
-                        renderInv(event.getView().getTopInventory(), player);
+                        if (items.size() >= 27) break;
                     }
+
+                    playerItems.put(player, items);
+
+                } else {
+                    items.add(event.getCurrentItem());
+
+                    playerItems.put(player, items);
+                    event.getClickedInventory().setItem(event.getSlot(), new ItemStack(Material.AIR));
                 }
+
+                renderInv(event.getView().getTopInventory(), player);
                 return;
             }
 
             Lang.get().message(player, Message.SELL_ITEM_NOT_ALLOWED);
 
         } else {
-
-            if (event.isShiftClick()) {
-                event.setCancelled(true);
-                return;
-            }
 
             switch (event.getRawSlot()) {
 
@@ -111,7 +113,7 @@ public class SellInvListener implements Listener {
 
                 default:
 
-                    if (9 > event.getRawSlot() && 35 < event.getRawSlot()) return;
+                    if (8 >= event.getRawSlot() || 36 <= event.getRawSlot()) return;
 
                     List<ItemStack> items = playerItems.get(player);
 
@@ -223,4 +225,17 @@ public class SellInvListener implements Listener {
 
         return  RoundUtils.round(totalValue);
     }
+
+    public boolean isValid(ItemStack itemStack) {
+
+        if (!MarketManager.getInstance().getAllMaterials().contains(itemStack.getType())) return false;
+
+        ItemMeta itemMeta = itemStack.getItemMeta();
+
+        if(itemMeta.hasDisplayName() || itemMeta.hasEnchants() || itemMeta.hasLore() || itemMeta.hasAttributeModifiers() || itemMeta.hasCustomModelData()) return false;
+
+        return true;
+
+    }
+
 }
