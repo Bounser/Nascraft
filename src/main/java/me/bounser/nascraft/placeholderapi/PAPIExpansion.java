@@ -1,10 +1,11 @@
 package me.bounser.nascraft.placeholderapi;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.managers.MarketManager;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -63,15 +64,15 @@ public class PAPIExpansion extends PlaceholderExpansion {
             item = MarketManager.getInstance().getItem(params.substring(params.indexOf("_") + 1));
         }
 
-        if (item == null) return "0.00";
+        if (item == null) return "0";
 
         TimeSpan timeSpan = null;
 
         switch (params.substring(0, params.indexOf("_")).toLowerCase()) {
 
-            case "buyprice": return String.valueOf(RoundUtils.round(item.getPrice().getBuyPrice()*quantity));
-            case "sellprice": return String.valueOf(RoundUtils.round(item.getPrice().getSellPrice()*quantity));
-            case "price": return String.valueOf(RoundUtils.round(item.getPrice().getValue()*quantity));
+            case "buyprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getBuyPrice()*quantity, Config.getInstance().getPlaceholderPrecission()));
+            case "sellprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getSellPrice()*quantity, Config.getInstance().getPlaceholderPrecission()));
+            case "price": return String.valueOf(RoundUtils.roundTo(item.getPrice().getValue()*quantity, Config.getInstance().getPlaceholderPrecission()));
             case "stock": return String.valueOf(item.getPrice().getStock());
             case "change":
 
