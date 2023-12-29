@@ -4,7 +4,8 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
 import me.bounser.nascraft.market.brokers.BrokerType;
 import me.bounser.nascraft.market.resources.Category;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.managers.MarketManager;
+import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -51,28 +52,38 @@ public class Config {
 
     public String getSelectedLanguage() { return config.getString("language"); }
 
-    public boolean getPriceNoise() {
-        return config.getBoolean("price-options.noise.enabled");
-    }
-
-    public float getTaxBuy() {
-        return 1 + (float) config.getDouble("market-control.taxation.buy");
-    }
-
-    public float getTaxSell() {
-        return 1 - (float) config.getDouble("market-control.taxation.sell");
-    }
-
     public float[] getLimits() {
         float[] limit = new float[2];
-            limit[0] = (float) config.getDouble("price-options.limits.low");
-            limit[1] = (float) config.getDouble("price-options.limits.high");
-            return limit;
+        limit[0] = (float) config.getDouble("price-options.limits.low");
+        limit[1] = (float) config.getDouble("price-options.limits.high");
+        return limit;
+    }
+
+    public boolean getPriceNoise() { return config.getBoolean("price-options.noise.enabled"); }
+
+    public float getTaxBuy(Item item) {
+
+        if (items.contains("items." + item.getMaterial().toString().toLowerCase() + ".tax.buy")) {
+            return 1 + (float) items.getDouble("items." + item.getMaterial().toString().toLowerCase() + ".tax.buy");
+        } else {
+            return 1 + (float) config.getDouble("market-control.taxation.buy");
+        }
+    }
+
+    public float getTaxSell(Item item) {
+
+        if (items.contains("items." + item.getMaterial().toString().toLowerCase() + ".tax.sell")) {
+            return 1 + (float) items.getDouble("items." + item.getMaterial().toString().toLowerCase() + ".tax.sell");
+        } else {
+            return 1 - (float) config.getDouble("market-control.taxation.sell");
+        }
     }
 
     public boolean getMarketPermissionRequirement() { return config.getBoolean("market-control.market-permission"); }
 
     public List<String> getCommands() { return config.getStringList("commands.enabled"); }
+
+    public int getPlaceholderPrecission() { return config.getInt("placeholders.decimal-precision"); }
 
     public boolean getDiscordEnabled() { return config.getBoolean("discord-bot.enabled"); }
 
@@ -114,52 +125,52 @@ public class Config {
 
         Set<String> section = null;
 
-        if(items.getConfigurationSection("items." + material + ".child.") != null) {
-            section = items.getConfigurationSection("items." + material + ".child.").getKeys(false);
+        if(items.getConfigurationSection("items." + material.toString().toLowerCase() + ".child.") != null) {
+            section = items.getConfigurationSection("items." + material.toString().toLowerCase() + ".child.").getKeys(false);
         }
 
         if (section == null ||section.size() == 0) return childs;
 
         for (String childMat : section){
-            childs.put(Material.getMaterial(childMat), (float) items.getDouble("items." + material + ".child." + childMat + ".multiplier"));
+            childs.put(Material.getMaterial(childMat), (float) items.getDouble("items." + material.toString().toLowerCase() + ".child." + childMat + ".multiplier"));
         }
         return childs;
     }
 
     public String getAlias(Material material) {
-        if(!items.contains("items." + material + ".alias")) {
+        if(!items.contains("items." + material.toString().toLowerCase() + ".alias")) {
             return (Character.toUpperCase(material.toString().toLowerCase().charAt(0)) + material.toString().toLowerCase().substring(1)).replace("_", " ");
         } else {
-            return items.getString("items." + material + ".alias");
+            return items.getString("items." + material.toString().toLowerCase() + ".alias");
         }
     }
 
     public float getSupport(Material material) {
-        if(items.contains("items." + material + ".support")) {
+        if(items.contains("items." + material.toString().toLowerCase() + ".support")) {
             return (float) items.getDouble("items." + material.toString().toLowerCase() + ".support");
         }
         return 0;
     }
 
     public float getResistance(Material material) {
-        if(items.contains("items." + material + ".resistance")) {
+        if(items.contains("items." + material.toString().toLowerCase() + ".resistance")) {
             return (float) items.getDouble("items." + material.toString().toLowerCase() + ".resistance");
         }
         return 0;
     }
 
     public float getElasticity(Material material) {
-        if(items.contains("items." + material + ".elasticity")) {
+        if(items.contains("items." + material.toString().toLowerCase() + ".elasticity")) {
             return (float) items.getDouble("items." + material.toString().toLowerCase() + ".elasticity");
         }
-        return 1;
+        return (float) config.getDouble("price-options.default-elasticity");
     }
 
     public float getNoiseIntensity(Material material) {
-        if(items.contains("items." + material + ".noise-intensity")) {
+        if(items.contains("items." + material.toString().toLowerCase() + ".noise-intensity")) {
             return (float) items.getDouble("items." + material.toString().toLowerCase() + ".noise-intensity");
         }
-        return 1;
+        return (float) config.getDouble("price-options.noise.default-intensity");
     }
 
     // Categories:

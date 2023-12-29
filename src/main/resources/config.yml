@@ -10,13 +10,17 @@ database:
   days-until-history-removed: 60
 
 price-options:
-  # Set limits on the minimum and maximum prices.
+  # Set (hard) limits on the minimum and maximum prices.
   limits:
     low: 0.001
     high: 9999999
   # With noise enabled, prices will vary over time in a pseudo-random manner.
   noise:
     enabled: true
+    # Change the default intensity of the noise with this factor.
+    default-intensity: 1
+  # The default elasticity applies to all items unless otherwise explicitly stated at items.yml.
+  default-elasticity: 1
 
 market-control:
   # Although taxation gets applied for buying and selling actions separately, the total tax paid is the same regardless of how it is split
@@ -25,6 +29,8 @@ market-control:
   # To avoid strengthening the underground economy, try to keep the taxation as low as possible.
   # Heavy taxation can encourage players to trade with each other directly, bypassing intermediaries,
   # and reducing the amount of money collected from taxes and making the market less efficient.
+  #
+  # This value will be applied by default if no other tax is explicitly stated on the item at items.yml
   taxation:
     # 6% taxation when players sell items.
     sell: 0.06
@@ -39,6 +45,14 @@ commands:
     - 'sell'
     - 'sellall'
     - 'sellhand'
+
+placeholders:
+  # Number of decimals to display in prices.
+  # For instance, with a price of 2.2732:
+  # 1 -> 2.3$
+  # 2 -> 2.27$
+  # 3 -> 2.273$
+  decimal-precision: 2
 
 # FEATURE IN BETA AS OF ${project.version}
 # Use with caution.

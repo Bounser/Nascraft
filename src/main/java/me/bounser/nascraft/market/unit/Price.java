@@ -7,7 +7,8 @@ import java.util.List;
 
 public class Price {
 
-    // Current neutral price
+    private Item item;
+
     private float value;
 
     private float previousValue;
@@ -16,7 +17,6 @@ public class Price {
 
     private float stock;
 
-    // Advanced metrics
     private final float support;
     private final float resistance;
     private final float noiseIntensity;
@@ -31,7 +31,12 @@ public class Price {
     private final List<Float> dayHigh = new ArrayList<>();
     private final List<Float> dayLow = new ArrayList<>();
 
-    public Price(float initialValue, float elasticity, float support, float resistance, float noiseIntensity) {
+    private float taxBuy;
+    private float taxSell;
+
+    public Price(Item item, float initialValue, float elasticity, float support, float resistance, float noiseIntensity) {
+
+        this.item = item;
 
         value = (float) (initialValue * Math.exp(-0.0005 * elasticity * stock));
         previousValue = value;
@@ -46,28 +51,16 @@ public class Price {
         this.resistance = resistance;
         this.noiseIntensity = noiseIntensity;
         this.elasticity = elasticity;
+
+        taxBuy = Config.getInstance().getTaxBuy(item);
+        taxSell = Config.getInstance().getTaxSell(item);
     }
 
     public float getValue() { return value; }
 
-    public float getBuyPrice() {
+    public float getBuyPrice() { return value * taxBuy; }
 
-        if (value * Config.getInstance().getTaxBuy() < 0.005) {
-            return (float) (value + 0.002);
-        } else {
-            return value * Config.getInstance().getTaxBuy();
-        }
-    }
-
-    public float getSellPrice() {
-
-        if (value - value*Config.getInstance().getTaxSell() < 0.005) {
-            if (value - 0.002 <= 0) return value;
-            return (float) (value - 0.002);
-        } else {
-            return value * Config.getInstance().getTaxSell();
-        }
-    }
+    public float getSellPrice() { return value * taxSell; }
 
     public void setStock(int stock) { this.stock = stock; }
 
@@ -137,7 +130,7 @@ public class Price {
 
     public void updateValue() {
 
-        value = (float) (initialValue * Math.exp(-0.0004 * stock));
+        value = (float) (initialValue * Math.exp(-0.0005 * elasticity * stock));
         verifyChange();
         updateLimits();
 
@@ -163,5 +156,10 @@ public class Price {
         hourLow = value;
         hourHigh = value;
     }
+
+    public float getBuyTaxMultiplier() { return taxBuy; }
+    public float getSellTaxMultiplier() { return taxSell; }
+
+    public Item getItem() { return item; }
 
 }
