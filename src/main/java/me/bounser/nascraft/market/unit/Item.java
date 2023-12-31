@@ -6,7 +6,8 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.managers.MarketManager;
+import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.config.Config;
@@ -61,6 +62,7 @@ public class Item {
         this.alias = alias;
 
         this.price = new Price(
+                this,
                 Config.getInstance().getInitialPrice(material),
                 Config.getInstance().getElasticity(material),
                 Config.getInstance().getSupport(material),
@@ -117,49 +119,20 @@ public class Item {
         Player player = Bukkit.getPlayer(uuid);
         Player offlinePlayer = Bukkit.getPlayer(uuid);
 
-
         if(!MarketManager.getInstance().getActive()) { Lang.get().message(player, Message.SHOP_CLOSED); return; }
 
-        Economy econ = Nascraft.getEconomy();
-
-        if (!econ.has(player, price.getBuyPrice()*amount*childs.get(material))) {
-            if (player != null && feedback) Lang.get().message(player, Message.NOT_ENOUGH_MONEY);
-            return;
-        }
-
-        if (player != null && player.getInventory().firstEmpty() == -1) {
-            for (ItemStack is : player.getInventory()) {
-                if(is != null && is.getType().equals(material)) {
-                    if (amount > (is.getMaxStackSize() - is.getAmount())) {
-                        if (feedback) Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
-                        return;
-                    }
-                }
-            }
-        } else {
-            int itemsInInventory = 0;
-
-            if (player != null)
-                for (ItemStack content : player.getInventory().getStorageContents())
-                    if (content != null && !content.getType().equals(Material.AIR)) itemsInInventory++;
-
-            if (player != null && (36 - itemsInInventory) < (amount/material.getMaxStackSize())) {
-                if (feedback) Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
-                return;
-            }
-        }
+        if (!checkBalance(player, feedback, amount)) return;
+        if (!checkInventory(player, feedback, amount)) return;
 
         int maxSize = material.getMaxStackSize();
         int orderSize = amount / maxSize;
         int excess = amount % maxSize;
 
         float totalCost = 0;
-        float totalTaxes = 0;
 
         for (int i = 0 ; i < orderSize ; i++) {
 
-            totalCost += price.getBuyPrice()*64*childs.get(material);
-            totalTaxes += Math.abs(price.getValue()*64*childs.get(material))-totalCost;
+            totalCost += price.getBuyPrice()*maxSize*childs.get(material);
 
             price.changeStock(-maxSize);
 
@@ -169,7 +142,6 @@ public class Item {
         if (excess > 0) {
 
             totalCost += price.getBuyPrice()*excess*childs.get(material);
-            totalTaxes += Math.abs(price.getValue()*excess*childs.get(material)-totalCost);
 
             price.changeStock(-excess);
 
@@ -177,20 +149,59 @@ public class Item {
         }
 
         totalCost = RoundUtils.round(totalCost);
-        totalTaxes = RoundUtils.round(totalTaxes);
 
-        econ.withdrawPlayer(offlinePlayer, totalCost);
+        MoneyManager.getInstance().withdraw(offlinePlayer, totalCost);
 
         if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(totalCost, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
-        operations += amount;
-
-        volume += RoundUtils.round(amount*price.getValue());
-
-        collectedTaxes += totalTaxes;
+        updateInternalValues(amount,
+                amount*price.getBuyPrice(),
+                0,
+                price.getValue()*price.getBuyTaxMultiplier());
 
         SQLite.getInstance().saveTrade(uuid, this, amount, totalCost, true, false);
         MarketManager.getInstance().addOperation();
+    }
+
+    public boolean checkBalance(Player player, boolean feedback, int amount) {
+        if (!Nascraft.getEconomy().has(player, price.getBuyPrice()*amount*childs.get(material))) {
+            if (player != null && feedback) Lang.get().message(player, Message.NOT_ENOUGH_MONEY);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean checkInventory(Player player, boolean feedback, int amount) {
+
+        if (player == null) return true;
+
+        if (player.getInventory().firstEmpty() == -1) {
+
+            int untilFull = 0;
+
+            for (ItemStack is : player.getInventory()) {
+                if(is != null && is.getType().equals(material)) {
+                    untilFull += material.getMaxStackSize() - is.getAmount();
+                }
+            }
+            if (untilFull < amount) {
+                if (feedback) Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
+                return false;
+            }
+
+        } else {
+            int slotsUsed = 0;
+
+            for (ItemStack content : player.getInventory().getStorageContents())
+                if (content != null && !content.getType().equals(Material.AIR)) slotsUsed++;
+
+            if ((36 - slotsUsed) < (amount/material.getMaxStackSize())) {
+                if (feedback) Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public float sellItem(int amount, UUID uuid, boolean feedback) {
@@ -213,12 +224,10 @@ public class Item {
         int excess = amount % maxSize;
 
         float totalWorth = 0;
-        float totalTaxes = 0;
 
         for (int i = 0 ; i < orderSize ; i++) {
 
-            totalWorth += price.getSellPrice()*64*childs.get(material);
-            totalTaxes += Math.abs(price.getValue()*64*childs.get(material)-totalWorth);
+            totalWorth += price.getSellPrice()*maxSize*childs.get(material);
 
             price.changeStock(maxSize);
 
@@ -228,7 +237,6 @@ public class Item {
         if (excess > 0) {
 
             totalWorth += price.getSellPrice()*excess*childs.get(material);
-            totalTaxes += Math.abs(price.getSellPrice()*excess*childs.get(material)-totalWorth);
 
             price.changeStock(excess);
 
@@ -236,15 +244,13 @@ public class Item {
         }
 
         totalWorth = RoundUtils.round(totalWorth);
-        totalTaxes = RoundUtils.round(totalTaxes);
 
-        operations += amount;
+        updateInternalValues(amount,
+                amount*price.getSellPrice(),
+                0,
+                price.getValue()*price.getSellTaxMultiplier());
 
-        volume += RoundUtils.round(amount*price.getSellPrice());
-
-        collectedTaxes += totalTaxes;
-
-        Nascraft.getEconomy().depositPlayer(offlinePlayer, totalWorth);
+        MoneyManager.getInstance().deposit(offlinePlayer, totalWorth);
 
         if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(totalWorth, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
@@ -255,17 +261,20 @@ public class Item {
     }
 
     public void ghostBuyItem(int amount) {
-        price.changeStock(-amount);
-        volume += RoundUtils.round(amount*price.getBuyPrice());
-        operations += amount;
+        updateInternalValues(-amount, amount*price.getBuyPrice(), amount,price.getValue()*price.getBuyTaxMultiplier());
         MarketManager.getInstance().addOperation();
     }
 
     public void ghostSellItem(int amount) {
-        operations += amount;
-        volume += RoundUtils.round(amount*price.getSellPrice());
-        price.changeStock(amount);
+        updateInternalValues(amount, amount*price.getSellPrice(), amount, price.getValue()*price.getSellTaxMultiplier());
         MarketManager.getInstance().addOperation();
+    }
+
+    private void updateInternalValues(int operations, float volume, int stockChange, float taxes) {
+        this.operations += operations;
+        this.volume += RoundUtils.round(volume);
+        this.price.changeStock(stockChange);
+        this.collectedTaxes += taxes;
     }
 
     public void dailyUpdate() {
