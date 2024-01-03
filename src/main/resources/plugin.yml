@@ -44,3 +44,7 @@ commands:
     description: Discord command.
     aliases:
       - dis
+  getsellwand:
+    description: Receive a sell wand.
+    aliases:
+      - gsw

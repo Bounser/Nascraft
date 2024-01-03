@@ -10,14 +10,17 @@ import me.bounser.nascraft.commands.sellall.SellAllCommand;
 import me.bounser.nascraft.commands.sellall.SellAllTabCompleter;
 import me.bounser.nascraft.commands.sellinv.SellInvListener;
 import me.bounser.nascraft.commands.sellinv.SellInvCommand;
+import me.bounser.nascraft.commands.sellwand.GetSellWandCommand;
 import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.linking.LinkCommand;
 import me.bounser.nascraft.discord.linking.LinkManager;
-import me.bounser.nascraft.market.managers.BrokersManager;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.discord.linking.LinkingMethod;
+import me.bounser.nascraft.managers.BrokersManager;
+import me.bounser.nascraft.managers.MarketManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.sellwand.WandListener;
 import me.leoko.advancedgui.AdvancedGUI;
 import me.leoko.advancedgui.manager.GuiItemManager;
 import me.leoko.advancedgui.manager.GuiWallManager;
@@ -73,30 +76,32 @@ public final class Nascraft extends JavaPlugin {
             return;
         }
 
-        getLogger().info(AdvancedGUI.getInstance() + " ");
-
         Plugin AGUI = Bukkit.getPluginManager().getPlugin("AdvancedGUI");
-        getLogger().info("Enabled: " + AGUI.isEnabled());
 
         if (AGUI == null || !AGUI.isEnabled()) {
             getLogger().warning("AdvancedGUI is not installed! You won't have graphs in-game without it!");
             getLogger().warning("Learn more about AdvancedGUI here: https://www.spigotmc.org/resources/83636/");
         } else {
             if (config.getCheckResources()) checkResources();
-            LayoutManager.getInstance().registerLayoutExtension(LayoutModifier.getInstance(), this);
+            LayoutModifier.getInstance();
             if (!Bukkit.getPluginManager().getPlugin("AdvancedGUI").getDescription().getVersion().equals(AdvancedGUI_version))
                 getLogger().warning("This plugin was made using AdvancedGUI " + AdvancedGUI_version + "! You may encounter errors on other versions");
         }
 
-        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             getLogger().info("PlaceholderAPI detected!");
             new PAPIExpansion().register();
         }
 
-        if(config.getDiscordEnabled()) {
+        if (config.getSellWandsEnabled()) {
+            getCommand("getsellwand").setExecutor(new GetSellWandCommand());
+            Bukkit.getPluginManager().registerEvents(new WandListener(), this);
+        }
+
+        if (config.getDiscordEnabled()) {
             getLogger().info("Enabling discord integration!");
 
-            getCommand("link").setExecutor(new LinkCommand());
+            if (Config.getInstance().getLinkingMethod().equals(LinkingMethod.NATIVE)) getCommand("link").setExecutor(new LinkCommand());
             getCommand("setalert").setExecutor(new SetAlertCommand());
             getCommand("alerts").setExecutor(new AlertsCommand());
             getCommand("discord").setExecutor(new DiscordCommand());
@@ -113,14 +118,14 @@ public final class Nascraft extends JavaPlugin {
         getCommand("market").setExecutor(new MarketCommand());
 
         List<String> commands = config.getCommands();
-        if(commands == null) return;
+        if (commands == null) return;
 
-        if(commands.contains("sellhand")) getCommand("sellhand").setExecutor(new SellHandCommand());
-        if(commands.contains("sell")) {
+        if (commands.contains("sellhand")) getCommand("sellhand").setExecutor(new SellHandCommand());
+        if (commands.contains("sell")) {
             getCommand("sellinv").setExecutor(new SellInvCommand());
             Bukkit.getPluginManager().registerEvents(new SellInvListener(), this);
         }
-        if(commands.contains("sellall")) {
+        if (commands.contains("sellall")) {
             getCommand("sellall").setExecutor(new SellAllCommand());
             getCommand("sellall").setTabCompleter(new SellAllTabCompleter());
         }
@@ -137,7 +142,7 @@ public final class Nascraft extends JavaPlugin {
             DiscordBot.getInstance().getJDA().shutdown();
         }
 
-        if(this.adventure != null) {
+        if (this.adventure != null) {
             this.adventure.close();
             this.adventure = null;
         }
@@ -182,7 +187,7 @@ public final class Nascraft extends JavaPlugin {
     }
 
     public @NonNull BukkitAudiences adventure() {
-        if(this.adventure == null) {
+        if (this.adventure == null) {
             throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
         }
         return this.adventure;
