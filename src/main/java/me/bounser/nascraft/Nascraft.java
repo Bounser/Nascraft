@@ -11,6 +11,7 @@ import me.bounser.nascraft.commands.sellall.SellAllTabCompleter;
 import me.bounser.nascraft.commands.sellinv.SellInvListener;
 import me.bounser.nascraft.commands.sellinv.SellInvCommand;
 import me.bounser.nascraft.commands.sellwand.GetSellWandCommand;
+import me.bounser.nascraft.commands.sellwand.getSellWandTabCompleter;
 import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.linking.LinkCommand;
@@ -21,6 +22,7 @@ import me.bounser.nascraft.managers.MarketManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.sellwand.WandListener;
+import me.bounser.nascraft.sellwand.WandsManager;
 import me.leoko.advancedgui.AdvancedGUI;
 import me.leoko.advancedgui.manager.GuiItemManager;
 import me.leoko.advancedgui.manager.GuiWallManager;
@@ -95,7 +97,9 @@ public final class Nascraft extends JavaPlugin {
 
         if (config.getSellWandsEnabled()) {
             getCommand("getsellwand").setExecutor(new GetSellWandCommand());
+            getCommand("getsellwand").setTabCompleter(new getSellWandTabCompleter());
             Bukkit.getPluginManager().registerEvents(new WandListener(), this);
+            WandsManager.getInstance();
         }
 
         if (config.getDiscordEnabled()) {

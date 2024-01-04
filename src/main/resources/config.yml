@@ -72,5 +72,56 @@ discord-bot:
   slot-price-factor: 1000
   slot-price-base: 10000
 
+sell-wands:
+  enabled: true
+  wands:
+    # ID - Just the identifier.
+    basic:
+      material: 'stick'
+      display-name: '&a&lBASIC WAND'
+      lore:
+        - '&aRight-click &7to estimate value.'
+        - '&cLeft-click &7a container to'
+        - '&7sell all its content to the market!'
+        - ' '
+        - '&7Uses left: &6[USES]'
+      # Maximum uses of the wand. Alternativelly you can place a limit on
+      # the quantity of the sells. See "MILLONAIRE WAND".
+      # If you don't set any of these, the wand can be used without limits. (See "PERMANENT WAND").
+      uses: 10
+      # Permission to use this specific wand. If not defined, no permission will be required.
+      permission: 'nascraft.wand.basic'
+    permanent:
+      material: 'blaze_rod'
+      enchanted: true
+      display-name: '&d&lPERMANENT WAND'
+      lore:
+        - '&aRight-click &7to estimate value.'
+        - '&cLeft-click &7a container to'
+        - '&7sell all its content to the market'
+        - '&7for &chalf &7its value.'
+        - '&75 minutes of cooldown between uses.'
+        - ' '
+        - '&cUNLIMITED USES'
+      multiplier: 0.5
+      # Set a minimum cooldown between uses in seconds.
+      cooldown: 300 # 300/60 = 5 min of cooldown.
+      permission: 'nascraft.wand.advanced'
+    millionaire:
+      material: 'blaze_rod'
+      enchanted: true
+      display-name: '&6&lMILLONAIRE WAND'
+      lore:
+        - '&aRight-click &7to estimate value.'
+        - '&cLeft-click &7a container to'
+        - '&7sell all its content to the market'
+        - '&7for &6x1.5 &7its value.'
+        - ' '
+        - '&7Left to sell: &a[PROFIT]'
+      # With this wand you can sell a maximum of 1.000.000$ (Including the multiplier)
+      max-profit: 1000000
+      multiplier: 1.5
+      permission: 'nascraft.wand.millonaire'
+
 # Verify whether the AdvancedGUI's layout is present, and if it is not, place it in the layout folder of AdvancedGUI.
 auto-resources-injection: true

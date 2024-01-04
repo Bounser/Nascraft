@@ -60,6 +60,17 @@ alerts_empty: "<gradient:#FB6363:#C4B3FD>You don't have any alert setup.</gradie
 alerts_header: "&eActive alerts:\n"
 alerts_list_segment: "\n&6> &l[MATERIAL] &r&eat price &l[WORTH]"
 
+# SELLWAND
+
+sellwand_estimated_value: "<gradient:#FF00CD:#DA58FF>Estimated value:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
+sellwand_sold: "<gradient:#FF00CD:#DA58FF>Sold content for:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
+sellwand_ran_out: "<gradient:#FB6363:#C4B3FD>That sell wand doesn't have any more uses left.</gradient>"
+sellwand_nothing_to_sell: "<gradient:#FB6363:#C4B3FD>There's nothing to sell!</gradient>"
+sellwand_cooldown: "<gradient:#FB6363:#C4B3FD>On cooldown, [TIME] left!</gradient>"
+sellwand_minutes: "[MINUTES] minutes and [SECONDS] seconds"
+sellwand_seconds: "[SECONDS] second(s)"
+sellwand_too_much: "<gradient:#FB6363:#C4B3FD>You can't sell that much with this wand!</gradient>"
+
 # DISCORD - No MiniMessage support.
 
 discord_status: "how prices move"
@@ -80,6 +91,16 @@ discord_position: "Position in market: "
 discord_trend: "Trend (24h): "
 discord_inventory_value: "Value: "
 discord_buy_slot: "Buy slot for "
+discord_sell_all: "Sell All"
+discord_confirm: "Confirm"
+
+discord_button_1: "Search Item"
+discord_button_2: "Trades History"
+discord_button_3: "Advanced"
+discord_button_4: "Link Account"
+discord_button_5: "Inventory"
+discord_button_6: "Balance"
+discord_button_7: "Brokers"
 
 discord_not_linked_short: "Not linked!"
 discord_not_linked: ":exclamation: Your account is not linked! Run ``/link`` in-game to start the process of linking accounts."
@@ -104,6 +125,8 @@ discord_alert_success: "Success! You will receive a DM when the price reaches th
 discord_alert_limit_reached: "Limit of alerts reached! Remove alerts before creating new ones."
 discord_alert_already_listed: "That item is already on you watchlist!"
 discord_alert_reached_segment: ":bell: [EMOJI] Alert reached for item: ``[MATERIAL] ([PRICE1])`` with current price: ``[PRICE2]``"
+discord_alert_not_in_watchlist: ":x: Item is not in your watchlist."
+discord_alert_removed: ":no_bell: Alert for **[MATERIAL]** removed."
 
 # LAYOUT TEXTS:
 # Main title.

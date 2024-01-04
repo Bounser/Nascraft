@@ -7,13 +7,17 @@ after: true
 # Separador decimal. Disponibles: point (.), comma (,)
 separator: "comma"
 
+# General:
+price: "Precio"
+material: "Material del item"
+
 # Placeholders disponibles: [AMOUNT], [MATERIAL], [WORTH]
 buy_message: "<gradient:#00E3FB:#F9ABFD>Has comprado <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> por </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
 sell_message: "<gradient:#00E3FB:#F9ABFD>Has vendido <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> por </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
 
-not_enough_money: "<gradient:#FB6363:#C4B3FD>No tienes suficiente dinero!</gradient>"
-not_enough_items: "<gradient:#FB6363:#C4B3FD>No tienes suficientes items!</gradient>"
-not_enough_space: "<gradient:#FB6363:#C4B3FD>No tienes suficiente espacio en el inventario!</gradient>"
+not_enough_money: "<gradient:#FB6363:#C4B3FD>¡No tienes suficiente dinero!</gradient>"
+not_enough_items: "<gradient:#FB6363:#C4B3FD>¡No tienes suficientes items!</gradient>"
+not_enough_space: "<gradient:#FB6363:#C4B3FD>¡No tienes suficiente espacio en el inventario!</gradient>"
 shop_closed: "<gradient:#FB6363:#C4B3FD>Error al comprar: La tienda esta cerrada</gradient>"
 
 # Comandos
@@ -25,7 +29,7 @@ list_segment: "\n<gray>> <gradient:#FF00CD:#DA58FF>[MATERIAL] x [AMOUNT] = [WORT
 sellall_everything: "<gradient:#FF00CD:#DA58FF>Has vendido <bold><light_purple>[AMOUNT]</light_purple></bold> distintos tipos de objetos por <green>[WORTH]</green></gradient>"
 sellall_everything_error: "<gradient:#FF0000:#FF7E7E:#FF0000>No tienes nada que vender!</gradient>"
 sellall: "<gradient:#FF00CD:#DA58FF>Has vendido <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[MATERIAL]</light_purple></bold> por <green>[WORTH]</green></gradient>"
-sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>No tienes nada de [MATERIAL] para vender!</gradient>"
+sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>¡No tienes nada de [MATERIAL] para vender!</gradient>"
 sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>Material no reconocido. Usa: /sellall [material]</gradient>"
 sellall_estimated_value: "<gray>Valor estimado:</gray> <green>[WORTH]</green>"
 
@@ -56,9 +60,20 @@ alerts_empty: "&cNo tienes ninguna alerta activa."
 alerts_header: "&3Alertas activas:\n"
 alerts_list_segment: "\n&5> [MATERIAL] a precio [WORTH]"
 
+# SELLWAND
+
+sellwand_estimated_value: "<gradient:#FF00CD:#DA58FF>Valor estimado:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
+sellwand_sold: "<gradient:#FF00CD:#DA58FF>Contenido vendido por:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
+sellwand_ran_out: "<gradient:#FB6363:#C4B3FD>A esta varita no le quedan usos.</gradient>"
+sellwand_nothing_to_sell: "<gradient:#FB6363:#C4B3FD>¡No hay nada que vender!</gradient>"
+sellwand_cooldown: "<gradient:#FB6363:#C4B3FD>Espera [TIME] para volver a usar eso!</gradient>"
+sellwand_minutes: "[MINUTES] minutos y [SECONDS] segundos"
+sellwand_seconds: "[SECONDS] segundo(s)"
+sellwand_too_much: "<gradient:#FB6363:#C4B3FD>¡No puedes vender tanto con esa varita!</gradient>"
+
 # DISCORD - Sin soporte para MiniMessage.
 
-discord_status: "el precio de los objetos."
+discord_status: "los precios moverse."
 
 discord_main_title: ":green_circle:  Mercado en tiempo real"
 discord_main_footer: "Selecciona un item para operar (Comprar/Vender) con el. \nLos precios en las operaciones pueden variar."
@@ -76,6 +91,16 @@ discord_position: "Posicion en mercado: "
 discord_trend: "Tendencia (24h): "
 discord_inventory_value: "Valor: "
 discord_buy_slot: "Comprar ranura por "
+discord_sell_all: "Vender Todo"
+discord_confirm: "Confirmar"
+
+discord_button_1: "Buscar Objeto"
+discord_button_2: "Historial"
+discord_button_3: "Avanzado"
+discord_button_4: "Enlazar cuenta"
+discord_button_5: "Inventario"
+discord_button_6: "Balance"
+discord_button_7: "Brokers"
 
 discord_not_linked_short: "No enlazado!"
 discord_not_linked: ":exclamation: Tu cuenta no está enlazada! Escribe ``/link`` en el juego para comenzar el proceso de enlazado.."
@@ -100,6 +125,8 @@ discord_alert_success: "Configurado exitosamente! recibirás un mensaje cuando s
 discord_alert_limit_reached: "Limite de alertas alcanzado! Quita alertas antes de crear nuevas."
 discord_alert_already_listed: "¡Ese item ya esta en tu lista!"
 discord_alert_reached_segment: ":bell: [EMOJI] Alerta alcanzada para: ``[MATERIAL] ([PRICE1])`` con precio actual: ``[PRICE2]``"
+discord_alert_not_in_watchlist: ":x: Ese item no esta en tu lista de seguimiento."
+discord_alert_removed: ":no_bell: Alerta para **[MATERIAL]** eliminada."
 
 # LAYOUT TEXTS:
 # Main title.
