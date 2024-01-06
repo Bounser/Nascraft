@@ -2,24 +2,24 @@ package me.bounser.nascraft.discord;
 
 import github.scarsz.discordsrv.DiscordSRV;
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.chart.ChartType;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.database.Trade;
-import me.bounser.nascraft.discord.images.BalanceImage;
-import me.bounser.nascraft.discord.images.BrokerImage;
-import me.bounser.nascraft.discord.images.InventoryImage;
+import me.bounser.nascraft.discord.images.*;
 import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.brokers.Broker;
 import me.bounser.nascraft.market.brokers.BrokerType;
-import me.bounser.nascraft.market.managers.BrokersManager;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.managers.BrokersManager;
+import me.bounser.nascraft.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -54,7 +54,9 @@ public class DiscordButtons extends ListenerAdapter {
 
     private Lang lang = Lang.get();
 
-    public DiscordButtons() { instance = this; }
+    public DiscordButtons() {
+        instance = this;
+    }
 
     public static DiscordButtons getInstance() { return instance; }
 
@@ -241,7 +243,7 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "unlink":
 
-                event.editButton(Button.danger("unlinkc", "Confirm")).queue(); return;
+                event.editButton(Button.danger("unlinkc", Lang.get().message(Message.DISCORD_CONFIRM))).queue(); return;
 
             case "unlinkc":
 
@@ -266,7 +268,7 @@ public class DiscordButtons extends ListenerAdapter {
                         .setRequiredRange(1, 40)
                         .build();
 
-                Modal modal2 = Modal.create("basic", "Search item...")
+                Modal modal2 = Modal.create("basic", Lang.get().message(Message.DISCORD_BUTTON_1))
                         .addComponents(ActionRow.of(material2))
                         .build();
 
@@ -370,8 +372,8 @@ public class DiscordButtons extends ListenerAdapter {
 
                     List<Button> actionRow = new ArrayList<>();
 
-                    actionRow.add(Button.success("i_buy", "Buy slot for " + discordInventory.getNextSlotPrice() + Lang.get().message(Message.CURRENCY)));
-                    actionRow.add(Button.danger("all", "Sell all"));
+                    actionRow.add(Button.success("i_buy", Lang.get().message(Message.DISCORD_BUY_SLOT) + discordInventory.getNextSlotPrice() + Lang.get().message(Message.CURRENCY)));
+                    actionRow.add(Button.danger("all", Lang.get().message(Message.DISCORD_SELL_ALL)));
 
                     event.replyFiles(FileUpload.fromData(outputfile , "image.png"))
                             .setEphemeral(true)
@@ -388,7 +390,7 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "all":
 
-                event.editButton(Button.danger("sellallconfirmed", "Confirm")).queue(); return;
+                event.editButton(Button.danger("sellallconfirmed", Lang.get().message(Message.DISCORD_CONFIRM))).queue(); return;
 
             case "sellallconfirmed":
 
@@ -547,6 +549,31 @@ public class DiscordButtons extends ListenerAdapter {
                 return;
         }
 
+        if (event.getComponentId().startsWith("time")) {
+
+            ChartType chartType = ChartType.getChartType(event.getComponentId().charAt(4));
+
+            File outputfile = new File("image.png");
+            try {
+                ImageIO.write(ItemTimeGraph.getImage(MarketManager.getInstance().getItem(event.getComponentId().substring(5)), chartType), "png", outputfile);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            EmbedBuilder embedBuilder = new EmbedBuilder();
+
+            embedBuilder.setColor(new Color(100, 50, 150));
+
+            embedBuilder.setImage("attachment://image.png");
+
+            event.replyEmbeds(embedBuilder.build())
+                    .addFiles(FileUpload.fromData(outputfile, "image.png"))
+                    .setEphemeral(true)
+                    .queue();
+
+            return;
+        }
+
         if (!MarketManager.getInstance().getActive()) {
             event.reply(":lock: Market is currently closed!")
                     .setEphemeral(true)
@@ -577,7 +604,7 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "b":
 
-                value = item.getPrice().getBuyPrice()*quantity;
+                value = item.getPrice().getProjectedCost(-quantity, DiscordBot.getInstance().getDiscordBuyTax());
 
                 if (balance < value) {
 
@@ -599,7 +626,7 @@ public class DiscordButtons extends ListenerAdapter {
                     return;
                 }
 
-                Nascraft.getEconomy().withdrawPlayer(player, value);
+                MoneyManager.getInstance().withdraw(player, value);
 
                 String buyText;
                 if (quantity == 1) {
@@ -631,11 +658,9 @@ public class DiscordButtons extends ListenerAdapter {
                     return;
                 }
 
-                value = item.getPrice().getSellPrice()*quantity;
+                value = item.getPrice().getProjectedCost(quantity, DiscordBot.getInstance().getDiscordSellTax());
 
-                Nascraft.getEconomy().depositPlayer(player, value);
-
-                item.ghostSellItem(quantity);
+                MoneyManager.getInstance().deposit(player, value);
 
                 String sellText;
                 if(quantity == 1) {

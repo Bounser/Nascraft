@@ -71,6 +71,12 @@ discord-bot:
   # For example, to buy the slot nº6 the price will be (1000 * 6) + 10000 = 16000$
   slot-price-factor: 1000
   slot-price-base: 10000
+  # Discord taxes:
+  taxation:
+    override: true
+    # By default, we apply a reduced tax to persuade users to operate through discord.
+    buy: 0.04
+    sell: 0.05
 
 sell-wands:
   enabled: true

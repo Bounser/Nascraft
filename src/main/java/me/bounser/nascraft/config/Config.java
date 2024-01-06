@@ -1,6 +1,7 @@
 package me.bounser.nascraft.config;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.sellwand.Wand;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
 import me.bounser.nascraft.market.brokers.BrokerType;
 import me.bounser.nascraft.market.resources.Category;
@@ -73,7 +74,7 @@ public class Config {
     public float getTaxSell(Item item) {
 
         if (items.contains("items." + item.getMaterial().toString().toLowerCase() + ".tax.sell")) {
-            return 1 + (float) items.getDouble("items." + item.getMaterial().toString().toLowerCase() + ".tax.sell");
+            return 1 - (float) items.getDouble("items." + item.getMaterial().toString().toLowerCase() + ".tax.sell");
         } else {
             return 1 - (float) config.getDouble("market-control.taxation.sell");
         }
@@ -82,6 +83,58 @@ public class Config {
     public boolean getMarketPermissionRequirement() { return config.getBoolean("market-control.market-permission"); }
 
     public List<String> getCommands() { return config.getStringList("commands.enabled"); }
+
+    public boolean getSellWandsEnabled() { return config.getBoolean("sell-wands.enabled"); }
+
+    public boolean getSellWandsPermissionNeeded(String wandName) { return config.contains("sell-wands." + wandName + ".permission"); }
+
+    public String getSellWandPermission(String wandName) { return config.getString("sell-wands.wands." + wandName + ".permission"); }
+
+    public List<Wand> getWands() {
+
+        List<Wand> wands = new ArrayList<>();
+
+        for (String name : config.getConfigurationSection("sell-wands.wands").getKeys(false)) {
+
+            float multiplier = 1;
+            if (config.contains("sell-wands.wands." + name +  ".multiplier")) {
+                multiplier = (float) config.getDouble("sell-wands.wands." + name + ".multiplier");
+            }
+
+            int uses = -1;
+            if (config.contains("sell-wands.wands." + name +  ".uses")) {
+                uses = config.getInt("sell-wands.wands." + name + ".uses");
+            }
+
+            float maxProfit = -1;
+            if (config.contains("sell-wands.wands." + name +  ".max-profit")) {
+                maxProfit = (float) config.getDouble("sell-wands.wands." + name + ".max-profit");
+            }
+
+            boolean enchanted = false;
+            if (config.contains("sell-wands.wands." + name +  ".enchanted")) {
+                enchanted = config.getBoolean("sell-wands.wands." + name + ".enchanted");
+            }
+
+            int cooldown = 3;
+            if (config.contains("sell-wands.wands." + name +  ".cooldown")) {
+                cooldown = config.getInt("sell-wands.wands." + name + ".cooldown");
+            }
+
+            wands.add(new Wand(name,
+                    Material.getMaterial(config.getString("sell-wands.wands." + name +  ".material").toUpperCase()),
+                    config.getString("sell-wands.wands." + name +  ".display-name"),
+                    config.getStringList("sell-wands.wands." + name +  ".lore"),
+                    uses,
+                    multiplier,
+                    maxProfit,
+                    cooldown,
+                    enchanted
+                    ));
+        }
+
+        return wands;
+    }
 
     public int getPlaceholderPrecission() { return config.getInt("placeholders.decimal-precision"); }
 
@@ -101,6 +154,23 @@ public class Config {
 
     public float getSlotPriceBase() { return (float) config.getDouble("discord-bot.slot-price-base"); }
 
+    public float getDiscordBuyTax() {
+
+        if (config.getBoolean("discord-bot.slot-price.taxation.override")) {
+            return (float) (1 + config.getDouble("discord-bot.slot-price.taxation.buy"));
+        } else {
+            return 1 + (float) config.getDouble("market-control.taxation.buy");
+        }
+    }
+
+    public float getDiscordSellTax() {
+
+        if (config.getBoolean("discord-bot.slot-price.taxation.override")) {
+            return (float) (1 - config.getDouble("discord-bot.slot-price.taxation.sell"));
+        } else {
+            return 1 - (float) config.getDouble("market-control.taxation.sell");
+        }
+    }
 
     // Items:
 
@@ -129,10 +199,10 @@ public class Config {
             section = items.getConfigurationSection("items." + material.toString().toLowerCase() + ".child.").getKeys(false);
         }
 
-        if (section == null ||section.size() == 0) return childs;
+        if (section == null || section.size() == 0) return childs;
 
         for (String childMat : section){
-            childs.put(Material.getMaterial(childMat), (float) items.getDouble("items." + material.toString().toLowerCase() + ".child." + childMat + ".multiplier"));
+            childs.put(Material.getMaterial(childMat.toUpperCase()), (float) items.getDouble("items." + material.toString().toLowerCase() + ".child." + childMat + ".multiplier"));
         }
         return childs;
     }
