@@ -12,7 +12,6 @@ import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.formatter.Style;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -31,7 +30,7 @@ public class Item {
 
     private int operations;
 
-    private float volume;
+    private int volume;
 
     private float collectedTaxes;
 
@@ -54,6 +53,8 @@ public class Item {
     private List<Float> pricesMonth;
     // 24 (0-23) values representing 2 prices each month. *
     private List<Float> pricesYear;
+
+    private ItemStats itemStats;
 
     private final HashMap<Material, Float> childs;
 
@@ -91,6 +92,8 @@ public class Item {
         gdMonth = new GraphData(TimeSpan.YEAR, pricesYear);
 
         plotData = new PlotData(this);
+
+        itemStats = new ItemStats(this);
     }
 
     public String getName() { return alias; }
@@ -124,7 +127,7 @@ public class Item {
         if (!checkBalance(player, feedback, amount)) return;
         if (!checkInventory(player, feedback, amount)) return;
 
-        int maxSize = material.getMaxStackSize();
+        int maxSize = Math.round((material.getMaxStackSize())/(price.getElasticity()*4));
         int orderSize = amount / maxSize;
         int excess = amount % maxSize;
 
@@ -155,7 +158,7 @@ public class Item {
         if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(totalCost, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
         updateInternalValues(amount,
-                amount*price.getBuyPrice(),
+                amount,
                 0,
                 price.getValue()*price.getBuyTaxMultiplier());
 
@@ -214,7 +217,7 @@ public class Item {
             return -1;
         }
 
-        if (player != null &&  feedback && !player.getInventory().containsAtLeast(new ItemStack(material), amount)) {
+        if (player != null && feedback && !player.getInventory().containsAtLeast(new ItemStack(material), amount)) {
             Lang.get().message(player, Message.NOT_ENOUGH_ITEMS);
             return -1;
         }
@@ -246,7 +249,7 @@ public class Item {
         totalWorth = RoundUtils.round(totalWorth);
 
         updateInternalValues(amount,
-                amount*price.getSellPrice(),
+                amount,
                 0,
                 price.getValue()*price.getSellTaxMultiplier());
 
@@ -261,18 +264,18 @@ public class Item {
     }
 
     public void ghostBuyItem(int amount) {
-        updateInternalValues(-amount, amount*price.getBuyPrice(), amount,price.getValue()*price.getBuyTaxMultiplier());
+        updateInternalValues(-amount, amount, -amount,price.getValue()*price.getBuyTaxMultiplier());
         MarketManager.getInstance().addOperation();
     }
 
     public void ghostSellItem(int amount) {
-        updateInternalValues(amount, amount*price.getSellPrice(), amount, price.getValue()*price.getSellTaxMultiplier());
+        updateInternalValues(amount, amount, amount, price.getValue()*price.getSellTaxMultiplier());
         MarketManager.getInstance().addOperation();
     }
 
-    private void updateInternalValues(int operations, float volume, int stockChange, float taxes) {
+    private void updateInternalValues(int operations, int volume, int stockChange, float taxes) {
         this.operations += operations;
-        this.volume += RoundUtils.round(volume);
+        this.volume += volume;
         this.price.changeStock(stockChange);
         this.collectedTaxes += taxes;
     }
@@ -331,7 +334,7 @@ public class Item {
 
     public PlotData getPlotData() { return plotData; }
 
-    public float getVolume() { return volume; }
+    public int getVolume() { return volume; }
 
     public float getLow(TimeSpan timeSpan) { return Collections.min(getPrices(timeSpan)); }
 
@@ -340,5 +343,11 @@ public class Item {
     public float getCollectedTaxes() { return collectedTaxes; }
 
     public void setCollectedTaxes(float newCollectedTaxes) { collectedTaxes = newCollectedTaxes; }
+
+    public void addVolume(int volume) { this.volume += volume; }
+
+    public void restartVolume() { volume = 0; }
+
+    public ItemStats getItemStats() { return itemStats; }
 
 }

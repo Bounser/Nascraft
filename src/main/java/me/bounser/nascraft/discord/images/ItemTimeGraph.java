@@ -1,0 +1,34 @@
+package me.bounser.nascraft.discord.images;
+
+import me.bounser.nascraft.chart.ChartType;
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.chart.ItemChart;
+import me.bounser.nascraft.market.unit.Item;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
+
+public class ItemTimeGraph {
+
+    public static BufferedImage getImage(Item item, ChartType chartType) {
+
+        BufferedImage image = new BufferedImage(610, 290, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics graphics = image.getGraphics();
+
+        graphics.drawImage(ItemChart.getImage(item, chartType, 600, 250), 5, 40, null);
+
+        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial()), 40, 0, 50, 50, null);
+
+        graphics.setFont(new Font("Arial", Font.BOLD, 23));
+
+        graphics.setColor(new Color(255, 255, 255));
+        graphics.drawString(item.getName() + " | " + Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC), 95, 38);
+
+        graphics.dispose();
+
+        return image;
+    }
+
+}

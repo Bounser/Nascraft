@@ -6,7 +6,7 @@
 
     <groupId>me.bounser</groupId>
     <artifactId>Nascraft</artifactId>
-    <version>1.4.3</version>
+    <version>1.4.5</version>
     <packaging>jar</packaging>
 
     <name>Nascraft</name>
@@ -30,6 +30,8 @@
                             <shadedPattern>me.bounser</shadedPattern>
                         </relocation>
                     </relocations>
+                    <minimizeJar>false</minimizeJar>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
                 <executions>
                     <execution>
@@ -39,14 +41,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
             </plugin>
         </plugins>
         <resources>
@@ -95,6 +89,11 @@
             <artifactId>spigot-api</artifactId>
             <version>1.20.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.13</version>
         </dependency>
         <dependency>
             <groupId>me.leoko.advancedgui</groupId>

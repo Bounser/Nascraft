@@ -1,7 +1,6 @@
-package me.bounser.nascraft.market.managers;
+package me.bounser.nascraft.managers;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.Plot;
 import me.bounser.nascraft.market.resources.Category;
@@ -10,6 +9,8 @@ import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +60,7 @@ public class MarketManager {
             Item item = new Item(material, config.getAlias(material), category);
             items.add(item);
             category.addItem(item);
+            materials.add(material);
         }
 
         marketChanges1h = new ArrayList<>(Collections.nCopies(60, 0f));
@@ -91,20 +93,23 @@ public class MarketManager {
         return sorted;
     }
 
-    public List<Material> getAllMaterials() {
-
-        if(materials.size() == 0) {
-            for(Item item : items) {
-                materials.add(item.getMaterial());
-            }
-        }
-        return materials;
-    }
+    public List<Material> getAllMaterials() { return materials; }
 
     public void stop() { active = false; }
     public void resume() { active = true; }
 
     public boolean getActive() { return active; }
+
+    public boolean isValidItem(ItemStack itemStack) {
+
+        if (itemStack == null) return false;
+
+        if (!getAllMaterials().contains(itemStack.getType())) return false;
+
+        ItemMeta meta = itemStack.getItemMeta();
+
+        return !meta.hasDisplayName() && !meta.hasEnchants() && !meta.hasLore() && !meta.hasAttributeModifiers() && !meta.hasCustomModelData();
+    }
 
     public List<Item> getTopGainers(int quantity) {
 
@@ -228,23 +233,16 @@ public class MarketManager {
 
     public float getLastChange() { return lastChange; }
 
-    public int[] getBenchmarkX(int xSize, int offset) {
-        return Plot.getXPositions(xSize, offset, false, 60);
-    }
+    public int[] getBenchmarkX(int xSize, int offset) { return Plot.getXPositions(xSize, offset, false, 60); }
 
     public int[] getBenchmarkY(int ySize, int offset) {
         return Plot.getYPositions(ySize, offset, false, getBenchmark1h(100));
     }
 
-    public int getOperationsLastHour() {
-        return operationsLastHour;
-    }
+    public int getOperationsLastHour() { return operationsLastHour; }
 
-    public void addOperation() {
-        operationsLastHour++;
+    public void addOperation() { operationsLastHour++; }
 
-        Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), () -> operationsLastHour--, 72000); // 1 hour
-
-    }
+    public void setOperationsLastHour(int operations) { operationsLastHour = operations; }
 
 }

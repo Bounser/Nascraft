@@ -1,6 +1,7 @@
 package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.config.Config;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +67,10 @@ public class Price {
 
     public float getStock() { return stock; }
 
+    public float getElasticity() { return elasticity; }
+
     public void changeStock(int change) {
-        stock += change * elasticity;
+        stock += change;
 
         updateValue();
     }
@@ -79,6 +82,7 @@ public class Price {
 
     public float applyNoise() {
 
+        float prevStock = stock;
 
         if (support != 0 && value < support && Math.random() > 0.8) {
 
@@ -94,6 +98,8 @@ public class Price {
 
         }
         updateValue();
+
+        item.addVolume(Math.abs(Math.round(stock - prevStock)));
 
         float change = -100 + 100*value/previousValue;
         previousValue = value;
@@ -155,6 +161,28 @@ public class Price {
         }
         hourLow = value;
         hourHigh = value;
+    }
+
+    public float getProjectedCost(int stockChange, float tax) {
+
+        int maxSize = Math.round((item.getMaterial().getMaxStackSize())/(elasticity*4));
+        int orderSize = stockChange / maxSize;
+        int excess = stockChange % maxSize;
+
+        float fictitiousValue = value;
+        float fictitiousStock = stock;
+
+        for (int i = 0 ; i < orderSize ; i++) {
+            fictitiousStock += maxSize;
+            fictitiousValue += (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
+        }
+
+        if (excess > 0) {
+            fictitiousStock += excess;
+            fictitiousValue += (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
+        }
+
+        return fictitiousValue*tax;
     }
 
     public float getBuyTaxMultiplier() { return taxBuy; }

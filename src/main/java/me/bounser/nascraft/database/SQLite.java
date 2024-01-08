@@ -4,9 +4,10 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.brokers.BrokerType;
-import me.bounser.nascraft.market.managers.BrokersManager;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.managers.BrokersManager;
+import me.bounser.nascraft.managers.MarketManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
+import me.bounser.nascraft.market.unit.Instant;
 import me.bounser.nascraft.market.unit.Item;
 
 import java.io.File;
@@ -54,10 +55,25 @@ public class SQLite {
                         "monthprices TEXT," + // 30
                         "yearprices TEXT");
 
-        createTable(connection, "prices_history",
-                "material TEXT  ," +
-                        "day INT," +
+        createTable(connection, "prices_day",
+                "id INTEGER PRIMARY KEY, " +
+                        "date TEXT," +
+                        "material TEXT," +
                         "price DOUBLE," +
+                        "volume INT");
+
+        createTable(connection, "prices_month",
+                "id INTEGER PRIMARY KEY, " +
+                        "date TEXT," +
+                        "material TEXT," +
+                        "price DOUBLE," +
+                        "volume INT");
+
+        createTable(connection, "prices_history",
+                "day INT  ," +
+                        "material INT," +
+                        "price DOUBLE," +
+                        "volume INT," +
                         "PRIMARY KEY (material, day)");
 
         createTable(connection, "inventories",
@@ -137,7 +153,6 @@ public class SQLite {
 
     public void saveEverything() {
         for (Item item : MarketManager.getInstance().getAllItems()) {
-            saveHistoryPrices(item);
             saveItem(item);
             savePrices(item);
         }
@@ -221,7 +236,7 @@ public class SQLite {
         }
     }
 
-    public void saveHistoryPrices(Item item) {
+    public void saveHistoryPrices(Item item, Instant instant) {
 
         try {
             String select = "SELECT price FROM prices_history WHERE material=? AND day=?;";
@@ -234,13 +249,14 @@ public class SQLite {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (!resultSet.next()) {
-                String insert = "INSERT INTO prices_history (material, day, price) VALUES (?,?,?);";
+                String insert = "INSERT INTO prices_history (material, day, price, volume) VALUES (?,?,?,?);";
 
                 PreparedStatement insertStatement = connection.prepareStatement(insert);
 
                 insertStatement.setString(1, item.getMaterial().toString());
                 insertStatement.setInt(2, getDays());
-                insertStatement.setDouble(3, item.getPrice().getValue());
+                insertStatement.setDouble(3, instant.getPrice());
+                insertStatement.setInt(4, instant.getVolume());
 
                 insertStatement.executeUpdate();
             }
@@ -248,6 +264,261 @@ public class SQLite {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void saveDayPrice(Item item, Instant instant) {
+
+        try {
+            String insert = "INSERT INTO prices_day (material, date, price, volume) VALUES (?,?,?,?);";
+
+            PreparedStatement insertStatement = connection.prepareStatement(insert);
+
+            insertStatement.setString(1, item.getMaterial().toString());
+            insertStatement.setString(2, instant.getLocalDateTime().toString());
+            insertStatement.setDouble(3, instant.getPrice());
+            insertStatement.setInt(4, instant.getVolume());
+
+            insertStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void saveMonthPrice(Item item, Instant instant) {
+
+        try {
+            String insert = "INSERT INTO prices_month (material, date, price, volume) VALUES (?,?,?,?);";
+
+            PreparedStatement insertStatement = connection.prepareStatement(insert);
+
+            insertStatement.setString(1, item.getMaterial().toString());
+            insertStatement.setString(2, instant.getLocalDateTime().toString());
+            insertStatement.setDouble(3, instant.getPrice());
+            insertStatement.setInt(4, instant.getVolume());
+
+            insertStatement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Instant> getDayPrices(Item item) {
+
+        List<Instant> prices = new LinkedList<>();
+
+        try {
+            String select = "SELECT date FROM prices_day WHERE material=? ORDER BY id DESC LIMIT 1;";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(select);
+
+            preparedStatement.setString(1, item.getMaterial().toString());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+
+                prices.add(new Instant(LocalDateTime.now().minusHours(24), 0, 0));
+                prices.add(new Instant(LocalDateTime.now().minusMinutes(5), 0, 0));
+
+                prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
+
+            } else {
+
+                String select288 = "SELECT date, price, volume FROM prices_day WHERE material=? ORDER BY id DESC LIMIT 288;";
+
+                PreparedStatement preparedStatement288 = connection.prepareStatement(select288);
+
+                preparedStatement288.setString(1, item.getMaterial().toString());
+
+                ResultSet resultSet1 = preparedStatement288.executeQuery();
+
+                while (resultSet1.next()) {
+
+                    LocalDateTime time = LocalDateTime.parse(resultSet1.getString("date"));
+
+                    if (time.isAfter(LocalDateTime.now().minusHours(24))) {
+                        prices.add(new Instant(
+                                time,
+                                resultSet1.getFloat("price"),
+                                resultSet1.getInt("volume")
+                        ));
+
+                    }
+                }
+
+                prices.add(0, new Instant(LocalDateTime.now().minusHours(24), 0, 0));
+
+                prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return prices;
+    }
+
+    public List<Instant> getMonthPrices(Item item) {
+
+        List<Instant> prices = new LinkedList<>();
+
+        try {
+            String select = "SELECT date FROM prices_month WHERE material=? ORDER BY id DESC LIMIT 1;";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(select);
+
+            preparedStatement.setString(1, item.getMaterial().toString());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+
+                prices.add(new Instant(LocalDateTime.now().minusDays(30), 0, 0));
+                prices.add(new Instant(LocalDateTime.now().minusMinutes(5), 0, 0));
+
+                prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
+
+            } else {
+
+                String select288 = "SELECT date, price, volume FROM prices_day WHERE material=? ORDER BY id DESC LIMIT 279;";
+
+                PreparedStatement preparedStatement288 = connection.prepareStatement(select288);
+
+                preparedStatement288.setString(1, item.getMaterial().toString());
+
+                ResultSet resultSet1 = preparedStatement288.executeQuery();
+
+                while (resultSet1.next()) {
+
+                    LocalDateTime time = LocalDateTime.parse(resultSet1.getString("date"));
+
+                    if (time.isAfter(LocalDateTime.now().minusDays(30))) {
+                        prices.add(new Instant(
+                                time,
+                                resultSet1.getFloat("price"),
+                                resultSet1.getInt("volume")
+                        ));
+
+                    }
+                }
+
+                prices.add(0, new Instant(LocalDateTime.now().minusDays(30), 0, 0));
+
+                prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return prices;
+    }
+
+    public List<Instant> getYearPrices(Item item) {
+
+        List<Instant> prices = new LinkedList<>();
+
+        try {
+            String select = "SELECT date FROM prices_month WHERE material=? ORDER BY id DESC LIMIT 1;";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(select);
+
+            preparedStatement.setString(1, item.getMaterial().toString());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+
+                prices.add(new Instant(LocalDateTime.now().minusDays(365), 0, 0));
+                prices.add(new Instant(LocalDateTime.now().minusMinutes(5), 0, 0));
+
+                prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
+
+            } else {
+
+                String select288 = "SELECT date, price, volume FROM prices_day WHERE material=? ORDER BY id DESC LIMIT 365;";
+
+                PreparedStatement preparedStatement288 = connection.prepareStatement(select288);
+
+                preparedStatement288.setString(1, item.getMaterial().toString());
+
+                ResultSet resultSet1 = preparedStatement288.executeQuery();
+
+                while (resultSet1.next()) {
+
+                    LocalDateTime time = LocalDateTime.parse(resultSet1.getString("date"));
+
+                    if (time.isAfter(LocalDateTime.now().minusDays(365))) {
+                        prices.add(new Instant(
+                                time,
+                                resultSet1.getFloat("price"),
+                                resultSet1.getInt("volume")
+                        ));
+
+                    }
+                }
+
+                prices.add(0, new Instant(LocalDateTime.now().minusDays(365), 0, 0));
+
+                prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return prices;
+    }
+
+    public List<Instant> getAllPrices(Item item) {
+
+        List<Instant> prices = new LinkedList<>();
+
+        try {
+            String select = "SELECT date FROM prices_month WHERE material=? ORDER BY id DESC LIMIT 1;";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(select);
+
+            preparedStatement.setString(1, item.getMaterial().toString());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+
+                prices.add(new Instant(LocalDateTime.now().minusDays(30), 0, 0));
+                prices.add(new Instant(LocalDateTime.now().minusMinutes(5), 0, 0));
+
+                prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
+
+            } else {
+
+                String select288 = "SELECT date, price, volume FROM prices_day WHERE material=? ORDER BY id DESC;";
+
+                PreparedStatement preparedStatement288 = connection.prepareStatement(select288);
+
+                preparedStatement288.setString(1, item.getMaterial().toString());
+
+                ResultSet resultSet1 = preparedStatement288.executeQuery();
+
+                while (resultSet1.next()) {
+
+                    LocalDateTime time = LocalDateTime.parse(resultSet1.getString("date"));
+
+                    prices.add(new Instant(
+                            time,
+                            resultSet1.getFloat("price"),
+                            resultSet1.getInt("volume")
+                    ));
+                }
+
+                prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return prices;
     }
 
     public void retrievePrices(Item item) {
