@@ -166,19 +166,19 @@ public class Price {
     public float getProjectedCost(int stockChange, float tax) {
 
         int maxSize = Math.round((item.getMaterial().getMaxStackSize())/(elasticity*4));
-        int orderSize = stockChange / maxSize;
-        int excess = stockChange % maxSize;
+        int orderSize = maxSize == 0 ? 1 : Math.abs(stockChange / maxSize);
+        int excess = maxSize == 0 ? 0 : Math.abs(stockChange % maxSize);
 
         float fictitiousValue = value;
         float fictitiousStock = stock;
 
         for (int i = 0 ; i < orderSize ; i++) {
-            fictitiousStock += maxSize;
+            fictitiousStock += maxSize*Integer.signum(stockChange);
             fictitiousValue += (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
         }
 
         if (excess > 0) {
-            fictitiousStock += excess;
+            fictitiousStock += excess*Integer.signum(stockChange);
             fictitiousValue += (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
         }
 

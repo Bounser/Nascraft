@@ -10,7 +10,7 @@ import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.managers.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.*;
 import net.dv8tion.jda.api.entities.Activity;
@@ -39,6 +39,10 @@ import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 public class DiscordBot {
+
+    private float discordBuyTax;
+
+    private float discordSellTax;
 
     private final JDA jda;
 
@@ -78,6 +82,9 @@ public class DiscordBot {
         ).queue();
 
         removeAllMessages();
+
+        discordBuyTax = Config.getInstance().getDiscordBuyTax();
+        discordSellTax = Config.getInstance().getDiscordSellTax();
     }
 
     public JDA getJDA() { return jda; }
@@ -108,14 +115,14 @@ public class DiscordBot {
             List<ItemComponent> componentList2 = new ArrayList<>();
 
             componentList1.add(Button.primary("data", Emoji.fromFormatted("U+2754")));
-            componentList1.add(Button.secondary("search", "Search Item").withEmoji(Emoji.fromFormatted("U+1F50D")));
-            componentList1.add(Button.secondary("history", "Trades History").withEmoji(Emoji.fromFormatted("U+1F4DC")));
-            componentList1.add(Button.secondary("advanced", "Advanced").withEmoji(Emoji.fromFormatted("U+1F4CA")));
+            componentList1.add(Button.secondary("search", Lang.get().message(Message.DISCORD_BUTTON_1)).withEmoji(Emoji.fromFormatted("U+1F50D")));
+            componentList1.add(Button.secondary("history", Lang.get().message(Message.DISCORD_BUTTON_2)).withEmoji(Emoji.fromFormatted("U+1F4DC")));
+            componentList1.add(Button.secondary("advanced", Lang.get().message(Message.DISCORD_BUTTON_3)).withEmoji(Emoji.fromFormatted("U+1F4CA")));
 
-            componentList2.add(Button.secondary("link", "Link Account").withEmoji(Emoji.fromFormatted("U+1F517")));
-            componentList2.add(Button.secondary("inventory", "Inventory").withEmoji(Emoji.fromFormatted("U+1F392")));
-            componentList2.add(Button.secondary("balance", "Balance").withEmoji(Emoji.fromFormatted("U+1FA99")));
-            componentList2.add(Button.secondary("manager", "Brokers").withEmoji(Emoji.fromFormatted("U+1F4BC")).asDisabled());
+            componentList2.add(Button.secondary("link", Lang.get().message(Message.DISCORD_BUTTON_4)).withEmoji(Emoji.fromFormatted("U+1F517")));
+            componentList2.add(Button.secondary("inventory", Lang.get().message(Message.DISCORD_BUTTON_5)).withEmoji(Emoji.fromFormatted("U+1F392")));
+            componentList2.add(Button.secondary("balance", Lang.get().message(Message.DISCORD_BUTTON_6)).withEmoji(Emoji.fromFormatted("U+1FA99")));
+            componentList2.add(Button.secondary("manager", Lang.get().message(Message.DISCORD_BUTTON_7)).withEmoji(Emoji.fromFormatted("U+1F4BC")).asDisabled());
 
             textChannel.sendMessageEmbeds(getEmbedded())
                     .addFiles(FileUpload.fromData(outputfile, "image.png"))
@@ -236,24 +243,24 @@ public class DiscordBot {
 
         List<ItemComponent> timeComponents = new ArrayList<>();
 
-        timeComponents.add(Button.secondary("time" + item.getMaterial(), "Change Time: ").asDisabled());
-        timeComponents.add(Button.secondary("time1" + item.getMaterial(), "1 Hour"));
-        timeComponents.add(Button.secondary("time2" + item.getMaterial(), "1 Day"));
-        timeComponents.add(Button.secondary("time3" + item.getMaterial(), "1 Month"));
-        timeComponents.add(Button.secondary("time4" + item.getMaterial(), "1 Year"));
+        timeComponents.add(Button.secondary("time" + item.getMaterial().toString(), "Change Time: ").asDisabled());
+        timeComponents.add(Button.secondary("time1" + item.getMaterial().toString(), "1 Day"));
+        timeComponents.add(Button.secondary("time2" + item.getMaterial().toString(), "1 Month"));
+        timeComponents.add(Button.secondary("time3" + item.getMaterial().toString(), "1 Year"));
+        timeComponents.add(Button.secondary("time4" + item.getMaterial().toString(), "All"));
 
         List<ItemComponent> componentList = new ArrayList<>();
 
         if (LinkManager.getInstance().getUUID(user.getId()) == null) {
             componentList.add(Button.success("b01" + item.getMaterial(), lang.message(Message.DISCORD_BUY) + " 1 x " + Formatter.format(item.getPrice().getBuyPrice(), Style.REDUCED_LENGTH)).asDisabled());
-            componentList.add(Button.success("b32" + item.getMaterial(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.format(item.getPrice().getBuyPrice()*32, Style.REDUCED_LENGTH)).asDisabled());
-            componentList.add(Button.danger("s32" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.format(item.getPrice().getSellPrice()*32, Style.REDUCED_LENGTH)).asDisabled());
+            componentList.add(Button.success("b32" + item.getMaterial(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(-32, discordBuyTax), Style.REDUCED_LENGTH)).asDisabled());
+            componentList.add(Button.danger("s32" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(32, discordSellTax), Style.REDUCED_LENGTH)).asDisabled());
             componentList.add(Button.danger("s01" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 1 x " + Formatter.format(item.getPrice().getSellPrice(), Style.REDUCED_LENGTH)).asDisabled());
             componentList.add(Button.secondary("info" + item.getMaterial(), "Not linked!").withEmoji(Emoji.fromFormatted("U+1F517")));
         } else {
             componentList.add(Button.success("b01" + item.getMaterial(), lang.message(Message.DISCORD_BUY) + " 1 x " + Formatter.format(item.getPrice().getBuyPrice(), Style.REDUCED_LENGTH)));
-            componentList.add(Button.success("b32" + item.getMaterial(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.format(item.getPrice().getBuyPrice()*32, Style.REDUCED_LENGTH)));
-            componentList.add(Button.danger("s32" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.format(item.getPrice().getSellPrice()*32, Style.REDUCED_LENGTH)));
+            componentList.add(Button.success("b32" + item.getMaterial(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(-32, discordBuyTax), Style.REDUCED_LENGTH)));
+            componentList.add(Button.danger("s32" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(32, discordSellTax), Style.REDUCED_LENGTH)));
             componentList.add(Button.danger("s01" + item.getMaterial(), lang.message(Message.DISCORD_SELL) + " 1 x " + Formatter.format(item.getPrice().getSellPrice(), Style.REDUCED_LENGTH)));
         }
 
@@ -270,18 +277,14 @@ public class DiscordBot {
                     .setEphemeral(true)
                     .addActionRow(timeComponents)
                     .addActionRow(componentList)
-                    .queue(message -> {
-
-                        message.editOriginalEmbeds(getBasicEditedEmbedded()).queueAfter(getSecondsRemainingToUpdate(), TimeUnit.SECONDS);
-
-                    });
+                    .queue(message -> message.editOriginalEmbeds(getBasicEditedEmbedded()).queueAfter(getSecondsRemainingToUpdate(), TimeUnit.SECONDS));
         }
 
         if (sEvent != null)
             sEvent.replyEmbeds(embedBuilder.build())
                     .addFiles(FileUpload.fromData(outputfile, "image.png"))
                     .setEphemeral(true)
-                    //.addActionRow(timeComponents)
+                    .addActionRow(timeComponents)
                     .addActionRow(componentList)
                     .queue(message -> {
 
@@ -293,7 +296,7 @@ public class DiscordBot {
             cEvent.replyEmbeds(embedBuilder.build())
                     .addFiles(FileUpload.fromData(outputfile, "image.png"))
                     .setEphemeral(true)
-                    //.addActionRow(timeComponents)
+                    .addActionRow(timeComponents)
                     .addActionRow(componentList)
                     .queue(message -> {
 
@@ -335,5 +338,11 @@ public class DiscordBot {
 
         return new Color((int) Math.round(red), (int) Math.round(green), (int) Math.round(blue));
     }
+
+    public void setDiscordBuyTax(float newTax) { discordBuyTax = newTax; }
+    public void setDiscordSellTax(float newTax) { discordSellTax = newTax; }
+
+    public float getDiscordBuyTax() { return discordBuyTax; }
+    public float getDiscordSellTax() { return discordSellTax; }
 
 }

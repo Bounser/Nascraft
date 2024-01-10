@@ -5,7 +5,7 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.market.unit.GraphData;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.managers.MarketManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.leoko.advancedgui.utils.GuiPoint;
@@ -114,22 +114,17 @@ public class GraphComponent extends RectangularComponent {
     public void updateButtonPrice() {
 
         GroupComponent ct = interaction.getComponentTree();
-        if (childs == null) {
-            for (int i : Arrays.asList(1, 16, 64)) {
-                ct.locate("buyprice" + i, TextComponent.class).setText(getItem().getPrice().getBuyPrice()*i + Lang.get().message(Message.CURRENCY));
-                ct.locate("sellprice" + i, TextComponent.class).setText(getItem().getPrice().getSellPrice()*i + Lang.get().message(Message.CURRENCY));
-            }
-        } else {
-            for (int i : Arrays.asList(1, 16, 64)) {
-                ct.locate("buyprice" + i, TextComponent.class).setText(RoundUtils.round(getItem().getPrice().getBuyPrice()*i*childs.get(childsMat.get(0))) + Lang.get().message(Message.CURRENCY));
-                ct.locate("sellprice" + i, TextComponent.class).setText(RoundUtils.round(getItem().getPrice().getSellPrice()*i*childs.get(childsMat.get(0))) + Lang.get().message(Message.CURRENCY));
-            }
+
+        for (int i : Arrays.asList(1, 16, 64)) {
+            ct.locate("buyprice" + i, TextComponent.class).setText(RoundUtils.round(getItem().getPrice().getBuyPrice()*i*childs.get(childsMat.get(0))) + Lang.get().message(Message.CURRENCY));
+            ct.locate("sellprice" + i, TextComponent.class).setText(RoundUtils.round(getItem().getPrice().getSellPrice()*i*childs.get(childsMat.get(0))) + Lang.get().message(Message.CURRENCY));
         }
+
     }
 
     public void changeMat(Material material) {
 
-        if(slideComponent == null) { slideComponent = this.interaction.getComponentTree().locate("slide1", SlideComponent.class); }
+        if (slideComponent == null) { slideComponent = this.interaction.getComponentTree().locate("slide1", SlideComponent.class); }
 
         childComponents = interaction.getComponentTree().locate("childC", GroupComponent.class);
 

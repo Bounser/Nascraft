@@ -2,7 +2,7 @@ package me.bounser.nascraft.discord;
 
 import github.scarsz.discordsrv.DiscordSRV;
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.chart.ChartType;
+import me.bounser.nascraft.chart.price.ChartType;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
