@@ -1,13 +1,12 @@
-package me.bounser.nascraft.managers;
+package me.bounser.nascraft.market;
 
-import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.formatter.RoundUtils;
-import me.bounser.nascraft.market.Plot;
+import me.bounser.nascraft.managers.GraphManager;
+import me.bounser.nascraft.managers.TasksManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -68,6 +67,15 @@ public class MarketManager {
 
         TasksManager.getInstance();
         GraphManager.getInstance();
+    }
+
+    public void reload() {
+
+        items.clear();
+        categories.clear();
+
+        setupItems();
+
     }
 
     public Item getItem(Material material) {
