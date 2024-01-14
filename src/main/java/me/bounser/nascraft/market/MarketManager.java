@@ -253,4 +253,8 @@ public class MarketManager {
 
     public void setOperationsLastHour(int operations) { operationsLastHour = operations; }
 
+    public void removeItem(Item item) { items.remove(item); }
+
+    public void addItem(Item item) { items.add(item); }
+
 }

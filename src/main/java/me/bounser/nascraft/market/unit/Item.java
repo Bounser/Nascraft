@@ -6,7 +6,7 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
-import me.bounser.nascraft.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.resources.TimeSpan;
@@ -23,8 +23,8 @@ import java.util.*;
 public class Item {
 
     private final Material material;
-    private final String alias;
-    private final Category category;
+    private String alias;
+    private Category category;
 
     private final Price price;
 
@@ -117,15 +117,15 @@ public class Item {
         pricesHour.add(value);
     }
 
-    public void buyItem(int amount, UUID uuid, boolean feedback) {
+    public void buyItem(int amount, UUID uuid, boolean feedback, Material material) {
 
         Player player = Bukkit.getPlayer(uuid);
         Player offlinePlayer = Bukkit.getPlayer(uuid);
 
         if(!MarketManager.getInstance().getActive()) { Lang.get().message(player, Message.SHOP_CLOSED); return; }
 
-        if (!checkBalance(player, feedback, amount)) return;
-        if (!checkInventory(player, feedback, amount)) return;
+        if (!checkBalance(player, feedback, amount, material)) return;
+        if (!checkInventory(player, feedback, amount, material)) return;
 
         int maxSize = Math.round((material.getMaxStackSize())/(price.getElasticity()*4));
         int orderSize = amount / maxSize;
@@ -166,7 +166,7 @@ public class Item {
         MarketManager.getInstance().addOperation();
     }
 
-    public boolean checkBalance(Player player, boolean feedback, int amount) {
+    public boolean checkBalance(Player player, boolean feedback, int amount, Material material) {
         if (!Nascraft.getEconomy().has(player, price.getBuyPrice()*amount*childs.get(material))) {
             if (player != null && feedback) Lang.get().message(player, Message.NOT_ENOUGH_MONEY);
             return false;
@@ -174,7 +174,7 @@ public class Item {
         return true;
     }
 
-    public boolean checkInventory(Player player, boolean feedback, int amount) {
+    public boolean checkInventory(Player player, boolean feedback, int amount, Material material) {
 
         if (player == null) return true;
 
@@ -207,7 +207,7 @@ public class Item {
         return true;
     }
 
-    public float sellItem(int amount, UUID uuid, boolean feedback) {
+    public float sellItem(int amount, UUID uuid, boolean feedback, Material material) {
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
         Player player = Bukkit.getPlayer(uuid);
@@ -349,5 +349,28 @@ public class Item {
     public void restartVolume() { volume = 0; }
 
     public ItemStats getItemStats() { return itemStats; }
+
+    public Category getCategory() { return category; }
+
+    public void setCategory(Category category) { this.category = category; }
+
+    public void changeProperties(float initialPrice, String alias, float elasticity, float noiseSensibility, float support, float resistance) {
+
+        price.setInitialValue(initialPrice)
+                .setElasticity(elasticity)
+                .setNoiseIntensity(support)
+                .setSupport(support)
+                .setResistance(resistance);
+
+        this.alias = alias;
+    }
+
+    public ItemStack getItemStack() {
+
+        ItemStack itemStack = new ItemStack(material);
+
+        return itemStack;
+
+    }
 
 }
