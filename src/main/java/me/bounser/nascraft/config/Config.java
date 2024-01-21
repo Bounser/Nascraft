@@ -1,15 +1,18 @@
 package me.bounser.nascraft.config;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.sellwand.Wand;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
 import me.bounser.nascraft.market.brokers.BrokerType;
 import me.bounser.nascraft.market.resources.Category;
-import me.bounser.nascraft.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.util.*;
@@ -45,6 +48,24 @@ public class Config {
         return YamlConfiguration.loadConfiguration(file);
     }
 
+    public void reload() {
+
+        SQLite.getInstance().saveEverything();
+
+        items = setupFile("items.yml");
+        categories = setupFile("categories.yml");
+
+        MarketManager.getInstance().reload();
+
+    }
+    public FileConfiguration getItemsFileConfiguration() { return items; }
+
+    public File getItemsFile() { return new File(main.getDataFolder(), "items.yml");}
+
+    public FileConfiguration getCategoriesFileConfiguration() { return categories; }
+
+    public File getCategoriesFile() { return new File(main.getDataFolder(), "categories.yml");}
+
     // Config:
 
     public Boolean getCheckResources() { return config.getBoolean("auto-resources-injection"); }
@@ -62,19 +83,19 @@ public class Config {
 
     public boolean getPriceNoise() { return config.getBoolean("price-options.noise.enabled"); }
 
-    public float getTaxBuy(Item item) {
+    public float getTaxBuy(String identifier) {
 
-        if (items.contains("items." + item.getMaterial().toString().toLowerCase() + ".tax.buy")) {
-            return 1 + (float) items.getDouble("items." + item.getMaterial().toString().toLowerCase() + ".tax.buy");
+        if (items.contains("items." + identifier + ".tax.buy")) {
+            return 1 + (float) items.getDouble("items." + identifier + ".tax.buy");
         } else {
             return 1 + (float) config.getDouble("market-control.taxation.buy");
         }
     }
 
-    public float getTaxSell(Item item) {
+    public float getTaxSell(String identifier) {
 
-        if (items.contains("items." + item.getMaterial().toString().toLowerCase() + ".tax.sell")) {
-            return 1 - (float) items.getDouble("items." + item.getMaterial().toString().toLowerCase() + ".tax.sell");
+        if (items.contains("items." + identifier + ".tax.sell")) {
+            return 1 - (float) items.getDouble("items." + identifier + ".tax.sell");
         } else {
             return 1 - (float) config.getDouble("market-control.taxation.sell");
         }
@@ -172,91 +193,122 @@ public class Config {
         }
     }
 
+    // Gold Standard.
+
+    public boolean isGoldStandardEnabled() { return config.getBoolean("gold-standard.enabled"); }
+
+    public boolean isGoldTrackingEnabled() { return config.getBoolean("gold-standard.track-gold-injection"); }
+
+    public boolean isVaultEnabled() { return config.getBoolean("gold-standard.gold-vault.enabled"); }
+
+
     // Items:
 
     public Set<String> getAllMaterials() {
         return items.getConfigurationSection("items.").getKeys(false);
     }
 
-    public float getInitialPrice(Material material) {
+    public float getInitialPrice(String identifier) {
         for (String item : getAllMaterials()) {
-            if (material.toString().equalsIgnoreCase(item)){
+            if (identifier.equalsIgnoreCase(item)){
                 return (float) items.getDouble("items." + item + ".initial-price");
             }
         }
         return 1;
     }
 
-    public HashMap<Material, Float> getChilds(Material material) {
+    public HashMap<ItemStack, Float> getChilds(Item item) {
 
-        HashMap<Material, Float> childs = new HashMap<>();
+        HashMap<ItemStack, Float> childs = new HashMap<>();
 
-        childs.put(material, 1f);
+        childs.put(item.getItemStack(), 1f);
 
         Set<String> section = null;
 
-        if(items.getConfigurationSection("items." + material.toString().toLowerCase() + ".child.") != null) {
-            section = items.getConfigurationSection("items." + material.toString().toLowerCase() + ".child.").getKeys(false);
+        if(items.getConfigurationSection("items." + item.getIdentifier() + ".child.") != null) {
+            section = items.getConfigurationSection("items." + item.getIdentifier() + ".child.").getKeys(false);
         }
 
         if (section == null || section.size() == 0) return childs;
 
         for (String childMat : section){
-            childs.put(Material.getMaterial(childMat.toUpperCase()), (float) items.getDouble("items." + material.toString().toLowerCase() + ".child." + childMat + ".multiplier"));
+            childs.put(new ItemStack(Material.getMaterial(childMat.toUpperCase())), (float) items.getDouble("items." +item.getIdentifier() + ".child." + childMat + ".multiplier"));
         }
         return childs;
     }
 
-    public String getAlias(Material material) {
-        if(!items.contains("items." + material.toString().toLowerCase() + ".alias")) {
-            return (Character.toUpperCase(material.toString().toLowerCase().charAt(0)) + material.toString().toLowerCase().substring(1)).replace("_", " ");
+    public ItemStack getItemStackOfItem(String identifier) {
+
+        if (!items.contains("items." + identifier + ".item-stack")) return null;
+
+        return items.getSerializable("items." + identifier + ".item-stack", ItemStack.class);
+
+    }
+
+    public String getAlias(String identifier) {
+        if(!items.contains("items." + identifier + ".alias")) {
+            return (Character.toUpperCase(identifier.charAt(0)) + identifier.substring(1)).replace("_", " ");
         } else {
-            return items.getString("items." + material.toString().toLowerCase() + ".alias");
+            return items.getString("items." + identifier + ".alias");
         }
     }
 
-    public float getSupport(Material material) {
-        if(items.contains("items." + material.toString().toLowerCase() + ".support")) {
-            return (float) items.getDouble("items." + material.toString().toLowerCase() + ".support");
-        }
-        return 0;
-    }
-
-    public float getResistance(Material material) {
-        if(items.contains("items." + material.toString().toLowerCase() + ".resistance")) {
-            return (float) items.getDouble("items." + material.toString().toLowerCase() + ".resistance");
+    public float getSupport(String identifier) {
+        if(items.contains("items." + identifier + ".support")) {
+            return (float) items.getDouble("items." + identifier + ".support");
         }
         return 0;
     }
 
-    public float getElasticity(Material material) {
-        if(items.contains("items." + material.toString().toLowerCase() + ".elasticity")) {
-            return (float) items.getDouble("items." + material.toString().toLowerCase() + ".elasticity");
+    public float getResistance(String identifier) {
+        if(items.contains("items." + identifier + ".resistance")) {
+            return (float) items.getDouble("items." + identifier + ".resistance");
+        }
+        return 0;
+    }
+
+    public float getElasticity(String identifier) {
+        if(items.contains("items." + identifier + ".elasticity")) {
+            return (float) items.getDouble("items." + identifier + ".elasticity");
         }
         return (float) config.getDouble("price-options.default-elasticity");
     }
 
-    public float getNoiseIntensity(Material material) {
-        if(items.contains("items." + material.toString().toLowerCase() + ".noise-intensity")) {
-            return (float) items.getDouble("items." + material.toString().toLowerCase() + ".noise-intensity");
+    public float getNoiseIntensity(String identifier) {
+        if(items.contains("items." + identifier + ".noise-intensity")) {
+            return (float) items.getDouble("items." + identifier + ".noise-intensity");
         }
         return (float) config.getDouble("price-options.noise.default-intensity");
     }
 
     // Categories:
 
-    public Set<String> getCategories() {
-        return categories.getConfigurationSection("categories.").getKeys(false);
+    public Set<String> getCategories() { return categories.getConfigurationSection("categories.").getKeys(false); }
+
+    public String getDisplayName(Category category){
+        return categories.getString("categories." + category.getIdentifier() + ".display-name");
     }
 
-    public String getDisplayName(Category cat ){
-        return categories.getString("categories." + cat.getName() + ".display_name");
+    public Material getMaterialOfCategory(Category category) {
+
+        if (categories.contains("categories." + category.getIdentifier() + ".display-material")) {
+
+            try {
+                return Material.valueOf(categories.getString("categories." + category.getIdentifier() + ".display-material").toUpperCase());
+            } catch (IllegalArgumentException exception) {
+                Nascraft.getInstance().getLogger().warning(ChatColor.RED + "Category " + category.getIdentifier() + " doesn't have a valid display material.");
+                return Material.STONE;
+            }
+        }
+
+        return Material.STONE;
+
     }
 
-    public Category getCategoryFromMaterial(Material material) {
+    public Category getCategoryFromMaterial(String identifier) {
 
         for(Category category : MarketManager.getInstance().getCategories()) {
-            if(categories.getList("categories." + category.getName() + ".items").contains(material.toString().toLowerCase())) {
+            if(categories.getList("categories." + category.getIdentifier() + ".items").contains(identifier)) {
                 return category;
             }
         }

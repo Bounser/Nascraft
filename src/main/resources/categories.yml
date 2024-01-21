@@ -4,7 +4,10 @@ categories:
   # Reference of the category. Categories are displayed in the main menu.
   1:
     # Display name of the category (cannot be very long).
-    display_name: 'Stone age'
+    display-name: 'Stone age'
+    # (OPTIONAL) Display item of the category.
+    # If not specified the material of the first item will be used.
+    display-material: 'stone_pickaxe'
     # Items within the category.
     items:
       # Material of the item.
@@ -13,8 +16,9 @@ categories:
       - 'andesite'
       - 'diorite'
       - 'granite'
+      - 'tuff'
   2:
-    display_name: 'In the depths'
+    display-name: 'In the depths'
     items:
       - 'cobbled_deepslate'
       - 'deepslate'
@@ -22,7 +26,7 @@ categories:
       - 'amethyst_shard'
       - 'sculk'
   3:
-    display_name: 'Even deeper'
+    display-name: 'Even deeper'
     items:
       - 'basalt'
       - 'blackstone'
@@ -34,7 +38,7 @@ categories:
       - 'quartz'
       - 'soul_sand'
   4:
-    display_name: 'The End'
+    display-name: 'The End'
     items:
       - 'end_stone'
       - 'purpur_block'
@@ -42,16 +46,19 @@ categories:
       - 'ender_pearl'
       - 'chorus_fruit'
   5:
-    display_name: 'Wet'
+    display-name: 'Wet'
     items:
       - 'sand'
       - 'prismarine_shard'
       - 'prismarine_crystals'
       - 'ink_sac'
       - 'glow_ink_sac'
-      - 'cooked_cod'
+      - 'cod'
+      - 'tropical_fish'
+      - 'salmon'
+      - 'pufferfish'
   6:
-    display_name: 'Tech'
+    display-name: 'Tech'
     items:
       - 'redstone'
       - 'hopper'
@@ -61,7 +68,7 @@ categories:
       - 'piston'
       - 'sculk_sensor'
   7:
-    display_name: 'In the woods'
+    display-name: 'In the woods'
     items:
       - 'oak_log'
       - 'birch_log'
@@ -72,28 +79,33 @@ categories:
       - 'mangrove_log'
       - 'cherry_log'
   8:
-    display_name: 'Valuables'
+    display-name: 'Loot'
+    items:
+      - 'rotten_flesh'
+      - 'bone'
+      - 'arrow'
+      - 'string'
+      - 'spider_eye'
+      - 'slime_ball'
+      - 'gunpowder'
+      - 'phantom_membrane'
+  9:
+    display-name: 'Valuables'
     items:
       - 'diamond'
       - 'emerald'
       - 'nether_star'
-  9:
-    display_name: 'Utils'
-    items:
       - 'name_tag'
       - 'totem_of_undying'
-      - 'leather'
       - 'golden_apple'
       - 'golden_carrot'
-      - 'slime_ball'
-      - 'gunpowder'
   10:
-    display_name: 'Fuel'
+    display-name: 'Fuel'
     items:
       - 'coal'
       - 'dried_kelp_block'
   11:
-    display_name: 'Ingots & Bricks'
+    display-name: 'Ingots & Bricks'
     items:
       - 'iron_ingot'
       - 'copper_ingot'
@@ -102,10 +114,22 @@ categories:
       - 'brick'
       - 'nether_brick'
   12:
-    display_name: 'In the farm'
+    display-name: 'Agriculture'
     items:
       - 'apple'
       - 'carrot'
       - 'potato'
       - 'wheat'
+      - 'pumpkin'
+      - 'melon'
       - 'honey_bottle'
+  13:
+    display-name: 'Livestock'
+    items:
+      - 'beef'
+      - 'porkchop'
+      - 'mutton'
+      - 'chicken'
+      - 'rabbit'
+      - 'egg'
+      - 'leather'
