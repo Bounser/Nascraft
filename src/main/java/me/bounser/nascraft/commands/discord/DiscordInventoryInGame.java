@@ -6,7 +6,7 @@ import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -147,7 +147,7 @@ public class DiscordInventoryInGame implements Listener {
 
         int i = 9;
         for (Item item : content.keySet()) {
-            ItemStack material = new ItemStack(item.getMaterial());
+            ItemStack material = item.getItemStack();
             ItemMeta meta = material.getItemMeta();
             meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + content.get(item)));
             material.setItemMeta(meta);

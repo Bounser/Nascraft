@@ -12,12 +12,26 @@ items:
     # when the price deviates due to player actions.
     support: 0.01
     resistance: 0.1
+
     # OPTIONAL: The elasticity determines the item's predisposition to react to changes in stock.
     # With lower values items will require more interactions to change, and with higher values items will change more easily.
     # This is especially useful with common objects such as cobblestone. At lower elasticity, players will have to sell/buy much more to influence the price.
-    elasticity: 0.45
+    elasticity: 0.5
     # OPTIONAL: The intensity of the noise determines the magnitude of the random fluctuations.
     noise-intensity: 1.4
+
+    # OPTIONAL: Set different taxes per item:
+    tax:
+      # Tax of 5% when buying cobblestone.
+      buy: 0.05
+      # Tax of 10% when selling cobblestone.
+      sell: 0.1
+
+    #OPTIONAL: Change the icon of the item to a custom one.
+    # This only has effect with AdvancedGUI layouts and the discord extension.
+    # Upload an image to /Nascraft/images/ and add:
+    # icon: 'Name of the image'
+
     # OPTIONAL: Child items. The price of these items will be determined by their parent item.
     child:
       cobblestone_slab:
@@ -34,6 +48,7 @@ items:
       cobblestone_wall:
         # Spends 6, gets 6. Therefore, the ratio is 6/6 = 1/1 = 1.
         multiplier: 1
+
   stone:
     initial-price: 0.1
     support: 0.05
@@ -49,13 +64,16 @@ items:
         multiplier: 1
   andesite:
     initial-price: 0.1
-    elasticity: 0.8
+    elasticity: 0.7
   diorite:
     initial-price: 0.1
-    elasticity: 0.8
+    elasticity: 0.7
   granite:
     initial-price: 0.1
-    elasticity: 0.8
+    elasticity: 0.7
+  tuff:
+    initial-price: 0.1
+    elasticity: 0.7
 
   cobbled_deepslate:
     initial-price: 0.1
@@ -70,14 +88,14 @@ items:
         multiplier: 1
   deepslate:
     initial-price: 0.1
-    elasticity: 0.6
+    elasticity: 0.7
   obsidian:
     initial-price: 350
     support: 100
   amethyst_shard:
     initial-price: 50
   sculk:
-    initial-price: 50
+    initial-price: 20
 
   basalt:
     initial-price: 0.5
@@ -121,8 +139,14 @@ items:
     initial-price: 100
   glow_ink_sac:
     initial-price: 500
-  cooked_cod:
+  cod:
+    initial-price: 5
+  tropical_fish:
     initial-price: 10
+  salmon:
+    initial-price: 10
+  pufferfish:
+    initial-price: 15
 
   redstone:
     initial-price: 2
@@ -177,6 +201,24 @@ items:
   cherry_log:
     initial-price: 1
 
+  rotten_flesh:
+    initial-price: 0.5
+  bone:
+    initial-price: 5
+  arrow:
+    initial-price: 6
+  string:
+    initial-price: 5
+  spider_eye:
+    initial-price: 8
+  slime_ball:
+    support: 50
+    initial-price: 150
+  gunpowder:
+    initial-price: 50
+  phantom_membrane:
+    initial-price: 10
+
   diamond:
     initial-price: 800
     resistance: 1000
@@ -188,26 +230,20 @@ items:
   nether_star:
     initial-price: 15000
     support: 5000
-    elasticity: 5
+    elasticity: 4
     noise-intensity: 0.5
-
   name_tag:
     initial-price: 5000
-    elasticity: 3
+    elasticity: 4
     noise-intensity: 0.5
   totem_of_undying:
     initial-price: 8000
-    elasticity: 1.5
+    elasticity: 4
     noise-intensity: 0.5
-  leather:
-    initial-price: 5
   golden_apple:
-    initial-price: 50
-  slime_ball:
-    support: 50
+    initial-price: 250
+  golden_carrot:
     initial-price: 150
-  gunpowder:
-    initial-price: 50
 
   coal:
     initial-price: 4
@@ -226,13 +262,25 @@ items:
   netherite_ingot:
     support: 5000
     initial-price: 10000
-    elasticity: 3
+    elasticity: 4
     noise-intensity: 0.5
   brick:
     initial-price: 50
   nether_brick:
     initial-price: 5
 
+  beef:
+    initial-price: 5
+  porkchop:
+    initial-price: 5
+  mutton:
+    initial-price: 6
+  chicken:
+    initial-price: 4
+  rabbit:
+    initial-price: 8
+  egg:
+    initial-price: 4
   apple:
     initial-price: 15
   carrot:
@@ -241,5 +289,11 @@ items:
     initial-price: 0.8
   wheat:
     initial-price: 0.8
+  pumpkin:
+    initial-price: 8
+  melon:
+    initial-price: 7
   honey_bottle:
-    initial-price: 80
+    initial-price: 40
+  leather:
+    initial-price: 30

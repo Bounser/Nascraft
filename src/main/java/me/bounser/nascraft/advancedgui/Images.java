@@ -1,6 +1,7 @@
 package me.bounser.nascraft.advancedgui;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.market.unit.Item;
 import me.leoko.advancedgui.manager.ResourceManager;
 import org.bukkit.Material;
 
@@ -18,6 +19,10 @@ public class Images {
 
     public static Images getInstance() { return instance == null ? instance = new Images() : instance; }
 
+
+    public BufferedImage getImage(Item item, int width, int height, boolean dithering) {
+        return ResourceManager.getInstance().processImage(item.getIcon(), width, height, dithering);
+    }
 
     public BufferedImage getImage(Material material, int width, int height, boolean dithering) {
 

@@ -1,5 +1,7 @@
 package me.bounser.nascraft.market;
 
+import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.managers.GraphManager;
 import me.bounser.nascraft.managers.TasksManager;
@@ -11,6 +13,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -50,16 +53,34 @@ public class MarketManager {
             categories.add(category);
         }
 
-        for (String stringMaterial : Config.getInstance().getAllMaterials()) {
+        for (String identifier : Config.getInstance().getAllMaterials()) {
 
-            Material material = Material.valueOf(stringMaterial.toUpperCase());
+            Category category = config.getCategoryFromMaterial(identifier);
 
-            Category category = config.getCategoryFromMaterial(material);
+            if (category == null) {
+                Nascraft.getInstance().getLogger().warning("No category found for item: " + identifier);
+                continue;
+            }
 
-            Item item = new Item(material, config.getAlias(material), category);
+            BufferedImage image = ImagesManager.getInstance().getImage(identifier);
+
+            if (image == null) {
+                Nascraft.getInstance().getLogger().warning("No image found for item: " + identifier);
+                continue;
+            }
+
+            ItemStack itemStack = config.getItemStackOfItem(identifier);
+
+            if (itemStack == null) itemStack = new ItemStack(Material.getMaterial(identifier.replaceAll("\\d", "").toUpperCase()));
+
+            Item item = new Item(
+                    itemStack,
+                    identifier,
+                    config.getAlias(identifier),
+                    category,
+                    image);
             items.add(item);
             category.addItem(item);
-            materials.add(material);
         }
 
         marketChanges1h = new ArrayList<>(Collections.nCopies(60, 0f));
@@ -78,13 +99,13 @@ public class MarketManager {
 
     }
 
-    public Item getItem(Material material) {
-        for (Item item : items) { if (item.getMaterial() == material) { return item; } }
+    public Item getItem(ItemStack itemStack) {
+        for (Item item : items) if (item.isFromThis(itemStack)) return item;
         return null;
     }
 
-    public Item getItem(String material) {
-        for (Item item : items) { if (item.getMaterial().toString().equalsIgnoreCase(material.replace(" ", "_"))) { return item; } }
+    public Item getItem(String identifier) {
+        for (Item item : items) if (item.getIdentifier().equalsIgnoreCase(identifier)) return item;
         return null;
     }
 
@@ -256,5 +277,10 @@ public class MarketManager {
     public void removeItem(Item item) { items.remove(item); }
 
     public void addItem(Item item) { items.add(item); }
+
+    public void removeCategory(Category category) { categories.remove(category); }
+
+    public void addCategory(Category category) { categories.remove(category); }
+
 
 }

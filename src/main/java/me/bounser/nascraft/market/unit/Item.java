@@ -18,12 +18,15 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.awt.image.BufferedImage;
 import java.util.*;
 
 public class Item {
 
-    private final Material material;
+    private ItemStack itemStack;
+    private final String identifier;
     private String alias;
+    private BufferedImage icon;
     private Category category;
 
     private final Price price;
@@ -56,19 +59,25 @@ public class Item {
 
     private ItemStats itemStats;
 
-    private final HashMap<Material, Float> childs;
+    private final HashMap<ItemStack, Float> childs;
 
-    public Item(Material material, String alias, Category category){
-        this.material = material;
+    public Item(ItemStack itemStack, String identifier, String alias, Category category, BufferedImage image){
+
+        itemStack.setAmount(1);
+
+        this.itemStack = itemStack;
+        this.identifier = identifier;
         this.alias = alias;
 
         this.price = new Price(
                 this,
-                Config.getInstance().getInitialPrice(material),
-                Config.getInstance().getElasticity(material),
-                Config.getInstance().getSupport(material),
-                Config.getInstance().getResistance(material),
-                Config.getInstance().getNoiseIntensity(material));
+                Config.getInstance().getInitialPrice(identifier),
+                Config.getInstance().getElasticity(identifier),
+                Config.getInstance().getSupport(identifier),
+                Config.getInstance().getResistance(identifier),
+                Config.getInstance().getNoiseIntensity(identifier));
+
+        this.icon = image;
 
         SQLite.getInstance().retrievePrices(this);
         SQLite.getInstance().retrieveItem(this);
@@ -84,7 +93,7 @@ public class Item {
 
         this.category = category;
         operations = 0;
-        this.childs = Config.getInstance().getChilds(this.material);
+        this.childs = Config.getInstance().getChilds(this);
 
         gdMinutes = new GraphData(TimeSpan.HOUR, pricesHour);
         gdHours = new GraphData(TimeSpan.DAY, pricesDay);
@@ -133,22 +142,28 @@ public class Item {
 
         float totalCost = 0;
 
+        ItemStack operationItemStack = getItemStackFromChildMaterial(material);
+
         for (int i = 0 ; i < orderSize ; i++) {
 
-            totalCost += price.getBuyPrice()*maxSize*childs.get(material);
+            totalCost += price.getBuyPrice()*maxSize*childs.get(getItemStackFromChildMaterial(material));
 
             price.changeStock(-maxSize);
 
-            if (player != null  && feedback) player.getInventory().addItem(new ItemStack(material, maxSize));
+            operationItemStack.setAmount(maxSize);
+
+            if (player != null  && feedback) player.getInventory().addItem(operationItemStack);
         }
 
         if (excess > 0) {
 
-            totalCost += price.getBuyPrice()*excess*childs.get(material);
+            totalCost += price.getBuyPrice()*excess*childs.get(getItemStackFromChildMaterial(material));
 
             price.changeStock(-excess);
 
-            if (player != null  && feedback) player.getInventory().addItem(new ItemStack(material, excess));
+            operationItemStack.setAmount(excess);
+
+            if (player != null  && feedback) player.getInventory().addItem(operationItemStack);
         }
 
         totalCost = RoundUtils.round(totalCost);
@@ -167,7 +182,7 @@ public class Item {
     }
 
     public boolean checkBalance(Player player, boolean feedback, int amount, Material material) {
-        if (!Nascraft.getEconomy().has(player, price.getBuyPrice()*amount*childs.get(material))) {
+        if (!Nascraft.getEconomy().has(player, price.getProjectedCost(amount, price.getBuyTaxMultiplier())*childs.get(getItemStackFromChildMaterial(material))*1.2)) {
             if (player != null && feedback) Lang.get().message(player, Message.NOT_ENOUGH_MONEY);
             return false;
         }
@@ -217,7 +232,11 @@ public class Item {
             return -1;
         }
 
-        if (player != null && feedback && !player.getInventory().containsAtLeast(new ItemStack(material), amount)) {
+        ItemStack operationItemStack = getItemStackFromChildMaterial(material);
+
+        operationItemStack.setAmount(1);
+
+        if (player != null && feedback && !player.getInventory().containsAtLeast(operationItemStack, amount)) {
             Lang.get().message(player, Message.NOT_ENOUGH_ITEMS);
             return -1;
         }
@@ -230,20 +249,24 @@ public class Item {
 
         for (int i = 0 ; i < orderSize ; i++) {
 
-            totalWorth += price.getSellPrice()*maxSize*childs.get(material);
+            totalWorth += price.getSellPrice()*maxSize*childs.get(getItemStackFromChildMaterial(material));
 
             price.changeStock(maxSize);
 
-            if (player != null && feedback) player.getInventory().removeItem(new ItemStack(material, maxSize));
+            operationItemStack.setAmount(maxSize);
+
+            if (player != null && feedback) player.getInventory().removeItem(operationItemStack);
         }
 
         if (excess > 0) {
 
-            totalWorth += price.getSellPrice()*excess*childs.get(material);
+            totalWorth += price.getSellPrice()*excess*childs.get(getItemStackFromChildMaterial(material));
 
             price.changeStock(excess);
 
-            if (player != null && feedback) player.getInventory().removeItem(new ItemStack(material, excess));
+            operationItemStack.setAmount(excess);
+
+            if (player != null && feedback) player.getInventory().removeItem(operationItemStack);
         }
 
         totalWorth = RoundUtils.round(totalWorth);
@@ -285,11 +308,11 @@ public class Item {
         pricesMonth.add(price.getValue());
     }
 
-    public Material getMaterial() { return material; }
+    public String getIdentifier() { return identifier; }
 
     public List<Material> getParentAndChildsMaterials() {
         List materials = new ArrayList();
-        materials.add(material);
+        materials.add(itemStack.getType());
         materials.add(childs.keySet());
 
         return materials;
@@ -307,7 +330,15 @@ public class Item {
         }
     }
 
-    public HashMap<Material, Float> getChilds() { return childs; }
+    public ItemStack getItemStackFromChildMaterial(Material material) {
+
+        for (ItemStack itemStack : childs.keySet())
+            if (itemStack.getType().equals(material)) return itemStack.clone();
+
+        return null;
+    }
+
+    public HashMap<ItemStack, Float> getChilds() { return childs; }
 
     public int getOperations() { return operations; }
 
@@ -358,19 +389,25 @@ public class Item {
 
         price.setInitialValue(initialPrice)
                 .setElasticity(elasticity)
-                .setNoiseIntensity(support)
+                .setNoiseIntensity(noiseSensibility)
                 .setSupport(support)
                 .setResistance(resistance);
 
         this.alias = alias;
     }
 
-    public ItemStack getItemStack() {
+    public ItemStack getItemStack() { return itemStack.clone(); }
 
-        ItemStack itemStack = new ItemStack(material);
+    public void setItemStack(ItemStack itemStack) { this.itemStack = itemStack; }
 
-        return itemStack;
+    public boolean isFromThis(ItemStack itemStack) {
 
+        ItemStack itemStack1 = itemStack.clone();
+        itemStack1.setAmount(1);
+
+        return this.itemStack.equals(itemStack1);
     }
+
+    public BufferedImage getIcon() { return icon; }
 
 }

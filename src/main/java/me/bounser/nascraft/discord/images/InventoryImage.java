@@ -61,7 +61,7 @@ public class InventoryImage {
                     if (items.size() >= slot) {
                         Item item = items.get(slot-1);
 
-                        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial()), i*79+40, j*81+124, 63, 63, null);
+                        graphics.drawImage(item.getIcon(), i*79+40, j*81+124, 63, 63, null);
 
                         graphics.setFont(new Font("Garamond", Font.BOLD, 26));
                         graphics.setColor(new Color(0, 0, 0));

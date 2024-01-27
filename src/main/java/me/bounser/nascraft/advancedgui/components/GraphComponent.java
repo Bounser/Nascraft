@@ -5,17 +5,19 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.market.unit.GraphData;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.managers.MarketManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.formatter.RoundUtils;
+import me.leoko.advancedgui.manager.ResourceManager;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
 import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.awt.*;
 import java.util.*;
@@ -27,8 +29,8 @@ public class GraphComponent extends RectangularComponent {
 
     private GraphData graphData;
 
-    private List<Material> childsMat;
-    private HashMap<Material, Float> childs;
+    private List<ItemStack> childsMat;
+    private HashMap<ItemStack, Float> childs;
     public int width, height, yc, xc;
 
     private final ViewComponent background;
@@ -85,9 +87,7 @@ public class GraphComponent extends RectangularComponent {
         graphData.changeState();
     }
 
-    public void setGraphData(GraphData graphData) {
-        slideComponent.setGraphData(graphData);
-    }
+    public void setGraphData(GraphData graphData) { slideComponent.setGraphData(graphData); }
 
     public Color setupBackGround() {
 
@@ -122,36 +122,38 @@ public class GraphComponent extends RectangularComponent {
 
     }
 
-    public void changeMat(Material material) {
+    public void changeMat(Item item) {
+
+        this.item = item;
 
         if (slideComponent == null) { slideComponent = this.interaction.getComponentTree().locate("slide1", SlideComponent.class); }
 
         childComponents = interaction.getComponentTree().locate("childC", GroupComponent.class);
 
-        item = MarketManager.getInstance().getItem(material);
         this.childs = item.getChilds();
 
         graphData = item.getGraphData(TimeSpan.HOUR);
 
         ImageComponent ic = childComponents.locate("MainImage", ImageComponent.class);
-        ic.setImage(Images.getInstance().getImage(material, 60, 60, true));
+
+        ic.setImage(ResourceManager.getInstance().processImage(item.getIcon(), 60, 60, true));
 
         mainText.setText(item.getName());
 
-        setGraphData(MarketManager.getInstance().getItem(material).getGraphData(TimeSpan.HOUR));
+        setGraphData(item.getGraphData(TimeSpan.HOUR));
 
         if (childs == null) {
             childComponents.locate("childs").setHidden(true);
             childComponents.locate("minichild").setHidden(true);
             childsMat = new ArrayList<>();
-            childsMat.add(0, material);
+            childsMat.add(0, item.getItemStack());
         } else {
             childComponents.locate("childs").setHidden(false);
             childComponents.locate("minichild").setHidden(false);
 
             childsMat = new ArrayList<>(childs.keySet());
 
-            while (!(childsMat.get(0) == material)) {
+            while (!(childsMat.get(0).equals(item.getItemStack()))) {
                 Collections.rotate(childsMat, 1);
             }
 
@@ -167,12 +169,12 @@ public class GraphComponent extends RectangularComponent {
         graphData.changeState();
     }
 
-    public void updateChilds(HashMap<Material, Float> childs) {
+    public void updateChilds(HashMap<ItemStack, Float> childs) {
 
         for (int i = 1; i <= 8 ; i++) {
 
             if (childs.keySet().size() >= i) {
-                childComponents.locate("child" + i, ImageComponent.class).setImage(Images.getInstance().getImage(childsMat.get(i-1), 32, 32, true));
+                childComponents.locate("child" + i, ImageComponent.class).setImage(Images.getInstance().getImage(childsMat.get(i-1).getType(), 32, 32, true));
                 childComponents.locate("child" + i, ImageComponent.class).setHidden(false);
             } else {
                 childComponents.locate("child" + i, ImageComponent.class).setHidden(true);
@@ -180,11 +182,11 @@ public class GraphComponent extends RectangularComponent {
             childComponents.locate("childback", RectComponent.class).setWidth(10 + 33*childs.keySet().size());
         }
 
-        if (childsMat.get(0).equals(item.getMaterial())) {
+        if (childsMat.get(0).equals(item.getItemStack().getType())) {
             childComponents.locate("minichild").setHidden(true);
         } else {
             childComponents.locate("minichild").setHidden(false);
-            childComponents.locate("childper", ImageComponent.class).setImage(Images.getInstance().getImage(childsMat.get(0), 26, 26, true));
+            childComponents.locate("childper", ImageComponent.class).setImage(Images.getInstance().getImage(childsMat.get(0).getType(), 26, 26, true));
         }
         updateButtonPrice();
     }
@@ -194,8 +196,8 @@ public class GraphComponent extends RectangularComponent {
     public Item getItem() { return item; }
 
     public Material getMaterial() {
-        if (childsMat == null) return item.getMaterial();
-        else return childsMat.get(0);
+        if (childsMat == null) return item.getItemStack().getType();
+        else return childsMat.get(0).getType();
     }
 
     public float getMultiplier() {

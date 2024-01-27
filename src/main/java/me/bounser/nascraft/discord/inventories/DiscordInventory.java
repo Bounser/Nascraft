@@ -102,7 +102,7 @@ public class DiscordInventory {
 
         for (Item item : inventory.keySet()) {
             if (item != null)
-                value += item.sellItem(inventory.get(item), uuid, false);
+                value += item.sellItem(inventory.get(item), uuid, false, item.getItemStack().getType());
         }
 
         inventory.clear();
