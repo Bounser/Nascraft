@@ -23,7 +23,7 @@ public class ItemStats {
 
     public void addInstant(Instant instant) {
 
-        dataMinute.add(instant); // Each minute
+        dataMinute.add(instant);
 
         if (dataMinute.size() % 5 == 0) {
 
@@ -34,36 +34,32 @@ public class ItemStats {
                     priceAverage(dataMinute.subList(dataMinute.size()-5, dataMinute.size()-1)),
                     volumeAdder(dataMinute.subList(dataMinute.size()-5, dataMinute.size()-1)));
 
-            dataDay.add(dayInstant); // Each five minutes
+            dataDay.add(dayInstant);
 
             SQLite.getInstance().saveDayPrice(item, dayInstant);
 
             while (dataDay.size() > 288)  dataDay.remove(0);
 
-            if (dataDay.size() % 32 == 0) {
+            if (dataDay.size() < 12) return;
 
-                Instant monthInstant = new Instant(
-                        getLocalDateTimeBetween(LocalDateTime.now(), dataDay.get(dataDay.size()-6).getLocalDateTime()),
-                        priceAverage(dataDay.subList(dataDay.size()-6, dataDay.size()-1)),
-                        volumeAdder(dataDay.subList(dataDay.size()-6, dataDay.size()-1)));
+            Instant monthInstant = new Instant(
+                    LocalDateTime.now(),
+                    priceAverage(dataDay),
+                    volumeAdder(dataDay));
 
-                dataMonth.add(monthInstant); // Each 160 minutes
+            dataMonth.add(monthInstant);
 
-                SQLite.getInstance().saveMonthPrice(item, monthInstant);
+            SQLite.getInstance().saveMonthPrice(item, monthInstant);
 
-                while (dataMonth.size() > 31*9)  dataMonth.remove(0);
+            while (dataMonth.size() > 180)  dataMonth.remove(0);
 
-                if (dataMonth.size() % 9 == 0) {
+            dataYear.add(new Instant(
+                    LocalDateTime.now(),
+                    priceAverage(dataDay),
+                    volumeAdder(dataDay)));
 
-                    dataYear.add(new Instant(
-                            getLocalDateTimeBetween(LocalDateTime.now(), dataMonth.get(dataMonth.size()-12).getLocalDateTime()),
-                            priceAverage(dataDay.subList(dataDay.size()-12, dataDay.size()-1)),
-                            volumeAdder(dataDay.subList(dataDay.size()-12, dataDay.size()-1))));
+            SQLite.getInstance().saveHistoryPrices(item, monthInstant);
 
-                    SQLite.getInstance().saveHistoryPrices(item, monthInstant); // Each day
-
-                }
-            }
         }
     }
 

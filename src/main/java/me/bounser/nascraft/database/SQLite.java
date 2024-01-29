@@ -4,8 +4,8 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.brokers.BrokerType;
-import me.bounser.nascraft.managers.BrokersManager;
-import me.bounser.nascraft.managers.MarketManager;
+import me.bounser.nascraft.market.brokers.BrokersManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Instant;
 import me.bounser.nascraft.market.unit.Item;
@@ -41,7 +41,7 @@ public class SQLite {
         }
 
         createTable(connection, "items",
-                "material TEXT PRIMARY KEY, " +
+                "identifier TEXT PRIMARY KEY, " +
                         "lastprice DOUBLE, " +
                         "lowest DOUBLE, " +
                         "highest DOUBLE, " +
@@ -49,7 +49,7 @@ public class SQLite {
                         "taxes DOUBLE");
 
         createTable(connection, "prices",
-                "material TEXT PRIMARY KEY," +
+                "identifier TEXT PRIMARY KEY," +
                         "date TEXT," +
                         "dayprices TEXT," + // 48
                         "monthprices TEXT," + // 30
@@ -57,28 +57,30 @@ public class SQLite {
 
         createTable(connection, "prices_day",
                 "id INTEGER PRIMARY KEY, " +
+                        "day INT, " +
                         "date TEXT," +
-                        "material TEXT," +
+                        "identifier TEXT," +
                         "price DOUBLE," +
                         "volume INT");
 
         createTable(connection, "prices_month",
                 "id INTEGER PRIMARY KEY, " +
+                        "day INT, " +
                         "date TEXT," +
-                        "material TEXT," +
+                        "identifier TEXT," +
                         "price DOUBLE," +
                         "volume INT");
 
         createTable(connection, "prices_history",
                 "day INT  ," +
-                        "material INT," +
+                        "identifier INT," +
                         "price DOUBLE," +
                         "volume INT," +
-                        "PRIMARY KEY (material, day)");
+                        "PRIMARY KEY (identifier, day)");
 
         createTable(connection, "inventories",
                 "uuid VARCHAR(36) NOT NULL," +
-                        "material TEXT," +
+                        "identifier TEXT," +
                         "amount INT");
 
         createTable(connection, "capacities",
@@ -95,7 +97,7 @@ public class SQLite {
                         "uuid VARCHAR(36) NOT NULL," +
                         "day INT NOT NULL," +
                         "date TEXT NOT NULL," +
-                        "material TEXT NOT NULL," +
+                        "identifier TEXT NOT NULL," +
                         "amount INT NOT NULL," +
                         "value TEXT NOT NULL," +
                         "buy INT NOT NULL, " +
@@ -114,6 +116,12 @@ public class SQLite {
                         "broker TEXT NOT NULL," +
                         "day INT NOT NULL," +
                         "lastvalue TEXT NOT NULL");
+
+//        createTable(connection, "gold_extraction",
+//                "id INTEGER PRIMARY KEY, " +
+//                        "day INT NOT NULL," +
+//                        "quantity INT NOT NULL," +
+//                        "source TEXT NOT NULL");
 
 
         purgeHistory();
@@ -160,7 +168,7 @@ public class SQLite {
 
     public void saveItem(Item item) {
         try {
-            String sql = "UPDATE items SET lastprice=?, lowest=?, highest=?, stock=?, taxes=? WHERE material=?;";
+            String sql = "UPDATE items SET lastprice=?, lowest=?, highest=?, stock=?, taxes=? WHERE identifier=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
 
             prep.setFloat(1, item.getPrice().getValue());
@@ -169,7 +177,7 @@ public class SQLite {
             prep.setFloat(4, item.getPrice().getStock());
             prep.setFloat(5, item.getCollectedTaxes());
 
-            prep.setString(6, item.getMaterial().toString());
+            prep.setString(6, item.getIdentifier());
 
             prep.executeUpdate();
 
@@ -181,10 +189,10 @@ public class SQLite {
     public void retrieveItem(Item item) {
 
         try {
-            String sql = "SELECT lowest, highest, stock, taxes FROM items WHERE material=?;";
+            String sql = "SELECT lowest, highest, stock, taxes FROM items WHERE identifier=?;";
 
             PreparedStatement prep = connection.prepareStatement(sql);
-            prep.setString(1, item.getMaterial().toString());
+            prep.setString(1, item.getIdentifier());
             ResultSet rs = prep.executeQuery();
 
             if (rs.next()) {
@@ -193,19 +201,19 @@ public class SQLite {
                 item.getPrice().setHistoricalLow(rs.getFloat("lowest"));
                 item.setCollectedTaxes(rs.getFloat("taxes"));
             } else {
-                String sqlinsert = "INSERT INTO items (material, lastprice, lowest, highest, stock, taxes) VALUES (?,?,?,?,?,?);";
+                String sqlinsert = "INSERT INTO items (identifier, lastprice, lowest, highest, stock, taxes) VALUES (?,?,?,?,?,?);";
 
                 PreparedStatement insertPrep = connection.prepareStatement(sqlinsert);
-                insertPrep.setString(1, item.getMaterial().toString());
-                insertPrep.setFloat(2, Config.getInstance().getInitialPrice(item.getMaterial()));
-                insertPrep.setFloat(3, Config.getInstance().getInitialPrice(item.getMaterial()));
-                insertPrep.setFloat(4, Config.getInstance().getInitialPrice(item.getMaterial()));
+                insertPrep.setString(1, item.getIdentifier());
+                insertPrep.setFloat(2, Config.getInstance().getInitialPrice(item.getIdentifier()));
+                insertPrep.setFloat(3, Config.getInstance().getInitialPrice(item.getIdentifier()));
+                insertPrep.setFloat(4, Config.getInstance().getInitialPrice(item.getIdentifier()));
                 insertPrep.setFloat(5, 0);
                 insertPrep.setFloat(6, 0);
 
                 item.getPrice().setStock(0);
-                item.getPrice().setHistoricalHigh(Config.getInstance().getInitialPrice(item.getMaterial()));
-                item.getPrice().setHistoricalLow(Config.getInstance().getInitialPrice(item.getMaterial()));
+                item.getPrice().setHistoricalHigh(Config.getInstance().getInitialPrice(item.getIdentifier()));
+                item.getPrice().setHistoricalLow(Config.getInstance().getInitialPrice(item.getIdentifier()));
                 item.setCollectedTaxes(0);
 
                 insertPrep.executeUpdate();
@@ -219,7 +227,7 @@ public class SQLite {
     public void savePrices(Item item) {
 
         try {
-            String updateSQL = "UPDATE prices SET date=?, dayprices=?, monthprices=?, yearprices=? WHERE material=?;";
+            String updateSQL = "UPDATE prices SET date=?, dayprices=?, monthprices=?, yearprices=? WHERE identifier=?;";
 
             PreparedStatement preparedStatement = connection.prepareStatement(updateSQL);
 
@@ -227,9 +235,89 @@ public class SQLite {
             preparedStatement.setString(2, item.getPrices(TimeSpan.DAY).toString());
             preparedStatement.setString(3, item.getPrices(TimeSpan.MONTH).toString());
             preparedStatement.setString(4, item.getPrices(TimeSpan.YEAR).toString());
-            preparedStatement.setString(5, item.getMaterial().toString());
+            preparedStatement.setString(5, item.getIdentifier());
 
             preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void saveDayPrice(Item item, Instant instant) {
+
+        try {
+            String insert = "INSERT INTO prices_day (day, identifier, date, price, volume) VALUES (?,?,?,?,?);";
+
+            PreparedStatement insertStatement = connection.prepareStatement(insert);
+
+            insertStatement.setInt(1, getDays());
+            insertStatement.setString(2, item.getIdentifier());
+            insertStatement.setString(3, instant.getLocalDateTime().toString());
+            insertStatement.setDouble(4, instant.getPrice());
+            insertStatement.setInt(5, instant.getVolume());
+
+            insertStatement.executeUpdate();
+
+            String deleteQuery = "DELETE FROM prices_day WHERE day < ?;";
+
+            PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
+
+            deleteStatement.setInt(1, getDays()-2);
+
+            deleteStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void saveMonthPrice(Item item, Instant instant) {
+
+        try {
+            String select = "SELECT price FROM prices_month WHERE identifier=? AND day=?;";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(select);
+
+            preparedStatement.setString(1, item.getIdentifier());
+            preparedStatement.setInt(2, getDays());
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) {
+                String insert = "INSERT INTO prices_month (day, identifier, date, price, volume) VALUES (?,?,?,?,?);";
+
+                PreparedStatement insertStatement = connection.prepareStatement(insert);
+
+                insertStatement.setInt(1, getDays());
+                insertStatement.setString(2, item.getIdentifier());
+                insertStatement.setString(3, instant.getLocalDateTime().toString());
+                insertStatement.setDouble(3, instant.getPrice());
+                insertStatement.setInt(4, instant.getVolume());
+
+                insertStatement.executeUpdate();
+            } else if (parseDateTime(resultSet.getString("date")).isBefore(LocalDateTime.now().minusHours(9))) {
+
+                String insert = "INSERT INTO prices_month (day, identifier, date, price, volume) VALUES (?,?,?,?,?);";
+
+                PreparedStatement insertStatement = connection.prepareStatement(insert);
+
+                insertStatement.setInt(1, getDays());
+                insertStatement.setString(2, item.getIdentifier());
+                insertStatement.setString(3, instant.getLocalDateTime().toString());
+                insertStatement.setDouble(3, instant.getPrice());
+                insertStatement.setInt(4, instant.getVolume());
+
+                insertStatement.executeUpdate();
+
+                String deleteQuery = "DELETE FROM prices_month WHERE day < ?;";
+
+                PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery);
+
+                deleteStatement.setInt(1, getDays()-31);
+
+                deleteStatement.executeUpdate();
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -239,22 +327,36 @@ public class SQLite {
     public void saveHistoryPrices(Item item, Instant instant) {
 
         try {
-            String select = "SELECT price FROM prices_history WHERE material=? AND day=?;";
+            String select = "SELECT price FROM prices_history WHERE identifier=? AND day=?;";
 
             PreparedStatement preparedStatement = connection.prepareStatement(select);
 
-            preparedStatement.setString(1, item.getMaterial().toString());
+            preparedStatement.setString(1, item.getIdentifier());
             preparedStatement.setInt(2, getDays());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (!resultSet.next()) {
-                String insert = "INSERT INTO prices_history (material, day, price, volume) VALUES (?,?,?,?);";
+                String insert = "INSERT INTO prices_history (day, identifier, date, price, volume) VALUES (?,?,?,?,?);";
 
                 PreparedStatement insertStatement = connection.prepareStatement(insert);
 
-                insertStatement.setString(1, item.getMaterial().toString());
-                insertStatement.setInt(2, getDays());
+                insertStatement.setInt(1, getDays());
+                insertStatement.setString(2, item.getIdentifier());
+                insertStatement.setString(3, instant.getLocalDateTime().toString());
+                insertStatement.setDouble(3, instant.getPrice());
+                insertStatement.setInt(4, instant.getVolume());
+
+                insertStatement.executeUpdate();
+            } else if (parseDateTime(resultSet.getString("date")).isBefore(LocalDateTime.now().minusHours(32))){
+
+                String insert = "INSERT INTO prices_history (day, identifier, date, price, volume) VALUES (?,?,?,?,?);";
+
+                PreparedStatement insertStatement = connection.prepareStatement(insert);
+
+                insertStatement.setInt(1, getDays());
+                insertStatement.setString(2, item.getIdentifier());
+                insertStatement.setString(3, instant.getLocalDateTime().toString());
                 insertStatement.setDouble(3, instant.getPrice());
                 insertStatement.setInt(4, instant.getVolume());
 
@@ -266,52 +368,17 @@ public class SQLite {
         }
     }
 
-    public void saveDayPrice(Item item, Instant instant) {
-
-        try {
-            String insert = "INSERT INTO prices_day (material, date, price, volume) VALUES (?,?,?,?);";
-
-            PreparedStatement insertStatement = connection.prepareStatement(insert);
-
-            insertStatement.setString(1, item.getMaterial().toString());
-            insertStatement.setString(2, instant.getLocalDateTime().toString());
-            insertStatement.setDouble(3, instant.getPrice());
-            insertStatement.setInt(4, instant.getVolume());
-
-            insertStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void saveMonthPrice(Item item, Instant instant) {
-
-        try {
-            String insert = "INSERT INTO prices_month (material, date, price, volume) VALUES (?,?,?,?);";
-
-            PreparedStatement insertStatement = connection.prepareStatement(insert);
-
-            insertStatement.setString(1, item.getMaterial().toString());
-            insertStatement.setString(2, instant.getLocalDateTime().toString());
-            insertStatement.setDouble(3, instant.getPrice());
-            insertStatement.setInt(4, instant.getVolume());
-
-            insertStatement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     public List<Instant> getDayPrices(Item item) {
 
         List<Instant> prices = new LinkedList<>();
 
         try {
-            String select = "SELECT date FROM prices_day WHERE material=? ORDER BY id DESC LIMIT 1;";
+            String select = "SELECT date FROM prices_day WHERE identifier=? ORDER BY id DESC LIMIT 1;";
 
             PreparedStatement preparedStatement = connection.prepareStatement(select);
 
-            preparedStatement.setString(1, item.getMaterial().toString());
+            preparedStatement.setString(1, item.getIdentifier());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -324,11 +391,11 @@ public class SQLite {
 
             } else {
 
-                String select288 = "SELECT date, price, volume FROM prices_day WHERE material=? ORDER BY id DESC LIMIT 288;";
+                String select288 = "SELECT date, price, volume FROM prices_day WHERE identifier=? ORDER BY id DESC LIMIT 288;";
 
                 PreparedStatement preparedStatement288 = connection.prepareStatement(select288);
 
-                preparedStatement288.setString(1, item.getMaterial().toString());
+                preparedStatement288.setString(1, item.getIdentifier());
 
                 ResultSet resultSet1 = preparedStatement288.executeQuery();
 
@@ -363,11 +430,11 @@ public class SQLite {
         List<Instant> prices = new LinkedList<>();
 
         try {
-            String select = "SELECT date FROM prices_month WHERE material=? ORDER BY id DESC LIMIT 1;";
+            String select = "SELECT date FROM prices_month WHERE identifier=? ORDER BY id DESC LIMIT 1;";
 
             PreparedStatement preparedStatement = connection.prepareStatement(select);
 
-            preparedStatement.setString(1, item.getMaterial().toString());
+            preparedStatement.setString(1, item.getIdentifier());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -380,11 +447,11 @@ public class SQLite {
 
             } else {
 
-                String select288 = "SELECT date, price, volume FROM prices_day WHERE material=? ORDER BY id DESC LIMIT 279;";
+                String select288 = "SELECT date, price, volume FROM prices_month WHERE identifier=? ORDER BY id DESC LIMIT 279;";
 
                 PreparedStatement preparedStatement288 = connection.prepareStatement(select288);
 
-                preparedStatement288.setString(1, item.getMaterial().toString());
+                preparedStatement288.setString(1, item.getIdentifier());
 
                 ResultSet resultSet1 = preparedStatement288.executeQuery();
 
@@ -419,11 +486,11 @@ public class SQLite {
         List<Instant> prices = new LinkedList<>();
 
         try {
-            String select = "SELECT date FROM prices_month WHERE material=? ORDER BY id DESC LIMIT 1;";
+            String select = "SELECT day FROM prices_history WHERE identifier=? ORDER BY day DESC LIMIT 1;";
 
             PreparedStatement preparedStatement = connection.prepareStatement(select);
 
-            preparedStatement.setString(1, item.getMaterial().toString());
+            preparedStatement.setString(1, item.getIdentifier());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -436,17 +503,17 @@ public class SQLite {
 
             } else {
 
-                String select288 = "SELECT date, price, volume FROM prices_day WHERE material=? ORDER BY id DESC LIMIT 365;";
+                String select288 = "SELECT day, price, volume FROM prices_history WHERE identifier=? ORDER BY day DESC LIMIT 385;";
 
                 PreparedStatement preparedStatement288 = connection.prepareStatement(select288);
 
-                preparedStatement288.setString(1, item.getMaterial().toString());
+                preparedStatement288.setString(1, item.getIdentifier());
 
                 ResultSet resultSet1 = preparedStatement288.executeQuery();
 
                 while (resultSet1.next()) {
 
-                    LocalDateTime time = LocalDateTime.parse(resultSet1.getString("date"));
+                    LocalDateTime time = LocalDateTime.of(2023, 1, 1, 1, 1).plusDays(resultSet1.getInt("day"));
 
                     if (time.isAfter(LocalDateTime.now().minusDays(365))) {
                         prices.add(new Instant(
@@ -475,11 +542,11 @@ public class SQLite {
         List<Instant> prices = new LinkedList<>();
 
         try {
-            String select = "SELECT date FROM prices_month WHERE material=? ORDER BY id DESC LIMIT 1;";
+            String select = "SELECT day FROM prices_history WHERE identifier=? ORDER BY day DESC LIMIT 1;";
 
             PreparedStatement preparedStatement = connection.prepareStatement(select);
 
-            preparedStatement.setString(1, item.getMaterial().toString());
+            preparedStatement.setString(1, item.getIdentifier());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -492,24 +559,26 @@ public class SQLite {
 
             } else {
 
-                String select288 = "SELECT date, price, volume FROM prices_day WHERE material=? ORDER BY id DESC;";
+                String select288 = "SELECT day, price, volume FROM prices_history WHERE identifier=? ORDER BY day DESC;";
 
                 PreparedStatement preparedStatement288 = connection.prepareStatement(select288);
 
-                preparedStatement288.setString(1, item.getMaterial().toString());
+                preparedStatement288.setString(1, item.getIdentifier());
 
                 ResultSet resultSet1 = preparedStatement288.executeQuery();
 
                 while (resultSet1.next()) {
 
-                    LocalDateTime time = LocalDateTime.parse(resultSet1.getString("date"));
+                    LocalDateTime time = LocalDateTime.of(2023, 1, 1, 1, 1);
 
                     prices.add(new Instant(
-                            time,
+                            time.plusDays(resultSet1.getInt("day")),
                             resultSet1.getFloat("price"),
                             resultSet1.getInt("volume")
                     ));
                 }
+
+                prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
 
                 prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
             }
@@ -525,10 +594,10 @@ public class SQLite {
 
         try {
 
-            String selectSQL = "SELECT date, dayprices, monthprices, yearprices FROM prices WHERE material=?;";
+            String selectSQL = "SELECT date, dayprices, monthprices, yearprices FROM prices WHERE identifier=?;";
             PreparedStatement preparedStatement = connection.prepareStatement(selectSQL);
 
-            preparedStatement.setString(1, item.getMaterial().toString());
+            preparedStatement.setString(1, item.getIdentifier());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -553,15 +622,15 @@ public class SQLite {
                 item.setPrice(TimeSpan.YEAR, yearprices);
             } else {
 
-                String insertSQL = "INSERT INTO prices (material, date, dayprices, monthprices, yearprices) VALUES (?,?,?,?,?);";
+                String insertSQL = "INSERT INTO prices (identifier, date, dayprices, monthprices, yearprices) VALUES (?,?,?,?,?);";
 
                 PreparedStatement statement = connection.prepareStatement(insertSQL);
 
-                statement.setString(1, item.getMaterial().toString());
+                statement.setString(1, item.getIdentifier());
                 statement.setString(2, formatDateTime(LocalDateTime.now()));
-                statement.setString(3, Collections.nCopies(48, Config.getInstance().getInitialPrice(item.getMaterial())).toString());
-                statement.setString(4, Collections.nCopies(30, Config.getInstance().getInitialPrice(item.getMaterial())).toString());
-                statement.setString(5, Collections.nCopies(51, Config.getInstance().getInitialPrice(item.getMaterial())).toString());
+                statement.setString(3, Collections.nCopies(48, Config.getInstance().getInitialPrice(item.getIdentifier())).toString());
+                statement.setString(4, Collections.nCopies(30, Config.getInstance().getInitialPrice(item.getIdentifier())).toString());
+                statement.setString(5, Collections.nCopies(51, Config.getInstance().getInitialPrice(item.getIdentifier())).toString());
 
                 statement.executeUpdate();
             }
@@ -575,17 +644,17 @@ public class SQLite {
 
     public float retrieveLastPrice(Item item) {
         try {
-            String selectSQL = "SELECT lastprice FROM items WHERE material = ?;";
+            String selectSQL = "SELECT lastprice FROM items WHERE identifier = ?;";
             PreparedStatement preparedStatement = connection.prepareStatement(selectSQL);
 
-            preparedStatement.setString(1, item.getMaterial().toString());
+            preparedStatement.setString(1, item.getIdentifier());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
                 return resultSet.getFloat("lastprice");
             } else {
-                return Config.getInstance().getInitialPrice(item.getMaterial());
+                return Config.getInstance().getInitialPrice(item.getIdentifier());
             }
 
         } catch (SQLException e) {
@@ -621,13 +690,13 @@ public class SQLite {
 
     public void saveTrade(UUID uuid, Item item, int amount, float value, boolean buy, boolean discord) {
         try {
-            String selectSQL = "INSERT INTO trade_log (uuid, day, date, material, amount, value, buy, discord) VALUES (?,?,?,?,?,?,?,?);";
+            String selectSQL = "INSERT INTO trade_log (uuid, day, date, identifier, amount, value, buy, discord) VALUES (?,?,?,?,?,?,?,?);";
             PreparedStatement statement = connection.prepareStatement(selectSQL);
 
             statement.setString(1, uuid.toString());
             statement.setInt(2, getDays());
             statement.setString(3, formatDateTime(LocalDateTime.now()));
-            statement.setString(4, item.getMaterial().toString());
+            statement.setString(4, item.getIdentifier());
             statement.setInt(5, amount);
             statement.setFloat(6, RoundUtils.round(value));
             statement.setBoolean(7, buy);
@@ -651,7 +720,7 @@ public class SQLite {
             while (rs.next()) {
 
                 Trade trade = new Trade(
-                        MarketManager.getInstance().getItem(rs.getString("material")),
+                        MarketManager.getInstance().getItem(rs.getString("identifier")),
                         parseDateTime(rs.getString("date")),
                         rs.getFloat("value"),
                         rs.getInt("amount"),
@@ -666,16 +735,6 @@ public class SQLite {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public static int getDays() {
-        LocalDate startDate = LocalDate.of(2023, 1, 1);
-
-        LocalDate currentDate = LocalDate.now();
-        long daysDifference = ChronoUnit.DAYS.between(startDate, currentDate);
-        int daysDifferenceInt = (int) daysDifference;
-
-        return daysDifferenceInt;
     }
 
     public void saveLink(String userId, UUID uuid, String nickname) {
@@ -753,24 +812,24 @@ public class SQLite {
 
     public void updateItem(UUID uuid, Item item, int quantity) {
         try {
-            String sql1 = "SELECT amount FROM inventories WHERE uuid=? AND material=?;";
+            String sql1 = "SELECT amount FROM inventories WHERE uuid=? AND identifier=?;";
             PreparedStatement prep1 =  connection.prepareStatement(sql1);
             prep1.setString(1, uuid.toString());
-            prep1.setString(2, item.getMaterial().toString());
+            prep1.setString(2, item.getIdentifier());
             ResultSet resultSet = prep1.executeQuery();
 
             if(resultSet.next()) {
-                String sql2 = "UPDATE inventories SET amount=? WHERE uuid=? AND material=?;";
+                String sql2 = "UPDATE inventories SET amount=? WHERE uuid=? AND identifier=?;";
                 PreparedStatement prep2 =  connection.prepareStatement(sql2);
                 prep2.setInt(1, quantity);
                 prep2.setString(2, uuid.toString());
-                prep2.setString(3, item.getMaterial().toString());
+                prep2.setString(3, item.getIdentifier());
                 prep2.executeUpdate();
             } else {
-                String sql2 = "INSERT INTO inventories (uuid, material, amount) VALUES (?,?,?);";
+                String sql2 = "INSERT INTO inventories (uuid, identifier, amount) VALUES (?,?,?);";
                 PreparedStatement prep2 =  connection.prepareStatement(sql2);
                 prep2.setString(1, uuid.toString());
-                prep2.setString(2, item.getMaterial().toString());
+                prep2.setString(2, item.getIdentifier());
                 prep2.setInt(3, quantity);
                 prep2.executeUpdate();
             }
@@ -781,10 +840,10 @@ public class SQLite {
 
     public void removeItem(UUID uuid, Item item) {
         try {
-            String sql = "DELETE FROM inventories WHERE uuid=? AND material=?;";
+            String sql = "DELETE FROM inventories WHERE uuid=? AND identifier=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, uuid.toString());
-            prep.setString(2, item.getMaterial().toString());
+            prep.setString(2, item.getIdentifier());
             prep.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -819,13 +878,13 @@ public class SQLite {
         LinkedHashMap<Item, Integer> content = new LinkedHashMap<>();
 
         try {
-            String sql = "SELECT material, amount FROM inventories WHERE uuid=?";
+            String sql = "SELECT identifier, amount FROM inventories WHERE uuid=?";
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, uuid.toString());
             ResultSet resultSet = prep.executeQuery();
 
             while (resultSet.next()) {
-                content.put(MarketManager.getInstance().getItem(resultSet.getString("material")), resultSet.getInt("amount"));
+                content.put(MarketManager.getInstance().getItem(resultSet.getString("identifier")), resultSet.getInt("amount"));
             }
 
         } catch (SQLException e) {
@@ -972,5 +1031,15 @@ public class SQLite {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static int getDays() {
+        LocalDate startDate = LocalDate.of(2023, 1, 1);
+
+        LocalDate currentDate = LocalDate.now();
+        long daysDifference = ChronoUnit.DAYS.between(startDate, currentDate);
+        int daysDifferenceInt = (int) daysDifference;
+
+        return daysDifferenceInt;
     }
 }
