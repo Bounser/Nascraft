@@ -26,7 +26,6 @@ click_to_confirm: "\n<gold>[ <gradient:#F5FFD5:#FFA200:#F5FFD5>Clic aquí para c
 list_segment: "\n<gray>> <gradient:#FF00CD:#DA58FF>[MATERIAL] x [AMOUNT] = [WORTH]</gradient>"
 
 # nsellall
-sellall_everything: "<gradient:#FF00CD:#DA58FF>Has vendido <bold><light_purple>[AMOUNT]</light_purple></bold> distintos tipos de objetos por <green>[WORTH]</green></gradient>"
 sellall_everything_error: "<gradient:#FF0000:#FF7E7E:#FF0000>No tienes nada que vender!</gradient>"
 sellall: "<gradient:#FF00CD:#DA58FF>Has vendido <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[MATERIAL]</light_purple></bold> por <green>[WORTH]</green></gradient>"
 sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>¡No tienes nada de [MATERIAL] para vender!</gradient>"
@@ -49,12 +48,12 @@ sellhand_invalid: "<gradient:#FF0000:#FF7E7E:#FF0000>¡Sostén un item válido!<
 sellhand_error_hand: "<gradient:#FF0000:#FF7E7E:#FF0000>¡Error! No cambies el item de tu mano antes de confirmar</gradient>"
 sellhand_estimated_value: "<gray>Valor estimado:</gray> \n"
 # alert - Actualemente esta desactivado.
-alert_invalid_use: "<gradient:#FB6363:#C4B3FD>Uso incorrecto del comando. /alert [material] [precio]</gradient>"
+alert_invalid_use: "<gradient:#FB6363:#C4B3FD>Uso incorrecto del comando. /setalert [material] [precio]</gradient>"
 alert_not_linked: "<gradient:#FB6363:#C4B3FD>¡Tienes que enlazar tu cuenta para usar eso!</gradient>"
 alert_in_watchlist: "<gradient:#FB6363:#C4B3FD>Ya tienes una alerta para ese objeto.</gradient>"
 alert_invalid_price: "<gradient:#FB6363:#C4B3FD>Uso inválido. El precio debe ser un numero. (Ejemplo 120.90)</gradient>"
 alert_not_recognized: "<gradient:#FB6363:#C4B3FD>Objeto no reconocido.</gradient>"
-alert_setup: "Alerta establecida correctamente! Recibirás un privado cuando se alcance el preico deseado."
+alert_setup: "<gradient:#00E3FB:#F9ABFD>Alerta establecida correctamente! Recibirás un privado cuando se alcance el preico deseado.</gradient>"
 # alerts
 alerts_empty: "&cNo tienes ninguna alerta activa."
 alerts_header: "&3Alertas activas:\n"
@@ -101,6 +100,30 @@ discord_button_4: "Enlazar cuenta"
 discord_button_5: "Inventario"
 discord_button_6: "Balance"
 discord_button_7: "Brokers"
+
+discord_wiki: "# :information_source: Información del mercado\n> En este canal podrás **comprar/vender objetos y muchas otras cosas sin estar dentro del juego!** Para empezar a usarlo debes enlazar tu cuenta, para hacerlo presiona el botón :link: **Enlazar cuenta** y sigue las instrucciones.\n## Haz click en una categoría para aprender más."
+discord_wiki_1: "Inventario"
+discord_wiki_2: "Balance"
+discord_wiki_3: "Alertas"
+discord_wiki_4: "Ordenes Dinámicas"
+discord_wiki_5: "Sesiones"
+discord_wiki_6: "Brokers"
+
+discord_wiki_inventory: "## :school_satchel: Inventario\n> Una vez que vincules tu cuenta, **tu dinero del juego se compartirá con tu cuenta de discord** y vice versa, y **recibirás un inventario virtual**, en el que podrás almacenar los items que compres por discord. Cada ranura puede almacenar **hasta 999 de un tipo de objeto**. Dos ranuras no pueden almacenar el mismo tipo de objeto. Puedes ampliar las ranuras y comprobar el valor y contenido del inventario presionando el boton :school_satchel: **Inventario**."
+discord_wiki_balance: "## :coin: Balance\n> Si estas enlazado, the :coin: **Balance** button will show you some statistics on how is your financial state. It will display the **purse shared between your discord and minecraft accounts**, and other information as the current **value of your discord inventory** and the money **under brokers management**."
+discord_wiki_alerts: "## :bell: Alerts\n> If you are interested in a certain item you can set up an **alert** to get a **DM when the price of an item reaches a threshold** that you previously register. To set up your own alerts use :bell:**Alerts**"
+discord_wiki_dynamic: "## :dart: Dynamic orders\n> Set orders that can react to the price of the asset. You can place Limit orders, to buy/sell an asset when it reaches a certain price, or take profit/stoploss, in which you will sell your position once a price gets reached. To access this functionality, press :bar_chart: **Advanced Options** and then :dart: **Dynamic Orders**."
+discord_wiki_sessions: "## :desktop:  **Sessions**: \n
+                         > Selecting an item opens a session, in which you will have access to more operations:
+                         \n\n> :chart_with_upwards_trend: **Long price**: Bet in favor of the price increasing. You will take a loan against your Inventory, up to 50% of its value (During the operation all assets will be locked, so you won't be able to sell), and you will multiply the movements of the price by a factor of 3. That means that a 33% gain will translate into a 100% gain, and a -33% into a total loss (-100%).
+                         \n\n> :chart_with_downwards_trend: **Short price**: Bet against the price increasing. Is the inverse of the long. Same principle, with a factor of 2. You will earn a 10% if the price falls 5%, and loss everything if the prices goes up 50%.
+                         \n\n> :bookmark_tabs: **Futures**: They are a contracts in which you can define a future operation with today prices, paying a fee. If you don't have money right now and want to buy or sell, for example diamonds, if you think that todays price is good, you can sign a future contract, paying 10% in advance, and you will have the right of buying the item in a week (10% comission) or in a month (20% comission) with todays price.
+                         \n\n> :date: **Programmed actions**: With this option you will be able to sell/buy items regularly in a fixed time interval. For example, you can buy 64 diamonds each week or sell 200 iron ingots a day."
+discord_wiki_brokers: "## :man_office_worker: Brokers:\n
+                        You can hire a broker to automate the investment process, albeit at a cost in the form of a fee. The available brokers are: 
+                        \n\n> :man_office_worker: **Aggresive broker**: Assing a quantity of money to him and he will automatically try to earn more by any means, complex derivatives included. He charges a fee of **8% a day**. No profits are guaranteed and you can loss all money invested.
+                        \n\n> :man_teacher:  **Regular broker**: Assing a quantity of money to him and he will automatically try to earn more conservatively. He charges a fee of **4% a day**. No profits are guaranteed and you can loss all money invested.
+                        \n\n> :man_technologist:**Lazy broker**: Assing a quantity of money to him will guarantee the market returns (Average) minus a daily **1% fee**."
 
 discord_not_linked_short: "No enlazado!"
 discord_not_linked: ":exclamation: Tu cuenta no está enlazada! Escribe ``/link`` en el juego para comenzar el proceso de enlazado.."

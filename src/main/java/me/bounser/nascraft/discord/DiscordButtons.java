@@ -18,8 +18,8 @@ import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.brokers.Broker;
 import me.bounser.nascraft.market.brokers.BrokerType;
-import me.bounser.nascraft.managers.BrokersManager;
-import me.bounser.nascraft.managers.MarketManager;
+import me.bounser.nascraft.market.brokers.BrokersManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -131,7 +131,7 @@ public class DiscordButtons extends ListenerAdapter {
                 StringSelectMenu.Builder builder = StringSelectMenu.create("menu:id");
 
                 for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
-                    builder.addOption(item.getName(), "alert-" + item.getMaterial(),
+                    builder.addOption(item.getName(), "alert-" + item.getIdentifier(),
                             Lang.get().message(Message.DISCORD_ALERT_AT_PRICE)
                                     .replace("PRICE", Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC)));
 
@@ -283,14 +283,14 @@ public class DiscordButtons extends ListenerAdapter {
                 List<ItemComponent> componentListData1 = new ArrayList<>();
                 List<ItemComponent> componentListData2 = new ArrayList<>();
 
-                componentListData1.add(Button.primary("data-inventory", "Inventory").withEmoji(Emoji.fromFormatted("U+1F392")));
-                componentListData1.add(Button.primary("data-balance", "Balance").withEmoji(Emoji.fromFormatted("U+1FA99")));
-                componentListData1.add(Button.primary("data-alerts", "Alerts").withEmoji(Emoji.fromFormatted("U+1F514")).asDisabled());
-                componentListData2.add(Button.primary("data-dynamic", "Dynamic Orders").withEmoji(Emoji.fromFormatted("U+1F3AF")).asDisabled());
-                componentListData2.add(Button.primary("data-session", "Sessions").withEmoji(Emoji.fromFormatted("U+1F5A5")).asDisabled());
-                componentListData2.add(Button.primary("data-broker", "Brokers").withEmoji(Emoji.fromFormatted("U+1F4BC")).asDisabled());
+                componentListData1.add(Button.primary("data-inventory", lang.message(Message.DISCORD_WIKI_1)).withEmoji(Emoji.fromFormatted("U+1F392")));
+                componentListData1.add(Button.primary("data-balance", lang.message(Message.DISCORD_WIKI_2)).withEmoji(Emoji.fromFormatted("U+1FA99")));
+                componentListData1.add(Button.primary("data-alerts", lang.message(Message.DISCORD_WIKI_3)).withEmoji(Emoji.fromFormatted("U+1F514")).asDisabled());
+                componentListData2.add(Button.primary("data-dynamic", lang.message(Message.DISCORD_WIKI_4)).withEmoji(Emoji.fromFormatted("U+1F3AF")).asDisabled());
+                componentListData2.add(Button.primary("data-session", lang.message(Message.DISCORD_WIKI_5)).withEmoji(Emoji.fromFormatted("U+1F5A5")).asDisabled());
+                componentListData2.add(Button.primary("data-broker", lang.message(Message.DISCORD_WIKI_6)).withEmoji(Emoji.fromFormatted("U+1F4BC")).asDisabled());
 
-                event.reply(info)
+                event.reply(lang.message(Message.DISCORD_WIKI))
                         .addActionRow(componentListData1)
                         .addActionRow(componentListData2)
                         .setEphemeral(true)
@@ -299,37 +299,22 @@ public class DiscordButtons extends ListenerAdapter {
                 return;
 
             case "data-inventory":
-                String inventory = "## :school_satchel: Inventory\n> Once you link your account, **you're in-game money will be shared with your discord account** and vice versa, and **you will receive a virtual inventory of three slots**, in which you will be able to store the items you buy through discord. Each slot can store **up to 999 of a unique type of item**. Two slots can't store the same type of material. You can buy more slots and check the contents and value pressing the button :school_satchel:\uFEFF **Inventory**.";
-                sendMessage(event, inventory, 35); return;
+                sendMessage(event, lang.message(Message.DISCORD_WIKI_INVENTORY), 35); return;
 
             case "data-balance":
-                String balance = "## :coin: Balance\n> If you are linked, the :coin: **Balance** button will show you some statistics on how is your financial state. It will display the **purse shared between your discord and minecraft accounts**, and other information as the current **value of your discord inventory** and the money **under brokers management**.";
-                sendMessage(event, balance, 35); return;
+                sendMessage(event, lang.message(Message.DISCORD_WIKI_BALANCE), 35); return;
 
             case "data-alerts":
-                String alertsData = "## :bell: Alerts\n> If you are interested in a certain item you can set up an **alert** to get a **DM when the price of an item reaches a threshold** that you previously register. To set up your own alerts use :bell:**Alerts**";
-                sendMessage(event, alertsData, 35); return;
+                sendMessage(event, lang.message(Message.DISCORD_WIKI_ALERTS), 35); return;
 
             case "data-dynamic":
-                String dynamic = "## :dart: Dynamic orders\n> Set orders that can react to the price of the asset. You can place Limit orders, to buy/sell an asset when it reaches a certain price, or take profit/stoploss, in which you will sell your position once a price gets reached. To access this functionality, press :bar_chart: **Advanced Options** and then :dart: **Dynamic Orders**.";
-                sendMessage(event, dynamic, 35); return;
+                sendMessage(event, lang.message(Message.DISCORD_WIKI_DYNAMIC), 35); return;
 
             case "data-session":
-                String session = "## :desktop:  **Sessions**: \n" +
-                        "> Selecting an item opens a session, in which you will have access to more operations:" +
-                        "\n\n> :chart_with_upwards_trend: **Long price**: Bet in favor of the price increasing. You will take a loan against your Inventory, up to 50% of its value (During the operation all assets will be locked, so you won't be able to sell), and you will multiply the movements of the price by a factor of 3. That means that a 33% gain will translate into a 100% gain, and a -33% into a total loss (-100%)." +
-                        "\n\n> :chart_with_downwards_trend: **Short price**: Bet against the price increasing. Is the inverse of the long. Same principle, with a factor of 2. You will earn a 10% if the price falls 5%, and loss everything if the prices goes up 50%." +
-                        "\n\n> :bookmark_tabs: **Futures**: They are a contracts in which you can define a future operation with todays prices, paying a comission. If you don't have money right now and want to buy or sell, for example diamonds, if you think that todays price is good, you can sign a future contract, paying 10% in advance, and you will have the right of buying the item in a week (10% comission) or in a month (20% comission) with todays price." +
-                        "\n\n> :date: **Programmed actions**: With this option you will be able to sell/buy items regularly in a fixed time interval. For example, you can buy 64 diamonds each week or sell 200 iron ingots a day.";
-                sendMessage(event, session, 35); return;
+               sendMessage(event, lang.message(Message.DISCORD_WIKI_SESSIONS), 35); return;
 
             case "data-broker":
-                String broker = "## :man_office_worker: Brokers:\n" +
-                        "You can hire a broker to automate the investment process, albeit at a cost in the form of a fee. The available brokers are: " +
-                        "\n\n> :man_office_worker: **Aggresive broker**: Assing a quantity of money to him and he will automatically try to earn more by any means, complex derivatives included. He charges a fee of **8% a day**. No profits are guaranteed and you can loss all money invested." +
-                        "\n\n> :man_teacher:  **Regular broker**: Assing a quantity of money to him and he will automatically try to earn more conservatively. He charges a fee of **4% a day**. No profits are guaranteed and you can loss all money invested." +
-                        "\n\n> :man_technologist:**Lazy broker**: Assing a quantity of money to him will guarantee the market returns (Average) minus a daily **1% fee**.";
-                sendMessage(event, broker, 25); return;
+                sendMessage(event, lang.message(Message.DISCORD_WIKI_BROKERS), 25); return;
 
         }
 
@@ -361,13 +346,6 @@ public class DiscordButtons extends ListenerAdapter {
 
                 DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(uuid);
 
-                File outputfile = new File("image.png");
-                try {
-                    ImageIO.write(InventoryImage.getImage(discordInventory), "png", outputfile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
                 if (discordInventory.getCapacity() < 40) {
 
                     List<Button> actionRow = new ArrayList<>();
@@ -375,14 +353,14 @@ public class DiscordButtons extends ListenerAdapter {
                     actionRow.add(Button.success("i_buy", Lang.get().message(Message.DISCORD_BUY_SLOT) + discordInventory.getNextSlotPrice() + Lang.get().message(Message.CURRENCY)));
                     actionRow.add(Button.danger("all", Lang.get().message(Message.DISCORD_SELL_ALL)));
 
-                    event.replyFiles(FileUpload.fromData(outputfile , "image.png"))
+                    event.replyFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(InventoryImage.getImage(discordInventory)) , "image.png"))
                             .setEphemeral(true)
                             .addActionRow(actionRow)
                             .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
                 } else {
 
-                    event.replyFiles(FileUpload.fromData(outputfile , "image.png"))
+                    event.replyFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(InventoryImage.getImage(discordInventory)), "image.png"))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
                 }
@@ -423,13 +401,6 @@ public class DiscordButtons extends ListenerAdapter {
                         "``\n> \n" +
                         ">  :abacus: **Total**: ``" + Formatter.formatDouble(total) + "``\n";
 
-                File balanceFile = new File("image.png");
-                try {
-                    ImageIO.write(BalanceImage.getImage(event.getUser()), "png", balanceFile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
                 EmbedBuilder eb = new EmbedBuilder();
 
                 eb.setImage("attachment://image.png");
@@ -447,7 +418,7 @@ public class DiscordButtons extends ListenerAdapter {
                                       purse/total, inventory/total, brokerValue/total));
 
                 event.replyEmbeds(eb.build())
-                        .addFiles(FileUpload.fromData(balanceFile , "image.png"))
+                        .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(BalanceImage.getImage(event.getUser())) , "image.png"))
                         .setEphemeral(true)
                         .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
                 return;
@@ -520,13 +491,6 @@ public class DiscordButtons extends ListenerAdapter {
 
                 Broker broker = BrokersManager.getInstance().getBroker(BrokerType.valueOf(event.getComponentId().substring(6)));
 
-                File brokerFile = new File("image.png");
-                try {
-                    ImageIO.write(BrokerImage.getImage(broker), "png", brokerFile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
                 List<Button> actionRow = new ArrayList<>();
 
                 actionRow.add(Button.success("brokerBuy1", "Buy 1 Share"));
@@ -535,7 +499,7 @@ public class DiscordButtons extends ListenerAdapter {
                 actionRow.add(Button.danger("brokerSell2", "Sell 10 Shares"));
                 actionRow.add(Button.primary("brokerCustomAmount", "Custom Amount").withEmoji(Emoji.fromFormatted("U+1F58A")));
 
-                event.replyFiles(FileUpload.fromData(brokerFile , "image.png"))
+                event.replyFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(BrokerImage.getImage(broker)) , "image.png"))
                         .addActionRow(actionRow)
                         .setEphemeral(true)
                         .queue();
@@ -553,13 +517,6 @@ public class DiscordButtons extends ListenerAdapter {
 
             ChartType chartType = ChartType.getChartType(event.getComponentId().charAt(4));
 
-            File outputfile = new File("image.png");
-            try {
-                ImageIO.write(ItemTimeGraph.getImage(MarketManager.getInstance().getItem(event.getComponentId().substring(5)), chartType), "png", outputfile);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
             EmbedBuilder embedBuilder = new EmbedBuilder();
 
             embedBuilder.setColor(new Color(100, 50, 150));
@@ -567,7 +524,7 @@ public class DiscordButtons extends ListenerAdapter {
             embedBuilder.setImage("attachment://image.png");
 
             event.replyEmbeds(embedBuilder.build())
-                    .addFiles(FileUpload.fromData(outputfile, "image.png"))
+                    .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(ItemTimeGraph.getImage(MarketManager.getInstance().getItem(event.getComponentId().substring(5)), chartType)), "image.png"))
                     .setEphemeral(true)
                     .queue();
 
@@ -588,7 +545,7 @@ public class DiscordButtons extends ListenerAdapter {
                 
         if (initial.equals("b") || initial.equals("s")) {
 
-            item = MarketManager.getInstance().getItem(Material.getMaterial(event.getComponentId().substring(3)));
+            item = MarketManager.getInstance().getItem(event.getComponentId().substring(3));
             quantity = Integer.parseInt(event.getComponentId().substring(1, 3));
             
         } else if (!initial.equals("i")) { return; }
