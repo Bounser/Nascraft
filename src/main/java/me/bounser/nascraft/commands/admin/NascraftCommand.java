@@ -2,6 +2,7 @@ package me.bounser.nascraft.commands.admin;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditor;
+import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorManager;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
@@ -27,7 +28,7 @@ public class NascraftCommand implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: save | info | stop | resume");
+            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: reload | editmarket | save | info | locate | stop | resume");
             return false;
         }
 
@@ -39,7 +40,7 @@ public class NascraftCommand implements CommandExecutor {
                 break;
             case "info":
                 for (Item item : MarketManager.getInstance().getAllItems()) {
-                    sender.sendMessage(ChatColor.GRAY + "Mat: " + item.getMaterial() + " value: " + item.getPrice().getValue() + " stock: " + item.getPrice().getStock());
+                    sender.sendMessage(ChatColor.GRAY + "Mat: " + item.getIdentifier() + " value: " + item.getPrice().getValue() + " stock: " + item.getPrice().getStock());
                 }
                 break;
             case "locate":
@@ -74,7 +75,7 @@ public class NascraftCommand implements CommandExecutor {
 
             case "editmarket":
 
-                if (sender instanceof Player) new MarketEditor((Player) sender);
+                if (sender instanceof Player) { MarketEditorManager.getInstance().startEditing((Player) sender); }
                 else Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console.");
 
                 break;

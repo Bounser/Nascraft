@@ -1,7 +1,9 @@
-package me.bounser.nascraft.commands.admin.marketeditor.edit;
+package me.bounser.nascraft.commands.admin.marketeditor.edit.item;
 
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditor;
+import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorManager;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.MarketManager;
@@ -43,6 +45,9 @@ public class EditItemMenu {
         this.player = player;
 
         this.itemStack = itemStack.clone();
+        this.itemStack.setAmount(1);
+
+        itemStack.setAmount(1);
 
         initialPrice = 1;
         alias = (Character.toUpperCase(itemStack.getType().toString().toLowerCase().charAt(0)) + itemStack.getType().toString().toLowerCase().substring(1)).replace("_", " ");
@@ -83,15 +88,13 @@ public class EditItemMenu {
         insertOptions(inventory);
 
         if (item == null) insertItem(itemStack, inventory);
-        else insertItem(item.getItemStack(), inventory);
+        else insertItem(item.getItemStack().clone(), inventory);
 
         player.openInventory(inventory);
 
     }
 
-    public void insertItem(ItemStack itemStack, Inventory inventory) {
-        inventory.setItem(10, itemStack);
-    }
+    public void insertItem(ItemStack itemStack, Inventory inventory) { inventory.setItem(10, itemStack); }
 
     public void insertPanes(Inventory inventory) {
 
@@ -146,7 +149,7 @@ public class EditItemMenu {
         inventory.setItem(22, getItemStackOfOption("Support", Formatter.format(support, Style.ROUND_BASIC)));
         inventory.setItem(23, getItemStackOfOption("Resistance", Formatter.format(resistance, Style.ROUND_BASIC)));
 
-        inventory.setItem(15, getItemStackOfOption("Category", category.getName() + ChatColor.GRAY + " - " + ChatColor.GOLD + category.getDisplayName()));
+        inventory.setItem(15, getItemStackOfOption("Category", category.getIdentifier() + ChatColor.GRAY + " - " + ChatColor.GOLD + category.getDisplayName()));
     }
 
     public ItemStack getItemStackOfOption(String displayName, String value) {
@@ -172,10 +175,18 @@ public class EditItemMenu {
 
         FileConfiguration items = Config.getInstance().getItemsFileConfiguration();
 
-        String identifier = null;
+        String identifier;
 
-        if (item == null) identifier = itemStack.getType().toString().toLowerCase();
-        else item.getMaterial().toString().toLowerCase();
+        if (item == null) {
+
+            int count = 0;
+
+            for (Item item : MarketManager.getInstance().getAllItems())
+                if (item.getItemStack().getType().equals(itemStack.getType())) count++;
+
+            identifier = count == 0 ? itemStack.getType().toString().toLowerCase() : itemStack.getType().toString().toLowerCase() + count;
+        }
+        else identifier = item.getIdentifier();
 
         items.set("items." + identifier + ".alias", alias);
         items.set("items." + identifier + ".initial-price", initialPrice);
@@ -186,17 +197,19 @@ public class EditItemMenu {
         if (resistance != 0)
             items.set("items." + identifier + ".resistance", resistance);
 
-        items.set("items." + identifier + ".item-stack", itemStack);
+        if (itemStack != null) {
+            items.set("items." + identifier + ".item-stack", itemStack);
+        }
 
         FileConfiguration categories = Config.getInstance().getCategoriesFileConfiguration();
 
-        List<String> itemsOfPrevCategory = categories.getStringList("categories." + prevCategory.getName() + ".items");
+        List<String> itemsOfPrevCategory = categories.getStringList("categories." + prevCategory.getIdentifier() + ".items");
         itemsOfPrevCategory.remove(identifier);
-        categories.set("categories." + prevCategory.getName() + ".items", itemsOfPrevCategory);
+        categories.set("categories." + prevCategory.getIdentifier() + ".items", itemsOfPrevCategory);
 
-        List<String> itemsOfNewCategory = categories.getStringList("categories." + category.getName() + ".items");
+        List<String> itemsOfNewCategory = categories.getStringList("categories." + category.getIdentifier() + ".items");
         itemsOfNewCategory.add(identifier);
-        categories.set("categories." + category.getName() + ".items", itemsOfNewCategory);
+        categories.set("categories." + category.getIdentifier() + ".items", itemsOfNewCategory);
 
         try {
             categories.save(Config.getInstance().getCategoriesFile());
@@ -216,36 +229,38 @@ public class EditItemMenu {
                     resistance
             );
 
-            if (!prevCategory.getName().equals(category.getName())) {
+            if (!prevCategory.getIdentifier().equals(category.getIdentifier())) {
                 category.addItem(item);
                 prevCategory.removeItem(item);
             }
 
             player.sendMessage(ChatColor.LIGHT_PURPLE + "Property changes saved!");
         } else {
-            Item item = new Item(itemStack.getType(), alias, category);
+            Item item = new Item(itemStack, identifier, alias, category, ImagesManager.getInstance().getImage(identifier));
             category.addItem(item);
             MarketManager.getInstance().addItem(item);
             player.sendMessage(ChatColor.LIGHT_PURPLE + "New item saved!");
         }
 
-        new MarketEditor(player);
+        MarketEditorManager.getInstance().getMarketEditorFromPlayer(player).open();
     }
 
     public void removeItem() {
+
+        if (item == null) new MarketEditor(player);
 
         MarketManager.getInstance().removeItem(item);
         prevCategory.removeItem(item);
 
         FileConfiguration items = Config.getInstance().getItemsFileConfiguration();
 
-        items.set("items." + item.getMaterial().toString().toLowerCase(), null);
+        items.set("items." + item.getIdentifier(), null);
 
         FileConfiguration categories = Config.getInstance().getCategoriesFileConfiguration();
 
-        List<String> itemsOfPrevCategory = categories.getStringList("categories." + prevCategory.getName() + ".items");
-        itemsOfPrevCategory.remove(item.getMaterial().toString().toLowerCase());
-        categories.set("categories." + prevCategory.getName() + ".items", itemsOfPrevCategory);
+        List<String> itemsOfPrevCategory = categories.getStringList("categories." + prevCategory.getIdentifier() + ".items");
+        itemsOfPrevCategory.remove(item.getIdentifier());
+        categories.set("categories." + prevCategory.getIdentifier() + ".items", itemsOfPrevCategory);
 
         try {
             categories.save(Config.getInstance().getCategoriesFile());
@@ -254,7 +269,7 @@ public class EditItemMenu {
             throw new RuntimeException(e);
         }
 
-        new MarketEditor(player);
+        MarketEditorManager.getInstance().getMarketEditorFromPlayer(player).open();
     }
 
 }

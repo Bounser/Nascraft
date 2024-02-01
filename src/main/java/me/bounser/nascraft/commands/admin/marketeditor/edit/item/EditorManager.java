@@ -1,4 +1,4 @@
-package me.bounser.nascraft.commands.admin.marketeditor.edit;
+package me.bounser.nascraft.commands.admin.marketeditor.edit.item;
 
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.entity.Player;

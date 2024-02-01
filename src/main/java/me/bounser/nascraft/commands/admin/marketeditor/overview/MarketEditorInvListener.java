@@ -1,31 +1,28 @@
 package me.bounser.nascraft.commands.admin.marketeditor.overview;
 
-import me.bounser.nascraft.commands.admin.marketeditor.edit.EditorManager;
-import me.bounser.nascraft.commands.admin.marketeditor.edit.category.CategoryEditor;
-import me.bounser.nascraft.formatter.Formatter;
-import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.commands.admin.marketeditor.edit.item.EditorManager;
+import me.bounser.nascraft.commands.admin.marketeditor.edit.category.CategoryEditorManager;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
+import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.io.IOException;
 import java.util.*;
 
 public class MarketEditorInvListener implements Listener {
 
-
-    private final HashMap<Player, Integer> playerOffset = new HashMap<>();
-
-    private final HashMap<Player, Integer> playerHorizontalOffset = new HashMap<>();
 
     private static MarketEditorInvListener instance = null;
 
@@ -37,228 +34,185 @@ public class MarketEditorInvListener implements Listener {
 
         if (!event.getWhoClicked().hasPermission("nascraft.admin")) return;
 
-        if (event.getView().getTopInventory().getSize() != 54 || !event.getView().getTitle().equals("§8§lAdmin view: Market") || event.getCurrentItem() == null)
-            return;
+        if (event.getView().getTopInventory().getSize() != 54 || !event.getView().getTitle().equals("§8§lAdmin view: Market")) return;
+
+        if (Objects.equals(event.getClickedInventory(), event.getView().getTopInventory())) event.setCancelled(true);
 
         Player player = (Player) event.getWhoClicked();
 
-        if (event.getClickedInventory().equals(event.getView().getTopInventory())) {
+        if (event.getClickedInventory() == null || event.getClickedInventory().equals(event.getView().getTopInventory())) event.setCancelled(true);
 
-            event.setCancelled(true);
+        MarketEditor marketEditor = MarketEditorManager.getInstance().getMarketEditorFromPlayer(((Player) event.getWhoClicked()).getPlayer());
 
-        }
+        switch (event.getRawSlot()) {
+            case 0:
 
-        if (event.getRawSlot() == 8) {
-            event.getWhoClicked().closeInventory();
-            return;
-        }
+                marketEditor.decreaseVerticalOffset();
+                marketEditor.insertItems(event.getInventory());
 
-        if ((event.getRawSlot() >= 9 && event.getRawSlot() <= 44)) {
+                return;
 
-            Item item = getItemFromSlot(event.getRawSlot(), player);
+            case 8:
+                event.getWhoClicked().closeInventory();
+                return;
 
-            EditorManager.getInstance().startEditing(player, item);
+            case 45:
 
-            return;
-        }
+                marketEditor.increaseVerticalOffset();
+                marketEditor.insertItems(event.getInventory());
 
-        if (event.getRawSlot() == 48) {
+                return;
 
-            new CategoryEditor(player);
+            case 46:
 
-            return;
-        }
+                new AnvilGUI.Builder()
+                        .onClick((slot, stateSnapshot) -> {
 
+                            String identifier = stateSnapshot.getText();
 
-        if (event.getRawSlot() == 49) {
+                            if (MarketManager.getInstance().getCategoryFromIdentifier(identifier) != null)
+                                return Arrays.asList(AnvilGUI.ResponseAction.replaceInputText("Repeated identifier!"));
 
-            if (MarketManager.getInstance().getActive()) MarketManager.getInstance().stop();
-            else MarketManager.getInstance().resume();
+                            Category category = new Category(identifier);
 
-            ItemStack enabled;
-            ItemMeta metaEnabled;
+                            category.setDisplayName(identifier);
 
-            if (MarketManager.getInstance().getActive()) {
-                enabled = new ItemStack(Material.LIME_DYE);
+                            MarketManager.getInstance().getCategories().add(category);
 
-                metaEnabled = enabled.getItemMeta();
-                metaEnabled.setDisplayName(ChatColor.GREEN + "§lMARKET ACTIVE");
-                metaEnabled.setLore(Arrays.asList(
-                        ChatColor.GRAY + "Click to stop the market.",
-                        ChatColor.GRAY + "Users won't be able to buy/sell."
-                ));
+                            FileConfiguration categoriesFile = Config.getInstance().getCategoriesFileConfiguration();
 
-            } else {
-                enabled = new ItemStack(Material.RED_DYE);
+                            categoriesFile.set("categories." + identifier + ".display-name", identifier);
 
-                metaEnabled = enabled.getItemMeta();
-                metaEnabled.setDisplayName(ChatColor.RED + "§lMARKET STOPPED");
-                metaEnabled.setLore(Arrays.asList(
-                        ChatColor.GRAY + "Click to resume the market.",
-                        ChatColor.GRAY + "Users will be able to buy/sell."
-                ));
-            }
+                            try { categoriesFile.save(Config.getInstance().getCategoriesFile()); }
+                            catch (IOException e) { throw new RuntimeException(e); }
 
-            enabled.setItemMeta(metaEnabled);
+                            stateSnapshot.getPlayer().sendMessage(ChatColor.LIGHT_PURPLE + "Category created correctly!");
 
-            event.getClickedInventory().setItem(49, enabled);
-        }
+                            return Arrays.asList(
+                                    AnvilGUI.ResponseAction.close(),
+                                    AnvilGUI.ResponseAction.run(() -> MarketEditorManager.getInstance().getMarketEditorFromPlayer(stateSnapshot.getPlayer()).open())
+                            );
 
-        if (event.getRawSlot() == 50) {
+                        })
+                        .preventClose()
+                        .text("identifier...")
+                        .title("New category")
+                        .plugin(Nascraft.getInstance())
+                        .open(player);
+                return;
 
-            if (event.getCursor() != null && !event.getCursor().getType().equals(Material.AIR)) {
+            case 7:
+                if (MarketManager.getInstance().getActive()) MarketManager.getInstance().stop();
+                else MarketManager.getInstance().resume();
 
-                EditorManager.getInstance().startEditing(player, event.getCursor().clone());
+                ItemStack enabled;
+                ItemMeta metaEnabled;
 
-            } else {
-                player.sendMessage(ChatColor.RED + "Drop an item to add it to the market!");
-            }
+                if (MarketManager.getInstance().getActive()) {
+                    enabled = new ItemStack(Material.LIME_DYE);
 
-            return;
-        }
-
-        if (event.getRawSlot() == 0) {
-
-            if (playerOffset.get(player) == null) initializeOffsets(player, 3, 0);
-            else if (playerOffset.get(player) > 3)
-                playerOffset.put(player, playerOffset.get(player) - 1);
-
-            insertItems(event.getInventory(), playerOffset.get(player), playerHorizontalOffset.get(player));
-
-            return;
-        }
-
-        if (event.getRawSlot() == 45) {
-
-            if (playerOffset.get(player) == null) initializeOffsets(player, 4, 0);
-            else if (playerOffset.get(player) < MarketManager.getInstance().getCategories().size()-1)
-                playerOffset.put(player, playerOffset.get(player) + 1);
-
-            insertItems(event.getInventory(), playerOffset.get(player), playerHorizontalOffset.get(player));
-
-            return;
-        }
-
-        if (event.getRawSlot() == 52) {
-
-            if (playerHorizontalOffset.get(player) == null) initializeOffsets(player, 3, 0);
-            else {
-                if (playerHorizontalOffset.get(player) > 0)
-                    playerHorizontalOffset.put(player, playerHorizontalOffset.get(player) - 1);
-            }
-
-            insertItems(event.getInventory(), playerOffset.get(player), playerHorizontalOffset.get(player));
-
-            return;
-        }
-
-        if (event.getRawSlot() == 53) {
-
-            if (playerHorizontalOffset.get(player) == null) initializeOffsets(player, 3, 1);
-            else {
-                int biggestCategory = 0;
-
-                for (Category category : MarketManager.getInstance().getCategories())
-                    if (category.getNumberOfItems() > biggestCategory) biggestCategory = category.getNumberOfItems();
-
-                if (playerHorizontalOffset.get(player) < biggestCategory-9)
-                    playerHorizontalOffset.put(player, playerHorizontalOffset.get(player) + 1);
-            }
-
-            insertItems(event.getInventory(), playerOffset.get(player), playerHorizontalOffset.get(player));
-
-            return;
-        }
-
-    }
-
-    public void initializeOffsets(Player player, int offset, int horizontalOffset) {
-
-        playerOffset.put(player, offset);
-        playerHorizontalOffset.put(player, horizontalOffset);
-
-    }
-
-    @EventHandler
-    public void onCloseInventory(InventoryCloseEvent event) {
-
-        if (!event.getPlayer().hasPermission("nascraft.admin")) return;
-
-        if (!event.getView().getTitle().equals("§8§lAdmin view: Market") || playerOffset.get(event.getPlayer()) == null)  return;
-
-        playerOffset.remove(event.getPlayer());
-
-    }
-
-    public void insertItems(Inventory inventory, int offset, int horizontalOffset) {
-
-        List<Category> categories = new ArrayList<>();
-
-        for (int i = 3; i >= 0; i--)
-            categories.add(MarketManager.getInstance().getCategories().get(offset-i));
-
-        int j = 0;
-
-        for (Category category : categories) {
-
-            List<Item> items = new ArrayList<>();
-
-            if (horizontalOffset < category.getNumberOfItems())
-                items = new ArrayList<>(category.getItems().subList(horizontalOffset, category.getNumberOfItems()));
-
-            while (items.size() < 9)
-                items.add(null);
-
-            for (int k = 0; k <= 8; k++) {
-
-                Item item = items.get(k);
-
-                if (item == null) {
-                    inventory.clear((j+1)*9 + k);
-                } else {
-                    ItemStack itemStack = item.getItemStack();
-
-                    ItemMeta meta = itemStack.getItemMeta();
-
-                    meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Alias: " + item.getName());
-
-                    meta.setLore(Arrays.asList(
-                            ChatColor.GRAY + "Initial price: " + ChatColor.GOLD + Formatter.format(item.getPrice().getInitialValue(), Style.ROUND_BASIC),
-                            ChatColor.GRAY + "Elasticity: " + ChatColor.GOLD + item.getPrice().getElasticity(),
-                            ChatColor.GRAY + "Noise Sensibility: " + ChatColor.GOLD + item.getPrice().getNoiseIntensity(),
-                            ChatColor.GRAY + "Support: " + ChatColor.GOLD + item.getPrice().getSupport(),
-                            ChatColor.GRAY + "Resistance: " + ChatColor.GOLD + item.getPrice().getResistance(),
-                            " ",
-                            ChatColor.GREEN + "§lCLICK TO EDIT"
+                    metaEnabled = enabled.getItemMeta();
+                    metaEnabled.setDisplayName(ChatColor.GREEN + "§lMARKET ACTIVE");
+                    metaEnabled.setLore(Arrays.asList(
+                            ChatColor.GRAY + "Click to stop the market.",
+                            ChatColor.GRAY + "Users won't be able to buy/sell."
                     ));
 
-                    itemStack.setItemMeta(meta);
+                } else {
+                    enabled = new ItemStack(Material.RED_DYE);
 
-                    inventory.setItem(((j+1)*9) + k, itemStack);
+                    metaEnabled = enabled.getItemMeta();
+                    metaEnabled.setDisplayName(ChatColor.RED + "§lMARKET STOPPED");
+                    metaEnabled.setLore(Arrays.asList(
+                            ChatColor.GRAY + "Click to resume the market.",
+                            ChatColor.GRAY + "Users will be able to buy/sell."
+                    ));
                 }
-            }
 
-            j++;
+                enabled.setItemMeta(metaEnabled);
+
+                event.getClickedInventory().setItem(7, enabled);
+                return;
+
+            case 49:
+                if (event.getCursor() != null && !event.getCursor().getType().equals(Material.AIR)) {
+
+                    EditorManager.getInstance().startEditing(player, event.getCursor().clone());
+
+                } else {
+                    player.sendMessage(ChatColor.RED + "Drop an item to add it to the market!");
+                }
+
+                return;
+
+            case 52:
+                marketEditor.decreaseHorizontalOffset();
+                marketEditor.insertItems(event.getInventory());
+                return;
+
+            case 53:
+                marketEditor.increaseHorizontalOffset();
+                marketEditor.insertItems(event.getInventory());
+                return;
+
+            case 9:
+            case 18:
+            case 27:
+            case 36:
+                CategoryEditorManager.getInstance().startEditing(player, getCategoryFromSlot(event.getRawSlot(), player));
+                return;
+
+            default:
+
+                if (event.getCurrentItem() == null) return;
+
+                if ((event.getRawSlot() >= 9 && event.getRawSlot() <= 44)) {
+
+                    if (!event.getCurrentItem().getType().equals(Material.AIR)) {
+                        Item item = getItemFromSlot(event.getRawSlot(), player);
+
+                        if (item == null) return;
+
+                        EditorManager.getInstance().startEditing(player, item);
+                    }
+                }
         }
     }
+
 
     public Item getItemFromSlot(int slot, Player player) {
 
+        MarketEditor marketEditor = MarketEditorManager.getInstance().getMarketEditorFromPlayer(player);
+
         int i = 0;
 
-        if (slot >= 18 && slot <= 25) i = 1;
-        else if (slot >= 27 && slot <= 35) i = 2;
-        else if (slot >= 36 && slot <= 44) i = 3;
+        if (slot >= 19 && slot <= 25) i = 1;
+        else if (slot >= 28 && slot <= 35) i = 2;
+        else if (slot >= 37 && slot <= 44) i = 3;
 
-        Category category;
+        Category category = MarketManager.getInstance().getCategories().get(marketEditor.getVerticalOffset()+i);
 
-        if (playerOffset.get(player) == null || playerOffset.get(player) == 0) {
-            category = MarketManager.getInstance().getCategories().get(i);
-        } else {
-            category = MarketManager.getInstance().getCategories().get(playerOffset.get(player)-3+i);
+        return category.getItemOfIndex(slot - 10 - (9 * i) + (marketEditor.getHorizontalOffset()));
+    }
+
+    public Category getCategoryFromSlot(int slot, Player player) {
+
+        MarketEditor marketEditor = MarketEditorManager.getInstance().getMarketEditorFromPlayer(player);
+
+        int offset = marketEditor.getVerticalOffset();
+
+        switch (slot) {
+
+            case 18:
+                offset += 1; break;
+            case 27:
+                offset += 2; break;
+            case 36:
+                offset += 3; break;
+
         }
 
-        return category.getItemOfIndex(slot - 9-(9*i) + (playerHorizontalOffset.get(player) == null ? 0 : playerHorizontalOffset.get(player)));
+        return MarketManager.getInstance().getCategories().get(offset);
     }
 
 }

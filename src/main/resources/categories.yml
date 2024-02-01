@@ -19,6 +19,7 @@ categories:
       - 'tuff'
   2:
     display-name: 'In the depths'
+    display-material: 'lantern'
     items:
       - 'cobbled_deepslate'
       - 'deepslate'
@@ -27,6 +28,7 @@ categories:
       - 'sculk'
   3:
     display-name: 'Even deeper'
+    display-material: 'netherrack'
     items:
       - 'basalt'
       - 'blackstone'
@@ -39,6 +41,7 @@ categories:
       - 'soul_sand'
   4:
     display-name: 'The End'
+    display-material: 'end_stone'
     items:
       - 'end_stone'
       - 'purpur_block'
@@ -47,6 +50,7 @@ categories:
       - 'chorus_fruit'
   5:
     display-name: 'Wet'
+    display-material: 'water_bucket'
     items:
       - 'sand'
       - 'prismarine_shard'
@@ -59,6 +63,7 @@ categories:
       - 'pufferfish'
   6:
     display-name: 'Tech'
+    display-material: 'redstone'
     items:
       - 'redstone'
       - 'hopper'
@@ -69,6 +74,7 @@ categories:
       - 'sculk_sensor'
   7:
     display-name: 'In the woods'
+    display-material: 'oak_sapling'
     items:
       - 'oak_log'
       - 'birch_log'
@@ -80,6 +86,7 @@ categories:
       - 'cherry_log'
   8:
     display-name: 'Loot'
+    display-material: 'stone_sword'
     items:
       - 'rotten_flesh'
       - 'bone'
@@ -91,6 +98,7 @@ categories:
       - 'phantom_membrane'
   9:
     display-name: 'Valuables'
+    display-material: 'chest'
     items:
       - 'diamond'
       - 'emerald'
@@ -101,11 +109,13 @@ categories:
       - 'golden_carrot'
   10:
     display-name: 'Fuel'
+    display-material: 'furnace'
     items:
       - 'coal'
       - 'dried_kelp_block'
   11:
     display-name: 'Ingots & Bricks'
+    display-material: 'blast_furnace'
     items:
       - 'iron_ingot'
       - 'copper_ingot'
@@ -115,6 +125,7 @@ categories:
       - 'nether_brick'
   12:
     display-name: 'Agriculture'
+    display-material: 'stone_hoe'
     items:
       - 'apple'
       - 'carrot'
@@ -125,6 +136,7 @@ categories:
       - 'honey_bottle'
   13:
     display-name: 'Livestock'
+    display-material: 'wheat'
     items:
       - 'beef'
       - 'porkchop'

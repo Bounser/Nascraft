@@ -1,7 +1,7 @@
-package me.bounser.nascraft.commands.admin.marketeditor.edit;
+package me.bounser.nascraft.commands.admin.marketeditor.edit.item;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditor;
+import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.Category;
 import net.wesjd.anvilgui.AnvilGUI;
@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 
 public class EditItemMenuListener implements Listener {
 
@@ -23,17 +24,17 @@ public class EditItemMenuListener implements Listener {
 
         if (!event.getWhoClicked().hasPermission("nascraft.admin")) return;
 
-        if (event.getView().getTopInventory().getSize() != 27 || !event.getView().getTitle().equals("§8§lEditing Item") || event.getCurrentItem() == null) return;
+        if (event.getView().getTopInventory().getSize() != 27 || !event.getView().getTitle().equals("§8§lEditing Item")) return;
 
         Player player = (Player) event.getWhoClicked();
 
-        event.setCancelled(true);
+        if (Objects.equals(event.getClickedInventory(), event.getView().getTopInventory())) event.setCancelled(true);
 
         switch (event.getRawSlot()) {
 
             case 11:
                 EditorManager.getInstance().clearEditing(player);
-                new MarketEditor(player);
+                MarketEditorManager.getInstance().getMarketEditorFromPlayer(player).open();
                 break;
 
             case 9:
@@ -57,8 +58,7 @@ public class EditItemMenuListener implements Listener {
 
             case 4:
 
-                openAnvil(
-                        player,
+                openAnvil(player,
                         ChatColor.LIGHT_PURPLE + "Initial price set correctly!",
                         "Initial price...",
                         "Initial price",
@@ -133,7 +133,7 @@ public class EditItemMenuListener implements Listener {
                             Category selectedCategory = null;
 
                             for (Category category : MarketManager.getInstance().getCategories())
-                                if (category.getName().equalsIgnoreCase(categoryReference) || category.getDisplayName().equalsIgnoreCase(categoryReference))
+                                if (category.getIdentifier().equalsIgnoreCase(categoryReference) || category.getDisplayName().equalsIgnoreCase(categoryReference))
                                     selectedCategory = category;
 
                             if (selectedCategory == null) {
