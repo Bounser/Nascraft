@@ -11,20 +11,21 @@ import me.bounser.nascraft.commands.alert.AlertsCommand;
 import me.bounser.nascraft.commands.alert.SetAlertCommand;
 import me.bounser.nascraft.commands.discord.DiscordCommand;
 import me.bounser.nascraft.commands.discord.DiscordInventoryInGame;
-import me.bounser.nascraft.commands.sellall.SellAllCommand;
-import me.bounser.nascraft.commands.sellall.SellAllTabCompleter;
-import me.bounser.nascraft.commands.sellinv.SellInvListener;
-import me.bounser.nascraft.commands.sellinv.SellInvCommand;
+import me.bounser.nascraft.commands.sell.SellHandCommand;
+import me.bounser.nascraft.commands.sell.sellall.SellAllCommand;
+import me.bounser.nascraft.commands.sell.sellall.SellAllTabCompleter;
+import me.bounser.nascraft.commands.sell.sellinv.SellInvListener;
+import me.bounser.nascraft.commands.sell.sellinv.SellInvCommand;
 import me.bounser.nascraft.commands.sellwand.GetSellWandCommand;
-import me.bounser.nascraft.commands.sellwand.getSellWandTabCompleter;
+import me.bounser.nascraft.commands.sellwand.GetSellWandTabCompleter;
 import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.linking.LinkCommand;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
-import me.bounser.nascraft.goldstandard.PlayerBreakEvent;
 import me.bounser.nascraft.market.brokers.BrokersManager;
 import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.market.limit.LimitOrdersManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.sellwand.WandListener;
@@ -76,6 +77,11 @@ public final class Nascraft extends JavaPlugin {
 
         setupMetrics();
 
+        new UpdateChecker(this, 108216).getVersion(version -> {
+            if (!getDescription().getVersion().equals(version))
+                getLogger().info("There is a new update available in spigot! Download it here: https://www.spigotmc.org/resources/108216/");
+        });
+
         this.adventure = BukkitAudiences.create(this);
 
         if (!setupEconomy()) {
@@ -101,28 +107,8 @@ public final class Nascraft extends JavaPlugin {
             new PAPIExpansion().register();
         }
 
-        if (config.getSellWandsEnabled()) {
-            getCommand("getsellwand").setExecutor(new GetSellWandCommand());
-            getCommand("getsellwand").setTabCompleter(new getSellWandTabCompleter());
-            Bukkit.getPluginManager().registerEvents(new WandListener(), this);
-            WandsManager.getInstance();
-        }
-
-        if (config.isGoldStandardEnabled()) {
-
-            if (config.isGoldTrackingEnabled()) {
-                Bukkit.getPluginManager().registerEvents(new PlayerBreakEvent(), this);
-            }
-
-            if (config.isVaultEnabled()) {
-
-
-            }
-
-        }
-
         if (config.getDiscordEnabled()) {
-            getLogger().info("Enabling discord integration!");
+            getLogger().info("Enabling discord extension!");
 
             if (Config.getInstance().getLinkingMethod().equals(LinkingMethod.NATIVE)) getCommand("link").setExecutor(new LinkCommand());
             getCommand("setalert").setExecutor(new SetAlertCommand());
@@ -134,9 +120,17 @@ public final class Nascraft extends JavaPlugin {
             new DiscordBot();
         }
 
+        if (config.getSellWandsEnabled()) {
+            getCommand("getsellwand").setExecutor(new GetSellWandCommand());
+            getCommand("getsellwand").setTabCompleter(new GetSellWandTabCompleter());
+            Bukkit.getPluginManager().registerEvents(new WandListener(), this);
+            WandsManager.getInstance();
+        }
+
         createImagesFolder();
 
         MarketManager.getInstance();
+        LimitOrdersManager.getInstance();
         BrokersManager.getInstance();
 
         getCommand("nascraft").setExecutor(new NascraftCommand());
