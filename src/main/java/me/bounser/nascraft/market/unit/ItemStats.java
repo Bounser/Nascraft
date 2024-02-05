@@ -13,9 +13,6 @@ public class ItemStats {
 
     private List<Instant> dataDay = new ArrayList<>();
 
-    private List<Instant> dataMonth = new ArrayList<>();
-
-    private List<Instant> dataYear = new ArrayList<>();
 
     private Item item;
 
@@ -42,24 +39,14 @@ public class ItemStats {
 
             if (dataDay.size() < 12) return;
 
-            Instant monthInstant = new Instant(
+            Instant bigDayInstant = new Instant(
                     LocalDateTime.now(),
                     priceAverage(dataDay),
                     volumeAdder(dataDay));
 
-            dataMonth.add(monthInstant);
+            SQLite.getInstance().saveMonthPrice(item, bigDayInstant);
 
-            SQLite.getInstance().saveMonthPrice(item, monthInstant);
-
-            while (dataMonth.size() > 180)  dataMonth.remove(0);
-
-            dataYear.add(new Instant(
-                    LocalDateTime.now(),
-                    priceAverage(dataDay),
-                    volumeAdder(dataDay)));
-
-            SQLite.getInstance().saveHistoryPrices(item, monthInstant);
-
+            SQLite.getInstance().saveHistoryPrices(item, bigDayInstant);
         }
     }
 
