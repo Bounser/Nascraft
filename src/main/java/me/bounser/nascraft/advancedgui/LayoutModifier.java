@@ -10,10 +10,10 @@ import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.leoko.advancedgui.manager.LayoutManager;
+import me.leoko.advancedgui.manager.ResourceManager;
 import me.leoko.advancedgui.utils.LayoutExtension;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.events.GuiInteractionBeginEvent;
@@ -24,6 +24,7 @@ import me.leoko.advancedgui.utils.interactions.Interaction;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.inventory.ItemStack;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -35,15 +36,13 @@ public class LayoutModifier implements LayoutExtension {
     private SlideComponent slideComponent = null;
     private GraphComponent graphComponent = null;
 
-    public HashMap<Player, Category> playerCategory;
-    // Offset of items of the selected category.
-    public HashMap<Player, Integer> playerOffset;
-
     private static LayoutModifier instance;
 
     public static LayoutModifier getInstance() { return instance == null ? instance = new LayoutModifier() : instance; }
 
-    private LayoutModifier () { LayoutManager.getInstance().registerLayoutExtension(this, Nascraft.getInstance()); }
+    private LayoutModifier () {
+        LayoutManager.getInstance().registerLayoutExtension(this, Nascraft.getInstance());
+    }
 
     @Override
     @EventHandler
@@ -51,30 +50,33 @@ public class LayoutModifier implements LayoutExtension {
 
         if (!event.getLayout().getName().equals("Nascraft")) return;
 
-        playerCategory = new HashMap<>();
-        playerOffset = new HashMap<>();
-
         GroupComponent componentTree = event.getLayout().getTemplateComponentTree();
-        GroupComponent tradeScreen = componentTree.locate("TS1", GroupComponent.class); // Trade Screen
+        GroupComponent tradeScreen = componentTree.locate("TradingScreen", GroupComponent.class);
 
         updateMainPage(componentTree, false, null);
 
         //
 
-        ViewComponent backgroundView = tradeScreen.locate("bview1", ViewComponent.class);
-        TextComponent mainText = tradeScreen.locate("maintext1", TextComponent.class);
+        ViewComponent backgroundView = tradeScreen.locate("BackgroundView", ViewComponent.class);
 
         tradeScreen.getComponents().remove(backgroundView);
-        tradeScreen.getComponents().remove(mainText);
 
         if (graphComponent == null)
-            graphComponent = new GraphComponent("graph1", null, false,
-                event.getLayout().getDefaultInteraction(), 11, 54, 362, 139, backgroundView, mainText);
-        tradeScreen.locate("graph123", DummyComponent.class).setComponent(graphComponent);
+            graphComponent = new GraphComponent(
+                    "Graph",
+                    null,
+                    false,
+                    event.getLayout().getDefaultInteraction(),
+                    11,
+                    54,
+                    362,
+                    139,
+                    backgroundView);
 
+        tradeScreen.locate("GraphDummy", DummyComponent.class).setComponent(graphComponent);
         //
 
-        GroupComponent slideComponents = tradeScreen.locate("SComp1", GroupComponent.class);
+        GroupComponent slideComponents = tradeScreen.locate("SliderComponents", GroupComponent.class);
 
         tradeScreen.getComponents().remove(slideComponents);
 
@@ -88,11 +90,19 @@ public class LayoutModifier implements LayoutExtension {
             TextComponent perslide = slideComponents.locate("perslide1", TextComponent.class);
             RectComponent divisor = slideComponents.locate("TIAYadch", RectComponent.class);
 
-            slideComponent = new SlideComponent("slide1", null, false,
-                    event.getLayout().getDefaultInteraction(), 11, 60, 362, 121, bar, translucid, up, down, textslide, timetext, perslide, divisor);
+            slideComponent = new SlideComponent(
+                    "Slider",
+                    null,
+                    false,
+                    event.getLayout().getDefaultInteraction(),
+                    11,
+                    60,
+                    362,
+                    121,
+                    bar, translucid, up, down, textslide, timetext, perslide, divisor);
         }
 
-        tradeScreen.locate("slide123", DummyComponent.class).setComponent(slideComponent);
+        tradeScreen.locate("SliderDummy", DummyComponent.class).setComponent(slideComponent);
 
         // Arrows
         componentTree.locate("ArrowUP").setClickAction((interaction, player, primaryTrigger) -> {
@@ -108,70 +118,60 @@ public class LayoutModifier implements LayoutExtension {
 
         arrowRight.setClickAction((interaction, playerAction, primaryTrigger) -> {
 
-            playerOffset.put(playerAction, playerOffset.get(playerAction)+1);
-            renderRow(interaction.getComponentTree(), playerCategory.get(playerAction), playerOffset.get(playerAction), 1);
+            InteractionsManager.getInstance().playerOffset.put(playerAction, InteractionsManager.getInstance().playerOffset.get(playerAction)+1);
+            renderRow(interaction.getComponentTree(), InteractionsManager.getInstance().playerCategory.get(playerAction), InteractionsManager.getInstance().playerOffset.get(playerAction), 1);
 
         });
+
         arrowLeft.setClickAction((interaction, playerAction, primaryTrigger) -> {
 
-            playerOffset.put(playerAction, playerOffset.get(playerAction)-1);
-            renderRow(interaction.getComponentTree(), playerCategory.get(playerAction), playerOffset.get(playerAction), 1);
+            InteractionsManager.getInstance().playerOffset.put(playerAction, InteractionsManager.getInstance().playerOffset.get(playerAction)-1);
+            renderRow(interaction.getComponentTree(), InteractionsManager.getInstance().playerCategory.get(playerAction), InteractionsManager.getInstance().playerOffset.get(playerAction), 1);
 
         });
 
         // Time Span selectors
         for (TimeSpan timeSpan : TimeSpan.values()) {
             componentTree.locate("timesel" + timeSpan.toString(), RectComponent.class).setClickAction((interaction, player, primaryTrigger) -> {
-                interaction.getComponentTree().locate("graph1", GraphComponent.class).setTimeFrame(timeSpan);
+                interaction.getComponentTree().locate("Graph", GraphComponent.class).setTimeFrame(timeSpan, player);
             });
         }
 
         // Back button
         componentTree.locate("back").setClickAction((interaction, player, primaryTrigger) -> {
-            interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("I4ztUi1d");
+            interaction.getComponentTree().locate("MainView", ViewComponent.class).setView("I4ztUi1d");
             updateMainPage(interaction.getComponentTree(), true, player);
         });
 
         // Buy/Sell buttons
         for (int j : Arrays.asList(1,16,64)) {
+
             componentTree.locate("buy" + j).setClickAction((interaction, player, primaryTrigger) -> {
-                GraphComponent g = interaction.getComponentTree().locate("graph1", GraphComponent.class);
-                g.getItem().buyItem(j, player.getUniqueId(), true, g.getMaterial());
-                g.updateButtonPrice();
+                Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
+
+                item.buyItem(j, player.getUniqueId(), true, InteractionsManager.getInstance().getChildFromPlayer(player).getType());
+                updateButtonPrice(player, interaction);
             });
             componentTree.locate("sell" + j).setClickAction((interaction, player, primaryTrigger) -> {
-                GraphComponent g = interaction.getComponentTree().locate("graph1", GraphComponent.class);
-                g.getItem().sellItem(j, player.getUniqueId(), true, g.getMaterial());
-                g.updateButtonPrice();
+                Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
+
+                item.sellItem(j, player.getUniqueId(), true, InteractionsManager.getInstance().getChildFromPlayer(player).getType());
+                updateButtonPrice(player, interaction);
             });
         }
+
+        // Childs
+
+        componentTree.locate("ChildHitbox").setClickAction((interaction, player, primaryTrigger) -> {
+
+            InteractionsManager.getInstance().rotateChilds(player);
+            updateChilds(player, interaction.getComponentTree());
+            updateButtonPrice(player, interaction);
+
+        });
+
         setLang(componentTree);
-    }
 
-    public void changeCategory(Player player, Interaction interaction, int rotateDirection) {
-
-        Category category = playerCategory.get(player);
-        int indexOfCategory = MarketManager.getInstance().getCategories().indexOf(category);
-        switch (rotateDirection) {
-
-            case -1:
-                if(indexOfCategory > 0) {
-                    playerCategory.put(player, MarketManager.getInstance().getCategories().get(indexOfCategory-1));
-                } else {
-                    playerCategory.put(player, MarketManager.getInstance().getCategories().get(MarketManager.getInstance().getCategories().size()-1));
-                }
-                break;
-            case +1:
-                if(indexOfCategory+1 != MarketManager.getInstance().getCategories().size()) {
-                    playerCategory.put(player, MarketManager.getInstance().getCategories().get(indexOfCategory+1));
-                } else {
-                    playerCategory.put(player, MarketManager.getInstance().getCategories().get(0));
-                }
-                break;
-        }
-
-        playerOffset.put(player, 0);
-        updateMainPage(interaction.getComponentTree(), false, player);
     }
 
     @EventHandler
@@ -179,10 +179,11 @@ public class LayoutModifier implements LayoutExtension {
 
         if (!event.getGuiInstance().getLayout().getName().equals("Nascraft")) return;
 
-        playerCategory.put(event.getPlayer(), MarketManager.getInstance().getCategories().get(0));
-        playerOffset.put(event.getPlayer(), 0);
+        InteractionsManager.getInstance().playerCategory.put(event.getPlayer(), MarketManager.getInstance().getCategories().get(0));
+        InteractionsManager.getInstance().playerOffset.put(event.getPlayer(), 0);
 
         updateMainPage(event.getInteraction().getComponentTree(), true, event.getPlayer());
+
     }
 
     @EventHandler
@@ -190,7 +191,33 @@ public class LayoutModifier implements LayoutExtension {
 
         if (!event.getGuiInstance().getLayout().getName().equals("Nascraft")) return;
 
-        playerCategory.remove(event.getPlayer());
+        InteractionsManager.getInstance().playerCategory.remove(event.getPlayer());
+    }
+
+    public void changeCategory(Player player, Interaction interaction, int rotateDirection) {
+
+        Category category = InteractionsManager.getInstance().playerCategory.get(player);
+        int indexOfCategory = MarketManager.getInstance().getCategories().indexOf(category);
+        switch (rotateDirection) {
+
+            case -1:
+                if(indexOfCategory > 0) {
+                    InteractionsManager.getInstance().playerCategory.put(player, MarketManager.getInstance().getCategories().get(indexOfCategory-1));
+                } else {
+                    InteractionsManager.getInstance().playerCategory.put(player, MarketManager.getInstance().getCategories().get(MarketManager.getInstance().getCategories().size()-1));
+                }
+                break;
+            case +1:
+                if(indexOfCategory+1 != MarketManager.getInstance().getCategories().size()) {
+                    InteractionsManager.getInstance().playerCategory.put(player, MarketManager.getInstance().getCategories().get(indexOfCategory+1));
+                } else {
+                    InteractionsManager.getInstance().playerCategory.put(player, MarketManager.getInstance().getCategories().get(0));
+                }
+                break;
+        }
+
+        InteractionsManager.getInstance().playerOffset.put(player, 0);
+        updateMainPage(interaction.getComponentTree(), false, player);
     }
 
     public void updateMainPage(GroupComponent cTree, boolean allSections, Player player) {
@@ -206,7 +233,7 @@ public class LayoutModifier implements LayoutExtension {
             categories = MarketManager.getInstance().getCategories();
         } else {
             List<Category> defaultCategories = MarketManager.getInstance().getCategories();
-            Category category = playerCategory.get(player);
+            Category category = InteractionsManager.getInstance().playerCategory.get(player);
             int indexOfCategory = defaultCategories.indexOf(category);
 
             if(indexOfCategory + 2 < defaultCategories.size()) {
@@ -236,8 +263,8 @@ public class LayoutModifier implements LayoutExtension {
             Category category = categories.get(i - 1);
 
             if(i == 1) {
-                playerOffset.putIfAbsent(player, 0);
-                renderRow(cTree, category, playerOffset.get(player), i);
+                InteractionsManager.getInstance().playerOffset.putIfAbsent(player, 0);
+                renderRow(cTree, category, InteractionsManager.getInstance().playerOffset.get(player), i);
             } else {
                 renderRow(cTree, category, 0, i);
             }
@@ -261,10 +288,11 @@ public class LayoutModifier implements LayoutExtension {
                 ImageComponent ic = componentTree.locate("asdi" + position + "" + j, ImageComponent.class);
                 ic.setImage(Images.getInstance().getImage(item, 32, 32, false));
 
-                ic.setClickAction((interaction, p, primaryTrigger) -> {
+                ic.setClickAction((interaction, player, primaryTrigger) -> {
 
-                    interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("TS1");
-                    interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(item);
+                    changeMaterial(player, item, interaction);
+                    updateButtonPrice(player, interaction);
+                    updateChilds(player, interaction.getComponentTree());
 
                 });
             }
@@ -307,8 +335,8 @@ public class LayoutModifier implements LayoutExtension {
 
             Item finalTrendingItem = trendingItem;
             ic.setClickAction((interaction, player, primaryTrigger) -> {
-                interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("TS1");
-                interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(finalTrendingItem);
+                changeMaterial(player, finalTrendingItem, interaction);
+                updateButtonPrice(player, interaction);
             });
         } else {
             icTree.locate("trend1", GroupComponent.class).setHidden(true);
@@ -344,8 +372,8 @@ public class LayoutModifier implements LayoutExtension {
 
             Item finalImax = imax;
             icTree.locate("top" + i, ImageComponent.class).setClickAction((interaction, player, primaryTrigger) -> {
-                interaction.getComponentTree().locate("mainView1", ViewComponent.class).setView("TS1");
-                interaction.getComponentTree().locate("graph1", GraphComponent.class).changeMat(finalImax);
+                changeMaterial(player, finalImax, interaction);
+                updateButtonPrice(player, interaction);
             });
 
             float fvar = RoundUtils.roundToOne(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.HOUR).get(0)));
@@ -368,9 +396,58 @@ public class LayoutModifier implements LayoutExtension {
         }
     }
 
+    public void updateButtonPrice(Player player, Interaction interaction) {
+
+        float multiplier = InteractionsManager.getInstance().getMultiplier(player);
+
+        GroupComponent ct = interaction.getComponentTree();
+
+        for (int i : Arrays.asList(1, 16, 64)) {
+            ct.locate("buyprice" + i, TextComponent.class).setText(RoundUtils.round(InteractionsManager.getInstance().getItemFromPlayer(player).getPrice().getBuyPrice()*i*multiplier) + Lang.get().message(Message.CURRENCY));
+            ct.locate("sellprice" + i, TextComponent.class).setText(RoundUtils.round(InteractionsManager.getInstance().getItemFromPlayer(player).getPrice().getSellPrice()*i*multiplier) + Lang.get().message(Message.CURRENCY));
+        }
+
+    }
+
+    public void updateChilds(Player player, GroupComponent components) {
+
+        List<ItemStack> childs = InteractionsManager.getInstance().getChildsFromPlayer(player);
+
+        GroupComponent childsGroup = components.locate("ChildMain", GroupComponent.class);
+
+        if (childs == null || childs.size() == 1) {
+            childsGroup.locate("childs").setHidden(true);
+            return;
+        }
+
+        childsGroup.locate("childs").setHidden(false);
+
+        for (int i = 1; i <= 8 ; i++) {
+            ImageComponent imageComponent = childsGroup.locate("child" + i, ImageComponent.class);
+
+            if (childs.size() >= i) {
+                imageComponent.setImage(Images.getInstance().getImage(InteractionsManager.getInstance().getChildFromPositionAndPlayer(i-1, player).getType(), 32, 32, true));
+                imageComponent.setHidden(false);
+            } else {
+                imageComponent.setHidden(true);
+            }
+        }
+
+        childsGroup.locate("childback", RectComponent.class).setWidth(10 + 33*childs.size());
+
+        List<ItemStack> arrayChilds = new ArrayList<>(childs);
+        List<ItemStack> defaultChilds = new ArrayList<>(InteractionsManager.getInstance().getItemFromPlayer(player).getChilds().keySet());
+
+        if (defaultChilds.get(0).equals(arrayChilds.get(0))) {
+            childsGroup.locate("Minichild").setHidden(true);
+        } else {
+            childsGroup.locate("Minichild").setHidden(false);
+            childsGroup.locate("MiniChildImage", ImageComponent.class).setImage(Images.getInstance().getImage(InteractionsManager.getInstance().getChildFromPlayer(player).getType(), 26, 26, true));
+        }
+    }
+
     public void setLang(GroupComponent cTree) {
 
-        Config config = Config.getInstance();
         // Title
         for (int i = 1; i <= 4 ; i++) { cTree.locate("title" + i, TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_TITLE)); }
         // Top Movers
@@ -391,5 +468,17 @@ public class LayoutModifier implements LayoutExtension {
         cTree.locate("ityZyfNt", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_AMOUNT_SELECTION));
         // Trend
         cTree.locate("pfV4FIy1", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_TREND));
+
     }
+
+    public void changeMaterial(Player player, Item item, Interaction interaction) {
+
+        InteractionsManager.getInstance().setItemOfPlayer(player, item);
+
+        interaction.getComponentTree().locate("MainView", ViewComponent.class).setView("TradingScreen");
+        interaction.getComponentTree().locate("MainText", TextComponent.class).setText(item.getName());
+        interaction.getComponentTree().locate("MainImage", ImageComponent.class).setImage(ResourceManager.getInstance().processImage(item.getIcon(), 60, 60, true));
+        interaction.getComponentTree().locate("Graph", GraphComponent.class).setTimeFrame(TimeSpan.HOUR, player);
+    }
+
 }

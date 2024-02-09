@@ -1,12 +1,10 @@
 package me.bounser.nascraft.advancedgui.components;
 
-import me.bounser.nascraft.config.lang.Lang;
-import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.advancedgui.InteractionsManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.GraphData;
 import me.bounser.nascraft.market.resources.TimeSpan;
-import me.bounser.nascraft.formatter.RoundUtils;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
@@ -22,8 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SlideComponent extends RectangularComponent {
-
-    private GraphData graphData;
 
     private List<Component> components;
 
@@ -56,11 +52,13 @@ public class SlideComponent extends RectangularComponent {
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
 
-        if (graphComponent == null) { graphComponent = this.interaction.getComponentTree().locate("graph1", GraphComponent.class); }
+        if (graphComponent == null) { graphComponent = this.interaction.getComponentTree().locate("Graph", GraphComponent.class); }
 
         int[] points = graphComponent.getGraphData().getXPositions();
 
         int point = closestNumber(points, cursor.getX());
+
+        GraphData graphData = graphComponent.getGraphData();
 
         bar.setX(point);
         translucid.setX(point);
@@ -69,7 +67,7 @@ public class SlideComponent extends RectangularComponent {
         List<Float> values = graphData.getValues();
 
         float value = values.get(findIndex(points, point));
-        float multiplier = graphComponent.getMultiplier();
+        float multiplier = InteractionsManager.getInstance().getMultiplier(player);;
 
         timetext.setX(point);
 
@@ -96,9 +94,7 @@ public class SlideComponent extends RectangularComponent {
     }
 
     @Override
-    public String getState(Player player, GuiPoint cursor) {
-        return cursor.getX() + ":";
-    }
+    public String getState(Player player, GuiPoint cursor) { return cursor.getX() + ":"; }
 
     @Override
     public Component clone(Interaction interaction) {
@@ -126,7 +122,5 @@ public class SlideComponent extends RectangularComponent {
         }
         return -1;
     }
-
-    public void setGraphData(GraphData graphData) { this.graphData = graphData; }
 
 }
