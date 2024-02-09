@@ -1,9 +1,9 @@
 package me.bounser.nascraft.discord.images;
 
-import me.bounser.nascraft.chart.ChartType;
+import me.bounser.nascraft.chart.price.ChartType;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.chart.ItemChart;
+import me.bounser.nascraft.chart.price.ItemChart;
 import me.bounser.nascraft.market.unit.Item;
 
 import java.awt.*;
@@ -19,7 +19,7 @@ public class ItemTimeGraph {
 
         graphics.drawImage(ItemChart.getImage(item, chartType, 600, 250), 5, 40, null);
 
-        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial()), 40, 0, 50, 50, null);
+        graphics.drawImage(item.getIcon(), 40, 0, 50, 50, null);
 
         graphics.setFont(new Font("Arial", Font.BOLD, 23));
 

@@ -3,7 +3,7 @@ package me.bounser.nascraft.discord.images;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.Plot;
 import me.bounser.nascraft.market.brokers.Broker;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

@@ -1,10 +1,8 @@
-package me.bounser.nascraft.market.managers;
+package me.bounser.nascraft.market.brokers;
 
 
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.database.SQLite;
-import me.bounser.nascraft.market.brokers.Broker;
-import me.bounser.nascraft.market.brokers.BrokerType;
 
 import java.util.HashMap;
 import java.util.List;

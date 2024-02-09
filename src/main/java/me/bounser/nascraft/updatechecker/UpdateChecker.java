@@ -1,5 +1,6 @@
-package me.bounser.nascraft;
+package me.bounser.nascraft.updatechecker;
 
+import me.bounser.nascraft.Nascraft;
 import org.bukkit.Bukkit;
 
 import java.io.IOException;

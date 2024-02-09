@@ -1,12 +1,15 @@
-package me.bounser.nascraft.commands;
+package me.bounser.nascraft.commands.sell;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
-import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.ChatColor;
 import me.bounser.nascraft.market.unit.Item;
@@ -15,7 +18,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -40,43 +42,45 @@ public class SellHandCommand implements CommandExecutor {
         }
 
         assert player != null;
-        ItemStack handItems = player.getInventory().getItemInMainHand();
+        ItemStack handItem = player.getInventory().getItemInMainHand();
 
         if (args.length == 0) {
 
-            Item item = MarketManager.getInstance().getItem(handItems.getType().toString());
+            Item item = MarketManager.getInstance().getItem(handItem.getType().toString());
 
             if(item == null) {
                 Lang.get().message(player, Message.SELLHAND_INVALID); return false;
             }
 
-            ItemMeta meta = handItems.getItemMeta();
-
-            if(meta.hasDisplayName() || meta.hasEnchants() || meta.hasLore() || meta.hasAttributeModifiers() || meta.hasCustomModelData()) {
+            if(!MarketManager.getInstance().isValidItem(handItem)) {
                 Lang.get().message(player, Message.SELLHAND_INVALID); return false;
             }
 
-            String message = "<hover:show_text:" +
-                    "\"" + Lang.get().message(Message.SELLHAND_ESTIMATED_VALUE) +
-                    Lang.get().message(Message.LIST_SEGMENT,
-                                       Formatter.format(handItems.getAmount()*item.getPrice().getSellPrice(),
-                                                        Style.ROUND_BASIC),
-                                                        String.valueOf(handItems.getAmount()),
-                                                        item.getName()) + "\">" +
-                    "<click:run_command:\"/nsellhand confirm\">" +
-                    Lang.get().message(Message.CLICK_TO_CONFIRM);
+            TextComponent component = (TextComponent) MiniMessage.miniMessage().deserialize(
+                    Lang.get().message(Message.CLICK_TO_CONFIRM)
+            );
 
-            Audience audience = (Audience) player;
-            audience.sendMessage(MiniMessage.miniMessage().deserialize(message));
+            Component hoverText = MiniMessage.miniMessage().deserialize(
+                    Lang.get().message(Message.SELLHAND_ESTIMATED_VALUE) +
+                            Lang.get().message(Message.LIST_SEGMENT,
+                                    Formatter.format(handItem.getAmount()*item.getPrice().getSellPrice(), Style.ROUND_BASIC),
+                                    String.valueOf(handItem.getAmount()),
+                                    item.getName())
+            );
 
-            players.put(player, handItems);
+            component = component.hoverEvent(HoverEvent.showText(hoverText))
+                    .clickEvent(ClickEvent.runCommand("/nsellhand confirm"));
+
+            Lang.get().getAudience().player(player).sendMessage(component);
+
+            players.put(player, handItem);
 
         } else if (args[0].equalsIgnoreCase("confirm")) {
 
             if(player.getInventory().getItemInMainHand().equals(players.get(player))) {
                 Item item = MarketManager.getInstance().getItem(player.getInventory().getItemInMainHand().getType().toString());
 
-                item.sellItem(handItems.getAmount(), player.getUniqueId(), true);
+                item.sellItem(handItem.getAmount(), player.getUniqueId(), true, item.getItemStack().getType());
             } else {
                 Lang.get().message(player, Message.SELLHAND_ERROR_HAND);
             }

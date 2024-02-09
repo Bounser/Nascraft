@@ -3,9 +3,10 @@ package me.bounser.nascraft.managers;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.database.SQLite;
-import me.bounser.nascraft.database.playerinfo.PlayerInfoManager;
 import me.bounser.nascraft.discord.DiscordAlerts;
 import me.bounser.nascraft.discord.DiscordBot;
+import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.market.brokers.BrokersManager;
 import me.bounser.nascraft.market.unit.Instant;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
@@ -23,9 +24,9 @@ public class TasksManager {
 
     public static TasksManager instance;
 
-    private int ticksPerSecond = 20;
+    private final int ticksPerSecond = 20;
 
-    private Plugin AGUI = Bukkit.getPluginManager().getPlugin("AdvancedGUI");
+    private final Plugin AGUI = Bukkit.getPluginManager().getPlugin("AdvancedGUI");
 
     public static TasksManager getInstance() { return instance == null ? instance = new TasksManager() : instance; }
 
@@ -58,32 +59,31 @@ public class TasksManager {
 
             MarketManager.getInstance().updateMarketChange1h(allChanges/MarketManager.getInstance().getAllItems().size());
 
-
-            if (AGUI != null && AGUI.isEnabled() &&
-                    GuiWallManager.getInstance().getActiveInstances() != null)
+            if (AGUI != null &&
+                AGUI.isEnabled() &&
+                GuiWallManager.getInstance().getActiveInstances() != null)
 
                 for (GuiWallInstance instance : GuiWallManager.getInstance().getActiveInstances()) {
 
-                    if (instance.getLayout().getName().equals("Nascraft")) {
-                        for (Player player : Bukkit.getOnlinePlayers()) {
-
-                            if (instance.getInteraction(player) != null) {
+                    if (instance.getLayout().getName().equals("Nascraft"))
+                        for (Player player : Bukkit.getOnlinePlayers())
+                            if (instance.getInteraction(player) != null)
                                 LayoutModifier.getInstance().updateMainPage(instance.getInteraction(player).getComponentTree(), true, player);
-                            }
-                        }
-                    }
+
                 }
 
             GraphManager.getInstance().outdatedCollector();
 
             BrokersManager.getInstance().operateBrokers();
 
+            // LimitOrdersManager.getInstance().checkOrders();
+
             if (Config.getInstance().getDiscordEnabled()) {
                 DiscordBot.getInstance().update();
                 DiscordAlerts.getInstance().updateAlerts();
             }
 
-        }, timeRemaining.getSeconds()*20, 60 * ticksPerSecond);
+        }, timeRemaining.getSeconds()*ticksPerSecond, 60L * ticksPerSecond);
     }
 
     private void saveDataTask() {
@@ -92,7 +92,7 @@ public class TasksManager {
 
             SQLite.getInstance().saveEverything();
 
-        }, 2400, 60 * 5 * ticksPerSecond); // 5 min
+        }, 2400, 60L * 5 * ticksPerSecond); // 5 min
     }
 
     private void saveInstants() {
@@ -108,10 +108,9 @@ public class TasksManager {
                 ));
 
                 item.restartVolume();
-
             }
 
-        }, 2400, 60 * ticksPerSecond);
+        }, 2400, 60L * ticksPerSecond);
     }
 
     private void hourlyTask() {
@@ -129,7 +128,7 @@ public class TasksManager {
 
             MarketManager.getInstance().setOperationsLastHour(0);
 
-        }, timeRemaining.getSeconds()*20, 72000); // 1 hour
+        }, timeRemaining.getSeconds()*ticksPerSecond, 60 * 60 * ticksPerSecond); // 1 hour
     }
 
     private void dailyTask() {
@@ -143,15 +142,7 @@ public class TasksManager {
 
             for (Item item : MarketManager.getInstance().getAllItems()) item.dailyUpdate();
 
-        }, timeRemaining.getSeconds()*20, 1728000);
-    }
-
-    public void save() {
-
-        for (Item item : MarketManager.getInstance().getAllItems())
-            SQLite.getInstance().saveItem(item);
-
-        PlayerInfoManager.getInstance().saveEverything();
+        }, timeRemaining.getSeconds()*ticksPerSecond, 24 * 60 * 60 * ticksPerSecond);
     }
 
 }

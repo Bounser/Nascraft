@@ -11,19 +11,15 @@ import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class MarketManager {
 
     private final List<Item> items = new ArrayList<>();
-    private final List<Material> materials = new ArrayList<>();
-    private final List<Category> categories = new ArrayList<>();
+    private final List<ItemStack> itemStacks = new ArrayList<>();
+    private List<Category> categories = new ArrayList<>();
 
     private boolean active = true;
 
@@ -83,6 +79,14 @@ public class MarketManager {
             category.addItem(item);
         }
 
+        if (categories.size() < 4) {
+            Nascraft.getInstance().getLogger().warning("You need to have at least 4 categories!");
+            Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
+        }
+
+        for (Item item : items)
+            if (item.getCategory() == null) Nascraft.getInstance().getLogger().warning("Item: " + item.getIdentifier() + " is not assigned to any category.");
+
         marketChanges1h = new ArrayList<>(Collections.nCopies(60, 0f));
         marketChanges24h = new ArrayList<>(Collections.nCopies(24, 0f));
 
@@ -122,7 +126,7 @@ public class MarketManager {
         return sorted;
     }
 
-    public List<Material> getAllMaterials() { return materials; }
+    public List<ItemStack> getAllItemStacks() { return itemStacks; }
 
     public void stop() { active = false; }
     public void resume() { active = true; }
@@ -131,13 +135,10 @@ public class MarketManager {
 
     public boolean isValidItem(ItemStack itemStack) {
 
-        if (itemStack == null) return false;
+        for (Item item : items)
+            if (item.getItemStack().isSimilar(itemStack)) return true;
 
-        if (!getAllMaterials().contains(itemStack.getType())) return false;
-
-        ItemMeta meta = itemStack.getItemMeta();
-
-        return !meta.hasDisplayName() && !meta.hasEnchants() && !meta.hasLore() && !meta.hasAttributeModifiers() && !meta.hasCustomModelData();
+        return false;
     }
 
     public List<Item> getTopGainers(int quantity) {
@@ -282,5 +283,14 @@ public class MarketManager {
 
     public void addCategory(Category category) { categories.remove(category); }
 
+    public void setCategories(List<Category> categories) { this.categories = categories; }
+
+    public Category getCategoryFromIdentifier(String identifier) {
+
+        for (Category category : categories)
+            if (category.getIdentifier().equals(identifier)) return category;
+
+        return null;
+    }
 
 }

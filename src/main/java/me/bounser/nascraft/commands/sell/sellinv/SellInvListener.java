@@ -1,11 +1,11 @@
-package me.bounser.nascraft.commands.sellinv;
+package me.bounser.nascraft.commands.sell.sellinv;
 
-import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
-import me.bounser.nascraft.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.formatter.Style;
 import org.bukkit.Material;
@@ -46,7 +46,7 @@ public class SellInvListener implements Listener {
                 return;
             }
 
-            if (isValid(itemClicked)) {
+            if (MarketManager.getInstance().isValidItem(itemClicked)) {
 
                 List<ItemStack> items = playerItems.get(player);
 
@@ -57,7 +57,7 @@ public class SellInvListener implements Listener {
                     for (int i = 0; i < event.getClickedInventory().getSize(); i++) {
                         ItemStack itemStack = event.getClickedInventory().getItem(i);
 
-                        if (itemStack != null && itemStack.getType().equals(itemClicked.getType()) && isValid(itemStack)) {
+                        if (itemStack != null && itemStack.equals(itemClicked)) {
 
                             items.add(itemStack);
                             event.getClickedInventory().setItem(i, new ItemStack(Material.AIR));
@@ -97,9 +97,9 @@ public class SellInvListener implements Listener {
 
                     for (ItemStack itemStack : playerItems.get(player)) {
 
-                        Item item = MarketManager.getInstance().getItem(itemStack.getType());
+                        Item item = MarketManager.getInstance().getItem(itemStack);
 
-                        realValue += item.sellItem(itemStack.getAmount(), player.getUniqueId(), false);
+                        realValue += item.sellItem(itemStack.getAmount(), player.getUniqueId(), false, item.getItemStack().getType());
                     }
 
                     playerItems.remove(player);
@@ -107,7 +107,7 @@ public class SellInvListener implements Listener {
 
                     Lang.get().message(player, Message.SELL_ACTION_MESSAGE, Formatter.format(realValue, Style.ROUND_BASIC), "", "");
 
-                    Nascraft.getEconomy().depositPlayer(player, RoundUtils.round(realValue));
+                    MoneyManager.getInstance().deposit(player, RoundUtils.round(realValue));
 
                     break;
 
@@ -121,7 +121,10 @@ public class SellInvListener implements Listener {
 
                     ItemMeta meta = item.getItemMeta();
 
-                    meta.setDisplayName(null);
+                    if (meta != null && meta.hasLore()) {
+                        if (meta.getLore().size() > 2) meta.setLore(meta.getLore().subList(0, meta.getLore().size()-2));
+                        else meta.setLore(null);
+                    }
 
                     item.setItemMeta(meta);
 
@@ -151,7 +154,7 @@ public class SellInvListener implements Listener {
 
         updateSellButton(inventory, player);
 
-        if (playerItems.get(player) == null || playerItems.get(player).size() == 0) {
+        if (playerItems.get(player) == null || playerItems.get(player).isEmpty()) {
             for (int i = 9 ; i <= 35 ; i++) {
                     inventory.setItem(i, new ItemStack(Material.AIR));
             }
@@ -178,7 +181,7 @@ public class SellInvListener implements Listener {
                 }
                 items.remove(item);
 
-                inventory.setItem(i, getClonedItem(item));
+                inventory.setItem(i, getDisplayClonedItem(item));
                 materials.remove(0);
 
             } else {
@@ -187,13 +190,24 @@ public class SellInvListener implements Listener {
         }
     }
 
-    public ItemStack getClonedItem(ItemStack itemStack) {
+    public ItemStack getDisplayClonedItem(ItemStack itemStack) {
 
         ItemStack clonedItem = itemStack.clone();
 
         ItemMeta meta = clonedItem.getItemMeta();
 
-        meta.setDisplayName(Lang.get().message(Message.SELL_REMOVE_ITEM));
+        if (meta.hasLore()) {
+
+            List<String> lore = meta.getLore();
+
+            lore.add("");
+            lore.add(Lang.get().message(Message.SELL_REMOVE_ITEM));
+
+            meta.setLore(lore);
+
+        } else {
+            meta.setLore(Arrays.asList("", Lang.get().message(Message.SELL_REMOVE_ITEM)));
+        }
 
         clonedItem.setItemMeta(meta);
 
@@ -217,25 +231,21 @@ public class SellInvListener implements Listener {
 
         if (playerItems.get(player) == null) return 0;
 
-        float totalValue = 0;
+        HashMap<Item, Integer> content = new HashMap<>();
 
         for (ItemStack itemStack : playerItems.get(player)) {
-            totalValue += MarketManager.getInstance().getItem(itemStack.getType()).getPrice().getSellPrice()*itemStack.getAmount();
+
+            Item item = MarketManager.getInstance().getItem(itemStack);
+
+            content.compute(item, (key, value) -> (value == null) ? itemStack.getAmount() : value + itemStack.getAmount());
         }
 
+        float totalValue = 0;
+
+        for (Item item : content.keySet())
+            totalValue += item.getPrice().getProjectedCost(content.get(item), item.getPrice().getSellTaxMultiplier());
+
         return  RoundUtils.round(totalValue);
-    }
-
-    public boolean isValid(ItemStack itemStack) {
-
-        if (!MarketManager.getInstance().getAllMaterials().contains(itemStack.getType())) return false;
-
-        ItemMeta itemMeta = itemStack.getItemMeta();
-
-        if(itemMeta.hasDisplayName() || itemMeta.hasEnchants() || itemMeta.hasLore() || itemMeta.hasAttributeModifiers() || itemMeta.hasCustomModelData()) return false;
-
-        return true;
-
     }
 
 }

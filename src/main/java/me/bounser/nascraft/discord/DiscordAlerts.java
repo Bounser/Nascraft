@@ -1,14 +1,11 @@
 package me.bounser.nascraft.discord;
 
-import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 
 import java.util.HashMap;
 
@@ -21,9 +18,9 @@ public class DiscordAlerts {
     public static DiscordAlerts getInstance() { return instance == null ? instance = new DiscordAlerts() : instance; }
 
 
-    public String setAlert(String userID, String material, Float price) {
+    public String setAlert(String userID, String identifier, Float price) {
 
-        Item item = MarketManager.getInstance().getItem(Material.getMaterial(material.replace(" ", "_").toUpperCase()));
+        Item item = MarketManager.getInstance().getItem(identifier);
 
         if (item == null) return "not_valid";
 

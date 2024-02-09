@@ -6,7 +6,7 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
@@ -37,10 +37,8 @@ public class WandListener implements Listener {
     private final HashMap<Wand, HashMap<Player, Instant>> onCooldown = new HashMap<>();
 
     public WandListener() {
-
-        for (Wand wand : WandsManager.getInstance().getWands().values()) {
+        for (Wand wand : WandsManager.getInstance().getWands().values())
             onCooldown.put(wand, new HashMap<>());
-        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -107,7 +105,7 @@ public class WandListener implements Listener {
 
                     if (MarketManager.getInstance().isValidItem(itemStack)) {
 
-                        Item item = MarketManager.getInstance().getItem(itemStack.getType());
+                        Item item = MarketManager.getInstance().getItem(itemStack);
 
                         totalWorth += itemStack.getAmount() * item.getPrice().getSellPrice() * wand.getMultiplier();
 
@@ -156,7 +154,7 @@ public class WandListener implements Listener {
 
                     if (MarketManager.getInstance().isValidItem(itemStack)) {
 
-                        Item item = MarketManager.getInstance().getItem(itemStack.getType());
+                        Item item = MarketManager.getInstance().getItem(itemStack);
 
                         expectedWorth += item.getPrice().getSellPrice() * wand.getMultiplier() * itemStack.getAmount();
 
@@ -172,9 +170,9 @@ public class WandListener implements Listener {
 
                     if (MarketManager.getInstance().isValidItem(itemStack)) {
 
-                        Item item = MarketManager.getInstance().getItem(itemStack.getType());
+                        Item item = MarketManager.getInstance().getItem(itemStack);
 
-                        totalWorth += item.sellItem(itemStack.getAmount(), event.getPlayer().getUniqueId(), false);
+                        totalWorth += item.sellItem(itemStack.getAmount(), event.getPlayer().getUniqueId(), false, item.getItemStack().getType());
 
                         itemStack.setAmount(0);
                     }
@@ -250,6 +248,4 @@ public class WandListener implements Listener {
         }
         return inventory;
     }
-
-
 }

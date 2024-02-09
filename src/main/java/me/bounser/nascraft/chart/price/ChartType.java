@@ -1,4 +1,4 @@
-package me.bounser.nascraft.chart;
+package me.bounser.nascraft.chart.price;
 
 public enum ChartType {
 

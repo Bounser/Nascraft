@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,6 +83,16 @@ public class ImagesManager {
 
         return image;
 
+    }
+
+    public static byte[] getBytesOfImage(BufferedImage image) {
+        ByteArrayOutputStream baosBalance = new ByteArrayOutputStream();
+        try {
+            ImageIO.write(image, "png", baosBalance);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return baosBalance.toByteArray();
     }
 
 }

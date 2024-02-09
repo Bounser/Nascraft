@@ -30,6 +30,7 @@ import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.sellwand.WandListener;
 import me.bounser.nascraft.sellwand.WandsManager;
+import me.bounser.nascraft.updatechecker.UpdateChecker;
 import me.leoko.advancedgui.AdvancedGUI;
 import me.leoko.advancedgui.manager.GuiItemManager;
 import me.leoko.advancedgui.manager.GuiWallManager;
@@ -79,7 +80,7 @@ public final class Nascraft extends JavaPlugin {
 
         new UpdateChecker(this, 108216).getVersion(version -> {
             if (!getDescription().getVersion().equals(version))
-                getLogger().info("There is a new update available in spigot! Download it here: https://www.spigotmc.org/resources/108216/");
+                getLogger().info("There is a new version available! Download it here: https://www.spigotmc.org/resources/108216/");
         });
 
         this.adventure = BukkitAudiences.create(this);

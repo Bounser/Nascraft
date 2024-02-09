@@ -1,15 +1,17 @@
 package me.bounser.nascraft.commands.discord;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.SQLite;
 import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -27,9 +29,7 @@ import org.bukkit.profile.PlayerTextures;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 public class DiscordInventoryInGame implements Listener {
 
@@ -40,7 +40,7 @@ public class DiscordInventoryInGame implements Listener {
     @EventHandler
     public void onClickInventory(InventoryClickEvent event) {
 
-        if (event.getClickedInventory() == null || event.getView().getTopInventory().getSize() != 45 || !event.getView().getTitle().equals("Discord Inventory")) { return; }
+        if (event.getClickedInventory() == null || event.getView().getTopInventory().getSize() != 45 || !event.getView().getTitle().equals(Lang.get().message(Message.DISINV_TITLE))) { return; }
 
         if (event.getClickedInventory().getSize() == 45 || event.isShiftClick() || event.isRightClick()) { event.setCancelled(true); }
 
@@ -48,34 +48,46 @@ public class DiscordInventoryInGame implements Listener {
 
         DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(event.getWhoClicked().getUniqueId());
 
-        if (event.getClickedInventory().getSize() == 45 && event.getCurrentItem() != null && event.getCurrentItem().getItemMeta().getDisplayName().equals(ChatColor.RED + "LOCKED")) {
-            Nascraft.getEconomy().withdrawPlayer((OfflinePlayer) event.getView().getPlayer(), discordInventory.getNextSlotPrice());
-            discordInventory.increaseCapacity();
-            return;
-
-        } else if (event.getClickedInventory().getSize() == 45 && event.getRawSlot() > 8 && event.getRawSlot() < 40 &&
-                (event.getCurrentItem() != null && (event.getCurrentItem().getItemMeta().hasLore() && event.getCurrentItem().getItemMeta().getLore().get(0).contains("Amount:") && event.getCursor().getType().equals(Material.AIR)))) {
-
-            Material material = event.getCurrentItem().getType();
-            Item item = MarketManager.getInstance().getItem(material.toString());
-            int quantity = discordInventory.getContent().get(item);
-
-            if (quantity <= material.getMaxStackSize()) {
-                discordInventory.removeItem(item, quantity);
-                event.getWhoClicked().setItemOnCursor(new ItemStack(material, quantity));
+        if (event.getClickedInventory().getSize() == 45 && event.getCurrentItem() != null && event.getCurrentItem().getItemMeta().getDisplayName().equals(Lang.get().message(Message.DISINV_LOCKED_TITLE))) {
+            if (MoneyManager.getInstance().hasEnoughMoney((OfflinePlayer) event.getWhoClicked(), discordInventory.getNextSlotPrice())) {
+                Nascraft.getEconomy().withdrawPlayer((OfflinePlayer) event.getView().getPlayer(), discordInventory.getNextSlotPrice());
+                discordInventory.increaseCapacity();
             } else {
-                discordInventory.removeItem(item, material.getMaxStackSize());
-                event.getWhoClicked().setItemOnCursor(new ItemStack(material, material.getMaxStackSize()));
+                Lang.get().message((Player) event.getWhoClicked(), Message.DISINV_CANT_AFFORD_EXPANSION);
             }
             return;
         }
 
-        if (event.getClickedInventory().getSize() == 45 && (event.getCursor() != null || event.getCursor().getType().equals(event.getCurrentItem().getType()))) {
+        if (event.getClickedInventory().getSize() == 45 &&
+                event.getRawSlot() > 8 &&
+                event.getRawSlot() < 40 &&
+                (event.getCurrentItem() != null && event.getCursor().getType().equals(Material.AIR))) {
 
-            Item item = MarketManager.getInstance().getItem(event.getCursor().getType().toString());
-            int amount = event.getCursor().getAmount();
+            List<Item> items = new ArrayList<>(discordInventory.getContent().keySet());
+
+            Item item = items.get(event.getRawSlot()-9);
+
+            if (item == null) return;
+
+            int quantity = discordInventory.getContent().get(item);
+
+            if (quantity <= event.getCurrentItem().getType().getMaxStackSize()) {
+                discordInventory.removeItem(item, quantity);
+                event.getWhoClicked().setItemOnCursor(item.getItemStack(quantity));
+            } else {
+                discordInventory.removeItem(item, event.getCurrentItem().getType().getMaxStackSize());
+                event.getWhoClicked().setItemOnCursor(item.getItemStack(event.getCurrentItem().getType().getMaxStackSize()));
+            }
+            return;
+        }
+
+        if (event.getClickedInventory().getSize() == 45 && (event.getCursor() != null) && MarketManager.getInstance().isValidItem(event.getCursor())) {
+
+            Item item = MarketManager.getInstance().getItem(event.getCursor());
 
             if (item == null) { return; }
+
+            int amount = event.getCursor().getAmount();
 
             event.getWhoClicked().setItemOnCursor(null);
             discordInventory.addItem(item, amount);
@@ -84,12 +96,12 @@ public class DiscordInventoryInGame implements Listener {
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getView().getTopInventory().getSize() == 45 && event.getView().getTitle().equals("Discord Inventory")) { event.setCancelled(true); }
+        if (event.getView().getTopInventory().getSize() == 45 && event.getView().getTitle().equals(Lang.get().message(Message.DISINV_TITLE))) { event.setCancelled(true); }
     }
 
     public void updateDiscordInventory(Player player) {
 
-        if (!player.getOpenInventory().getTitle().equals("Discord Inventory") || player.getOpenInventory().getTopInventory().getSize() != 45) return;
+        if (!player.getOpenInventory().getTitle().equals(Lang.get().message(Message.DISINV_TITLE)) || player.getOpenInventory().getTopInventory().getSize() != 45) return;
 
         Inventory inventory = player.getOpenInventory().getTopInventory();
 
@@ -120,8 +132,8 @@ public class DiscordInventoryInGame implements Listener {
         PlayerProfile profile = getProfile(TEXTURE);
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) head.getItemMeta();
-        meta.setDisplayName(ChatColor.LIGHT_PURPLE + "Discord Inventory");
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GOLD + Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getInventoryValue(), Style.ROUND_BASIC)));
+        meta.setDisplayName(Lang.get().message(Message.DISINV_INFO_TITLE));
+        meta.setLore(Arrays.asList(Lang.get().message(Message.DISINV_INFO_LORE, "0", Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getInventoryValue(), Style.ROUND_BASIC), "0").split("\\n")));
         meta.setOwnerProfile(profile);
         head.setItemMeta(meta);
 
@@ -132,8 +144,8 @@ public class DiscordInventoryInGame implements Listener {
 
         ItemStack filler = new ItemStack(Material.RED_STAINED_GLASS_PANE);
         ItemMeta meta = filler.getItemMeta();
-        meta.setDisplayName(ChatColor.RED + "LOCKED");
-        meta.setLore(Arrays.asList(ChatColor.GRAY + "Click to buy next slot for: ", ChatColor.GOLD + Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getNextSlotPrice(), Style.ROUND_BASIC)));
+        meta.setDisplayName(Lang.get().message(Message.DISINV_LOCKED_TITLE));
+        meta.setLore(Arrays.asList(Lang.get().message(Message.DISINV_LOCKED_LORE, "0", Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getNextSlotPrice(), Style.ROUND_BASIC), "0").split("\\n")));
         filler.setItemMeta(meta);
 
         for(int i = 9 + SQLite.getInstance().retrieveCapacity(uuid); i < 40 ; i++) {
@@ -147,11 +159,27 @@ public class DiscordInventoryInGame implements Listener {
 
         int i = 9;
         for (Item item : content.keySet()) {
-            ItemStack material = item.getItemStack();
-            ItemMeta meta = material.getItemMeta();
-            meta.setLore(Arrays.asList(ChatColor.GRAY + "Amount: " + content.get(item)));
-            material.setItemMeta(meta);
-            inventory.setItem(i, material);
+            if (item == null) {
+                i++; continue;
+            }
+            ItemStack itemStack = item.getItemStack();
+            ItemMeta meta = itemStack.getItemMeta();
+
+            if (meta.hasLore()) {
+
+                List<String> lore = meta.getLore();
+
+                lore.add("");
+                lore.add(Lang.get().message(Message.DISINV_AMOUNT, "0", String.valueOf(content.get(item)), "0"));
+
+                meta.setLore(lore);
+
+            } else {
+                meta.setLore(Arrays.asList("", Lang.get().message(Message.DISINV_AMOUNT, "0", String.valueOf(content.get(item)), "0")));
+            }
+
+            itemStack.setItemMeta(meta);
+            inventory.setItem(i, itemStack);
             i++;
         }
     }

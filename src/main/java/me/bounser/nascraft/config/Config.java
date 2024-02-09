@@ -193,15 +193,6 @@ public class Config {
         }
     }
 
-    // Gold Standard.
-
-    public boolean isGoldStandardEnabled() { return config.getBoolean("gold-standard.enabled"); }
-
-    public boolean isGoldTrackingEnabled() { return config.getBoolean("gold-standard.track-gold-injection"); }
-
-    public boolean isVaultEnabled() { return config.getBoolean("gold-standard.gold-vault.enabled"); }
-
-
     // Items:
 
     public Set<String> getAllMaterials() {
@@ -219,7 +210,7 @@ public class Config {
 
     public HashMap<ItemStack, Float> getChilds(Item item) {
 
-        HashMap<ItemStack, Float> childs = new HashMap<>();
+        HashMap<ItemStack, Float> childs = new LinkedHashMap<>();
 
         childs.put(item.getItemStack(), 1f);
 
@@ -231,9 +222,10 @@ public class Config {
 
         if (section == null || section.size() == 0) return childs;
 
-        for (String childMat : section){
+        for (String childMat : section) {
             childs.put(new ItemStack(Material.getMaterial(childMat.toUpperCase())), (float) items.getDouble("items." +item.getIdentifier() + ".child." + childMat + ".multiplier"));
         }
+
         return childs;
     }
 

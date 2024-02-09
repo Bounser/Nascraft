@@ -4,7 +4,7 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 
 import java.awt.*;
@@ -15,6 +15,7 @@ public class MainImage {
     private static Lang lang = Lang.get();
 
     public static BufferedImage getImage() {
+
 
         BufferedImage image;
         if (MarketManager.getInstance().getAllItems().size() > 25) {
@@ -138,15 +139,17 @@ public class MainImage {
         graphics.drawRoundRect(offset[0]+1, offset[1]+1, 298, 118, 15, 15);
         graphics.drawRoundRect(offset[0]+2, offset[1]+2, 296, 116, 15, 15);
 
-        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial()), offset[0]+2, offset[1], 48, 48, null);
+        graphics.drawImage(ImagesManager.getInstance().getImage(item.getIdentifier()), offset[0]+2, offset[1], 48, 48, null);
 
     }
 
     public static void setItem(Item item, int[] offset, int intraOffset, Graphics graphics, Color color) {
 
-        graphics.drawImage(ImagesManager.getInstance().getImage(item.getMaterial()), offset[0]+7+intraOffset, offset[1], 45, 45, null);
+        graphics.drawImage(item.getIcon(), offset[0]+7+intraOffset, offset[1], 45, 45, null);
 
         graphics.setColor(color);
         graphics.drawString(item.getPlotData().getChange(), 15 - Math.round(item.getPlotData().getChange().getBytes().length) + offset[0] + intraOffset, offset[1]+60);
     }
+
+
 }

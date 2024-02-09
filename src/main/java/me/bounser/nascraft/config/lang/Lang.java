@@ -22,6 +22,9 @@ public class Lang {
 
     public static Lang get() { return instance == null ? instance = new Lang() : instance; }
 
+    public BukkitAudiences getAudience() { return audience; }
+
+
     private Lang() {
 
         Nascraft main = Nascraft.getInstance();
@@ -63,12 +66,24 @@ public class Lang {
                 .replace("[MATERIAL]", material)));
     }
 
+    public void message(Player player, Message lang, String placeholder, String replacement) {
+
+        audience.player(player).sendMessage(miniMessage.deserialize(this.lang.getString(lang.name().toLowerCase())
+                .replace(placeholder, replacement)));
+    }
+
     public String message(Message lang, String worth, String amount, String material) {
         return this.lang.getString(lang.name().toLowerCase())
                 .replace("&", "§")
                 .replace("[WORTH]", worth)
                 .replace("[AMOUNT]", amount)
                 .replace("[MATERIAL]", material);
+    }
+
+    public String message(Message lang, String placeholder, String replacement) {
+        return this.lang.getString(lang.name().toLowerCase())
+                .replace("&", "§")
+                .replace(placeholder, replacement);
     }
 
     public boolean after() { return lang.getBoolean("after"); }

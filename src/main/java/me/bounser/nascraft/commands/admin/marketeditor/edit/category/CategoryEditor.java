@@ -193,7 +193,11 @@ public class CategoryEditor {
         catch (IOException e) { throw new RuntimeException(e); }
 
         player.sendMessage(ChatColor.LIGHT_PURPLE + "Category deleted.");
-        MarketEditorManager.getInstance().getMarketEditorFromPlayer(player).open();
+        if (MarketEditorManager.getInstance().getMarketEditorFromPlayer(player) == null) {
+            MarketEditorManager.getInstance().startEditing(player);
+        } else {
+            MarketEditorManager.getInstance().clearEditing(player);
+            MarketEditorManager.getInstance().startEditing(player);
+        }
     }
-
 }

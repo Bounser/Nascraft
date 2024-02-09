@@ -1,4 +1,4 @@
-package me.bounser.nascraft.commands.sellinv;
+package me.bounser.nascraft.commands.sell.sellinv;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;

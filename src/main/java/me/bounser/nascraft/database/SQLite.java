@@ -319,9 +319,9 @@ public class SQLite {
                 insertStatement.setInt(5, instant.getVolume());
 
                 insertStatement.executeUpdate();
-            } else if (LocalDateTime.parse(resultSet.getString("date")).isBefore(LocalDateTime.now().minusHours(3))) {
+            } else if (LocalDateTime.parse(resultSet.getString("date")).isBefore(LocalDateTime.now().minusHours(4))) {
 
-                String selectDay = "SELECT date FROM prices_day WHERE identifier=? ORDER BY id DESC LIMIT 36;";
+                String selectDay = "SELECT date, price, volume FROM prices_day WHERE identifier=? ORDER BY id DESC LIMIT 48;";
 
                 PreparedStatement preparedStatementDay = connection.prepareStatement(selectDay);
 
@@ -350,7 +350,7 @@ public class SQLite {
                     int i = 0;
 
                     while (resultSetDay.next()) {
-                        if (LocalDateTime.parse(resultSetDay.getString("date")).isAfter(LocalDateTime.now().minusHours(3))) {
+                        if (LocalDateTime.parse(resultSetDay.getString("date")).isAfter(LocalDateTime.now().minusHours(4))) {
                             i++;
                             averagePrice += resultSetDay.getFloat("price");
                             totalVolume += resultSetDay.getInt("volume");
@@ -362,7 +362,7 @@ public class SQLite {
                     PreparedStatement insertStatement = connection.prepareStatement(insert);
 
                     insertStatement.setInt(1, getDays());
-                    insertStatement.setString(2, LocalDateTime.now().minusHours((long) 1.5).toString());
+                    insertStatement.setString(2, LocalDateTime.now().minusHours(2).toString());
                     insertStatement.setString(3, item.getIdentifier());
                     insertStatement.setDouble(4, averagePrice/i);
                     insertStatement.setInt(5, totalVolume);
@@ -408,7 +408,7 @@ public class SQLite {
                 insertStatement.executeUpdate();
             } else if (LocalDateTime.parse(resultSet.getString("date")).isBefore(LocalDateTime.now().minusHours(24))){
 
-                String selectMonth = "SELECT date FROM prices_month WHERE identifier=? ORDER BY id DESC LIMIT 8;";
+                String selectMonth = "SELECT date, price, volume FROM prices_month WHERE identifier=? ORDER BY id DESC LIMIT 6;";
 
                 PreparedStatement preparedStatementMonth = connection.prepareStatement(selectMonth);
 
@@ -979,7 +979,16 @@ public class SQLite {
             ResultSet resultSet = prep.executeQuery();
 
             while (resultSet.next()) {
-                content.put(MarketManager.getInstance().getItem(resultSet.getString("identifier")), resultSet.getInt("amount"));
+                Item item = MarketManager.getInstance().getItem(resultSet.getString("identifier"));
+
+                if (item != null)
+                    content.put(item, resultSet.getInt("amount"));
+
+                String sqlDelete = "DELETE FROM inventories WHERE identifier=? AND uuid=?;";
+                PreparedStatement prepDelete = connection.prepareStatement(sqlDelete);
+                prepDelete.setString(1, resultSet.getString("identifier"));
+                prepDelete.setString(2, uuid.toString());
+                prepDelete.executeUpdate();
             }
 
         } catch (SQLException e) {

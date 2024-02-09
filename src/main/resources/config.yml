@@ -3,12 +3,6 @@
 # Language file to use. Available: en_US es_ES
 language: 'en_US'
 
-database:
-  # How many days should the trade's log last in the database?
-  # With the option 60, all trades older than 60 days will be automatically removed.
-  # Use -1 to disable (Keep all trades logged).
-  days-until-history-removed: 60
-
 price-options:
   # Set (hard) limits on the minimum and maximum prices.
   limits:
@@ -32,12 +26,18 @@ market-control:
   #
   # This value will be applied by default if no other tax is explicitly stated on the item at items.yml
   taxation:
-    # 6% taxation when players sell items.
-    sell: 0.06
-    # 4% taxation when players buy items.
-    buy: 0.04
+    sell: 0.06 # 6% taxation when players sell items.
+    buy: 0.04 # 4% taxation when players buy items.
   # Do players need the permission "nascraft.market" to operate directly with commands?
   market-permission: true
+
+  # With limit orders players can select an item and a desired price to automatically perform transactions.
+  limit-orders:
+    enabled: true
+    # This extra tax is collected when placing the order and won't be refunded even if the order expires.
+    extra-tax: 0.1 # 10%
+    # After how many (real life) hours should the order be expired?
+    expiration: 120 # 120 hours = 5 days
 
 commands:
   # Available commands: sell, sellall, sellhand
@@ -54,6 +54,12 @@ placeholders:
   # 3 -> 2.273$
   decimal-precision: 2
 
+database:
+  # How many days should the trade's log last in the database?
+  # With the option 60, all trades older than 60 days will be automatically removed.
+  # Use -1 to disable (Keep all trades logged).
+  days-until-history-removed: 60
+
 # FEATURE IN BETA AS OF ${project.version}
 # Use with caution.
 discord-bot:
@@ -61,10 +67,11 @@ discord-bot:
   # Available methods: NATIVE, DISCORDSRV
   link-method: 'NATIVE'
   token: 'TOKEN-ID'
+  # This channel should be only used by the bot. Every message in it will be removed.
   channel: 'TEXTCHANNEL-ID'
   # Role requiered to execute admin commands through discord.
   # Current commands: /stop, /resume, /seeinv [ID], /seebal [ID]
-  admin-role-id: 'ROLE-ID'
+  admin-role-id: 'ADMIN-ROLE-ID'
   # Default size of discord's virtual inventories.
   default-inventory: 5
   # Formula to calculate the price of then next slot. slot_price_factor * #slot + slot_price_base = price
@@ -124,7 +131,7 @@ sell-wands:
         - '&7for &6x1.5 &7its value.'
         - ' '
         - '&7Left to sell: &a[PROFIT]'
-      # With this wand you can sell a maximum of 1.000.000$ (Including the multiplier)
+      # With this wand you can sell a maximum of 1.000.000$ (Including the multiplier) worth of items.
       max-profit: 1000000
       multiplier: 1.5
       permission: 'nascraft.wand.millonaire'

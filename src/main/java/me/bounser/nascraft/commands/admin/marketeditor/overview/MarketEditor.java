@@ -171,9 +171,9 @@ public class MarketEditor {
 
             ItemMeta CategoryMeta = categoryItemStack.getItemMeta();
 
-            CategoryMeta.setDisplayName(ChatColor.GOLD + "Category: " + category.getDisplayName());
-            CategoryMeta.setLore(Arrays.asList(ChatColor.GRAY + "identifier: " + category.getIdentifier(),
-                    "", ChatColor.LIGHT_PURPLE + "CLICK TO EDIT"));
+            CategoryMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Category: " + category.getDisplayName());
+            CategoryMeta.setLore(Arrays.asList(ChatColor.GRAY + "Identifier: " + ChatColor.GOLD + category.getIdentifier(),
+                    "", ChatColor.GREEN + "§lCLICK TO EDIT"));
 
             categoryItemStack.setItemMeta(CategoryMeta);
 

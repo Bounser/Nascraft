@@ -3,6 +3,8 @@ package me.bounser.nascraft.discord.linking;
 import github.scarsz.discordsrv.DiscordSRV;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.SQLite;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -142,8 +144,8 @@ public class LinkManager {
                 SQLite.getInstance().removeLink(userId);
 
                 Player player = Bukkit.getPlayer(userToUUID.get(userId));
-                if (player != null && player.getOpenInventory().getTitle().equals("Discord Inventory"))
-                    Bukkit.getScheduler().runTask(Nascraft.getInstance(), () -> player.closeInventory());
+                if (player != null && player.getOpenInventory().getTitle().equals(Lang.get().message(Message.DISINV_TITLE)))
+                    Bukkit.getScheduler().runTask(Nascraft.getInstance(), player::closeInventory);
 
                 userToUUID.remove(userId);
         }

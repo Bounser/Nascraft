@@ -95,7 +95,7 @@ public class MarketEditorInvListener implements Listener {
 
                         })
                         .preventClose()
-                        .text("identifier...")
+                        .text("Identifier...")
                         .title("New category")
                         .plugin(Nascraft.getInstance())
                         .open(player);

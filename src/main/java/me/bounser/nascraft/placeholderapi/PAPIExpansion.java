@@ -5,11 +5,12 @@ import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 
 public class PAPIExpansion extends PlaceholderExpansion {
 
@@ -30,64 +31,106 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
         String params = PlaceholderAPI.setBracketPlaceholders(player, identifier);
 
-        switch (params) {
-            case "linked":
-                return String.valueOf(LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null);
-            case "discord_id":
-                String id = LinkManager.getInstance().getUserDiscordID(player.getUniqueId());
-                if (id == null) return "Not linked";
-                return LinkManager.getInstance().getUserDiscordID(player.getUniqueId());
-        }
+        String[] dividedParams = params.split("_", 3);
+
+        if (dividedParams.length == 0) return "Invalid format.";
 
         Item item;
 
-        int quantity = 1;
+        switch (dividedParams[0]) {
 
-        if (params.substring(0, params.indexOf("_")).equalsIgnoreCase("change")) {
+            case "linked":
+                return String.valueOf(LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null);
 
-            String argument = params.substring(params.indexOf("_", params.indexOf("_") + 1) + 1);
+            case "discordid":
+                String id = LinkManager.getInstance().getUserDiscordID(player.getUniqueId());
+                if (id == null) return "Not linked";
+                return LinkManager.getInstance().getUserDiscordID(player.getUniqueId());
 
-            if (argument.equalsIgnoreCase("mainhand")) {
-                item = MarketManager.getInstance().getItem(player.getPlayer().getInventory().getItemInMainHand().getType().toString());
-                quantity = player.getPlayer().getInventory().getItemInMainHand().getAmount();
-            } else {
-                item = MarketManager.getInstance().getItem(argument);
-            }
+            case "price":
 
-        } else if (params.substring(params.indexOf("_") + 1).equalsIgnoreCase("mainhand")) {
+                String[] dividedParamsPrice = params.split("_", 2);
 
-            item = MarketManager.getInstance().getItem(player.getPlayer().getInventory().getItemInMainHand().getType().toString());
-            quantity = player.getPlayer().getInventory().getItemInMainHand().getAmount();
+                if (dividedParamsPrice.length != 2) return "Invalid format";
 
-        } else {
+                item = getItemFromString(dividedParamsPrice[1], player.getPlayer());
 
-            item = MarketManager.getInstance().getItem(params.substring(params.indexOf("_") + 1));
-        }
+                if (item == null) return "0";
 
-        if (item == null) return "0";
+                return String.valueOf(RoundUtils.roundTo(item.getPrice().getValue(), Config.getInstance().getPlaceholderPrecission()));
 
-        TimeSpan timeSpan = null;
+            case "stock":
 
-        switch (params.substring(0, params.indexOf("_")).toLowerCase()) {
+                String[] dividedParamsStock = params.split("_", 2);
 
-            case "buyprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getBuyPrice()*quantity, Config.getInstance().getPlaceholderPrecission()));
-            case "sellprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getSellPrice()*quantity, Config.getInstance().getPlaceholderPrecission()));
-            case "price": return String.valueOf(RoundUtils.roundTo(item.getPrice().getValue()*quantity, Config.getInstance().getPlaceholderPrecission()));
-            case "stock": return String.valueOf(item.getPrice().getStock());
+                if (dividedParamsStock.length != 2) return "Invalid format";
+
+                item = getItemFromString(dividedParamsStock[1], player.getPlayer());
+
+                if (item == null) return "0";
+
+                return String.valueOf(RoundUtils.roundTo(item.getPrice().getStock(), Config.getInstance().getPlaceholderPrecission()));
+
             case "change":
 
-                switch (params.substring(params.indexOf("_") + 1, params.indexOf("_", params.indexOf("_") + 1)).toLowerCase()) {
+                if (dividedParams.length != 3) return "Invalid format";
+
+                item = getItemFromString(dividedParams[2], player.getPlayer());
+
+                if (item == null) return "0";
+
+                TimeSpan timeSpan;
+
+                switch (dividedParams[1].toLowerCase()) {
 
                     case "1h": timeSpan = TimeSpan.HOUR; break;
                     case "1d": timeSpan = TimeSpan.DAY; break;
                     case "1m": timeSpan = TimeSpan.MONTH; break;
                     case "1y": timeSpan = TimeSpan.YEAR; break;
+                    default: return "Invalid format.";
+
                 }
 
-                if(timeSpan != null)
-                    return String.valueOf(RoundUtils.roundToOne(-100 + item.getPrice().getValue() *100/item.getPrices(timeSpan).get(0)));
-
-            default: return "0.00";
+                return String.valueOf(RoundUtils.roundToOne(-100 + item.getPrice().getValue() *100/item.getPrices(timeSpan).get(0)));
         }
+
+        if (dividedParams.length < 2) { return "Invalid format."; }
+
+        int quantity;
+
+        if (dividedParams[1].equalsIgnoreCase("mainhand")) {
+            item = MarketManager.getInstance().getItem(player.getPlayer().getInventory().getItemInMainHand());
+            quantity = player.getPlayer().getInventory().getItemInMainHand().getAmount();
+        } else {
+            if (dividedParams.length != 3) { return "Invalid format."; }
+            item = MarketManager.getInstance().getItem(dividedParams[2]);
+            try {
+                quantity = Integer.parseInt(dividedParams[1]);
+            } catch (NumberFormatException e) {
+                return "Invalid quantity.";
+            }
+        }
+
+        if (item == null) return "0";
+
+        switch (dividedParams[0]) {
+            case "buyprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getProjectedCost(-quantity, item.getPrice().getBuyTaxMultiplier()), Config.getInstance().getPlaceholderPrecission()));
+            case "sellprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getProjectedCost(quantity, item.getPrice().getSellTaxMultiplier()), Config.getInstance().getPlaceholderPrecission()));
+        }
+
+        return "0";
     }
+
+    public Item getItemFromString(String itemIdentifier, Player player) {
+
+        Item item;
+
+        if (itemIdentifier.equalsIgnoreCase("mainhand")) {
+            item = MarketManager.getInstance().getItem(player.getInventory().getItemInMainHand());
+        } else {
+            item = MarketManager.getInstance().getItem(itemIdentifier);
+        }
+        return item;
+    }
+
 }

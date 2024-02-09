@@ -31,9 +31,14 @@ public class DiscordCommand implements CommandExecutor {
             Lang.get().message((Player) sender, Message.NO_PERMISSION); return false;
         }
 
+        if (LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) == null) {
+            Lang.get().message(player, Message.DISCORDCMD_NOT_LINKED);
+            return false;
+        }
+
         if (args.length == 0) {
             DiscordBot.getInstance().getJDA().retrieveUserById(LinkManager.getInstance().getUserDiscordID(player.getUniqueId()))
-                    .queue(user -> player.sendMessage(ChatColor.GRAY + "You have your account linked with the user: " + ChatColor.LIGHT_PURPLE + user.getName()));
+                    .queue(user -> Lang.get().message(player, Message.DISCORDCMD_LINKED, "[USER]", user.getName()));
 
             return false;
         }
@@ -43,12 +48,7 @@ public class DiscordCommand implements CommandExecutor {
             case "inv":
             case "inventory":
 
-                if (LinkManager.getInstance().getUserDiscordID(((Player) sender).getUniqueId()) == null) {
-                    player.sendMessage("You are not linked.");
-                    return false;
-                }
-
-                Inventory inventory = Bukkit.createInventory(player, 45, "Discord Inventory");
+                Inventory inventory = Bukkit.createInventory(player, 45, Lang.get().message(Message.DISINV_TITLE));
                 player.openInventory(inventory);
 
                 DiscordInventoryInGame.getInstance().updateDiscordInventory(player);

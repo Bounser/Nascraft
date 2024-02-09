@@ -20,6 +20,9 @@ public class MarketEditorManager {
         playerMenus.remove(player);
     }
 
-    public MarketEditor getMarketEditorFromPlayer(Player player) { return playerMenus.get(player); }
+    public MarketEditor getMarketEditorFromPlayer(Player player) {
+        if (playerMenus.get(player) != null) return playerMenus.get(player);
+        return null;
+    }
 
 }

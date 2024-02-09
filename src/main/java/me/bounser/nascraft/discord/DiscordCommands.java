@@ -5,6 +5,7 @@ import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.images.BalanceImage;
+import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.discord.images.InventoryImage;
 import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
@@ -12,24 +13,18 @@ import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -37,34 +32,27 @@ public class DiscordCommands extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        switch (event.getName()) {
 
-            case "ping":
-                long time = System.currentTimeMillis();
-                event.reply("Pong!").setEphemeral(true)
-                        .flatMap(v ->
-                                event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time)
-                        ).queue();
-                break;
+        switch (event.getName()) {
 
             case "alert":
 
                 switch (DiscordAlerts.getInstance().setAlert(event.getUser().getId(), event.getOption("material").getAsString(), (float) event.getOption("price").getAsDouble())) {
 
                     case "success":
-                        event.reply("Success! You will receive a DM when the price reaches the price.")
+                        event.reply(Lang.get().message(Message.DISCORD_ALERT_SUCCESS))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
 
                     case "repeated":
-                        event.reply("That item is already on you watchlist!")
+                        event.reply(Lang.get().message(Message.DISCORD_ALERT_ALREADY_LISTED))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
 
                     case "not_valid":
-                        event.reply("Item not recognized!")
+                        event.reply(Lang.get().message(Message.DISCORD_ALERT_INVALID_MATERIAL))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
@@ -80,16 +68,19 @@ public class DiscordCommands extends ListenerAdapter {
 
                 if (DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()) == null ||
                         DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).size() < 1) {
-                    event.reply(":x: You don't have any alert setup!")
+                    event.reply(Lang.get().message(Message.DISCORD_NO_ALERTS_SETUP))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
                 }
 
-                String alerts = ":bell: Active alerts:\n ";
+                String alerts = Lang.get().message(Message.DISCORD_ALERT_HEADER);
 
                 for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
-                    alerts = alerts + "\n**" + item.getName() + "** at price: **" + Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)) + Lang.get().message(Message.CURRENCY) + "**";
+                    alerts = alerts + "\n" + Lang.get().message(Message.DISCORD_ALERT_SEGMENT)
+                            .replace("[MATERIAL]", item.getName())
+                            .replace("[PRICE1]", Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC))
+                            .replace("[PRICE2]", String.valueOf(item.getPrice().getValue()));
 
                 event.reply(alerts)
                         .setEphemeral(true)
@@ -101,16 +92,16 @@ public class DiscordCommands extends ListenerAdapter {
 
                 if (DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()) == null ||
                         DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).size() < 1) {
-                    event.reply(":x: You don't have any alert setup already!")
+                    event.reply(Lang.get().message(Message.DISCORD_NO_ALERTS_SETUP))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
                 }
 
-                Item item = MarketManager.getInstance().getItem(Material.getMaterial(event.getOption("material").getAsString().replace(" ", "_").toUpperCase()));
+                Item item = MarketManager.getInstance().getItem((event.getOption("material").getAsString()));
 
                 if (item == null) {
-                    event.reply(":x: Item not recognized.")
+                    event.reply(Lang.get().message(Message.DISCORD_ALERT_INVALID_MATERIAL))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
@@ -119,16 +110,15 @@ public class DiscordCommands extends ListenerAdapter {
                 switch (DiscordAlerts.getInstance().removeAlert(event.getUser().getId(), item)) {
 
                     case "not_found":
-                        event.reply(":x: Item is not in your watchlist.")
+                        event.reply(Lang.get().message(Message.DISCORD_ALERT_NOT_IN_WATCHLIST))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
 
                     case "success":
-                        event.reply(":no_bell: Alert for **" + event.getOption("material").getAsString().replace(" ", "_") + "** removed.")
+                        event.reply(Lang.get().message(Message.DISCORD_ALERT_REMOVED).replace("[MATERIAL]", MarketManager.getInstance().getItem(event.getOption("material").getAsString()).getName()))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
-
                         break;
                 }
 
@@ -168,13 +158,6 @@ public class DiscordCommands extends ListenerAdapter {
                                     "``\n> \n" +
                                     ">  :abacus: **Total**: ``" + Formatter.formatDouble(total) + "``\n";
 
-                    File balanceFile = new File("image.png");
-                    try {
-                        ImageIO.write(BalanceImage.getImage(event.getUser()), "png", balanceFile);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-
                     EmbedBuilder eb = new EmbedBuilder();
 
                     eb.setImage("attachment://image.png");
@@ -192,7 +175,7 @@ public class DiscordCommands extends ListenerAdapter {
                             purse/total, inventory/total, brokerValue/total));
 
                     event.replyEmbeds(eb.build())
-                            .addFiles(FileUpload.fromData(balanceFile , "image.png"))
+                            .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(BalanceImage.getImage(event.getUser())), "image.png"))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
@@ -214,29 +197,18 @@ public class DiscordCommands extends ListenerAdapter {
 
                 DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(LinkManager.getInstance().getUUID(event.getUser().getId()));
 
-                File outputfile = new File("image.png");
-                try {
-                    ImageIO.write(InventoryImage.getImage(discordInventory), "png", outputfile);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-
                 if (discordInventory.getCapacity() < 40) {
 
-                    event.replyFiles(FileUpload.fromData(outputfile , "image.png"))
+                    event.replyFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(InventoryImage.getImage(discordInventory)), "image.png"))
                             .setEphemeral(true)
-                            .addActionRow(Button.success("i_buy", "Buy slot for " + discordInventory.getNextSlotPrice() + Lang.get().message(Message.CURRENCY)))
-                            .queue(message -> {
-                                message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS);
-                            });
+                            .addActionRow(Button.success("i_buy", Lang.get().message(Message.DISCORD_BUY_SLOT) + discordInventory.getNextSlotPrice() + Lang.get().message(Message.CURRENCY)))
+                            .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
                 } else {
 
-                    event.replyFiles(FileUpload.fromData(outputfile , "image.png"))
+                    event.replyFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(InventoryImage.getImage(discordInventory)) , "image.png"))
                             .setEphemeral(true)
-                            .queue(message -> {
-                                message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS);
-                            });
+                            .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
                 }
                 break;
 
@@ -245,7 +217,7 @@ public class DiscordCommands extends ListenerAdapter {
                 Item itemSearched = null;
 
                 for (Item itemCandidate : MarketManager.getInstance().getAllItems()) {
-                    if (itemCandidate.getMaterial().toString().equalsIgnoreCase(event.getOption("material").getAsString()) ||
+                    if (itemCandidate.getIdentifier().equalsIgnoreCase(event.getOption("material").getAsString()) ||
                             itemCandidate.getName().equalsIgnoreCase(event.getOption("material").getAsString())) {
                         itemSearched = itemCandidate; break;
                     }
@@ -305,6 +277,13 @@ public class DiscordCommands extends ListenerAdapter {
                     return;
                 }
 
+                if (event.getOption("userid") == null ) {
+                    event.reply(":exclamation: Invalid argument! You have to provide the ID of the discord user!")
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                    return;
+                }
+
                 try {
                     DiscordBot.getInstance().getJDA().retrieveUserById(event.getOption("userid").getAsString()).queue(
 
@@ -317,22 +296,20 @@ public class DiscordCommands extends ListenerAdapter {
                                     return;
                                 }
 
-                                File outputFile = new File("image.png");
+                                if (LinkManager.getInstance().getUUID(event.getOption("userid").getAsString()) == null) {
+                                    event.reply(":exclamation: User ``" + user.getName() + "`` is not linked!")
+                                            .setEphemeral(true)
+                                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                                    return;
+                                }
 
                                 switch (event.getName()) {
 
                                     case "seeinv":
                                         DiscordInventory discordInventory1 = DiscordInventories.getInstance().getInventory(event.getOption("userid").getAsString());
 
-                                        File outputInventoryFile = new File("image.png");
-                                        try {
-                                            ImageIO.write(InventoryImage.getImage(discordInventory1), "png", outputInventoryFile);
-                                        } catch (IOException e) {
-                                            throw new RuntimeException(e);
-                                        }
-
                                         event.reply("## Displaying inventory of user: ``" + user.getName() + "``")
-                                                .setFiles(FileUpload.fromData(outputFile, "image.png"))
+                                                .setFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(InventoryImage.getImage(discordInventory1)), "image.png"))
                                                 .setEphemeral(true)
                                                 .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
@@ -352,12 +329,6 @@ public class DiscordCommands extends ListenerAdapter {
                                                         "``\n> \n" +
                                                         ">  :abacus: **Total**: ``" + Formatter.formatDouble(total) + "``\n";
 
-                                        File balanceFile = new File("image.png");
-                                        try {
-                                            ImageIO.write(BalanceImage.getImage(event.getUser()), "png", balanceFile);
-                                        } catch (IOException e) {
-                                            throw new RuntimeException(e);
-                                        }
 
                                         EmbedBuilder eb = new EmbedBuilder();
 
@@ -369,7 +340,6 @@ public class DiscordCommands extends ListenerAdapter {
 
                                         eb.setDescription(text);
 
-
                                         eb.setColor(DiscordBot.mixColors(new Color(100,250,100),
                                                 new Color(250,250,100),
                                                 new Color(250,100,100),
@@ -377,19 +347,21 @@ public class DiscordCommands extends ListenerAdapter {
 
                                         event.reply("## Displaying balance of user: ``" + user.getName() + "``")
                                                 .addEmbeds(eb.build())
-                                                .addFiles(FileUpload.fromData(balanceFile , "image.png"))
+                                                .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(BalanceImage.getImage(event.getUser())), "image.png"))
                                                 .setEphemeral(true)
                                                 .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
                                 }
                             }
                     );
-                } catch (NumberFormatException e) {
+                } catch (Exception e) {
 
                     event.reply("Invalid user id! Make sure its in a valid format. Example of a valid ID (yours): ``" + event.getUser().getId() + "``")
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
                 }
+
         }
     }
 }
+

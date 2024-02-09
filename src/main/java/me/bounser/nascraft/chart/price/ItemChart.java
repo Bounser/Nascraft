@@ -1,4 +1,4 @@
-package me.bounser.nascraft.chart;
+package me.bounser.nascraft.chart.price;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -14,6 +14,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.*;
+import org.jfree.data.time.Day;
 import org.jfree.data.time.Minute;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
@@ -60,7 +61,7 @@ public class ItemChart {
 
         }
 
-        XYDataset priceData = createPriceDataset(data);
+        XYDataset priceData = createPriceDataset(data, chartType);
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 null,
                 null,
@@ -93,7 +94,7 @@ public class ItemChart {
 
         rangeAxis2.setUpperMargin(1.00);  // to leave room for price line
         plot.setRangeAxis(1, rangeAxis2);
-        plot.setDataset(1, createVolumeDataset(data));
+        plot.setDataset(1, createVolumeDataset(data, chartType));
         plot.setRangeAxis(1, rangeAxis2);
         plot.mapDatasetToRangeAxis(1, 1);
         XYBarRenderer renderer2 = new XYBarRenderer(0.20);
@@ -132,7 +133,7 @@ public class ItemChart {
         return chart;
     }
 
-    private static XYDataset createPriceDataset(List<Instant> intants) {
+    private static XYDataset createPriceDataset(List<Instant> intants, ChartType chartType) {
 
         TimeSeries series1 = new TimeSeries("Price");
 
@@ -150,18 +151,39 @@ public class ItemChart {
 
     }
 
-    private static IntervalXYDataset createVolumeDataset(List<Instant> intants) {
+    private static IntervalXYDataset createVolumeDataset(List<Instant> intants, ChartType chartType) {
 
         TimeSeries series1 = new TimeSeries("Volume");
 
-        for (Instant instant : intants) {
-            Minute minute = new Minute(instant.getLocalDateTime().getMinute(),
-                    instant.getLocalDateTime().getHour(),
-                    instant.getLocalDateTime().getDayOfMonth(),
-                    instant.getLocalDateTime().getMonthValue(),
-                    instant.getLocalDateTime().getYear());
+        switch (chartType) {
 
-            series1.addOrUpdate(minute,  instant.getVolume());
+            case DAY:
+            case MONTH:
+
+                for (Instant instant : intants) {
+                    Minute time = new Minute(instant.getLocalDateTime().getMinute(),
+                            instant.getLocalDateTime().getHour(),
+                            instant.getLocalDateTime().getDayOfMonth(),
+                            instant.getLocalDateTime().getMonthValue(),
+                            instant.getLocalDateTime().getYear());
+
+                    series1.addOrUpdate(time,  instant.getVolume());
+                }
+                break;
+
+            case YEAR:
+            case ALL:
+
+                for (Instant instant : intants) {
+                    Day time = new Day(
+                            instant.getLocalDateTime().getDayOfMonth(),
+                            instant.getLocalDateTime().getMonthValue(),
+                            instant.getLocalDateTime().getYear());
+
+                    series1.addOrUpdate(time,  instant.getVolume());
+                }
+                break;
+
         }
 
         return new TimeSeriesCollection(series1);

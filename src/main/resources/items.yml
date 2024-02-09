@@ -1,12 +1,15 @@
 # Nascraft items.yml - ${project.version}
 
+# You can edit this file manually or using /nascraft editmarket
 items:
   # Material of the item.
   cobblestone:
-    # OPTIONAL: Display name of the item. If not specified, the material (with the first letter capitalized and without underscores) will be displayed.
-    alias: 'Cobble'
     # REQUIRED: INITIAL price. This value will be disregarded once the market begins to establish its own valuations.
     initial-price: 0.05
+
+    # OPTIONAL: Display name of the item. If not specified, the material (with the first letter capitalized and without underscores) will be displayed.
+    alias: 'Cobble'
+
     # OPTIONAL: You can have a support level, a resistance level, or both for each item.
     # In this example, the item will fluctuate randomly between 0,3 - 2 and will try to go again to this range
     # when the price deviates due to player actions.
@@ -17,6 +20,7 @@ items:
     # With lower values items will require more interactions to change, and with higher values items will change more easily.
     # This is especially useful with common objects such as cobblestone. At lower elasticity, players will have to sell/buy much more to influence the price.
     elasticity: 0.5
+
     # OPTIONAL: The intensity of the noise determines the magnitude of the random fluctuations.
     noise-intensity: 1.4
 
@@ -27,7 +31,7 @@ items:
       # Tax of 10% when selling cobblestone.
       sell: 0.1
 
-    #OPTIONAL: Change the icon of the item to a custom one.
+    # OPTIONAL: Change the icon of the item to a custom one.
     # This only has effect with AdvancedGUI layouts and the discord extension.
     # Upload an image to /Nascraft/images/ and add:
     # icon: 'Name of the image'
@@ -48,7 +52,6 @@ items:
       cobblestone_wall:
         # Spends 6, gets 6. Therefore, the ratio is 6/6 = 1/1 = 1.
         multiplier: 1
-
   stone:
     initial-price: 0.1
     support: 0.05
@@ -269,18 +272,6 @@ items:
   nether_brick:
     initial-price: 5
 
-  beef:
-    initial-price: 5
-  porkchop:
-    initial-price: 5
-  mutton:
-    initial-price: 6
-  chicken:
-    initial-price: 4
-  rabbit:
-    initial-price: 8
-  egg:
-    initial-price: 4
   apple:
     initial-price: 15
   carrot:
@@ -295,5 +286,18 @@ items:
     initial-price: 7
   honey_bottle:
     initial-price: 40
+
+  beef:
+    initial-price: 5
+  porkchop:
+    initial-price: 5
+  mutton:
+    initial-price: 6
+  chicken:
+    initial-price: 4
+  rabbit:
+    initial-price: 8
+  egg:
+    initial-price: 4
   leather:
     initial-price: 30

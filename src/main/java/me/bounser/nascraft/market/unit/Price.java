@@ -1,7 +1,6 @@
 package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.config.Config;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +17,11 @@ public class Price {
 
     private float stock;
 
-    private final float support;
-    private final float resistance;
-    private final float noiseIntensity;
+    private float support;
+    private float resistance;
+    private float noiseIntensity;
 
-    private final float elasticity;
+    private float elasticity;
 
     private float historicalHigh;
     private float historicalLow;
@@ -32,8 +31,8 @@ public class Price {
     private final List<Float> dayHigh = new ArrayList<>();
     private final List<Float> dayLow = new ArrayList<>();
 
-    private float taxBuy;
-    private float taxSell;
+    private final float taxBuy;
+    private final float taxSell;
 
     public Price(Item item, float initialValue, float elasticity, float support, float resistance, float noiseIntensity) {
 
@@ -53,8 +52,8 @@ public class Price {
         this.noiseIntensity = noiseIntensity;
         this.elasticity = elasticity;
 
-        taxBuy = Config.getInstance().getTaxBuy(item);
-        taxSell = Config.getInstance().getTaxSell(item);
+        taxBuy = Config.getInstance().getTaxBuy(getItem().getIdentifier());
+        taxSell = Config.getInstance().getTaxSell(getItem().getIdentifier());
     }
 
     public float getValue() { return value; }
@@ -165,29 +164,41 @@ public class Price {
 
     public float getProjectedCost(int stockChange, float tax) {
 
-        int maxSize = Math.round((item.getMaterial().getMaxStackSize())/(elasticity*4));
-        int orderSize = maxSize == 0 ? 1 : Math.abs(stockChange / maxSize);
-        int excess = maxSize == 0 ? 0 : Math.abs(stockChange % maxSize);
+        int maxSize = Math.round((item.getItemStack().getType().getMaxStackSize())/(elasticity*4));
+        int orderSize = Math.abs(stockChange / maxSize);
+        int excess = Math.abs(stockChange % maxSize);
 
         float fictitiousValue = value;
         float fictitiousStock = stock;
+        float cost = 0;
 
         for (int i = 0 ; i < orderSize ; i++) {
+            cost += fictitiousValue*maxSize;
             fictitiousStock += maxSize*Integer.signum(stockChange);
-            fictitiousValue += (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
+            fictitiousValue = (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
         }
 
         if (excess > 0) {
-            fictitiousStock += excess*Integer.signum(stockChange);
-            fictitiousValue += (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
+            cost += fictitiousValue*excess;
         }
 
-        return fictitiousValue*tax;
+        return cost*tax;
     }
 
     public float getBuyTaxMultiplier() { return taxBuy; }
     public float getSellTaxMultiplier() { return taxSell; }
 
     public Item getItem() { return item; }
+
+    public float getInitialValue() { return initialValue; }
+    public float getNoiseIntensity() { return noiseIntensity; }
+    public float getSupport() { return support; }
+    public float getResistance() { return resistance; }
+
+    public Price setInitialValue(float initialValue) { this.initialValue = initialValue; return this; }
+    public Price setElasticity(float elasticity) { this.elasticity = elasticity; return this; }
+    public Price setNoiseIntensity(float noiseIntensity) { this.noiseIntensity = noiseIntensity; return this; }
+    public Price setSupport(float support) { this.support = support; return this; }
+    public Price setResistance(float resistance) { this.resistance = resistance; return this; }
 
 }

@@ -2,8 +2,9 @@ package me.bounser.nascraft.discord;
 
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.discord.images.ItemAdvancedImage;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -13,9 +14,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.FileUpload;
 
 import javax.annotation.Nonnull;
-import javax.imageio.ImageIO;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +28,7 @@ public class DiscordModal extends ListenerAdapter {
             Item item = null;
 
             for (Item item1 : MarketManager.getInstance().getAllItems()) {
-                if (item1.getMaterial().toString().equalsIgnoreCase(event.getValue("material").getAsString()) ||
+                if (item1.getIdentifier().equalsIgnoreCase(event.getValue("material").getAsString()) ||
                         item1.getName().equalsIgnoreCase(event.getValue("material").getAsString())) {
                     item = item1; break;
                 }
@@ -54,7 +52,7 @@ public class DiscordModal extends ListenerAdapter {
                 return;
             }
 
-            switch (DiscordAlerts.getInstance().setAlert(event.getUser().getId(), item.getMaterial().toString(), price)) {
+            switch (DiscordAlerts.getInstance().setAlert(event.getUser().getId(), item.getIdentifier(), price)) {
 
                 case "success":
                     event.reply(Lang.get().message(Message.DISCORD_ALERT_SUCCESS))
@@ -94,7 +92,7 @@ public class DiscordModal extends ListenerAdapter {
             Item item = null;
 
             for (Item itemCandidate : MarketManager.getInstance().getAllItems()) {
-                if (itemCandidate.getMaterial().toString().equalsIgnoreCase(event.getValue("material").getAsString()) ||
+                if (itemCandidate.getIdentifier().equalsIgnoreCase(event.getValue("material").getAsString()) ||
                         itemCandidate.getName().equalsIgnoreCase(event.getValue("material").getAsString())) {
                     item = itemCandidate; break;
                 }
@@ -115,7 +113,7 @@ public class DiscordModal extends ListenerAdapter {
             Item item = null;
 
             for (Item itemCandidate : MarketManager.getInstance().getAllItems()) {
-                if (itemCandidate.getMaterial().toString().equalsIgnoreCase(event.getValue("material").getAsString()) ||
+                if (itemCandidate.getIdentifier().equalsIgnoreCase(event.getValue("material").getAsString()) ||
                         itemCandidate.getName().equalsIgnoreCase(event.getValue("material").getAsString())) {
                     item = itemCandidate; break;
                 }
@@ -135,20 +133,13 @@ public class DiscordModal extends ListenerAdapter {
 
         List<ItemComponent> componentList = new ArrayList<>();
 
-        componentList.add(Button.secondary("long-" + item.getMaterial(), "Long price").withEmoji(Emoji.fromFormatted("U+1F4C8")));
-        componentList.add(Button.secondary("short-" + item.getMaterial(), "Short price").withEmoji(Emoji.fromFormatted("U+1F4C9")));
+        componentList.add(Button.secondary("long-" + item.getIdentifier(), "Long price").withEmoji(Emoji.fromFormatted("U+1F4C8")));
+        componentList.add(Button.secondary("short-" + item.getIdentifier(), "Short price").withEmoji(Emoji.fromFormatted("U+1F4C9")));
 
-        componentList.add(Button.secondary("future-" + item.getMaterial(), "Futures").withEmoji(Emoji.fromFormatted("U+1F4D1")));
-        componentList.add(Button.secondary("recurring-" + item.getMaterial(), "Programmed actions").withEmoji(Emoji.fromFormatted("U+1F4C5")));
+        componentList.add(Button.secondary("future-" + item.getIdentifier(), "Futures").withEmoji(Emoji.fromFormatted("U+1F4D1")));
+        componentList.add(Button.secondary("recurring-" + item.getIdentifier(), "Programmed actions").withEmoji(Emoji.fromFormatted("U+1F4C5")));
 
-        File outputfile = new File("image.png");
-        try {
-            ImageIO.write(ItemAdvancedImage.getImage(item), "png", outputfile);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        modalEvent.replyFiles(FileUpload.fromData(outputfile , "image.png"))
+        modalEvent.replyFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(ItemAdvancedImage.getImage(item)), "image.png"))
                 .addActionRow(componentList)
                 .setEphemeral(true)
                 .queue();

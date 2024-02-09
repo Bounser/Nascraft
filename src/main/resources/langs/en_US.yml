@@ -70,6 +70,30 @@ sellwand_minutes: "[MINUTES] minutes and [SECONDS] seconds"
 sellwand_seconds: "[SECONDS] second(s)"
 sellwand_too_much: "<gradient:#FB6363:#C4B3FD>You can't sell that much with this wand!</gradient>"
 
+# LINK COMMAND
+
+link_already_linked: "<gradient:#FF00CD:#DA58FF>Already linked!</gradient>"
+link_wrong_use: "<gradient:#FB6363:#C4B3FD>Wrong use of the command!</gradient>"
+link_wrong_format:  "<gradient:#FB6363:#C4B3FD>Wrong code format!</gradient>"
+link_no_process_found: "<gradient:#FB6363:#C4B3FD>No linking process found with that code.</gradient>"
+link_success: "<gradient:#FF00CD:#DA58FF>Linked successfully with user:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+link_direct_message: ":link: Your discords account has been successfully linked to the minecraft user: ``[USER]``"
+
+# DISCORD COMMAND
+
+discordcmd_not_linked: "<gradient:#FB6363:#C4B3FD>You are not linked!</gradient>"
+discordcmd_linked: "<gradient:#FF00CD:#DA58FF>You are linked with:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+
+# DISCORD INVENTORY
+
+disinv_title: "&lDiscord Inventory"
+disinv_cant_afford_expansion: "<gradient:#FB6363:#C4B3FD>You don't have enough money!</gradient>"
+disinv_locked_title: "&c&lLOCKED"
+disinv_locked_lore: "&7Click to buy next slot for:\n&6[AMOUNT]"
+disinv_info_title: "&dDiscord Inventory"
+disinv_info_lore: "&7Value: &6[AMOUNT]"
+disinv_amount: "&7Amount: &6[AMOUNT]"
+
 # DISCORD - No MiniMessage support.
 
 discord_status: "how prices move"

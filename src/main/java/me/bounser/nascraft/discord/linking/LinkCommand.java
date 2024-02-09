@@ -29,12 +29,12 @@ public class LinkCommand implements CommandExecutor {
         }
 
         if (LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null) {
-            player.sendMessage(ChatColor.GRAY + "Already linked!");
+            Lang.get().message(player, Message.LINK_ALREADY_LINKED);
             return false;
         }
 
         if (args.length != 1) {
-            player.sendMessage(ChatColor.GRAY + "Wrong use of the command!");
+            Lang.get().message(player, Message.LINK_WRONG_USE);
             return false;
         }
 
@@ -43,22 +43,22 @@ public class LinkCommand implements CommandExecutor {
         try {
             code = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
-            player.sendMessage(ChatColor.GRAY + "Wrong code format!");
+            Lang.get().message(player, Message.LINK_WRONG_FORMAT);
             return false;
         }
 
         if (!LinkManager.getInstance().codeExists(code)) {
-            player.sendMessage(ChatColor.GRAY + "No linking process found with that code.");
+            Lang.get().message(player, Message.LINK_NO_PROCESS_FOUND);
             return false;
         }
 
         DiscordBot.getInstance().getJDA().retrieveUserById(LinkManager.getInstance().getUserFromCode(code))
                 .queue(user -> {
                     if (LinkManager.getInstance().redeemCode(code, ((Player) sender).getUniqueId(), player.getName())) {
-                        player.sendMessage(ChatColor.GRAY + "Linked successfully with user " + user.getName());
+                        Lang.get().message(player, Message.LINK_SUCCESS, "[USER]", user.getName());
                     }
                     user.openPrivateChannel().queue(privateChannel -> {
-                        privateChannel.sendMessage(":link: Your discords account has been successfully linked to the minecraft user: ``" + player.getName() + "``").queue();
+                        privateChannel.sendMessage(Lang.get().message(Message.LINK_DIRECT_MESSAGE, "[USER]", player.getName())).queue();
                     });
                 });
 

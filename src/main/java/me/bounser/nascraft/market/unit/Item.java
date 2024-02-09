@@ -1,6 +1,5 @@
 package me.bounser.nascraft.market.unit;
 
-import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.SQLite;
@@ -166,9 +165,9 @@ public class Item {
             if (player != null  && feedback) player.getInventory().addItem(operationItemStack);
         }
 
-        totalCost = RoundUtils.round(totalCost);
-
         MoneyManager.getInstance().withdraw(offlinePlayer, totalCost);
+
+        totalCost = RoundUtils.round(totalCost);
 
         if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(totalCost, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
@@ -182,7 +181,7 @@ public class Item {
     }
 
     public boolean checkBalance(Player player, boolean feedback, int amount, Material material) {
-        if (!Nascraft.getEconomy().has(player, price.getProjectedCost(amount, price.getBuyTaxMultiplier())*childs.get(getItemStackFromChildMaterial(material))*1.2)) {
+        if (!MoneyManager.getInstance().hasEnoughMoney(player, (float) (price.getProjectedCost(amount, price.getBuyTaxMultiplier())*childs.get(getItemStackFromChildMaterial(material))*1.2))) {
             if (player != null && feedback) Lang.get().message(player, Message.NOT_ENOUGH_MONEY);
             return false;
         }
@@ -269,14 +268,14 @@ public class Item {
             if (player != null && feedback) player.getInventory().removeItem(operationItemStack);
         }
 
-        totalWorth = RoundUtils.round(totalWorth);
-
         updateInternalValues(amount,
                 amount,
                 0,
                 price.getValue()*price.getSellTaxMultiplier());
 
         MoneyManager.getInstance().deposit(offlinePlayer, totalWorth);
+
+        totalWorth = RoundUtils.round(totalWorth);
 
         if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(totalWorth, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
@@ -397,6 +396,12 @@ public class Item {
     }
 
     public ItemStack getItemStack() { return itemStack.clone(); }
+
+    public ItemStack getItemStack(int quantity) {
+        ItemStack clonedItemStack = itemStack.clone();
+        clonedItemStack.setAmount(quantity);
+        return clonedItemStack;
+    }
 
     public void setItemStack(ItemStack itemStack) { this.itemStack = itemStack; }
 

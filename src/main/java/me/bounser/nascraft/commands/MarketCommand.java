@@ -3,12 +3,11 @@ package me.bounser.nascraft.commands;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.market.managers.MarketManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -39,24 +38,17 @@ public class MarketCommand implements CommandExecutor {
                 return false;
             }
 
-            try {
-                Material.valueOf(args[1].toUpperCase());
-            } catch (IllegalArgumentException e) {
-                player.sendMessage(ChatColor.RED + "That material isn't valid!");
-                return false;
-            }
-
             if (MarketManager.getInstance().getItem(args[1]) == null) {
-                player.sendMessage(ChatColor.RED + "That material isn't valid!");
+                player.sendMessage(ChatColor.RED + "That identifier isn't valid!");
                 return false;
             }
             Item item = MarketManager.getInstance().getItem(args[1]);
             switch (args[0]){
                 case "buy":
-                    item.buyItem(Integer.parseInt(args[2]), player.getUniqueId(), true);
+                    item.buyItem(Integer.parseInt(args[2]), player.getUniqueId(), true, item.getItemStack().getType());
                     break;
                 case "sell":
-                    item.sellItem(Integer.parseInt(args[2]), player.getUniqueId(), true);
+                    item.sellItem(Integer.parseInt(args[2]), player.getUniqueId(), true, item.getItemStack().getType());
                     break;
                 default:
                     player.sendMessage(ChatColor.RED + "Wrong command.");
@@ -77,10 +69,10 @@ public class MarketCommand implements CommandExecutor {
             Item item = MarketManager.getInstance().getItem(args[1]);
             switch (args[0]){
                 case "buy":
-                    item.buyItem(Integer.parseInt(args[2]), player.getUniqueId(), true);
+                    item.buyItem(Integer.parseInt(args[2]), player.getUniqueId(), true, item.getItemStack().getType());
                     break;
                 case "sell":
-                    item.sellItem(Integer.parseInt(args[2]), player.getUniqueId(), true);
+                    item.sellItem(Integer.parseInt(args[2]), player.getUniqueId(), true, item.getItemStack().getType());
                     break;
                 default:
                     sender.sendMessage(ChatColor.RED + "Wrong command.");

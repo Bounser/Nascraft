@@ -70,6 +70,30 @@ sellwand_minutes: "[MINUTES] minutos y [SECONDS] segundos"
 sellwand_seconds: "[SECONDS] segundo(s)"
 sellwand_too_much: "<gradient:#FB6363:#C4B3FD>¡No puedes vender tanto con esa varita!</gradient>"
 
+# COMANDO LINK
+
+link_already_linked: "<gradient:#FF00CD:#DA58FF>¡Ya estás enlazado!</gradient>"
+link_wrong_use: "<gradient:#FB6363:#C4B3FD>¡Uso incorrecto del comando!</gradient>"
+link_wrong_format:  "<gradient:#FB6363:#C4B3FD>¡Ese código no es correcto!</gradient>"
+link_no_process_found: "<gradient:#FB6363:#C4B3FD>No se ha encontrado ningún proceso de enlazado vinculado a ese código.</gradient>"
+link_success: "<gradient:#FF00CD:#DA58FF>Enlazado satisfactoriamente con:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+link_direct_message: ":link: Tu cuenta ha sido enlazada con el usuario de minecraft con nombre: ``[USER]``"
+
+# COMANDO DISCORD
+
+discordcmd_not_linked: "<gradient:#FB6363:#C4B3FD>¡No estás enlazado!</gradient>"
+discordcmd_linked: "<gradient:#FF00CD:#DA58FF>Estás enlazado con:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+
+# INVENTARIO DE DISCORD
+
+disinv_title: "&lInventario de discord"
+disinv_cant_afford_expansion: "<gradient:#FB6363:#C4B3FD>No tienes suficiente dinero!</gradient>"
+disinv_locked_title: "&c&lBLOQUEADO"
+disinv_locked_lore: "&7Clic para comprar el siguiente slot por:\n&6[AMOUNT]"
+disinv_info_title: "&dInventario de discord"
+disinv_info_lore: "&7Valor: &6[AMOUNT]"
+disinv_amount: "&7Cantidad: &6[AMOUNT]"
+
 # DISCORD - Sin soporte para MiniMessage.
 
 discord_status: "los precios moverse."
