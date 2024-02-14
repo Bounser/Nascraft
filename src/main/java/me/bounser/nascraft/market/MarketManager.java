@@ -67,7 +67,17 @@ public class MarketManager {
 
             ItemStack itemStack = config.getItemStackOfItem(identifier);
 
-            if (itemStack == null) itemStack = new ItemStack(Material.getMaterial(identifier.replaceAll("\\d", "").toUpperCase()));
+            if (itemStack == null)
+                try {
+                    itemStack = new ItemStack(Material.getMaterial(identifier.replaceAll("\\d", "").toUpperCase()));
+
+                } catch (IllegalArgumentException e) {
+                    Nascraft.getInstance().getLogger().severe("Couldn't load item with identifier: " + identifier);
+                    Nascraft.getInstance().getLogger().severe("Reason: Material " + identifier.replaceAll("\\d", "").toUpperCase() + " is not a valid material!");
+                    Nascraft.getInstance().getLogger().severe("Does the item exist in the version of your server?");
+                    e.printStackTrace();
+                    Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
+                }
 
             Item item = new Item(
                     itemStack,
