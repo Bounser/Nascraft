@@ -131,6 +131,12 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>LATEST</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>

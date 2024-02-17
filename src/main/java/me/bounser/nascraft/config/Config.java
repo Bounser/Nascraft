@@ -1,10 +1,13 @@
 package me.bounser.nascraft.config;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.database.DatabaseType;
 import me.bounser.nascraft.database.SQLite;
+import me.bounser.nascraft.market.funds.Fund;
+import me.bounser.nascraft.market.funds.FundsManager;
+import me.bounser.nascraft.market.funds.Strategy;
 import me.bounser.nascraft.sellwand.Wand;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
-import me.bounser.nascraft.market.brokers.BrokerType;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
@@ -13,7 +16,9 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+import org.checkerframework.checker.units.qual.N;
 
+import javax.xml.crypto.Data;
 import java.io.File;
 import java.util.*;
 
@@ -22,6 +27,7 @@ public class Config {
     private final FileConfiguration config;
     private FileConfiguration items;
     private FileConfiguration categories;
+    private FileConfiguration investments;
     private FileConfiguration inventorygui;
     private static Config instance;
     private Nascraft main;
@@ -36,6 +42,7 @@ public class Config {
 
         items = setupFile("items.yml");
         categories = setupFile("categories.yml");
+        investments = setupFile("investments.yml");
         // inventorygui = setupFile("inventorygui.yml");
     }
 
@@ -54,6 +61,7 @@ public class Config {
 
         items = setupFile("items.yml");
         categories = setupFile("categories.yml");
+        investments = setupFile("investments.yml");
 
         MarketManager.getInstance().reload();
 
@@ -69,6 +77,35 @@ public class Config {
     // Config:
 
     public Boolean getCheckResources() { return config.getBoolean("auto-resources-injection"); }
+
+    public DatabaseType getDatabaseType() {
+
+        DatabaseType databaseType = null;
+
+        try {
+            databaseType = DatabaseType.valueOf(config.getString("database.type").toUpperCase());
+        } catch (IllegalArgumentException e) {
+
+            Nascraft.getInstance().getLogger().warning("Error trying to recognize database type: " + config.getString("database.type").toUpperCase());
+            Nascraft.getInstance().getLogger().warning("Is it a valid type of database?");
+            e.printStackTrace();
+            Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
+        }
+
+        if (databaseType == null) {
+            Nascraft.getInstance().getLogger().warning("DatabaseManager type not recognized: " + config.getString("database.type").toUpperCase());
+            Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
+        }
+
+        return databaseType;
+
+    }
+
+    public String getHost() { return config.getString("database.mysql.host"); }
+    public int getPort() { return config.getInt("database.mysql.port"); }
+    public String getDatabase() { return config.getString("database.mysql.database"); }
+    public String getUser() { return config.getString("database.mysql.user"); }
+    public String getPassword() { return config.getString("database.mysql.password"); }
 
     public int getDatabasePurgeDays() { return config.getInt("database.days-until-history-removed"); }
 
@@ -307,34 +344,37 @@ public class Config {
         return null;
     }
 
-    public List<BrokerType> getBrokers() {
+    public List<Fund> getFunds() {
 
-        List<BrokerType> brokers = new ArrayList<>();
+        List<Fund> brokers = new ArrayList<>();
 
-        if (config.getBoolean("brokers.aggressive.enabled")) { brokers.add(BrokerType.AGGRESSIVE); }
+        for (String identifier : investments.getConfigurationSection("investments.funds.").getKeys(false)) {
 
-        if (config.getBoolean("brokers.conservative.enabled")) { brokers.add(BrokerType.CONSERVATIVE); }
+            HashMap<Strategy, Float> weightedStrategy = new HashMap<>();
 
-        if (config.getBoolean("brokers.lazy.enabled")) { brokers.add(BrokerType.LAZY); }
+            for (String strategyString : investments.getConfigurationSection("investments.funds." + identifier + ".strategy.").getKeys(false)) {
+
+                Strategy strategy = null;
+
+                try {
+                    strategy = Strategy.valueOf(strategyString.toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    Nascraft.getInstance().getLogger().warning("Strategy " + strategyString + " is not a valid strategy!");
+                    Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
+                }
+
+                if (strategy != null)
+                    weightedStrategy.put(
+                            strategy,
+                            (float) investments.getDouble("investments.funds." + identifier + ".strategy." + strategyString + ".weight")
+                    );
+            }
+            FundsManager.getInstance().createFund(identifier, weightedStrategy);
+        }
 
         return brokers;
     }
 
-    public float getBrokerFee(BrokerType brokerType) {
-        return (float) config.getDouble("brokers." + brokerType.toString().toLowerCase() + ".daily-fee");
-    }
-
-    public float getMarketSensibility(BrokerType brokerType) {
-        return (float) config.getDouble("brokers." + brokerType.toString().toLowerCase() + ".market-sensibility");
-    }
-
-    public float getVolatility(BrokerType brokerType) {
-        return (float) config.getDouble("brokers." + brokerType.toString().toLowerCase() + ".volatility");
-    }
-
-    public float getPositiveReturn(BrokerType brokerType) {
-        return (float) config.getDouble("brokers." + brokerType.toString().toLowerCase() + ".positive-return");
-    }
 
 }
 
