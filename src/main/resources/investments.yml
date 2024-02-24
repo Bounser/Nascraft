@@ -1,0 +1,48 @@
+# Available strategies:
+# - equal-weighted (Average return of the market)
+# - price-weighted (Average return of the market weighted by price)
+# - minimum-volatility (Return of the # (By default 3) items with less volatility, equal weighted)
+# - high-volatility (Return of the # (By default 3) items with higher volatility, equal weighted)
+# - cash (0 return)
+# - winners (Return of the # (By default 3) items with higher performance over the last hour, equal weighted)
+# - losers (Return of the # (By default 3) items with lowest performance over the last hour, equal weighted)
+
+investments:
+  enabled: true
+  funds:
+    # Identifier of the broker
+    1:
+      display-name: "Indexed Broker"
+      # Strategy the broker will follow
+      strategy:
+        # Type of strategy
+        equal-weighted:
+          # Weight of the total portfolio
+          weight: 1 # 1 = 100%
+    2:
+      display-name: "Conservative Broker"
+      strategy:
+        # Example: The five companies with less
+        # volatility will make up 60% of the fund, equal weighted
+        minimum-volatility:
+          caped-at: 5
+          weight: 0.6
+        cash:
+          weight: 0.4
+    3:
+      display-name: "Agressive Broker"
+      strategy:
+        winners:
+          caped-at: 4
+          weight: 0.5
+        price-weighted:
+          weight: 0.3
+        random:
+          caped-at: 5
+          weight: 0.2
+    4:
+      display-name: "Value Broker"
+      strategy:
+        losers:
+          caped-at: 5
+          weight: 1
