@@ -2,7 +2,9 @@ package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.database.SQLite;
+import me.bounser.nascraft.database.DatabaseManager;
+import me.bounser.nascraft.api.events.BuyTradableEvent;
+import me.bounser.nascraft.api.events.SellTradableEvent;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.MarketManager;
@@ -11,6 +13,9 @@ import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.market.unit.plot.GraphData;
+import me.bounser.nascraft.market.unit.plot.PlotData;
+import me.bounser.nascraft.market.unit.stats.ItemStats;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -20,7 +25,7 @@ import org.bukkit.inventory.ItemStack;
 import java.awt.image.BufferedImage;
 import java.util.*;
 
-public class Item {
+public class Item implements Tradable{
 
     private ItemStack itemStack;
     private final String identifier;
@@ -78,10 +83,10 @@ public class Item {
 
         this.icon = image;
 
-        SQLite.getInstance().retrievePrices(this);
-        SQLite.getInstance().retrieveItem(this);
+        DatabaseManager.getInstance().getDatabase().retrievePrices(this);
+        DatabaseManager.getInstance().getDatabase().retrieveItem(this);
 
-        float lastPrice = SQLite.getInstance().retrieveLastPrice(this);
+        float lastPrice = DatabaseManager.getInstance().getDatabase().retrieveLastPrice(this);
         pricesHour = new ArrayList<>(Collections.nCopies(60, lastPrice));
 
         if (pricesDay == null) {
@@ -125,27 +130,33 @@ public class Item {
         pricesHour.add(value);
     }
 
-    public void buyItem(int amount, UUID uuid, boolean feedback, Material material) {
+    @Override
+    public void buy(int amount, UUID uuid, boolean feedback) {
 
         Player player = Bukkit.getPlayer(uuid);
         Player offlinePlayer = Bukkit.getPlayer(uuid);
 
+        BuyTradableEvent event = new BuyTradableEvent(player, this, amount);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) return;
+
         if(!MarketManager.getInstance().getActive()) { Lang.get().message(player, Message.SHOP_CLOSED); return; }
 
-        if (!checkBalance(player, feedback, amount, material)) return;
-        if (!checkInventory(player, feedback, amount, material)) return;
+        if (!checkBalance(player, feedback, amount)) return;
+        if (!checkInventory(player, feedback, amount)) return;
 
-        int maxSize = Math.round((material.getMaxStackSize())/(price.getElasticity()*4));
+        int maxSize = Math.round((itemStack.getType().getMaxStackSize())/(price.getElasticity()*4));
         int orderSize = amount / maxSize;
         int excess = amount % maxSize;
 
         float totalCost = 0;
 
-        ItemStack operationItemStack = getItemStackFromChildMaterial(material);
+        ItemStack operationItemStack = itemStack.clone();
 
         for (int i = 0 ; i < orderSize ; i++) {
 
-            totalCost += price.getBuyPrice()*maxSize*childs.get(getItemStackFromChildMaterial(material));
+            totalCost += price.getBuyPrice()*maxSize*childs.get(itemStack);
 
             price.changeStock(-maxSize);
 
@@ -156,7 +167,7 @@ public class Item {
 
         if (excess > 0) {
 
-            totalCost += price.getBuyPrice()*excess*childs.get(getItemStackFromChildMaterial(material));
+            totalCost += price.getBuyPrice()*excess*childs.get(itemStack);
 
             price.changeStock(-excess);
 
@@ -176,19 +187,20 @@ public class Item {
                 0,
                 price.getValue()*price.getBuyTaxMultiplier());
 
-        SQLite.getInstance().saveTrade(uuid, this, amount, totalCost, true, false);
+        DatabaseManager.getInstance().getDatabase().saveTrade(uuid, this, amount, totalCost, true, false);
         MarketManager.getInstance().addOperation();
     }
 
-    public boolean checkBalance(Player player, boolean feedback, int amount, Material material) {
-        if (!MoneyManager.getInstance().hasEnoughMoney(player, (float) (price.getProjectedCost(amount, price.getBuyTaxMultiplier())*childs.get(getItemStackFromChildMaterial(material))*1.2))) {
+
+    public boolean checkBalance(Player player, boolean feedback, int amount) {
+        if (!MoneyManager.getInstance().hasEnoughMoney(player, (float) (price.getProjectedCost(amount, price.getBuyTaxMultiplier())*1.2))) {
             if (player != null && feedback) Lang.get().message(player, Message.NOT_ENOUGH_MONEY);
             return false;
         }
         return true;
     }
 
-    public boolean checkInventory(Player player, boolean feedback, int amount, Material material) {
+    public boolean checkInventory(Player player, boolean feedback, int amount) {
 
         if (player == null) return true;
 
@@ -197,8 +209,8 @@ public class Item {
             int untilFull = 0;
 
             for (ItemStack is : player.getInventory()) {
-                if(is != null && is.getType().equals(material)) {
-                    untilFull += material.getMaxStackSize() - is.getAmount();
+                if(is != null && is.isSimilar(itemStack)) {
+                    untilFull += itemStack.getType().getMaxStackSize() - is.getAmount();
                 }
             }
             if (untilFull < amount) {
@@ -212,7 +224,7 @@ public class Item {
             for (ItemStack content : player.getInventory().getStorageContents())
                 if (content != null && !content.getType().equals(Material.AIR)) slotsUsed++;
 
-            if ((36 - slotsUsed) < (amount/material.getMaxStackSize())) {
+            if ((36 - slotsUsed) < (amount/itemStack.getType().getMaxStackSize())) {
                 if (feedback) Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
                 return false;
             }
@@ -221,17 +233,23 @@ public class Item {
         return true;
     }
 
-    public float sellItem(int amount, UUID uuid, boolean feedback, Material material) {
+    @Override
+    public float sell(int amount, UUID uuid, boolean feedback) {
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
         Player player = Bukkit.getPlayer(uuid);
+
+        SellTradableEvent event = new SellTradableEvent(player, this, amount);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) return -1;
 
         if (!MarketManager.getInstance().getActive()) {
             if (player != null && feedback) Lang.get().message(player, Message.SHOP_CLOSED);
             return -1;
         }
 
-        ItemStack operationItemStack = getItemStackFromChildMaterial(material);
+        ItemStack operationItemStack = itemStack.clone();
 
         operationItemStack.setAmount(1);
 
@@ -240,7 +258,7 @@ public class Item {
             return -1;
         }
 
-        int maxSize = material.getMaxStackSize();
+        int maxSize = itemStack.getType().getMaxStackSize();
         int orderSize = amount / maxSize;
         int excess = amount % maxSize;
 
@@ -248,7 +266,7 @@ public class Item {
 
         for (int i = 0 ; i < orderSize ; i++) {
 
-            totalWorth += price.getSellPrice()*maxSize*childs.get(getItemStackFromChildMaterial(material));
+            totalWorth += price.getSellPrice()*maxSize*childs.get(itemStack);
 
             price.changeStock(maxSize);
 
@@ -259,7 +277,7 @@ public class Item {
 
         if (excess > 0) {
 
-            totalWorth += price.getSellPrice()*excess*childs.get(getItemStackFromChildMaterial(material));
+            totalWorth += price.getSellPrice()*excess*childs.get(itemStack);
 
             price.changeStock(excess);
 
@@ -279,7 +297,7 @@ public class Item {
 
         if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(totalWorth, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
-        SQLite.getInstance().saveTrade(uuid, this, amount, totalWorth, false, false);
+        DatabaseManager.getInstance().getDatabase().saveTrade(uuid, this, amount, totalWorth, false, false);
         MarketManager.getInstance().addOperation();
 
         return totalWorth;
@@ -405,13 +423,6 @@ public class Item {
 
     public void setItemStack(ItemStack itemStack) { this.itemStack = itemStack; }
 
-    public boolean isFromThis(ItemStack itemStack) {
-
-        ItemStack itemStack1 = itemStack.clone();
-        itemStack1.setAmount(1);
-
-        return this.itemStack.equals(itemStack1);
-    }
 
     public BufferedImage getIcon() { return icon; }
 
