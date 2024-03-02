@@ -2,7 +2,7 @@ package me.bounser.nascraft.managers;
 
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
-import me.bounser.nascraft.market.unit.GraphData;
+import me.bounser.nascraft.market.unit.plot.GraphData;
 import me.bounser.nascraft.market.unit.Item;
 
 public class GraphManager {

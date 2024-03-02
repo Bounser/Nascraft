@@ -3,7 +3,7 @@ package me.bounser.nascraft.advancedgui.components;
 import me.bounser.nascraft.advancedgui.InteractionsManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.market.unit.GraphData;
+import me.bounser.nascraft.market.unit.plot.GraphData;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;

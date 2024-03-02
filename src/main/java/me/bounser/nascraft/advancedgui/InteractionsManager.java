@@ -2,6 +2,7 @@ package me.bounser.nascraft.advancedgui;
 
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.unit.Tradable;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -14,6 +15,8 @@ public class InteractionsManager {
     // Offset of items of the selected category.
     public HashMap<Player, Integer> playerOffset = new HashMap<>();
 
+    private final HashMap<Player, Tradable> tradables = new HashMap<>();
+
     public HashMap<Player, Item> items = new HashMap<>();
 
     public HashMap<Player, List<ItemStack>> childs = new HashMap<>();
@@ -25,6 +28,12 @@ public class InteractionsManager {
     }
 
     public Item getItemFromPlayer(Player player) { return items.get(player); }
+
+    public Tradable getTradableFromPlayer(Player player) { return tradables.get(player); }
+
+    public void setTradableOfPlayer(Player player, Tradable tradable) {
+        tradables.put(player, tradable);
+    }
 
     public void setItemOfPlayer(Player player, Item item) {
 

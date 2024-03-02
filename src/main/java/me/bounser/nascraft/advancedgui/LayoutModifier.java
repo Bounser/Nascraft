@@ -12,6 +12,7 @@ import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.formatter.RoundUtils;
+import me.bounser.nascraft.market.unit.Tradable;
 import me.leoko.advancedgui.manager.LayoutManager;
 import me.leoko.advancedgui.manager.ResourceManager;
 import me.leoko.advancedgui.utils.LayoutExtension;
@@ -73,6 +74,7 @@ public class LayoutModifier implements LayoutExtension {
                     backgroundView);
 
         tradeScreen.locate("GraphDummy", DummyComponent.class).setComponent(graphComponent);
+
         //
 
         GroupComponent slideComponents = tradeScreen.locate("SliderComponents", GroupComponent.class);
@@ -130,8 +132,8 @@ public class LayoutModifier implements LayoutExtension {
         });
 
         // Time Span selectors
-        for (TimeSpan timeSpan : TimeSpan.values()) {
-            componentTree.locate("timesel" + timeSpan.toString(), RectComponent.class).setClickAction((interaction, player, primaryTrigger) -> {
+        for (TimeSpan timeSpan : Arrays.asList(TimeSpan.HOUR, TimeSpan.DAY)) {
+            componentTree.locate("timesel" + timeSpan, RectComponent.class).setClickAction((interaction, player, primaryTrigger) -> {
                 interaction.getComponentTree().locate("Graph", GraphComponent.class).setTimeFrame(timeSpan, player);
             });
         }
@@ -146,21 +148,20 @@ public class LayoutModifier implements LayoutExtension {
         for (int j : Arrays.asList(1,16,64)) {
 
             componentTree.locate("buy" + j).setClickAction((interaction, player, primaryTrigger) -> {
-                Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
+                Tradable tradable = InteractionsManager.getInstance().getTradableFromPlayer(player);
 
-                item.buyItem(j, player.getUniqueId(), true, InteractionsManager.getInstance().getChildFromPlayer(player).getType());
+                tradable.sell(j, player.getUniqueId(), true);
                 updateButtonPrice(player, interaction);
             });
             componentTree.locate("sell" + j).setClickAction((interaction, player, primaryTrigger) -> {
-                Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
+                Tradable tradable = InteractionsManager.getInstance().getTradableFromPlayer(player);
 
-                item.sellItem(j, player.getUniqueId(), true, InteractionsManager.getInstance().getChildFromPlayer(player).getType());
+                tradable.sell(j, player.getUniqueId(), true);
                 updateButtonPrice(player, interaction);
             });
         }
 
         // Childs
-
         componentTree.locate("ChildHitbox").setClickAction((interaction, player, primaryTrigger) -> {
 
             InteractionsManager.getInstance().rotateChilds(player);
@@ -170,7 +171,6 @@ public class LayoutModifier implements LayoutExtension {
         });
 
         setLang(componentTree);
-
     }
 
     @EventHandler
@@ -182,7 +182,6 @@ public class LayoutModifier implements LayoutExtension {
         InteractionsManager.getInstance().playerOffset.put(event.getPlayer(), 0);
 
         updateMainPage(event.getInteraction().getComponentTree(), true, event.getPlayer());
-
     }
 
     @EventHandler
@@ -405,7 +404,6 @@ public class LayoutModifier implements LayoutExtension {
             ct.locate("buyprice" + i, TextComponent.class).setText(RoundUtils.round(InteractionsManager.getInstance().getItemFromPlayer(player).getPrice().getBuyPrice()*i*multiplier) + Lang.get().message(Message.CURRENCY));
             ct.locate("sellprice" + i, TextComponent.class).setText(RoundUtils.round(InteractionsManager.getInstance().getItemFromPlayer(player).getPrice().getSellPrice()*i*multiplier) + Lang.get().message(Message.CURRENCY));
         }
-
     }
 
     public void updateChilds(Player player, GroupComponent components) {
@@ -467,7 +465,6 @@ public class LayoutModifier implements LayoutExtension {
         cTree.locate("ityZyfNt", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_AMOUNT_SELECTION));
         // Trend
         cTree.locate("pfV4FIy1", TextComponent.class).setText(Lang.get().message(Message.ADVANCEDGUI_TREND));
-
     }
 
     public void changeMaterial(Player player, Item item, Interaction interaction) {
@@ -479,5 +476,4 @@ public class LayoutModifier implements LayoutExtension {
         interaction.getComponentTree().locate("MainImage", ImageComponent.class).setImage(ResourceManager.getInstance().processImage(item.getIcon(), 60, 60, true));
         interaction.getComponentTree().locate("Graph", GraphComponent.class).setTimeFrame(TimeSpan.HOUR, player);
     }
-
 }
