@@ -1,7 +1,7 @@
 package me.bounser.nascraft;
 
 import me.bounser.nascraft.advancedgui.LayoutModifier;
-import me.bounser.nascraft.commands.*;
+import me.bounser.nascraft.api.NascraftAPI;
 import me.bounser.nascraft.commands.admin.NascraftCommand;
 import me.bounser.nascraft.commands.admin.NascraftTabCompleter;
 import me.bounser.nascraft.commands.admin.marketeditor.edit.item.EditItemMenuListener;
@@ -11,6 +11,8 @@ import me.bounser.nascraft.commands.alert.AlertsCommand;
 import me.bounser.nascraft.commands.alert.SetAlertCommand;
 import me.bounser.nascraft.commands.discord.DiscordCommand;
 import me.bounser.nascraft.commands.discord.DiscordInventoryInGame;
+import me.bounser.nascraft.commands.market.MarketCommand;
+import me.bounser.nascraft.commands.market.MarketTabCompleter;
 import me.bounser.nascraft.commands.sell.SellHandCommand;
 import me.bounser.nascraft.commands.sell.sellall.SellAllCommand;
 import me.bounser.nascraft.commands.sell.sellall.SellAllTabCompleter;
@@ -18,14 +20,12 @@ import me.bounser.nascraft.commands.sell.sellinv.SellInvListener;
 import me.bounser.nascraft.commands.sell.sellinv.SellInvCommand;
 import me.bounser.nascraft.commands.sellwand.GetSellWandCommand;
 import me.bounser.nascraft.commands.sellwand.GetSellWandTabCompleter;
-import me.bounser.nascraft.database.SQLite;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.linking.LinkCommand;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
-import me.bounser.nascraft.market.brokers.BrokersManager;
 import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.market.limit.LimitOrdersManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.sellwand.WandListener;
@@ -61,6 +61,7 @@ import java.util.concurrent.Callable;
 public final class Nascraft extends JavaPlugin {
 
     private static Nascraft main;
+    private static NascraftAPI apiInstance;
     private static Economy economy = null;
 
     private static final String AGUI_VERSION = "2.2.7";
@@ -68,6 +69,8 @@ public final class Nascraft extends JavaPlugin {
     private BukkitAudiences adventure;
 
     public static Nascraft getInstance() { return main; }
+
+    public static NascraftAPI getAPI() { return apiInstance == null ? apiInstance = new NascraftAPI() : apiInstance; }
 
     @Override
     public void onEnable() {
@@ -131,8 +134,8 @@ public final class Nascraft extends JavaPlugin {
         createImagesFolder();
 
         MarketManager.getInstance();
-        LimitOrdersManager.getInstance();
-        BrokersManager.getInstance();
+        //LimitOrdersManager.getInstance();
+        //FundsManager.getInstance();
 
         getCommand("nascraft").setExecutor(new NascraftCommand());
         getCommand("nascraft").setTabCompleter(new NascraftTabCompleter());
@@ -142,6 +145,7 @@ public final class Nascraft extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new CategoryEditorListener(), this);
 
         getCommand("market").setExecutor(new MarketCommand());
+        getCommand("market").setTabCompleter(new MarketTabCompleter());
 
         List<String> commands = config.getCommands();
         if (commands == null) return;
@@ -160,7 +164,7 @@ public final class Nascraft extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        SQLite.getInstance().shutdown();
+        DatabaseManager.get().getDatabase().disconnect();
 
         if (Config.getInstance().getDiscordEnabled() && DiscordBot.getInstance() != null) {
             DiscordBot.getInstance().removeAllMessages();
@@ -174,7 +178,7 @@ public final class Nascraft extends JavaPlugin {
         }
     }
 
-    public void setupMetrics() {
+    private void setupMetrics() {
         Metrics metrics = new Metrics(this, 18404);
 
         metrics.addCustomChart(new SimplePie("discord_bridge", () -> String.valueOf(Config.getInstance().getDiscordEnabled())));
@@ -188,6 +192,9 @@ public final class Nascraft extends JavaPlugin {
             @Override
             public Map<String, Integer> call() {
                 Map<String, Integer> valueMap = new HashMap<>();
+
+                if (!Config.getInstance().getDiscordEnabled()) return valueMap;
+
                 int linkedPlayers = getLinkedPlayers();
                 valueMap.put("Linked", linkedPlayers);
                 valueMap.put("Not linked", Bukkit.getOnlinePlayers().size() - linkedPlayers);
@@ -223,7 +230,7 @@ public final class Nascraft extends JavaPlugin {
         return this.adventure;
     }
 
-    public void createImagesFolder() {
+    private void createImagesFolder() {
 
         File imagesFolder = new File(getDataFolder(), "images");
 
@@ -233,7 +240,7 @@ public final class Nascraft extends JavaPlugin {
         }
     }
 
-    public void checkResources() {
+    private void checkResources() {
 
         getLogger().info("Checking required layouts... ");
         getLogger().info("If you want to disable this procedure, set auto_resources_injection to false in the config.yml file.");

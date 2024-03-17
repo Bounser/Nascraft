@@ -1,4 +1,4 @@
-package me.bounser.nascraft.commands;
+package me.bounser.nascraft.commands.market;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
@@ -6,6 +6,7 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.unit.Tradable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -33,22 +34,33 @@ public class MarketCommand implements CommandExecutor {
                 return false;
             }
 
-            if (Integer.parseInt(args[2]) > 64) {
+            int quantity;
+
+            try {
+                quantity = Integer.parseInt(args[2]);
+            } catch (NumberFormatException e) {
+                player.sendMessage(ChatColor.RED  + "Invalid quantity.");
+                return false;
+            }
+
+            if (quantity > 64) {
                 player.sendMessage(ChatColor.RED + "Quantity can't be higher than 64!");
                 return false;
             }
 
-            if (MarketManager.getInstance().getItem(args[1]) == null) {
+            Tradable tradable = MarketManager.getInstance().getTradable(args[1]);
+
+            if (tradable == null) {
                 player.sendMessage(ChatColor.RED + "That identifier isn't valid!");
                 return false;
             }
-            Item item = MarketManager.getInstance().getItem(args[1]);
+
             switch (args[0]){
                 case "buy":
-                    item.buyItem(Integer.parseInt(args[2]), player.getUniqueId(), true, item.getItemStack().getType());
+                    tradable.buy(quantity, player.getUniqueId(), true);
                     break;
                 case "sell":
-                    item.sellItem(Integer.parseInt(args[2]), player.getUniqueId(), true, item.getItemStack().getType());
+                    tradable.sell(quantity, player.getUniqueId(), true);
                     break;
                 default:
                     player.sendMessage(ChatColor.RED + "Wrong command.");
@@ -66,13 +78,13 @@ public class MarketCommand implements CommandExecutor {
                 Nascraft.getInstance().getLogger().info(ChatColor.RED + "Invalid player");
                 return false;
             }
-            Item item = MarketManager.getInstance().getItem(args[1]);
+            Tradable tradable = MarketManager.getInstance().getTradable(args[1]);
             switch (args[0]){
                 case "buy":
-                    item.buyItem(Integer.parseInt(args[2]), player.getUniqueId(), true, item.getItemStack().getType());
+                    tradable.buy(Integer.parseInt(args[2]), player.getUniqueId(), true);
                     break;
                 case "sell":
-                    item.sellItem(Integer.parseInt(args[2]), player.getUniqueId(), true, item.getItemStack().getType());
+                    tradable.sell(Integer.parseInt(args[2]), player.getUniqueId(), true);
                     break;
                 default:
                     sender.sendMessage(ChatColor.RED + "Wrong command.");
