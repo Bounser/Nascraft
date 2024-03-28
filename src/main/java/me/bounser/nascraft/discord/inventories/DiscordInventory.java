@@ -1,15 +1,18 @@
 package me.bounser.nascraft.discord.inventories;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.commands.discord.DiscordInventoryInGame;
 import me.bounser.nascraft.config.Config;
-import me.bounser.nascraft.database.SQLite;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.unit.Tradable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 
 public class DiscordInventory {
@@ -26,13 +29,13 @@ public class DiscordInventory {
         retrieveCapacity();
     }
 
-    public void retrieveInventory() { inventory = SQLite.getInstance().retrieveInventory(uuid); }
+    public void retrieveInventory() { inventory = DatabaseManager.get().getDatabase().retrieveInventory(uuid); }
 
-    public void retrieveCapacity() { capacity = SQLite.getInstance().retrieveCapacity(uuid); }
+    public void retrieveCapacity() { capacity = DatabaseManager.get().getDatabase().retrieveCapacity(uuid); }
 
     public void increaseCapacity() {
         capacity++;
-        SQLite.getInstance().updateCapacity(uuid, capacity);
+        DatabaseManager.get().getDatabase().updateCapacity(uuid, capacity);
         updateInventoryInGame();
     }
 
@@ -45,14 +48,13 @@ public class DiscordInventory {
 
     public void addItem(Item item, int amount) {
         inventory.merge(item, amount, Integer::sum);
-        SQLite.getInstance().updateItem(uuid, item, inventory.get(item));
+        DatabaseManager.get().getDatabase().updateItem(uuid, item, inventory.get(item));
         updateInventoryInGame();
     }
 
     public boolean hasItem(Item item, int amount) {
         return inventory.get(item) != null && inventory.get(item) >= amount;
     }
-
 
     public void removeItem(Item item, int amount) {
 
@@ -61,7 +63,7 @@ public class DiscordInventory {
 
             if (inventory.get(item) <= 0) {
                 inventory.remove(item);
-                SQLite.getInstance().removeItem(uuid, item);
+                DatabaseManager.get().getDatabase().removeItem(uuid, item);
             }
 
             updateInventoryInGame();
@@ -96,18 +98,22 @@ public class DiscordInventory {
 
     }
 
-    public float sellAll() {
+    public void sellAll(Consumer<Float> callback) {
 
-        float value = 0;
+        Bukkit.getScheduler().runTask(Nascraft.getInstance(), () -> {
+            
+            float value = 0;
+            
+            for (Tradable tradable : inventory.keySet())
+                if (tradable != null) value += tradable.sell(inventory.get(tradable), uuid, false);
 
-        for (Item item : inventory.keySet()) {
-            if (item != null)
-                value += item.sellItem(inventory.get(item), uuid, false, item.getItemStack().getType());
-        }
+            inventory.clear();
+            updateInventoryInGame();
+            DatabaseManager.get().getDatabase().clearInventory(uuid);
 
-        inventory.clear();
-        SQLite.getInstance().clearInventory(uuid);
-        return value;
+            callback.accept(value);
+        });
+       
     }
 
 }

@@ -6,8 +6,9 @@ import me.bounser.nascraft.chart.price.ChartType;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.database.SQLite;
-import me.bounser.nascraft.database.Trade;
+import me.bounser.nascraft.database.Database;
+import me.bounser.nascraft.database.DatabaseManager;
+import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.discord.images.*;
 import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
@@ -16,9 +17,6 @@ import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.managers.MoneyManager;
-import me.bounser.nascraft.market.brokers.Broker;
-import me.bounser.nascraft.market.brokers.BrokerType;
-import me.bounser.nascraft.market.brokers.BrokersManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -34,13 +32,9 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.utils.FileUpload;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
@@ -54,8 +48,11 @@ public class DiscordButtons extends ListenerAdapter {
 
     private Lang lang = Lang.get();
 
+    private Database database;
+
     public DiscordButtons() {
         instance = this;
+        this.database = DatabaseManager.get().getDatabase();
     }
 
     public static DiscordButtons getInstance() { return instance; }
@@ -162,9 +159,6 @@ public class DiscordButtons extends ListenerAdapter {
                 List<ItemComponent> brokers = new ArrayList<>();
 
                 brokers.add(Button.primary("data-broker", Emoji.fromFormatted("U+2754")));
-                if (Config.getInstance().getBrokers().contains(BrokerType.AGGRESSIVE)) brokers.add(Button.secondary("brokerAGGRESSIVE", "Aggresive Broker").withEmoji(Emoji.fromFormatted("U+1F4BC")));
-                if (Config.getInstance().getBrokers().contains(BrokerType.CONSERVATIVE)) brokers.add(Button.secondary("brokerCONSERVATIVE", "Conservative Broker").withEmoji(Emoji.fromFormatted("U+1F4BC")));
-                if (Config.getInstance().getBrokers().contains(BrokerType.LAZY)) brokers.add(Button.secondary("brokerLAZY", "Lazy Broker").withEmoji(Emoji.fromFormatted("U+1F4BC")));
 
                 String brokerText = "## Available brokers:\n" +
                         "> :man_office_worker: **Aggresive broker**: Assing a quantity of money to him and he will automatically try to earn more, doing even complex operations with derivatives. \n" +
@@ -232,7 +226,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                         } else {
 
-                            event.reply(":link: You have your account linked with the user: ``" + SQLite.getInstance().getNickname(event.getUser().getId()) + "``")
+                            event.reply(":link: You have your account linked with the user: ``" + database.getNickname(event.getUser().getId()) + "``")
                                     .setEphemeral(true)
                                     .addActionRow(Button.danger("unlink", "Unlink account"))
                                     .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
@@ -247,7 +241,7 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "unlinkc":
 
-                String nickname = SQLite.getInstance().getNickname(event.getUser().getId());
+                String nickname = database.getNickname(event.getUser().getId());
                 String text;
                 if (LinkManager.getInstance().unlink(event.getUser().getId())) {
                     text = ":link: You have un-linked your account from ``" + nickname + "``";
@@ -379,11 +373,11 @@ public class DiscordButtons extends ListenerAdapter {
                     return;
                 }
 
-                float value = DiscordInventories.getInstance().getInventory(uuid).sellAll();
-
-                event.reply("You just sold everything for: **" + Formatter.format(value, Style.ROUND_BASIC) + "**")
-                        .setEphemeral(true)
-                        .queue(message -> message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS));
+                DiscordInventories.getInstance().getInventory(uuid).sellAll(
+                        value -> event.reply("You just sold everything for: **" + Formatter.format(value, Style.ROUND_BASIC) + "**")
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS))
+                );
                 return;
 
             case "balance":
@@ -437,17 +431,17 @@ public class DiscordButtons extends ListenerAdapter {
 
                 if (event.getComponentId().equals("hnext")) { offset++; }
 
-                List<Trade> trades = SQLite.getInstance().retrieveTrades(uuid, 15*offset);
+                List<Trade> trades = database.retrieveTrades(uuid, 15*offset);
 
                 String history = ":scroll: **Trade history:** Page " +  (1 + offset)  + " (" + (trades.size() == 16 ? 15 : trades.size()) + "/15)\n";
 
                 for (Trade trade : trades) {
 
-                    if (trade.getItem() != null) {
+                    if (trade.getTradable() != null) {
                         if (trade.isBuy())
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **BUY " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **-" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **BUY " + trade.getAmount() + "** x **" + trade.getTradable().getName() + "** :arrow_right: **-" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
                         else
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **SELL " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **+" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **SELL " + trade.getAmount() + "** x **" + trade.getTradable().getName() + "** :arrow_right: **+" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
 
                         if (trade.throughDiscord()) {
                             history = history + " (Discord)";
@@ -485,32 +479,6 @@ public class DiscordButtons extends ListenerAdapter {
 
                 return;
 
-            case "brokerAGGRESSIVE":
-            case "brokerCONSERVATIVE":
-            case "brokerLAZY":
-
-                Broker broker = BrokersManager.getInstance().getBroker(BrokerType.valueOf(event.getComponentId().substring(6)));
-
-                List<Button> actionRow = new ArrayList<>();
-
-                actionRow.add(Button.success("brokerBuy1", "Buy 1 Share"));
-                actionRow.add(Button.success("brokerBuy2", "Buy 10 Shares"));
-                actionRow.add(Button.danger("brokerSell1", "Sell 1 Shares"));
-                actionRow.add(Button.danger("brokerSell2", "Sell 10 Shares"));
-                actionRow.add(Button.primary("brokerCustomAmount", "Custom Amount").withEmoji(Emoji.fromFormatted("U+1F58A")));
-
-                event.replyFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(BrokerImage.getImage(broker)) , "image.png"))
-                        .addActionRow(actionRow)
-                        .setEphemeral(true)
-                        .queue();
-
-                return;
-
-            case "brokerBuy":
-            case "brokerSell":
-
-
-                return;
         }
 
         if (event.getComponentId().startsWith("time")) {
@@ -594,7 +562,7 @@ public class DiscordButtons extends ListenerAdapter {
                             "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
                 }
 
-                SQLite.getInstance().saveTrade(uuid, item, quantity, value, true, true);
+                database.saveTrade(uuid, item, quantity, value, true, true);
 
                 event.reply(buyText)
                         .setEphemeral(true)
@@ -628,7 +596,7 @@ public class DiscordButtons extends ListenerAdapter {
                             "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
                 }
 
-                SQLite.getInstance().saveTrade(uuid, item, quantity, value, false, true);
+                database.saveTrade(uuid, item, quantity, value, false, true);
 
                 event.reply(sellText)
                         .setEphemeral(true)
