@@ -6,9 +6,7 @@ import java.util.Calendar;
 public enum TimeSpan {
 
     HOUR, // 60 minutes
-    DAY, // 24 hours
-    MONTH, // 1 month
-    YEAR; // 1 year
+    DAY; // 24 hours
 
     public static String getTime(TimeSpan timeFrame, float subtract) {
 
@@ -25,16 +23,6 @@ public enum TimeSpan {
             case DAY:
                 sdf = new SimpleDateFormat("HH:mm");
                 cal.add(Calendar.HOUR, Math.round(-24 * subtract));
-                break;
-            // 1 Month
-            case MONTH:
-                sdf = new SimpleDateFormat("dd MMMM");
-                cal.add(Calendar.DATE, Math.round(-30 * subtract));
-                break;
-            // 1 Year
-            case YEAR:
-                sdf = new SimpleDateFormat("dd/MM/yyyy");
-                cal.add(Calendar.DATE, Math.round(-365 * subtract));
                 break;
         }
         return sdf.format(cal.getTime());

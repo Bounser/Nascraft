@@ -25,12 +25,12 @@ import org.bukkit.inventory.ItemStack;
 import java.awt.image.BufferedImage;
 import java.util.*;
 
-public class Item implements Tradable{
+public class Item implements Tradable {
 
     private ItemStack itemStack;
     private final String identifier;
     private String alias;
-    private BufferedImage icon;
+    private final BufferedImage icon;
     private Category category;
 
     private final Price price;
@@ -45,10 +45,6 @@ public class Item implements Tradable{
     private final GraphData gdMinutes;
     // 1 day
     private final GraphData gdHours;
-    // 1 month
-    private final GraphData gdDays;
-    // 1 year
-    private final GraphData gdMonth;
 
     private final PlotData plotData;
 
@@ -56,16 +52,12 @@ public class Item implements Tradable{
     private List<Float> pricesHour;
     // 24 (0-23) values representing the prices in all 24 hours of the day.
     private List<Float> pricesDay;
-    // 30 (0-29) values representing the prices in the last month. *
-    private List<Float> pricesMonth;
-    // 24 (0-23) values representing 2 prices each month. *
-    private List<Float> pricesYear;
 
     private ItemStats itemStats;
 
-    private final HashMap<ItemStack, Float> childs;
+    private final HashMap<Child, Float> childs;
 
-    public Item(ItemStack itemStack, String identifier, String alias, Category category, BufferedImage image){
+    public Item(ItemStack itemStack, String identifier, String alias, Category category, HashMap<Child, Float> childs, BufferedImage image){
 
         itemStack.setAmount(1);
 
@@ -83,26 +75,18 @@ public class Item implements Tradable{
 
         this.icon = image;
 
-        DatabaseManager.getInstance().getDatabase().retrievePrices(this);
-        DatabaseManager.getInstance().getDatabase().retrieveItem(this);
+        DatabaseManager.get().getDatabase().retrieveItem(this);
 
-        float lastPrice = DatabaseManager.getInstance().getDatabase().retrieveLastPrice(this);
+        float lastPrice = DatabaseManager.get().getDatabase().retrieveLastPrice(this);
         pricesHour = new ArrayList<>(Collections.nCopies(60, lastPrice));
-
-        if (pricesDay == null) {
-            pricesDay = new ArrayList<>(Collections.nCopies(48, lastPrice));
-            pricesMonth = new ArrayList<>(Collections.nCopies(30, lastPrice));
-            pricesYear = new ArrayList<>(Collections.nCopies(51, lastPrice));
-        }
+        pricesDay = new ArrayList<>(Collections.nCopies(48, lastPrice));
 
         this.category = category;
         operations = 0;
-        this.childs = Config.getInstance().getChilds(this);
+        this.childs = childs;
 
         gdMinutes = new GraphData(TimeSpan.HOUR, pricesHour);
         gdHours = new GraphData(TimeSpan.DAY, pricesDay);
-        gdDays = new GraphData(TimeSpan.MONTH, pricesMonth);
-        gdMonth = new GraphData(TimeSpan.YEAR, pricesYear);
 
         plotData = new PlotData(this);
 
@@ -115,8 +99,6 @@ public class Item implements Tradable{
         switch (timeSpan) {
             case HOUR: pricesHour = prices; break;
             case DAY: pricesDay = prices; break;
-            case MONTH: pricesMonth = prices; break;
-            case YEAR: pricesYear = prices; break;
         }
     }
 
@@ -128,6 +110,16 @@ public class Item implements Tradable{
     public void addValueToHour(float value) {
         pricesHour.remove(0);
         pricesHour.add(value);
+    }
+
+    @Override
+    public float buyPrice(int amount) {
+        return price.getProjectedCost(-amount, price.getBuyTaxMultiplier());
+    }
+
+    @Override
+    public float sellPrice(int amount) {
+        return price.getProjectedCost(amount, price.getSellTaxMultiplier());
     }
 
     @Override
@@ -156,7 +148,7 @@ public class Item implements Tradable{
 
         for (int i = 0 ; i < orderSize ; i++) {
 
-            totalCost += price.getBuyPrice()*maxSize*childs.get(itemStack);
+            totalCost += price.getBuyPrice()*maxSize;
 
             price.changeStock(-maxSize);
 
@@ -167,7 +159,7 @@ public class Item implements Tradable{
 
         if (excess > 0) {
 
-            totalCost += price.getBuyPrice()*excess*childs.get(itemStack);
+            totalCost += price.getBuyPrice()*excess;
 
             price.changeStock(-excess);
 
@@ -187,7 +179,7 @@ public class Item implements Tradable{
                 0,
                 price.getValue()*price.getBuyTaxMultiplier());
 
-        DatabaseManager.getInstance().getDatabase().saveTrade(uuid, this, amount, totalCost, true, false);
+        DatabaseManager.get().getDatabase().saveTrade(uuid, this, amount, totalCost, true, false);
         MarketManager.getInstance().addOperation();
     }
 
@@ -266,7 +258,7 @@ public class Item implements Tradable{
 
         for (int i = 0 ; i < orderSize ; i++) {
 
-            totalWorth += price.getSellPrice()*maxSize*childs.get(itemStack);
+            totalWorth += price.getSellPrice()*maxSize;
 
             price.changeStock(maxSize);
 
@@ -277,7 +269,7 @@ public class Item implements Tradable{
 
         if (excess > 0) {
 
-            totalWorth += price.getSellPrice()*excess*childs.get(itemStack);
+            totalWorth += price.getSellPrice()*excess;
 
             price.changeStock(excess);
 
@@ -297,7 +289,7 @@ public class Item implements Tradable{
 
         if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(totalWorth, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
-        DatabaseManager.getInstance().getDatabase().saveTrade(uuid, this, amount, totalWorth, false, false);
+        DatabaseManager.get().getDatabase().saveTrade(uuid, this, amount, totalWorth, false, false);
         MarketManager.getInstance().addOperation();
 
         return totalWorth;
@@ -320,11 +312,6 @@ public class Item implements Tradable{
         this.collectedTaxes += taxes;
     }
 
-    public void dailyUpdate() {
-        pricesMonth.remove(0);
-        pricesMonth.add(price.getValue());
-    }
-
     public String getIdentifier() { return identifier; }
 
     public List<Material> getParentAndChildsMaterials() {
@@ -341,21 +328,11 @@ public class Item implements Tradable{
         switch (timeSpan) {
             case HOUR: return pricesHour;
             case DAY: return pricesDay;
-            case MONTH: return pricesMonth;
-            case YEAR: return pricesYear;
             default: return null;
         }
     }
 
-    public ItemStack getItemStackFromChildMaterial(Material material) {
-
-        for (ItemStack itemStack : childs.keySet())
-            if (itemStack.getType().equals(material)) return itemStack.clone();
-
-        return null;
-    }
-
-    public HashMap<ItemStack, Float> getChilds() { return childs; }
+    public HashMap<Child, Float> getChilds() { return childs; }
 
     public int getOperations() { return operations; }
 
@@ -368,14 +345,12 @@ public class Item implements Tradable{
         }
     }
 
-    public List<GraphData> getGraphData() { return Arrays.asList(gdMinutes, gdHours, gdDays, gdMonth); }
+    public List<GraphData> getGraphData() { return Arrays.asList(gdMinutes, gdHours); }
 
     public GraphData getGraphData(TimeSpan timeSpan) {
         switch (timeSpan) {
             case HOUR: return gdMinutes;
             case DAY: return gdHours;
-            case MONTH: return gdDays;
-            case YEAR: return gdMonth;
             default: return null;
         }
     }

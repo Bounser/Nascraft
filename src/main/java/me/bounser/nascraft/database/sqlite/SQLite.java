@@ -2,18 +2,17 @@ package me.bounser.nascraft.database.sqlite;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.database.Database;
-import me.bounser.nascraft.database.commands.DiscordLink;
-import me.bounser.nascraft.database.commands.HistorialData;
-import me.bounser.nascraft.database.commands.ItemProperties;
-import me.bounser.nascraft.database.commands.TradesLog;
+import me.bounser.nascraft.database.commands.*;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.unit.Tradable;
 import me.bounser.nascraft.market.unit.stats.Instant;
 
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -199,7 +198,6 @@ public class SQLite implements Database {
     public void saveEverything() {
         for (Item item : MarketManager.getInstance().getAllItems()) {
             saveItem(item);
-            savePrices(item);
         }
     }
 
@@ -274,23 +272,13 @@ public class SQLite implements Database {
     }
 
     @Override
-    public void savePrices(Item item) {
-        ItemProperties.savePrices(connection, item);
-    }
-
-    @Override
-    public void retrievePrices(Item item) {
-        ItemProperties.retrievePrices(connection, item);
-    }
-
-    @Override
     public float retrieveLastPrice(Item item) {
         return ItemProperties.retrieveLastPrice(connection, item);
     }
 
     @Override
-    public void saveTrade(UUID uuid, Item item, int amount, float value, boolean buy, boolean discord) {
-        TradesLog.saveTrade(connection, uuid, item, amount, value, buy, discord);
+    public void saveTrade(UUID uuid, Tradable tradable, int amount, float value, boolean buy, boolean discord) {
+        TradesLog.saveTrade(connection, uuid, tradable, amount, value, buy, discord);
     }
 
     @Override
@@ -301,6 +289,36 @@ public class SQLite implements Database {
     @Override
     public void purgeHistory() {
         TradesLog.purgeHistory(connection);
+    }
+
+    @Override
+    public void updateItem(UUID uuid, Item item, int quantity) {
+        VirtualInventory.updateItem(connection, uuid, item, quantity);
+    }
+
+    @Override
+    public void removeItem(UUID uuid, Item item) {
+        VirtualInventory.removeItem(connection, uuid, item);
+    }
+
+    @Override
+    public void clearInventory(UUID uuid) {
+        VirtualInventory.clearInventory(connection, uuid);
+    }
+
+    @Override
+    public void updateCapacity(UUID uuid, int capacity) {
+        VirtualInventory.updateCapacity(connection, uuid, capacity);
+    }
+
+    @Override
+    public LinkedHashMap<Item, Integer> retrieveInventory(UUID uuid) {
+        return VirtualInventory.retrieveInventory(connection, uuid);
+    }
+
+    @Override
+    public int retrieveCapacity(UUID uuid) {
+        return VirtualInventory.retrieveCapacity(connection, uuid);
     }
 
 }
