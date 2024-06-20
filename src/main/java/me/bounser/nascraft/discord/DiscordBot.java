@@ -4,6 +4,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.discord.images.ItemBasicImage;
 import me.bounser.nascraft.discord.images.MainImage;
@@ -28,6 +29,8 @@ import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.FileUpload;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.time.Duration;
@@ -90,6 +93,8 @@ public class DiscordBot {
 
     public void update() {
 
+        if (!Config.getInstance().getDiscordMenuEnabled()) return;
+
         jda.getGuilds().forEach(guild -> {
 
             TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
@@ -97,10 +102,6 @@ public class DiscordBot {
             if (textChannel == null) {
                 Nascraft.getInstance().getLogger().info("textChannel is null");
                 return;
-            }
-
-            if (Math.random() > 0.95) {
-                textChannel.purgeMessages();
             }
 
             List<ItemComponent> componentList1 = new ArrayList<>();
@@ -192,6 +193,8 @@ public class DiscordBot {
 
     public void removeAllMessages() {
 
+        if (!Config.getInstance().getDiscordMenuEnabled()) return;
+
         try {
             jda.awaitReady().getGuilds().forEach(guild -> {
                 TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
@@ -280,6 +283,50 @@ public class DiscordBot {
                     .addActionRow(timeComponents)
                     .addActionRow(componentList)
                     .queue(message -> message.editOriginalEmbeds(getBasicEditedEmbedded()).queueAfter(getSecondsRemainingToUpdate(), TimeUnit.SECONDS));
+    }
+
+    public void sendLog(Trade trade) {
+
+        try {
+            jda.awaitReady().getGuilds().forEach(guild -> {
+                TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getLogChannel());
+                if (textChannel == null) {
+                    Nascraft.getInstance().getLogger().info("Log channel could not be found.");
+                    return;
+                }
+
+                Player player = Bukkit.getPlayer(trade.getUuid());
+
+                String nickname;
+
+                if (player == null) nickname = "?";
+                else nickname = player.getName();
+
+                String action = trade.isBuy() ? Lang.get().message(Message.DISCORD_LOG_BUY) : Lang.get().message(Message.DISCORD_LOG_SELL);
+
+                String user = LinkManager.getInstance().getUserDiscordID(trade.getUuid());
+
+                String message = user == null ?
+                        Lang.get().message(Message.DISCORD_LOG_NOT_LINKED):
+                        Lang.get().message(Message.DISCORD_LOG_LINKED);
+
+                        message = message.replace("[UUID]", trade.getUuid().toString())
+                                .replace("[NICK]", nickname)
+                                .replace("[ACTION]", action)
+                                .replace("[QUANTITY]", String.valueOf(trade.getAmount()))
+                                .replace("[ALIAS]", trade.getTradable().getName())
+                                .replace("[WORTH]", Formatter.format(trade.getValue(), Style.ROUND_BASIC));
+
+                        if (user != null) {
+                            message = message.replace("[USER]", user);
+                        }
+
+                textChannel.sendMessage(message).queue();
+            });
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     private MessageEmbed getBasicEditedEmbedded() {

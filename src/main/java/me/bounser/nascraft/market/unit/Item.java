@@ -5,16 +5,15 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.api.events.BuyTradableEvent;
 import me.bounser.nascraft.api.events.SellTradableEvent;
+import me.bounser.nascraft.database.commands.resources.Trade;
+import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.resources.Category;
-import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.market.unit.plot.GraphData;
-import me.bounser.nascraft.market.unit.plot.PlotData;
 import me.bounser.nascraft.market.unit.stats.ItemStats;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -23,6 +22,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.awt.image.BufferedImage;
+import java.time.LocalDateTime;
 import java.util.*;
 
 public class Item implements Tradable {
@@ -40,18 +40,6 @@ public class Item implements Tradable {
     private int volume;
 
     private float collectedTaxes;
-
-    // 30 min
-    private final GraphData gdMinutes;
-    // 1 day
-    private final GraphData gdHours;
-
-    private final PlotData plotData;
-
-    // 60 (0-59) values representing the prices in the last 60 minutes.
-    private List<Float> pricesHour;
-    // 24 (0-23) values representing the prices in all 24 hours of the day.
-    private List<Float> pricesDay;
 
     private ItemStats itemStats;
 
@@ -75,42 +63,19 @@ public class Item implements Tradable {
 
         this.icon = image;
 
-        DatabaseManager.get().getDatabase().retrieveItem(this);
+        DatabaseManager.get().getDatabase().retrieveLastPrice(this);
 
-        float lastPrice = DatabaseManager.get().getDatabase().retrieveLastPrice(this);
-        pricesHour = new ArrayList<>(Collections.nCopies(60, lastPrice));
-        pricesDay = new ArrayList<>(Collections.nCopies(48, lastPrice));
+        price.initializeHourValues(DatabaseManager.get().getDatabase().retrieveLastPrice(this));
 
         this.category = category;
         operations = 0;
         this.childs = childs;
-
-        gdMinutes = new GraphData(TimeSpan.HOUR, pricesHour);
-        gdHours = new GraphData(TimeSpan.DAY, pricesDay);
-
-        plotData = new PlotData(this);
 
         itemStats = new ItemStats(this);
     }
 
     public String getName() { return alias; }
 
-    public void setPrice(TimeSpan timeSpan, List<Float> prices) {
-        switch (timeSpan) {
-            case HOUR: pricesHour = prices; break;
-            case DAY: pricesDay = prices; break;
-        }
-    }
-
-    public void addValueToDay(float value) {
-        pricesDay.remove(0);
-        pricesDay.add(value);
-    }
-
-    public void addValueToHour(float value) {
-        pricesHour.remove(0);
-        pricesHour.add(value);
-    }
 
     @Override
     public float buyPrice(int amount) {
@@ -179,13 +144,16 @@ public class Item implements Tradable {
                 0,
                 price.getValue()*price.getBuyTaxMultiplier());
 
-        DatabaseManager.get().getDatabase().saveTrade(uuid, this, amount, totalCost, true, false);
+        Trade trade = new Trade(this, LocalDateTime.now(), totalCost, amount, true, false, uuid);
+
+        DatabaseManager.get().getDatabase().saveTrade(trade);
+        if (Config.getInstance().getDiscordEnabled() && Config.getInstance().getLogChannelEnabled())
+            DiscordBot.getInstance().sendLog(trade);
         MarketManager.getInstance().addOperation();
     }
 
-
     public boolean checkBalance(Player player, boolean feedback, int amount) {
-        if (!MoneyManager.getInstance().hasEnoughMoney(player, (float) (price.getProjectedCost(amount, price.getBuyTaxMultiplier())*1.2))) {
+        if (!MoneyManager.getInstance().hasEnoughMoney(player, price.getProjectedCost(amount, price.getBuyTaxMultiplier()))) {
             if (player != null && feedback) Lang.get().message(player, Message.NOT_ENOUGH_MONEY);
             return false;
         }
@@ -289,10 +257,19 @@ public class Item implements Tradable {
 
         if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(totalWorth, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
-        DatabaseManager.get().getDatabase().saveTrade(uuid, this, amount, totalWorth, false, false);
+        Trade trade = new Trade(this, LocalDateTime.now(), totalWorth, amount, false, false, uuid);
+
+        DatabaseManager.get().getDatabase().saveTrade(trade);
+        if (Config.getInstance().getDiscordEnabled() && Config.getInstance().getLogChannelEnabled())
+            DiscordBot.getInstance().sendLog(trade);
         MarketManager.getInstance().addOperation();
 
         return totalWorth;
+    }
+
+    @Override
+    public List<Float> getValuesPastHour() {
+        return price.getValuesPastHour();
     }
 
     public void ghostBuyItem(int amount) {
@@ -324,13 +301,6 @@ public class Item implements Tradable {
 
     public Price getPrice() { return price; }
 
-    public List<Float> getPrices(TimeSpan timeSpan) {
-        switch (timeSpan) {
-            case HOUR: return pricesHour;
-            case DAY: return pricesDay;
-            default: return null;
-        }
-    }
 
     public HashMap<Child, Float> getChilds() { return childs; }
 
@@ -345,23 +315,7 @@ public class Item implements Tradable {
         }
     }
 
-    public List<GraphData> getGraphData() { return Arrays.asList(gdMinutes, gdHours); }
-
-    public GraphData getGraphData(TimeSpan timeSpan) {
-        switch (timeSpan) {
-            case HOUR: return gdMinutes;
-            case DAY: return gdHours;
-            default: return null;
-        }
-    }
-
-    public PlotData getPlotData() { return plotData; }
-
     public int getVolume() { return volume; }
-
-    public float getLow(TimeSpan timeSpan) { return Collections.min(getPrices(timeSpan)); }
-
-    public float getHigh(TimeSpan timeSpan) { return Collections.max(getPrices(timeSpan)); }
 
     public float getCollectedTaxes() { return collectedTaxes; }
 
@@ -397,7 +351,6 @@ public class Item implements Tradable {
     }
 
     public void setItemStack(ItemStack itemStack) { this.itemStack = itemStack; }
-
 
     public BufferedImage getIcon() { return icon; }
 

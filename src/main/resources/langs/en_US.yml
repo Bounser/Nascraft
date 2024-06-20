@@ -94,9 +94,18 @@ disinv_info_title: "&dDiscord Inventory"
 disinv_info_lore: "&7Value: &6[AMOUNT]"
 disinv_amount: "&7Amount: &6[AMOUNT]"
 
-# DISCORD - No MiniMessage support.
+# DISCORD - No MiniMessage support. ---------------------------------
 
 discord_status: "how prices move"
+
+# Logs
+
+discord_log_linked: "> ``[UUID]`` ([NICK] or [USER]) has [ACTION] x[QUANTITY] of ``[ALIAS]`` for [WORTH]"
+discord_log_not_linked: "> ``[UUID]`` ([NICK]) has [ACTION] x[QUANTITY] of ``[ALIAS]`` for [WORTH]"
+discord_log_buy: ":inbox_tray: bought"
+discord_log_sell: ":outbox_tray: sold"
+
+# Main menu
 
 discord_main_title: ":green_circle:  Live item market"
 discord_main_footer: "Select an item to get more details and to operate (Buy/sell) with it. \nPrices in operations may vary."
