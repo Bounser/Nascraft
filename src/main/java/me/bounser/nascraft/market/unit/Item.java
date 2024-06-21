@@ -103,7 +103,7 @@ public class Item implements Tradable {
         if (!checkBalance(player, feedback, amount)) return;
         if (!checkInventory(player, feedback, amount)) return;
 
-        int maxSize = Math.round((itemStack.getType().getMaxStackSize())/(price.getElasticity()*4));
+        int maxSize = (int) Math.round((itemStack.getType().getMaxStackSize())/(price.getElasticity()*4) + 0.5);
         int orderSize = amount / maxSize;
         int excess = amount % maxSize;
 
@@ -148,7 +148,7 @@ public class Item implements Tradable {
 
         DatabaseManager.get().getDatabase().saveTrade(trade);
         if (Config.getInstance().getDiscordEnabled() && Config.getInstance().getLogChannelEnabled())
-            DiscordBot.getInstance().sendLog(trade);
+            DiscordBot.getInstance().sendTradeLog(trade);
         MarketManager.getInstance().addOperation();
     }
 
@@ -261,7 +261,7 @@ public class Item implements Tradable {
 
         DatabaseManager.get().getDatabase().saveTrade(trade);
         if (Config.getInstance().getDiscordEnabled() && Config.getInstance().getLogChannelEnabled())
-            DiscordBot.getInstance().sendLog(trade);
+            DiscordBot.getInstance().sendTradeLog(trade);
         MarketManager.getInstance().addOperation();
 
         return totalWorth;

@@ -3,6 +3,7 @@ package me.bounser.nascraft.market.unit;
 import me.bounser.nascraft.config.Config;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Price {
@@ -30,6 +31,8 @@ public class Price {
     private float hourLow;
     private final List<Float> dayHigh = new ArrayList<>();
     private final List<Float> dayLow = new ArrayList<>();
+
+    private List<Float> hourValues;
 
     private final float taxBuy;
     private final float taxSell;
@@ -62,19 +65,19 @@ public class Price {
 
     public float getSellPrice() { return value * taxSell; }
 
-    public void setStock(int stock) { this.stock = stock; }
+    public void setStock(float stock) { this.stock = stock; }
 
     public float getStock() { return stock; }
 
     public float getElasticity() { return elasticity; }
 
-    public void changeStock(int change) {
+    public void changeStock(float change) {
         stock += change;
 
         updateValue();
     }
 
-    public void verifyChange() {
+    public void enforceLimits() {
         value = Math.min(value, Config.getInstance().getLimits()[1]);
         value = Math.max(value, Config.getInstance().getLimits()[0]);
     }
@@ -136,12 +139,12 @@ public class Price {
     public void updateValue() {
 
         value = (float) (initialValue * Math.exp(-0.0005 * elasticity * stock));
-        verifyChange();
+        enforceLimits();
         updateLimits();
 
     }
 
-    public void updateLimits() {
+    private void updateLimits() {
         if (value > historicalHigh) { historicalHigh = value; }
         if (value < historicalLow) { historicalLow = value; }
 
@@ -162,9 +165,29 @@ public class Price {
         hourHigh = value;
     }
 
-    public float getProjectedCost(int stockChange, float tax) {
+    public void initializeHourValues(float value) {
+        if (hourValues == null)
+            hourValues = new ArrayList<>(Collections.nCopies(60, value));
+    }
 
-        int maxSize = Math.round((item.getItemStack().getType().getMaxStackSize())/(elasticity*4));
+    public void addValueToShortTermStorage() {
+
+        hourValues.remove(0);
+        hourValues.add(value);
+
+    }
+
+    public float getValueAnHourAgo() {
+        return hourValues.get(0);
+    }
+
+    public List<Float> getValuesPastHour() {
+        return hourValues;
+    }
+
+    public float getProjectedCost(int stockChange, float tax, float multiplier) {
+
+        int maxSize = (int) Math.round((item.getItemStack().getType().getMaxStackSize())/(elasticity*4) + 0.5);
         int orderSize = Math.abs(stockChange / maxSize);
         int excess = Math.abs(stockChange % maxSize);
 
@@ -173,13 +196,36 @@ public class Price {
         float cost = 0;
 
         for (int i = 0 ; i < orderSize ; i++) {
-            cost += fictitiousValue*maxSize;
-            fictitiousStock += maxSize*Integer.signum(stockChange);
+            cost += fictitiousValue * maxSize * multiplier;
+            fictitiousStock += maxSize * Integer.signum(stockChange) * multiplier;
             fictitiousValue = (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
         }
 
         if (excess > 0) {
-            cost += fictitiousValue*excess;
+            cost += fictitiousValue * excess * multiplier;
+        }
+
+        return cost*tax;
+    }
+
+    public float getProjectedCost(int stockChange, float tax) {
+
+        int maxSize = (int) Math.round((item.getItemStack().getType().getMaxStackSize())/(elasticity*4) + 0.5);
+        int orderSize = Math.abs(stockChange / maxSize);
+        int excess = Math.abs(stockChange % maxSize);
+
+        float fictitiousValue = value;
+        float fictitiousStock = stock;
+        float cost = 0;
+
+        for (int i = 0 ; i < orderSize ; i++) {
+            cost += fictitiousValue * maxSize;
+            fictitiousStock += maxSize * Integer.signum(stockChange);
+            fictitiousValue = (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
+        }
+
+        if (excess > 0) {
+            cost += fictitiousValue * excess;
         }
 
         return cost*tax;
