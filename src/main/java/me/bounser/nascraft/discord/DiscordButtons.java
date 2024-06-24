@@ -2,6 +2,7 @@ package me.bounser.nascraft.discord;
 
 import github.scarsz.discordsrv.DiscordSRV;
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.chart.cpi.CPIChart;
 import me.bounser.nascraft.chart.price.ChartType;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
@@ -142,13 +143,29 @@ public class DiscordButtons extends ListenerAdapter {
 
                 List<ItemComponent> componentList = new ArrayList<>();
 
-                componentList.add(Button.secondary("limit", "Limit orders").withEmoji(Emoji.fromFormatted("U+1F3AF")).asDisabled());
-                componentList.add(Button.secondary("opensession", "Open session").withEmoji(Emoji.fromFormatted("U+1F5A5")).asDisabled());
+                // componentList.add(Button.secondary("limit", "Limit orders").withEmoji(Emoji.fromFormatted("U+1F3AF")).asDisabled());
+                // componentList.add(Button.secondary("opensession", "Open session").withEmoji(Emoji.fromFormatted("U+1F5A5")).asDisabled());
                 componentList.add(Button.secondary("alerts", Lang.get().message(Message.DISCORD_ALERTS_NAME)).withEmoji(Emoji.fromFormatted("U+1F514")));
-                componentList.add(Button.secondary("ositions", "Open positions").withEmoji(Emoji.fromFormatted("U+231B")).asDisabled());
+                //componentList.add(Button.secondary("ositions", "Open positions").withEmoji(Emoji.fromFormatted("U+231B")).asDisabled());
+                componentList.add(Button.secondary("cpi", "CPI Evolution").withEmoji(Emoji.fromFormatted("U+1F4C8")));
 
                 event.reply(":bar_chart: Advanced Mode: Select an option.")
                         .addActionRow(componentList)
+                        .setEphemeral(true)
+                        .queue();
+
+                return;
+
+            case "cpi":
+
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+
+                embedBuilder.setColor(new Color(100, 50, 150));
+
+                embedBuilder.setImage("attachment://image.png");
+
+                event.replyEmbeds(embedBuilder.build())
+                        .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(CPIChart.getImage(500, 200)), "image.png"))
                         .setEphemeral(true)
                         .queue();
 
@@ -271,8 +288,6 @@ public class DiscordButtons extends ListenerAdapter {
                 return;
 
             case "data":
-
-                String info = "## :information_source: Market information \n> Using this channel you will be able to **buy/sell items and much more without being in the game!** To start using this you have to link your discord account, to do so just press the :link: **Account linking** button and  follow instructions. \n## Click on a category to learn more:";
 
                 List<ItemComponent> componentListData1 = new ArrayList<>();
                 List<ItemComponent> componentListData2 = new ArrayList<>();
@@ -437,11 +452,11 @@ public class DiscordButtons extends ListenerAdapter {
 
                 for (Trade trade : trades) {
 
-                    if (trade.getTradable() != null) {
+                    if (trade.getItem() != null) {
                         if (trade.isBuy())
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **BUY " + trade.getAmount() + "** x **" + trade.getTradable().getName() + "** :arrow_right: **-" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **BUY " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **-" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
                         else
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **SELL " + trade.getAmount() + "** x **" + trade.getTradable().getName() + "** :arrow_right: **+" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **SELL " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **+" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
 
                         if (trade.throughDiscord()) {
                             history = history + " (Discord)";
@@ -562,7 +577,10 @@ public class DiscordButtons extends ListenerAdapter {
                             "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
                 }
 
-                database.saveTrade(uuid, item, quantity, value, true, true);
+                Trade buyTrade = new Trade(item, LocalDateTime.now(), value, quantity, true, true, uuid);
+
+                database.saveTrade(buyTrade);
+                DiscordBot.getInstance().sendTradeLog(buyTrade);
 
                 event.reply(buyText)
                         .setEphemeral(true)
@@ -596,7 +614,10 @@ public class DiscordButtons extends ListenerAdapter {
                             "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
                 }
 
-                database.saveTrade(uuid, item, quantity, value, false, true);
+                Trade sellTrade = new Trade(item, LocalDateTime.now(), value, quantity, false, true, uuid);
+
+                database.saveTrade(sellTrade);
+                DiscordBot.getInstance().sendTradeLog(sellTrade);
 
                 event.reply(sellText)
                         .setEphemeral(true)

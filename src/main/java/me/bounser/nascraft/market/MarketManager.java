@@ -1,15 +1,14 @@
 package me.bounser.nascraft.market;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.managers.GraphManager;
 import me.bounser.nascraft.managers.TasksManager;
 import me.bounser.nascraft.market.resources.Category;
-import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.awt.image.BufferedImage;
@@ -18,7 +17,6 @@ import java.util.*;
 public class MarketManager {
 
     private final List<Item> items = new ArrayList<>();
-    private final List<ItemStack> itemStacks = new ArrayList<>();
     private List<Category> categories = new ArrayList<>();
 
     private boolean active = true;
@@ -44,12 +42,19 @@ public class MarketManager {
         Config config = Config.getInstance();
 
         for (String categoryName : Config.getInstance().getCategories()) {
-
             Category category = new Category(categoryName);
             categories.add(category);
         }
 
         for (String identifier : Config.getInstance().getAllMaterials()) {
+
+            ItemStack itemStack = config.getItemStackOfItem(identifier);
+
+            if (itemStack == null) {
+                Nascraft.getInstance().getLogger().warning("Error with the itemStack item: " + identifier);
+                Nascraft.getInstance().getLogger().warning("Make sure the material is correct and exists in your version.");
+                continue;
+            }
 
             Category category = config.getCategoryFromMaterial(identifier);
 
@@ -65,29 +70,24 @@ public class MarketManager {
                 continue;
             }
 
-            ItemStack itemStack = config.getItemStackOfItem(identifier);
-
-            if (itemStack == null)
-                try {
-                    itemStack = new ItemStack(Material.getMaterial(identifier.replaceAll("\\d", "").toUpperCase()));
-
-                } catch (IllegalArgumentException e) {
-                    Nascraft.getInstance().getLogger().severe("Couldn't load item with identifier: " + identifier);
-                    Nascraft.getInstance().getLogger().severe("Reason: Material " + identifier.replaceAll("\\d", "").toUpperCase() + " is not a valid material!");
-                    Nascraft.getInstance().getLogger().severe("Does the item exist in the version of your server?");
-                    e.printStackTrace();
-                    Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
-                }
-
             Item item = new Item(
                     itemStack,
                     identifier,
                     config.getAlias(identifier),
                     category,
-                    image);
+                    image
+            );
+
             items.add(item);
             category.addItem(item);
+
+            for (Item child : config.getChilds(identifier)) {
+                item.addChildItem(child);
+                items.add(child);
+            }
         }
+
+        DatabaseManager.get().getDatabase().retrieveItems();
 
         if (categories.size() < 4) {
             Nascraft.getInstance().getLogger().warning("You need to have at least 4 categories!");
@@ -95,7 +95,7 @@ public class MarketManager {
         }
 
         for (Item item : items)
-            if (item.getCategory() == null) Nascraft.getInstance().getLogger().warning("Item: " + item.getIdentifier() + " is not assigned to any category.");
+            if (item.getCategory() == null && item.isParent()) Nascraft.getInstance().getLogger().warning("Item: " + item.getIdentifier() + " is not assigned to any category.");
 
         marketChanges1h = new ArrayList<>(Collections.nCopies(60, 0f));
         marketChanges24h = new ArrayList<>(Collections.nCopies(24, 0f));
@@ -105,16 +105,14 @@ public class MarketManager {
     }
 
     public void reload() {
-
         items.clear();
         categories.clear();
 
         setupItems();
-
     }
 
     public Item getItem(ItemStack itemStack) {
-        for (Item item : items) if (item.isFromThis(itemStack)) return item;
+        for (Item item : items) if (itemStack.isSimilar(item.getItemStack())) return item;
         return null;
     }
 
@@ -127,23 +125,43 @@ public class MarketManager {
 
     public List<Item> getAllItems() { return items; }
 
-    public List<Item> getAllItemsInAlphabeticalOrder() {
+    public List<Item> getAllParentItemsInAlphabeticalOrder() {
 
-        List<Item> sorted = new ArrayList<>(items);
+        List<Item> sorted = new ArrayList<>(getAllParentItems());
 
         sorted.sort(Comparator.comparing(Item::getName));
 
         return sorted;
     }
 
-    public List<ItemStack> getAllItemStacks() { return itemStacks; }
+    public List<String> getAllItemsAndChildsIdentifiers() {
+
+        List<String> identifiers = new ArrayList<>();
+
+        for (Item item : getAllItems()) {
+            identifiers.add(item.getIdentifier());
+        }
+
+        return identifiers;
+    }
+
+    public List<Item> getAllParentItems() {
+
+        List<Item> parents = new ArrayList<>();
+
+        for (Item item : items) {
+            if (item.isParent()) parents.add(item);
+        }
+
+        return parents;
+    }
 
     public void stop() { active = false; }
     public void resume() { active = true; }
 
     public boolean getActive() { return active; }
 
-    public boolean isValidItem(ItemStack itemStack) {
+    public boolean isAValidItem(ItemStack itemStack) {
 
         for (Item item : items)
             if (item.getItemStack().isSimilar(itemStack)) return true;
@@ -153,7 +171,7 @@ public class MarketManager {
 
     public List<Item> getTopGainers(int quantity) {
 
-        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllItems());
+        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
 
         List<Item> topGainers = new ArrayList<>();
 
@@ -162,10 +180,10 @@ public class MarketManager {
             Item imax = items.get(0);
             for (Item item : items) {
 
-                float variation = -100 + 100 * (item.getPrice().getValue() / item.getPrices(TimeSpan.HOUR).get(0));
+                float variation = -100 + 100 * (item.getPrice().getValue() / item.getPrice().getValueAnHourAgo());
 
                 if (variation != 0) {
-                    if (variation > -100 + 100 * (imax.getPrice().getValue() / imax.getPrices(TimeSpan.HOUR).get(0))) {
+                    if (variation > -100 + 100 * (imax.getPrice().getValue() / imax.getPrice().getValueAnHourAgo())) {
                         imax = item;
                     }
                 }
@@ -179,7 +197,7 @@ public class MarketManager {
 
     public List<Item> getTopDippers(int quantity) {
 
-        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllItems());
+        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
 
         List<Item> topDippers = new ArrayList<>();
 
@@ -188,10 +206,10 @@ public class MarketManager {
             Item imax = items.get(0);
             for (Item item : items) {
 
-                float variation = RoundUtils.round(-100 + 100 * (item.getPrice().getValue() / item.getPrices(TimeSpan.HOUR).get(0)));
+                float variation = RoundUtils.round(-100 + 100 * (item.getPrice().getValue() / item.getPrice().getValueAnHourAgo()));
 
                 if (variation != 0) {
-                    if (variation < -100 + 100 * (imax.getPrice().getValue() / imax.getPrices(TimeSpan.HOUR).get(0))) {
+                    if (variation < -100 + 100 * (imax.getPrice().getValue() / imax.getPrice().getValueAnHourAgo())) {
                         imax = item;
                     }
                 }
@@ -205,7 +223,7 @@ public class MarketManager {
 
     public List<Item> getMostTraded(int quantity) {
 
-        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllItems());
+        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
 
         List<Item> mostTraded = new ArrayList<>();
 
@@ -301,6 +319,17 @@ public class MarketManager {
             if (category.getIdentifier().equals(identifier)) return category;
 
         return null;
+    }
+
+    public float getConsumerPriceIndex() {
+
+        float index = 0;
+
+        for (Item item : getAllParentItems()) {
+            index += item.getPrice().getValue()/item.getPrice().getInitialValue();
+        }
+
+        return (index/getAllParentItems().size())*100;
     }
 
 }
