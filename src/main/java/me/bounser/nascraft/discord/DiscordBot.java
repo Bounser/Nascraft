@@ -4,6 +4,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.discord.images.ItemBasicImage;
@@ -38,6 +39,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class DiscordBot {
@@ -182,7 +184,7 @@ public class DiscordBot {
             for (Item item : MarketManager.getInstance().getMostTraded(8)) if(!items.contains(item)) items.add(item);
             for (Item item : MarketManager.getInstance().getTopDippers(8)) if(!items.contains(item)) items.add(item);
         } else {
-            items = MarketManager.getInstance().getAllItemsInAlphabeticalOrder();
+            items = MarketManager.getInstance().getAllParentItemsInAlphabeticalOrder();
         }
 
         for (Item item : items)
@@ -285,43 +287,31 @@ public class DiscordBot {
                     .queue(message -> message.editOriginalEmbeds(getBasicEditedEmbedded()).queueAfter(getSecondsRemainingToUpdate(), TimeUnit.SECONDS));
     }
 
-    public void sendLog(Trade trade) {
+    public void sendLinkLog(String id, UUID uuid, String nick, boolean linked) {
 
         try {
             jda.awaitReady().getGuilds().forEach(guild -> {
                 TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getLogChannel());
+
                 if (textChannel == null) {
                     Nascraft.getInstance().getLogger().info("Log channel could not be found.");
                     return;
                 }
 
-                Player player = Bukkit.getPlayer(trade.getUuid());
+                jda.retrieveUserById(id).queue(user -> {
 
-                String nickname;
+                    String message = linked ? Lang.get().message(Message.DISCORD_LOG_LINKED) : Lang.get().message(Message.DISCORD_LOG_UNLINKED);
 
-                if (player == null) nickname = "?";
-                else nickname = player.getName();
+                    message = message
+                            .replace("[UUID]", uuid.toString())
+                            .replace("[NICK]", nick)
+                            .replace("[ID]", id)
+                            .replace("[DISCORD-NAME]", user.getName());
 
-                String action = trade.isBuy() ? Lang.get().message(Message.DISCORD_LOG_BUY) : Lang.get().message(Message.DISCORD_LOG_SELL);
+                    textChannel.sendMessage(message).queue();
 
-                String user = LinkManager.getInstance().getUserDiscordID(trade.getUuid());
+                });
 
-                String message = user == null ?
-                        Lang.get().message(Message.DISCORD_LOG_NOT_LINKED):
-                        Lang.get().message(Message.DISCORD_LOG_LINKED);
-
-                        message = message.replace("[UUID]", trade.getUuid().toString())
-                                .replace("[NICK]", nickname)
-                                .replace("[ACTION]", action)
-                                .replace("[QUANTITY]", String.valueOf(trade.getAmount()))
-                                .replace("[ALIAS]", trade.getTradable().getName())
-                                .replace("[WORTH]", Formatter.format(trade.getValue(), Style.ROUND_BASIC));
-
-                        if (user != null) {
-                            message = message.replace("[USER]", user);
-                        }
-
-                textChannel.sendMessage(message).queue();
             });
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
