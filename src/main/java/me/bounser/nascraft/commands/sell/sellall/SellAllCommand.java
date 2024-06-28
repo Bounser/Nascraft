@@ -5,9 +5,8 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.managers.MoneyManager;
-import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.market.unit.Item;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -21,7 +20,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -66,7 +64,7 @@ public class SellAllCommand implements CommandExecutor {
 
                 if(itemStack != null && itemStack.getType().toString().equalsIgnoreCase(args[0])) {
 
-                    if(MarketManager.getInstance().isValidItem(itemStack)) {
+                    if(MarketManager.getInstance().isAValidItem(itemStack)) {
 
                         if(items.get(nascraftItem) != null) {
 
@@ -84,11 +82,11 @@ public class SellAllCommand implements CommandExecutor {
             if(items.get(nascraftItem) != null) {
 
                 if(args.length == 2 && args[1].equalsIgnoreCase("confirm")) {
-                    nascraftItem.sellItem(items.get(nascraftItem), player.getUniqueId(), true, nascraftItem.getItemStack().getType());
+                    nascraftItem.sell(items.get(nascraftItem), player.getUniqueId(), true);
                     return false;
                 }
 
-                String formattedValue =  Formatter.format(nascraftItem.getPrice().getSellPrice()*items.get(nascraftItem), Style.ROUND_BASIC);
+                String formattedValue =  Formatter.format(nascraftItem.getPrice().getProjectedCost(items.get(nascraftItem), nascraftItem.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC);
 
                 TextComponent component = (TextComponent) MiniMessage.miniMessage().deserialize(
                         Lang.get().message(Message.CLICK_TO_CONFIRM)
@@ -144,17 +142,17 @@ public class SellAllCommand implements CommandExecutor {
 
         if (confirmed) {
 
-            for (Item item : items.keySet())
-                totalValue += item.sellItem(items.get(item), player.getUniqueId(), true, item.getItemStack().getType());
+            for (Item tradable : items.keySet())
+                totalValue += tradable.sell(items.get(tradable), player.getUniqueId(), true);
 
         } else {
 
-            for (Item item : items.keySet())
-                totalValue += item.getPrice().getSellPrice()*items.get(item);
+            for (Item tradable : items.keySet())
+                totalValue += tradable.sellPrice(items.get(tradable));
 
             String text = "";
-            for (Item item : items.keySet())
-                text = text + Lang.get().message(Message.LIST_SEGMENT, Formatter.format(item.getPrice().getSellPrice()*items.get(item), Style.ROUND_BASIC), String.valueOf(items.get(item)), item.getName());
+            for (Item tradable : items.keySet())
+                text = text + Lang.get().message(Message.LIST_SEGMENT, Formatter.format(tradable.sellPrice(items.get(tradable)), Style.ROUND_BASIC), String.valueOf(items.get(tradable)), tradable.getName());
 
             text = text + "\n";
 

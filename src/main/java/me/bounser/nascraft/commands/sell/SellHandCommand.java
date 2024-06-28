@@ -52,7 +52,7 @@ public class SellHandCommand implements CommandExecutor {
                 Lang.get().message(player, Message.SELLHAND_INVALID); return false;
             }
 
-            if(!MarketManager.getInstance().isValidItem(handItem)) {
+            if(!MarketManager.getInstance().isAValidItem(handItem)) {
                 Lang.get().message(player, Message.SELLHAND_INVALID); return false;
             }
 
@@ -63,7 +63,7 @@ public class SellHandCommand implements CommandExecutor {
             Component hoverText = MiniMessage.miniMessage().deserialize(
                     Lang.get().message(Message.SELLHAND_ESTIMATED_VALUE) +
                             Lang.get().message(Message.LIST_SEGMENT,
-                                    Formatter.format(handItem.getAmount()*item.getPrice().getSellPrice(), Style.ROUND_BASIC),
+                                    Formatter.format(item.getPrice().getProjectedCost(handItem.getAmount(), item.getPrice().getSellTaxMultiplier()) , Style.ROUND_BASIC),
                                     String.valueOf(handItem.getAmount()),
                                     item.getName())
             );
@@ -78,9 +78,9 @@ public class SellHandCommand implements CommandExecutor {
         } else if (args[0].equalsIgnoreCase("confirm")) {
 
             if(player.getInventory().getItemInMainHand().equals(players.get(player))) {
-                Item item = MarketManager.getInstance().getItem(player.getInventory().getItemInMainHand().getType().toString());
+                Item item = MarketManager.getInstance().getItem(player.getInventory().getItemInMainHand());
 
-                item.sellItem(handItem.getAmount(), player.getUniqueId(), true, item.getItemStack().getType());
+                item.sell(handItem.getAmount(), player.getUniqueId(), true);
             } else {
                 Lang.get().message(player, Message.SELLHAND_ERROR_HAND);
             }

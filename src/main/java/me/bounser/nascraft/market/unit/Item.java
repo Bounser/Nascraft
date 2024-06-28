@@ -1,5 +1,6 @@
 package me.bounser.nascraft.market.unit;
 
+import me.bounser.nascraft.advancedgui.Images;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
@@ -7,6 +8,7 @@ import me.bounser.nascraft.api.events.BuyTradableEvent;
 import me.bounser.nascraft.api.events.SellTradableEvent;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.discord.DiscordBot;
+import me.bounser.nascraft.discord.DiscordLog;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.MarketManager;
@@ -25,7 +27,7 @@ import java.awt.image.BufferedImage;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class Item implements Tradable {
+public class Item {
 
     private ItemStack itemStack;
     private final String identifier;
@@ -43,9 +45,13 @@ public class Item implements Tradable {
 
     private ItemStats itemStats;
 
-    private final HashMap<Child, Float> childs;
+    private final float multiplier;
 
-    public Item(ItemStack itemStack, String identifier, String alias, Category category, HashMap<Child, Float> childs, BufferedImage image){
+    private final Item parent;
+
+    private List<Item> childs = new ArrayList<>();
+
+    public Item (ItemStack itemStack, String identifier, String alias, Category category, BufferedImage image) {
 
         itemStack.setAmount(1);
 
@@ -63,31 +69,52 @@ public class Item implements Tradable {
 
         this.icon = image;
 
-        DatabaseManager.get().getDatabase().retrieveLastPrice(this);
-
         price.initializeHourValues(DatabaseManager.get().getDatabase().retrieveLastPrice(this));
 
         this.category = category;
         operations = 0;
-        this.childs = childs;
+        multiplier = 1;
+        parent = null;
 
         itemStats = new ItemStats(this);
+    }
+
+    public Item(Item parent, float multiplier, ItemStack itemStack, String identifier, String alias){
+
+        itemStack.setAmount(1);
+
+        this.parent = parent;
+        this.itemStack = itemStack;
+        this.multiplier = multiplier;
+        this.identifier = identifier;
+        this.alias = alias;
+        this.price = parent.getPrice();
+        this.icon = Images.getInstance().getImage(itemStack.getType());
+    }
+
+    public void addChildItem(Item item) {
+        childs.add(item);
+    }
+
+    public void removeChildItem(Item item) {
+        childs.remove(item);
+    }
+
+    public List<Item> getChilds() {
+        return childs;
     }
 
     public String getName() { return alias; }
 
 
-    @Override
     public float buyPrice(int amount) {
-        return price.getProjectedCost(-amount, price.getBuyTaxMultiplier());
+        return price.getProjectedCost(-amount*multiplier, price.getBuyTaxMultiplier());
     }
 
-    @Override
     public float sellPrice(int amount) {
-        return price.getProjectedCost(amount, price.getSellTaxMultiplier());
+        return price.getProjectedCost(amount*multiplier, price.getSellTaxMultiplier());
     }
 
-    @Override
     public void buy(int amount, UUID uuid, boolean feedback) {
 
         Player player = Bukkit.getPlayer(uuid);
@@ -100,60 +127,44 @@ public class Item implements Tradable {
 
         if(!MarketManager.getInstance().getActive()) { Lang.get().message(player, Message.SHOP_CLOSED); return; }
 
-        if (!checkBalance(player, feedback, amount)) return;
+        float worth = price.getProjectedCost(-amount*multiplier, price.getBuyTaxMultiplier());
+
+        if (!checkBalance(player, feedback, worth)) return;
         if (!checkInventory(player, feedback, amount)) return;
-
-        int maxSize = (int) Math.round((itemStack.getType().getMaxStackSize())/(price.getElasticity()*4) + 0.5);
-        int orderSize = amount / maxSize;
-        int excess = amount % maxSize;
-
-        float totalCost = 0;
 
         ItemStack operationItemStack = itemStack.clone();
 
-        for (int i = 0 ; i < orderSize ; i++) {
+        operationItemStack.setAmount(amount);
 
-            totalCost += price.getBuyPrice()*maxSize;
+        if (player != null && feedback) player.getInventory().addItem(operationItemStack);
 
-            price.changeStock(-maxSize);
+        MoneyManager.getInstance().withdraw(offlinePlayer, worth);
 
-            operationItemStack.setAmount(maxSize);
+        if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(worth, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
-            if (player != null  && feedback) player.getInventory().addItem(operationItemStack);
-        }
+        if (parent != null)
+            parent.updateInternalValues(amount,
+                amount*price.getValue(),
+                -amount*multiplier,
+                price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+        else
+            updateInternalValues(amount,
+                    amount*price.getValue(),
+                    -amount*multiplier,
+                    price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
 
-        if (excess > 0) {
-
-            totalCost += price.getBuyPrice()*excess;
-
-            price.changeStock(-excess);
-
-            operationItemStack.setAmount(excess);
-
-            if (player != null  && feedback) player.getInventory().addItem(operationItemStack);
-        }
-
-        MoneyManager.getInstance().withdraw(offlinePlayer, totalCost);
-
-        totalCost = RoundUtils.round(totalCost);
-
-        if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(totalCost, Style.ROUND_BASIC), String.valueOf(amount), alias);
-
-        updateInternalValues(amount,
-                amount,
-                0,
-                price.getValue()*price.getBuyTaxMultiplier());
-
-        Trade trade = new Trade(this, LocalDateTime.now(), totalCost, amount, true, false, uuid);
+        Trade trade = new Trade(this, LocalDateTime.now(), worth, amount, true, false, uuid);
 
         DatabaseManager.get().getDatabase().saveTrade(trade);
+
         if (Config.getInstance().getDiscordEnabled() && Config.getInstance().getLogChannelEnabled())
-            DiscordBot.getInstance().sendTradeLog(trade);
+            DiscordLog.getInstance().sendTradeLog(trade);
+
         MarketManager.getInstance().addOperation();
     }
 
-    public boolean checkBalance(Player player, boolean feedback, int amount) {
-        if (!MoneyManager.getInstance().hasEnoughMoney(player, price.getProjectedCost(amount, price.getBuyTaxMultiplier()))) {
+    public boolean checkBalance(Player player, boolean feedback, float money) {
+        if (!MoneyManager.getInstance().hasEnoughMoney(player, money)) {
             if (player != null && feedback) Lang.get().message(player, Message.NOT_ENOUGH_MONEY);
             return false;
         }
@@ -193,7 +204,6 @@ public class Item implements Tradable {
         return true;
     }
 
-    @Override
     public float sell(int amount, UUID uuid, boolean feedback) {
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
@@ -218,56 +228,41 @@ public class Item implements Tradable {
             return -1;
         }
 
-        int maxSize = itemStack.getType().getMaxStackSize();
-        int orderSize = amount / maxSize;
-        int excess = amount % maxSize;
+        float worth = price.getProjectedCost(amount*multiplier, price.getSellTaxMultiplier());
 
-        float totalWorth = 0;
-
-        for (int i = 0 ; i < orderSize ; i++) {
-
-            totalWorth += price.getSellPrice()*maxSize;
-
-            price.changeStock(maxSize);
-
-            operationItemStack.setAmount(maxSize);
-
-            if (player != null && feedback) player.getInventory().removeItem(operationItemStack);
+        if (player != null && feedback) {
+            operationItemStack.setAmount(amount);
+            player.getInventory().removeItem(operationItemStack);
         }
 
-        if (excess > 0) {
+        if (parent != null)
+            parent.updateInternalValues(amount,
+                    amount*price.getValue(),
+                    amount*multiplier,
+                    price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+        else
+            updateInternalValues(amount,
+                    amount*price.getValue(),
+                    amount*multiplier,
+                    price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
 
-            totalWorth += price.getSellPrice()*excess;
 
-            price.changeStock(excess);
+        MoneyManager.getInstance().deposit(offlinePlayer, worth*multiplier);
 
-            operationItemStack.setAmount(excess);
+        worth = RoundUtils.round(worth*multiplier);
 
-            if (player != null && feedback) player.getInventory().removeItem(operationItemStack);
-        }
+        if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(worth, Style.ROUND_BASIC), String.valueOf(amount), alias);
 
-        updateInternalValues(amount,
-                amount,
-                0,
-                price.getValue()*price.getSellTaxMultiplier());
-
-        MoneyManager.getInstance().deposit(offlinePlayer, totalWorth);
-
-        totalWorth = RoundUtils.round(totalWorth);
-
-        if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(totalWorth, Style.ROUND_BASIC), String.valueOf(amount), alias);
-
-        Trade trade = new Trade(this, LocalDateTime.now(), totalWorth, amount, false, false, uuid);
+        Trade trade = new Trade(this, LocalDateTime.now(), worth, amount, false, false, uuid);
 
         DatabaseManager.get().getDatabase().saveTrade(trade);
         if (Config.getInstance().getDiscordEnabled() && Config.getInstance().getLogChannelEnabled())
-            DiscordBot.getInstance().sendTradeLog(trade);
+            DiscordLog.getInstance().sendTradeLog(trade);
         MarketManager.getInstance().addOperation();
 
-        return totalWorth;
+        return worth;
     }
 
-    @Override
     public List<Float> getValuesPastHour() {
         return price.getValuesPastHour();
     }
@@ -282,7 +277,7 @@ public class Item implements Tradable {
         MarketManager.getInstance().addOperation();
     }
 
-    private void updateInternalValues(int operations, int volume, int stockChange, float taxes) {
+    private void updateInternalValues(int operations, float volume, float stockChange, float taxes) {
         this.operations += operations;
         this.volume += volume;
         this.price.changeStock(stockChange);
@@ -292,17 +287,24 @@ public class Item implements Tradable {
     public String getIdentifier() { return identifier; }
 
     public List<Material> getParentAndChildsMaterials() {
-        List materials = new ArrayList();
+        List<Material> materials = new ArrayList<>();
+
         materials.add(itemStack.getType());
-        materials.add(childs.keySet());
+
+        for (Item item : childs)
+            materials.add(item.getItemStack().getType());
 
         return materials;
     }
 
+    public boolean isParent() { return parent == null; }
+
+    public Item getParent() { return parent; }
+
+    public float getMultiplier() { return multiplier; }
+
     public Price getPrice() { return price; }
 
-
-    public HashMap<Child, Float> getChilds() { return childs; }
 
     public int getOperations() { return operations; }
 
