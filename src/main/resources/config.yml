@@ -3,6 +3,14 @@
 # Language file to use. Available: en_US es_ES
 language: 'en_US'
 
+database:
+  # Available types: SQLite
+  type: 'SQLite'
+  # How many days should logs of trades last in the database?
+  # With the option 60, all trades older than 60 days will be automatically removed.
+  # Use -1 to disable (Keep all trades logged).
+  days-until-history-removed: 60
+
 price-options:
   # Set (hard) limits on the minimum and maximum prices.
   limits:
@@ -31,14 +39,6 @@ market-control:
   # Do players need the permission "nascraft.market" to operate directly with commands?
   market-permission: true
 
-  # With limit orders players can select an item and a desired price to automatically perform transactions.
-  limit-orders:
-    enabled: true
-    # This extra tax is collected when placing the order and won't be refunded even if the order expires.
-    extra-tax: 0.1 # 10%
-    # After how many (real life) hours should the order be expired?
-    expiration: 120 # 120 hours = 5 days
-
 commands:
   # Available commands: sell, sellall, sellhand
   enabled:
@@ -54,36 +54,38 @@ placeholders:
   # 3 -> 2.273$
   decimal-precision: 2
 
-database:
-  # How many days should the trade's log last in the database?
-  # With the option 60, all trades older than 60 days will be automatically removed.
-  # Use -1 to disable (Keep all trades logged).
-  days-until-history-removed: 60
-
 # FEATURE IN BETA AS OF ${project.version}
 # Use with caution.
 discord-bot:
   enabled: false
-  # Available methods: NATIVE, DISCORDSRV
-  link-method: 'NATIVE'
   token: 'TOKEN-ID'
-  # This channel should be only used by the bot. Every message in it will be removed.
-  channel: 'TEXTCHANNEL-ID'
   # Role requiered to execute admin commands through discord.
   # Current commands: /stop, /resume, /seeinv [ID], /seebal [ID]
   admin-role-id: 'ADMIN-ROLE-ID'
-  # Default size of discord's virtual inventories.
-  default-inventory: 5
-  # Formula to calculate the price of then next slot. slot_price_factor * #slot + slot_price_base = price
-  # For example, to buy the slot nº6 the price will be (1000 * 6) + 10000 = 16000$
-  slot-price-factor: 1000
-  slot-price-base: 10000
-  # Discord taxes:
-  taxation:
-    override: true
-    # By default, we apply a reduced tax to persuade users to operate through discord.
-    buy: 0.04
-    sell: 0.05
+  # You can select a channel to send information of each transaction when executed.
+  # You will most likely want to make the channel private, but it's optional.
+  log-trades:
+    enabled: false
+    channel: 'LOGS-TEXTHANNEL-ID'
+  # Menu to let users sell/buy items
+  main-menu:
+    enabled: false
+    # Available methods: NATIVE, DISCORDSRV
+    link-method: 'NATIVE'
+    # This channel should be only used by the bot. Every message in it will be removed.
+    channel: 'MAINMENU-TEXTCHANNEL-ID'
+    # Default size of discord's virtual inventories.
+    default-inventory: 5
+    # Formula to calculate the price of then next slot. slot_price_factor * #slot + slot_price_base = price
+    # For example, to buy the slot nº6 the price will be (1000 * 6) + 10000 = 16000$
+    slot-price-factor: 1000
+    slot-price-base: 10000
+    # Discord taxes:
+    taxation:
+      override: true
+      # By default, we apply a reduced tax to persuade users to operate through discord.
+      buy: 0.04
+      sell: 0.05
 
 sell-wands:
   enabled: true
@@ -98,7 +100,7 @@ sell-wands:
         - '&7sell all its content to the market!'
         - ' '
         - '&7Uses left: &6[USES]'
-      # Maximum uses of the wand. Alternativelly you can place a limit on
+      # Maximum uses of the wand. Alternatively you can place a limit on
       # the quantity of the sells. See "MILLONAIRE WAND".
       # If you don't set any of these, the wand can be used without limits. (See "PERMANENT WAND").
       uses: 10
