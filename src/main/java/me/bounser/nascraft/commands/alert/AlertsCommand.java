@@ -3,7 +3,6 @@ package me.bounser.nascraft.commands.alert;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.database.playerinfo.PlayerInfoManager;
 import me.bounser.nascraft.discord.DiscordAlerts;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.market.unit.Item;

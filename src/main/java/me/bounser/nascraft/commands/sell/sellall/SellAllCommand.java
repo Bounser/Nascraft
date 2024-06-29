@@ -50,7 +50,7 @@ public class SellAllCommand implements CommandExecutor {
 
         } else {
 
-            if(MarketManager.getInstance().getItem(args[0]) == null) {
+            if (MarketManager.getInstance().getItem(args[0]) == null) {
                 Lang.get().message(player, Message.SELLALL_ERROR_WRONG_MATERIAL);
                 return false;
             }
@@ -58,7 +58,7 @@ public class SellAllCommand implements CommandExecutor {
             PlayerInventory inventory = player.getInventory();
 
             HashMap<Item, Integer> items = new HashMap<>();
-            Item nascraftItem = MarketManager.getInstance().getItem(args[0]);
+            Item item = MarketManager.getInstance().getItem(args[0]);
 
             for(ItemStack itemStack : inventory) {
 
@@ -66,27 +66,27 @@ public class SellAllCommand implements CommandExecutor {
 
                     if(MarketManager.getInstance().isAValidItem(itemStack)) {
 
-                        if(items.get(nascraftItem) != null) {
+                        if(items.get(item) != null) {
 
-                            items.put(nascraftItem, items.get(nascraftItem) + itemStack.getAmount());
+                            items.put(item, items.get(item) + itemStack.getAmount());
 
                         } else {
 
-                            items.put(nascraftItem, itemStack.getAmount());
+                            items.put(item, itemStack.getAmount());
 
                         }
                     }
                 }
             }
 
-            if(items.get(nascraftItem) != null) {
+            if(items.get(item) != null) {
 
                 if(args.length == 2 && args[1].equalsIgnoreCase("confirm")) {
-                    nascraftItem.sell(items.get(nascraftItem), player.getUniqueId(), true);
+                    item.sell(items.get(item), player.getUniqueId(), true);
                     return false;
                 }
 
-                String formattedValue =  Formatter.format(nascraftItem.getPrice().getProjectedCost(items.get(nascraftItem), nascraftItem.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC);
+                String formattedValue =  Formatter.format(item.getPrice().getProjectedCost(items.get(item)*item.getMultiplier(), item.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC);
 
                 TextComponent component = (TextComponent) MiniMessage.miniMessage().deserialize(
                         Lang.get().message(Message.CLICK_TO_CONFIRM)
@@ -94,16 +94,16 @@ public class SellAllCommand implements CommandExecutor {
 
                 Component hoverText = MiniMessage.miniMessage().deserialize(
                         Lang.get().message(Message.SELLALL_ESTIMATED_VALUE, formattedValue, "0", "0") +
-                                Lang.get().message(Message.LIST_SEGMENT, formattedValue, String.valueOf(items.get(nascraftItem)), nascraftItem.getName())
+                                Lang.get().message(Message.LIST_SEGMENT, formattedValue, String.valueOf(items.get(item)), item.getName())
                 );
 
                 component = component.hoverEvent(HoverEvent.showText(hoverText))
-                        .clickEvent(ClickEvent.runCommand("/nsellall " + nascraftItem.getIdentifier() + " confirm"));
+                        .clickEvent(ClickEvent.runCommand("/nsellall " + item.getIdentifier() + " confirm"));
 
                 Lang.get().getAudience().player(player).sendMessage(component);
 
             } else {
-                Lang.get().message(player, Message.SELLALL_ERROR_WITHOUT_ITEM, "0", "0", nascraftItem.getName());
+                Lang.get().message(player, Message.SELLALL_ERROR_WITHOUT_ITEM, "0", "0", item.getName());
             }
         }
         return false;
@@ -111,24 +111,23 @@ public class SellAllCommand implements CommandExecutor {
 
     public void sellEverything(Player player, boolean confirmed) {
 
-        if (player.getInventory().getContents() == null) {
-            return;
-        }
+        if (player.getInventory().getContents() == null) return;
 
-        HashMap<Item, Integer> items = new HashMap<>();
+        HashMap<Item, Float> items = new HashMap<>();
 
         for (ItemStack itemStack : player.getInventory()) {
 
             if (itemStack != null && !itemStack.getType().equals(Material.AIR)) {
                 Item item = MarketManager.getInstance().getItem(itemStack);
 
-                if (item != null) {
+                if (item == null) continue;
 
-                    if (items.get(item) == null) {
-                        items.put(item, itemStack.getAmount());
-                    } else {
-                        items.put(item, items.get(item) + itemStack.getAmount());
-                    }
+                Item parent = item.isParent() ? item : item.getParent();
+
+                if (items.containsKey(parent)) {
+                    items.put(parent, items.get(parent) + itemStack.getAmount() * item.getMultiplier());
+                } else {
+                    items.put(parent, itemStack.getAmount() * item.getMultiplier());
                 }
             }
         }
@@ -138,21 +137,40 @@ public class SellAllCommand implements CommandExecutor {
             return;
         }
 
+        HashMap<Item, Integer> content = new HashMap<>();
+
+        for (ItemStack itemStack : player.getInventory().getContents()) {
+
+            if (itemStack == null) continue;
+
+            Item item = MarketManager.getInstance().getItem(itemStack);
+
+            if (item == null) continue;
+
+            if (content.containsKey(item)) {
+                content.put(item, content.get(item) + itemStack.getAmount());
+            } else {
+                content.put(item, itemStack.getAmount());
+            }
+        }
+
         float totalValue = 0;
 
         if (confirmed) {
 
-            for (Item tradable : items.keySet())
-                totalValue += tradable.sell(items.get(tradable), player.getUniqueId(), true);
+            for (Item item : content.keySet()) {
+                item.sell(content.get(item), player.getUniqueId(), true);
+            }
 
         } else {
 
-            for (Item tradable : items.keySet())
-                totalValue += tradable.sellPrice(items.get(tradable));
-
             String text = "";
-            for (Item tradable : items.keySet())
-                text = text + Lang.get().message(Message.LIST_SEGMENT, Formatter.format(tradable.sellPrice(items.get(tradable)), Style.ROUND_BASIC), String.valueOf(items.get(tradable)), tradable.getName());
+
+            for (Item item : content.keySet()) {
+                float value = item.getPrice().getProjectedCost(content.get(item) * item.getMultiplier(), item.getPrice().getSellTaxMultiplier());
+                totalValue += value;
+                text = text + Lang.get().message(Message.LIST_SEGMENT, Formatter.format(value, Style.ROUND_BASIC), String.valueOf(content.get(item)), item.getName());
+            }
 
             text = text + "\n";
 

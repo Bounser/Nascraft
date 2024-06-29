@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GetSellWandTabCompleter implements TabCompleter {
+public class GiveSellWandTabCompleter implements TabCompleter {
 
     @Nullable
     @Override

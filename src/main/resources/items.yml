@@ -2,7 +2,7 @@
 
 # You can edit this file manually or using /nascraft editmarket
 items:
-  # Material of the item.
+  # Identifier (Material, in most cases) of the item.
   cobblestone:
     # REQUIRED: INITIAL price. This value will be disregarded once the market begins to establish its own valuations.
     initial-price: 0.05
@@ -42,6 +42,7 @@ items:
         # To make a cobblestone slab we only need half of a cobblestone block, so the price of the slab is half the price of the cobblestone.
         # Therefore, the initial price will be 0.5 times the price of cobblestone, resulting in 0.05*0.5 = 0.025 for one slab in this example.
         multiplier: 0.5
+        alias: 'Cobbled slabs'
       cobblestone_stairs:
         # To make a cobblestone stair, we require six blocks of cobblestone, but we only get four stairs.
         # Therefore, the price will be 6/4 = 3/2 = 1.5 times the price of cobblestone.
@@ -49,6 +50,7 @@ items:
         # NOTE: Keep in mind that this logic is not necessary, as you could choose to set the price of a stair as ten times the price of cobblestone.
         # However, this would not make sense and would likely allow people to take advantage of the overvaluation.
         multiplier: 1.5
+        alias: 'Cobbled stairs'
       cobblestone_wall:
         # Spends 6, gets 6. Therefore, the ratio is 6/6 = 1/1 = 1.
         multiplier: 1
@@ -68,12 +70,33 @@ items:
   andesite:
     initial-price: 0.1
     elasticity: 0.7
+    child:
+      andesite_stairs:
+        multiplier: 1.5
+      andesite_slab:
+        multiplier: 0.5
+      andesite_wall:
+        multiplier: 1
   diorite:
     initial-price: 0.1
     elasticity: 0.7
+    child:
+      diorite_stairs:
+        multiplier: 1.5
+      diorite_slab:
+        multiplier: 0.5
+      diorite_wall:
+        multiplier: 1
   granite:
     initial-price: 0.1
     elasticity: 0.7
+    child:
+      granite_stairs:
+        multiplier: 1.5
+      granite_slab:
+        multiplier: 0.5
+      granite_wall:
+        multiplier: 1
   tuff:
     initial-price: 0.1
     elasticity: 0.7
@@ -97,6 +120,8 @@ items:
     support: 100
   amethyst_shard:
     initial-price: 50
+    amethyst_block:
+      multiplier: 4
   sculk:
     initial-price: 20
 
@@ -104,18 +129,43 @@ items:
     initial-price: 0.5
   blackstone:
     initial-price: 0.5
+    child:
+      blackstone_stairs:
+        multiplier: 1.5
+      blackstone_slab:
+        multiplier: 0.5
+      blackstone_wall:
+        multiplier: 1
   ghast_tear:
     initial-price: 1000
+    elasticity: 2
+    noise-intensity: 0.6
   blaze_rod:
     initial-price: 250
+    child:
+      blaze_powder:
+        multiplier: 0.5
   glowstone_dust:
     initial-price: 25
+    child:
+      glowstone_dust:
+        multiplier: 4
   nether_wart:
     initial-price: 80
+    child:
+      nether_wart_block:
+        multiplier: 9
   magma_cream:
     initial-price: 25
   quartz:
     initial-price: 50
+    child:
+      quartz_block:
+        multiplier: 4
+      quartz_stairs:
+        multiplier: 6
+      quartz_slab:
+        multiplier: 2
   soul_sand:
     initial-price: 5
 
@@ -123,6 +173,11 @@ items:
     initial-price: 8
   purpur_block:
     initial-price: 20
+    child:
+      purpur_stairs:
+        multiplier: 1.5
+      purpur_slab:
+        multiplier: 0.5
   shulker_shell:
     initial-price: 15000
     elasticity: 2
@@ -136,6 +191,13 @@ items:
     initial-price: 0.5
   prismarine_shard:
     initial-price: 10
+    child:
+      prismarine:
+        multiplier: 4
+      prismarine_stairs:
+        multiplier: 6
+      prismarine_slab:
+        multiplier: 2
   prismarine_crystals:
     initial-price: 15
   ink_sac:
@@ -178,8 +240,6 @@ items:
         multiplier: 0.375
       oak_slab:
         multiplier: 0.125
-      stick:
-        multiplier: 0.0625
   birch_log:
     initial-price: 1
     child:
@@ -189,25 +249,70 @@ items:
         multiplier: 0.375
       birch_slab:
         multiplier: 0.125
-      stick:
-        multiplier: 0.0625
   spruce_log:
     initial-price: 1
+    child:
+      spruce_planks:
+        multiplier: 0.25
+      spruce_stairs:
+        multiplier: 0.375
+      spruce_slab:
+        multiplier: 0.125
   jungle_log:
     initial-price: 1
+    child:
+      jungle_planks:
+        multiplier: 0.25
+      jungle_stairs:
+        multiplier: 0.375
+      jungle_slab:
+        multiplier: 0.125
   acacia_log:
     initial-price: 1
+    child:
+      acacia_planks:
+        multiplier: 0.25
+      acacia_stairs:
+        multiplier: 0.375
+      acacia_slab:
+        multiplier: 0.125
   dark_oak_log:
     initial-price: 1
+    child:
+      dark_oak_planks:
+        multiplier: 0.25
+      dark_oak_stairs:
+        multiplier: 0.375
+      dark_oak_slab:
+        multiplier: 0.125
   mangrove_log:
     initial-price: 1
+    child:
+      mangrove_planks:
+        multiplier: 0.25
+      mangrove_stairs:
+        multiplier: 0.375
+      mangrove_slab:
+        multiplier: 0.125
   cherry_log:
     initial-price: 1
+    child:
+      cherry_planks:
+        multiplier: 0.25
+      cherry_stairs:
+        multiplier: 0.375
+      cherry_slab:
+        multiplier: 0.125
 
   rotten_flesh:
     initial-price: 0.5
   bone:
     initial-price: 5
+    child:
+      bone_meal:
+        multiplier: 0.33
+      bone_block:
+        multiplier: 3
   arrow:
     initial-price: 6
   string:
@@ -217,6 +322,9 @@ items:
   slime_ball:
     support: 50
     initial-price: 150
+    child:
+      slime_block:
+        multiplier: 9
   gunpowder:
     initial-price: 50
   phantom_membrane:
@@ -226,15 +334,24 @@ items:
     initial-price: 800
     resistance: 1000
     support: 150
+    child:
+      diamond_block:
+        multiplier: 9
   emerald:
     initial-price: 50
     resistance: 100
     support: 10
+    child:
+      emerald_block:
+        multiplier: 9
   nether_star:
     initial-price: 15000
     support: 5000
     elasticity: 4
     noise-intensity: 0.5
+    tax:
+      buy: 0.1
+      sell: 0.15
   name_tag:
     initial-price: 5000
     elasticity: 4
@@ -251,17 +368,29 @@ items:
   coal:
     initial-price: 4
     child:
-      charcoal:
-        multiplier: 1
+      coal_block:
+        multiplier: 9
   dried_kelp_block:
     initial-price: 75
+    child:
+      dried_kelp:
+        multiplier: 0.111
 
   iron_ingot:
     initial-price: 10
+    child:
+      iron_block:
+        multiplier: 9
   copper_ingot:
     initial-price: 5
+    child:
+      copper_block:
+        multiplier: 9
   gold_ingot:
     initial-price: 50
+    child:
+      gold_block:
+        multiplier: 9
   netherite_ingot:
     support: 5000
     initial-price: 10000
@@ -269,8 +398,28 @@ items:
     noise-intensity: 0.5
   brick:
     initial-price: 50
+    child:
+      bricks:
+        multiplier: 4
+      brick_stairs:
+        multiplier: 6
+      brick_slab:
+        multiplier: 2
+      brick_wall:
+        multiplier: 4
   nether_brick:
     initial-price: 5
+    child:
+      nether_bricks:
+        multiplier: 4
+      nether_brick_stairs:
+        multiplier: 6
+      nether_brick_slab:
+        multiplier: 2
+      nether_brick_wall:
+        multiplier: 4
+      nether_brick_fence:
+        multiplier: 3
 
   apple:
     initial-price: 15
@@ -280,10 +429,16 @@ items:
     initial-price: 0.8
   wheat:
     initial-price: 0.8
+    child:
+      hay_block:
+        multiplier: 9
   pumpkin:
     initial-price: 8
   melon:
     initial-price: 7
+    child:
+      melon_slice:
+        multiplier: 0.111
   honey_bottle:
     initial-price: 40
 

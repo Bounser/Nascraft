@@ -67,7 +67,7 @@ public class SlideComponent extends RectangularComponent {
         List<Float> values = graphData.getValues();
 
         float value = values.get(findIndex(points, point));
-        float multiplier = InteractionsManager.getInstance().getMultiplier(player);;
+        float multiplier = InteractionsManager.getInstance().getItemFromPlayer(player).getMultiplier();;
 
         timetext.setX(point);
 
@@ -88,7 +88,7 @@ public class SlideComponent extends RectangularComponent {
             perslide.setText("~  0%");
         }
 
-        timetext.setText(TimeSpan.getTime(graphData.getTimeSpan(), (x + width - point)/(float) width));
+        timetext.setText(TimeSpan.getTime(TimeSpan.HOUR, (x + width - point)/(float) width));
 
         components.forEach(comp -> comp.apply(graphic, player, cursor));
     }

@@ -13,24 +13,32 @@ import java.util.HashMap;
 
 public class Images {
 
-    private final HashMap<Material, BufferedImage> images = new HashMap<>();
+    private static final HashMap<Material, BufferedImage> images = new HashMap<>();
 
     private static Images instance;
 
     public static Images getInstance() { return instance == null ? instance = new Images() : instance; }
 
 
-    public BufferedImage getImage(Item item, int width, int height, boolean dithering) {
+    public static BufferedImage getProcessedImage(Item item, int width, int height, boolean dithering) {
+
+        BufferedImage icon = item.getIcon();
+
+        if (icon == null) {
+            Nascraft.getInstance().getLogger().warning("Default icon of item " + item.getIdentifier() + " not found.");
+            return ResourceManager.getInstance().processImage(getImage(Material.STRUCTURE_VOID), width, height, dithering);
+        }
+
         return ResourceManager.getInstance().processImage(item.getIcon(), width, height, dithering);
     }
 
-    public BufferedImage getImage(Material material, int width, int height, boolean dithering) {
+    public static BufferedImage getImage(Material material) {
 
-        if(images.containsKey(material)) { return ResourceManager.getInstance().processImage(images.get(material), width, height, dithering); }
+        if(images.containsKey(material)) { return images.get(material); }
 
         BufferedImage image = null;
         try {
-            InputStream input = Nascraft.getInstance().getResource("1-20-1-materials/" + material.toString().toLowerCase() + ".png");
+            InputStream input = Nascraft.getInstance().getResource("1-21-materials/" + material.toString().toLowerCase() + ".png");
             assert input != null;
             image = ImageIO.read(input);
         } catch (IOException e) {
@@ -39,7 +47,7 @@ public class Images {
         }
         images.put(material, image);
 
-        return ResourceManager.getInstance().processImage(image, width, height, dithering);
+        return image;
     }
 
     public static boolean areEqual(BufferedImage img1, BufferedImage img2) {

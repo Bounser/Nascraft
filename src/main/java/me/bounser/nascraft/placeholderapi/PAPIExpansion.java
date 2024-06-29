@@ -3,7 +3,6 @@ package me.bounser.nascraft.placeholderapi;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.discord.linking.LinkManager;
-import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.formatter.RoundUtils;
@@ -73,25 +72,13 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
             case "change":
 
-                if (dividedParams.length != 3) return "Invalid format";
+                if (dividedParams.length != 2) return "Invalid format";
 
                 item = getItemFromString(dividedParams[2], player.getPlayer());
 
-                if (item == null) return "0";
+                if (item == null) return "Invalid item";
 
-                TimeSpan timeSpan;
-
-                switch (dividedParams[1].toLowerCase()) {
-
-                    case "1h": timeSpan = TimeSpan.HOUR; break;
-                    case "1d": timeSpan = TimeSpan.DAY; break;
-                    case "1m": timeSpan = TimeSpan.MONTH; break;
-                    case "1y": timeSpan = TimeSpan.YEAR; break;
-                    default: return "Invalid format.";
-
-                }
-
-                return String.valueOf(RoundUtils.roundToOne(-100 + item.getPrice().getValue() *100/item.getPrices(timeSpan).get(0)));
+                return String.valueOf(RoundUtils.roundToOne(-100 + item.getPrice().getValue() *100/item.getPrice().getValueAnHourAgo()));
         }
 
         if (dividedParams.length < 2) { return "Invalid format."; }
@@ -132,5 +119,4 @@ public class PAPIExpansion extends PlaceholderExpansion {
         }
         return item;
     }
-
 }

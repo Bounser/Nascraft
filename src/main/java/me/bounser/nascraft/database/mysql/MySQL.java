@@ -1,13 +1,13 @@
 package me.bounser.nascraft.database.mysql;
 
 import com.zaxxer.hikari.HikariDataSource;
+import me.bounser.nascraft.chart.cpi.CPIInstant;
 import me.bounser.nascraft.database.Database;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,6 +40,14 @@ public class MySQL implements Database {
         hikari.addDataSourceProperty("password", PASSWORD);
     }
 
+    public HikariDataSource getHikari() { return hikari; }
+
+    public void disconnect() {
+        if (!isConnected() || hikari.isClosed()) return;
+
+        hikari.close();
+    }
+
     public boolean isConnected() { return hikari != null; }
 
     @Override
@@ -53,111 +61,145 @@ public class MySQL implements Database {
     }
 
     @Override
-    public void saveLink(Connection connection, String userId, UUID uuid, String nickname) {
+    public void saveLink(String userId, UUID uuid, String nickname) {
 
     }
 
     @Override
-    public void removeLink(Connection connection, String userId) {
+    public void removeLink(String userId) {
 
     }
 
     @Override
-    public UUID getUUID(Connection connection, String userId) {
+    public UUID getUUID(String userId) {
         return null;
     }
 
     @Override
-    public String getNickname(Connection connection, String userId) {
+    public String getNickname(String userId) {
         return null;
     }
 
     @Override
-    public String getUserId(Connection connection, UUID uuid) {
+    public String getUserId(UUID uuid) {
         return null;
     }
 
     @Override
-    public void saveDayPrice(Connection connection, Item item, Instant instant) {
+    public void saveDayPrice(Item item, Instant instant) {
 
     }
 
     @Override
-    public void saveMonthPrice(Connection connection, Item item, Instant instant) {
+    public void saveMonthPrice(Item item, Instant instant) {
 
     }
 
     @Override
-    public void saveHistoryPrices(Connection connection, Item item, Instant instant) {
+    public void saveHistoryPrices(Item item, Instant instant) {
 
     }
 
     @Override
-    public List<Instant> getDayPrices(Connection connection, Item item) {
+    public List<Instant> getDayPrices(Item item) {
         return null;
     }
 
     @Override
-    public List<Instant> getMonthPrices(Connection connection, Item item) {
+    public List<Instant> getMonthPrices(Item item) {
         return null;
     }
 
     @Override
-    public List<Instant> getYearPrices(Connection connection, Item item) {
+    public List<Instant> getYearPrices(Item item) {
         return null;
     }
 
     @Override
-    public List<Instant> getAllPrices(Connection connection, Item item) {
+    public List<Instant> getAllPrices(Item item) {
         return null;
     }
 
     @Override
-    public void saveItem(Connection connection, Item item) {
+    public void saveItem(Item item) {
 
     }
 
     @Override
-    public void retrieveItem(Connection connection, Item item) {
+    public void retrieveItem(Item item) {
 
     }
 
     @Override
-    public void savePrices(Connection connection, Item item) {
+    public void retrieveItems() {
 
     }
 
-    @Override
-    public void retrievePrices(Connection connection, Item item) {
-
-    }
 
     @Override
-    public float retrieveLastPrice(Connection connection, Item item) {
+    public float retrieveLastPrice(Item item) {
         return 0;
     }
 
     @Override
-    public void saveTrade(Connection connection, UUID uuid, Item item, int amount, float value, boolean buy, boolean discord) {
+    public void saveTrade(Trade trade) {
 
     }
 
     @Override
-    public List<Trade> retrieveTrades(Connection connection, UUID uuid, int offset) {
+    public List<Trade> retrieveTrades(UUID uuid, int offset) {
         return null;
     }
 
     @Override
-    public void purgeHistory(Connection connection) {
+    public List<Trade> retrieveTrades(int offset) {
+        return null;
+    }
+
+    @Override
+    public void purgeHistory() {
 
     }
 
-    public HikariDataSource getHikari() { return hikari; }
+    @Override
+    public void updateItem(UUID uuid, Item item, int quantity) {
 
-    public void disconnect() {
-        if (!isConnected() || hikari.isClosed()) return;
-
-        hikari.close();
     }
+
+    @Override
+    public void removeItem(UUID uuid, Item item) {
+
+    }
+
+    @Override
+    public void clearInventory(UUID uuid) {
+
+    }
+
+    @Override
+    public void updateCapacity(UUID uuid, int capacity) {
+
+    }
+
+    @Override
+    public LinkedHashMap<Item, Integer> retrieveInventory(UUID uuid) {
+        return null;
+    }
+
+    @Override
+    public int retrieveCapacity(UUID uuid) {
+        return 0;
+    }
+
+    @Override
+    public void saveCPIValue(float indexValue) {
+
+    }
+
+    @Override
+    public List<CPIInstant> getCPIHistory() {
+        return null;
+    }
+
 
 }

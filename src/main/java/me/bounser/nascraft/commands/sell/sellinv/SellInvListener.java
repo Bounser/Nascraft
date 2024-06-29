@@ -5,9 +5,8 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.managers.MoneyManager;
-import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -46,7 +45,7 @@ public class SellInvListener implements Listener {
                 return;
             }
 
-            if (MarketManager.getInstance().isValidItem(itemClicked)) {
+            if (MarketManager.getInstance().isAValidItem(itemClicked)) {
 
                 List<ItemStack> items = playerItems.get(player);
 
@@ -57,7 +56,7 @@ public class SellInvListener implements Listener {
                     for (int i = 0; i < event.getClickedInventory().getSize(); i++) {
                         ItemStack itemStack = event.getClickedInventory().getItem(i);
 
-                        if (itemStack != null && itemStack.equals(itemClicked)) {
+                        if (itemStack != null && itemStack.isSimilar(itemClicked)) {
 
                             items.add(itemStack);
                             event.getClickedInventory().setItem(i, new ItemStack(Material.AIR));
@@ -99,16 +98,14 @@ public class SellInvListener implements Listener {
 
                         Item item = MarketManager.getInstance().getItem(itemStack);
 
-                        realValue += item.sellItem(itemStack.getAmount(), player.getUniqueId(), false, item.getItemStack().getType());
+                        realValue += item.sell(itemStack.getAmount(), player.getUniqueId(), false);
                     }
 
                     playerItems.remove(player);
                     renderInv(event.getClickedInventory(), player);
 
                     Lang.get().message(player, Message.SELL_ACTION_MESSAGE, Formatter.format(realValue, Style.ROUND_BASIC), "", "");
-
-                    MoneyManager.getInstance().deposit(player, RoundUtils.round(realValue));
-
+                    
                     break;
 
                 default:
@@ -243,9 +240,8 @@ public class SellInvListener implements Listener {
         float totalValue = 0;
 
         for (Item item : content.keySet())
-            totalValue += item.getPrice().getProjectedCost(content.get(item), item.getPrice().getSellTaxMultiplier());
+            totalValue += item.sellPrice(content.get(item));
 
         return  RoundUtils.round(totalValue);
     }
-
 }

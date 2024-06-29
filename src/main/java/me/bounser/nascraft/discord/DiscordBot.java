@@ -4,8 +4,6 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.database.DatabaseManager;
-import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.discord.images.ItemBasicImage;
 import me.bounser.nascraft.discord.images.MainImage;
@@ -30,8 +28,6 @@ import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.FileUpload;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.time.Duration;
@@ -140,13 +136,15 @@ public class DiscordBot {
 
         eb.setTitle(Lang.get().message(Message.DISCORD_MAIN_TITLE));
 
-        eb.setDescription("Avg change (1h): " + RoundUtils.roundToTwo(MarketManager.getInstance().getChange1h()) + "%");
+        float avgChange = MarketManager.getInstance().getChange1h();;
+
+        eb.setDescription("Avg change (1h): " + RoundUtils.roundToTwo(avgChange) + "%");
 
         eb.setImage("attachment://image.png");
 
         eb.setFooter(Lang.get().message(Message.DISCORD_MAIN_FOOTER));
 
-        eb.setColor(getColorByValue(MarketManager.getInstance().getChange1h()));
+        eb.setColor(getColorByValue(avgChange));
 
         return eb.build();
     }

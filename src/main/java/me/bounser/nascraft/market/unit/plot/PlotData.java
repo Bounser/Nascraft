@@ -1,7 +1,8 @@
-package me.bounser.nascraft.market.unit;
+package me.bounser.nascraft.market.unit.plot;
 
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.resources.TimeSpan;
+import me.bounser.nascraft.market.unit.Item;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -19,7 +20,7 @@ public class PlotData {
 
     public int[] getYPositions(int size, int offset, boolean polygon, boolean precise) {
 
-        List<Float> values = item.getPrices(TimeSpan.HOUR);
+        List<Float> values = item.getPrice().getValuesPastHour();
 
         if (!precise) {
             values.replaceAll(RoundUtils::round);
@@ -52,7 +53,7 @@ public class PlotData {
 
     public int[] getXPositions(int size, int offset, boolean polygon) {
 
-        List<Float> values = item.getPrices(TimeSpan.HOUR);
+        List<Float> values = item.getPrice().getValuesPastHour();
 
         float z = (float) size /(values.size()-1);
 
@@ -75,18 +76,18 @@ public class PlotData {
         return x;
     }
 
-    public int getNPoints(boolean polygon) { return polygon ? item.getPrices(TimeSpan.HOUR).size() + 2 : item.getPrices(TimeSpan.HOUR).size(); }
+    public int getNPoints(boolean polygon) { return polygon ? item.getPrice().getValuesPastHour().size() + 2 : item.getPrice().getValuesPastHour().size(); }
 
     public boolean isGoingUp() {
 
-        List<Float> values = item.getPrices(TimeSpan.HOUR);
+        List<Float> values = item.getPrice().getValuesPastHour();
 
         return values.get(0) < values.get(values.size()-1);
     }
 
     public String getChange() {
 
-        List<Float> values = item.getPrices(TimeSpan.HOUR);
+        List<Float> values = item.getPrice().getValuesPastHour();
         NumberFormat formatter = new DecimalFormat("#0.0");
 
         return formatter.format((-100 + values.get(values.size()-1)*100/values.get(0))) + "%";
@@ -96,23 +97,23 @@ public class PlotData {
 
         float z = (float) size /(points-1);
 
-        float min = Collections.min(item.getPrices(TimeSpan.HOUR));
+        float min = Collections.min(item.getPrice().getValuesPastHour());
 
-        return new float[]{min, z*item.getPrices(TimeSpan.HOUR).lastIndexOf(min)};
+        return new float[]{min, z*item.getPrice().getValuesPastHour().lastIndexOf(min)};
     }
 
     public float[] getHighestValue(int size, int points) {
 
         float z = (float) size /(points-1);
 
-        float max = Collections.max(item.getPrices(TimeSpan.HOUR));
+        float max = Collections.max(item.getPrice().getValuesPastHour());
 
-        return new float[]{max, z*item.getPrices(TimeSpan.HOUR).lastIndexOf(max)};
+        return new float[]{max, z*item.getPrice().getValuesPastHour().lastIndexOf(max)};
     }
 
     public int[] getExtremePositions(int offset, int size) {
 
-        if (Collections.min(item.getPrices(TimeSpan.HOUR)) == Collections.max(item.getPrices(TimeSpan.HOUR)))
+        if (Collections.min(item.getPrice().getValuesPastHour()) == Collections.max(item.getPrice().getValuesPastHour()))
             return new int[]{0, 0};
 
         int graphArea = (int) Math.round(size*0.9);

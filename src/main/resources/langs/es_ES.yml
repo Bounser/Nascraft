@@ -63,6 +63,7 @@ alerts_list_segment: "\n&5> [MATERIAL] a precio [WORTH]"
 
 sellwand_estimated_value: "<gradient:#FF00CD:#DA58FF>Valor estimado:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
 sellwand_sold: "<gradient:#FF00CD:#DA58FF>Contenido vendido por:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
+sellwand_sold_with_multiplier: "<gradient:#FF00CD:#DA58FF>Contenido vendido por:</gradient> <light_purple>[INITIAL_WORTH] x [MULTIPLIER] = <bold>[WORTH]</bold></light_purple>"
 sellwand_ran_out: "<gradient:#FB6363:#C4B3FD>A esta varita no le quedan usos.</gradient>"
 sellwand_nothing_to_sell: "<gradient:#FB6363:#C4B3FD>¡No hay nada que vender!</gradient>"
 sellwand_cooldown: "<gradient:#FB6363:#C4B3FD>Espera [TIME] para volver a usar eso!</gradient>"
@@ -77,6 +78,7 @@ link_wrong_use: "<gradient:#FB6363:#C4B3FD>¡Uso incorrecto del comando!</gradie
 link_wrong_format:  "<gradient:#FB6363:#C4B3FD>¡Ese código no es correcto!</gradient>"
 link_no_process_found: "<gradient:#FB6363:#C4B3FD>No se ha encontrado ningún proceso de enlazado vinculado a ese código.</gradient>"
 link_success: "<gradient:#FF00CD:#DA58FF>Enlazado satisfactoriamente con:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+link_unlinked: "<gradient:#FF00CD:#DA58FF>Te has desvinculado del usuario:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
 link_direct_message: ":link: Tu cuenta ha sido enlazada con el usuario de minecraft con nombre: ``[USER]``"
 
 # COMANDO DISCORD
@@ -97,6 +99,17 @@ disinv_amount: "&7Cantidad: &6[AMOUNT]"
 # DISCORD - Sin soporte para MiniMessage.
 
 discord_status: "los precios moverse."
+
+# Logs
+
+discord_log_trade_linked: "> [[NICK]](https:[UUID]) o [[USER]](https:id-[ID]) ha [ACTION] ``[QUANTITY]`` de ``[ALIAS]`` por **[WORTH]**"
+discord_log_trade_not_linked: "> [[NICK]](https:[UUID]) ha [ACTION] ``[QUANTITY]`` de ``[ALIAS]`` por **[WORTH]**"
+discord_log_buy: ":inbox_tray: comprado"
+discord_log_sell: ":outbox_tray: vendido"
+discord_log_linked: "> :link: El usuario [[NICK]](https:[UUID]) se ha vinculado con la cuenta de discord [[DISCORD-NAME]](https:id-[ID])"
+discord_log_unlinked: "> :chains: El usuario [[NICK]](https:[UUID]) se ha desvinculado de la cuenta de discord [[DISCORD-NAME]](https:id-[ID])"
+
+# Main menu
 
 discord_main_title: ":green_circle:  Mercado en tiempo real"
 discord_main_footer: "Selecciona un item para operar (Comprar/Vender) con el. \nLos precios en las operaciones pueden variar."

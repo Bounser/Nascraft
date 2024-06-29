@@ -1,6 +1,5 @@
 package me.bounser.nascraft.commands.admin;
 
-import me.bounser.nascraft.market.MarketManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -14,7 +13,7 @@ import java.util.List;
 
 public class NascraftTabCompleter implements TabCompleter {
 
-    private final List<String> arguments = Arrays.asList("reload", "editmarket", "stop", "resume", "locate", "info", "save");
+    private final List<String> arguments = Arrays.asList("reload", "editmarket", "stop", "resume", "locate", "list", "cpi", "save", "lasttrades");
 
     @Nullable
     @Override

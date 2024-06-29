@@ -1,12 +1,12 @@
 package me.bounser.nascraft.database.sqlite;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.chart.cpi.CPIInstant;
 import me.bounser.nascraft.database.Database;
 import me.bounser.nascraft.database.commands.*;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.market.unit.Tradable;
 import me.bounser.nascraft.market.unit.stats.Instant;
 
 import java.io.File;
@@ -68,6 +68,8 @@ public class SQLite implements Database {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+        createTables();
     }
 
     @Override
@@ -94,13 +96,6 @@ public class SQLite implements Database {
                         "highest DOUBLE, " +
                         "stock DOUBLE DEFAULT 0, " +
                         "taxes DOUBLE");
-
-        createTable(connection, "prices",
-                "identifier TEXT PRIMARY KEY," +
-                        "date TEXT," +
-                        "dayprices TEXT," + // 48
-                        "monthprices TEXT," + // 30
-                        "yearprices TEXT");
 
         createTable(connection, "prices_day",
                 "id INTEGER PRIMARY KEY, " +
@@ -151,6 +146,13 @@ public class SQLite implements Database {
                         "buy INT NOT NULL, " +
                         "discord INT NOT NULL");
 
+        createTable(connection, "cpi",
+                        "day INT NOT NULL," +
+                        "date TEXT NOT NULL," +
+                        "value DOUBLE NOT NULL");
+
+        /*
+
         createTable(connection, "broker_shares",
                 "id INTEGER PRIMARY KEY, " +
                         "uuid VARCHAR(36) NOT NULL," +
@@ -192,11 +194,14 @@ public class SQLite implements Database {
                         "money DOUBLE NOT NULL," +
                         "identifier TEXT NOT NULL," +
                         "quantity INT NOT NULL");
+
+         */
+
     }
 
     @Override
     public void saveEverything() {
-        for (Item item : MarketManager.getInstance().getAllItems()) {
+        for (Item item : MarketManager.getInstance().getAllParentItems()) {
             saveItem(item);
         }
     }
@@ -272,18 +277,28 @@ public class SQLite implements Database {
     }
 
     @Override
+    public void retrieveItems() {
+        ItemProperties.retrieveItems(connection);
+    }
+
+    @Override
     public float retrieveLastPrice(Item item) {
         return ItemProperties.retrieveLastPrice(connection, item);
     }
 
     @Override
-    public void saveTrade(UUID uuid, Tradable tradable, int amount, float value, boolean buy, boolean discord) {
-        TradesLog.saveTrade(connection, uuid, tradable, amount, value, buy, discord);
+    public void saveTrade(Trade trade) {
+        TradesLog.saveTrade(connection, trade);
     }
 
     @Override
     public List<Trade> retrieveTrades(UUID uuid, int offset) {
         return TradesLog.retrieveTrades(connection, uuid, offset);
+    }
+
+    @Override
+    public List<Trade> retrieveTrades(int offset) {
+        return TradesLog.retrieveLastTrades(connection, offset);
     }
 
     @Override
@@ -320,5 +335,16 @@ public class SQLite implements Database {
     public int retrieveCapacity(UUID uuid) {
         return VirtualInventory.retrieveCapacity(connection, uuid);
     }
+
+    @Override
+    public void saveCPIValue(float indexValue) {
+        Statistics.saveCPI(connection, indexValue);
+    }
+
+    @Override
+    public List<CPIInstant> getCPIHistory() {
+        return Statistics.getAllCPI(connection);
+    }
+
 
 }

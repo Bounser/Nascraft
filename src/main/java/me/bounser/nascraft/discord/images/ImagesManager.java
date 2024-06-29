@@ -3,7 +3,6 @@ package me.bounser.nascraft.discord.images;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.inventory.ItemStack;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -47,7 +46,7 @@ public class ImagesManager {
 
             BufferedImage image = null;
             String imageName = items.getString("items." + identifier + ".item-stack.type").toLowerCase() + ".png";
-            String imagePath = "1-20-1-materials/" + imageName;
+            String imagePath = "1-21-materials/" + imageName;
 
             try (InputStream input = Nascraft.getInstance().getResource(imagePath)) {
                 if (input != null) {
@@ -67,7 +66,7 @@ public class ImagesManager {
 
         BufferedImage image = null;
         String imageName = identifier.replaceAll("\\d", "").toLowerCase() + ".png";
-        String imagePath = "1-20-1-materials/" + imageName;
+        String imagePath = "1-21-materials/" + imageName;
 
         try (InputStream input = Nascraft.getInstance().getResource(imagePath)) {
             if (input != null) {

@@ -1,4 +1,4 @@
-package me.bounser.nascraft.market.unit;
+package me.bounser.nascraft.market.unit.stats;
 
 import java.time.LocalDateTime;
 

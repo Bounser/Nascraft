@@ -10,11 +10,8 @@ import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.formatter.RoundUtils;
-import me.bounser.nascraft.market.unit.Tradable;
 import me.leoko.advancedgui.manager.LayoutManager;
-import me.leoko.advancedgui.manager.ResourceManager;
 import me.leoko.advancedgui.utils.LayoutExtension;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.events.GuiInteractionBeginEvent;
@@ -24,7 +21,6 @@ import me.leoko.advancedgui.utils.events.LayoutLoadEvent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.inventory.ItemStack;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -131,13 +127,6 @@ public class LayoutModifier implements LayoutExtension {
 
         });
 
-        // Time Span selectors
-        for (TimeSpan timeSpan : Arrays.asList(TimeSpan.HOUR, TimeSpan.DAY)) {
-            componentTree.locate("timesel" + timeSpan, RectComponent.class).setClickAction((interaction, player, primaryTrigger) -> {
-                interaction.getComponentTree().locate("Graph", GraphComponent.class).setTimeFrame(timeSpan, player);
-            });
-        }
-
         // Back button
         componentTree.locate("back").setClickAction((interaction, player, primaryTrigger) -> {
             interaction.getComponentTree().locate("MainView", ViewComponent.class).setView("I4ztUi1d");
@@ -148,15 +137,15 @@ public class LayoutModifier implements LayoutExtension {
         for (int j : Arrays.asList(1,16,64)) {
 
             componentTree.locate("buy" + j).setClickAction((interaction, player, primaryTrigger) -> {
-                Tradable tradable = InteractionsManager.getInstance().getTradableFromPlayer(player);
+                Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
 
-                tradable.sell(j, player.getUniqueId(), true);
+                item.buy(j, player.getUniqueId(), true);
                 updateButtonPrice(player, interaction);
             });
             componentTree.locate("sell" + j).setClickAction((interaction, player, primaryTrigger) -> {
-                Tradable tradable = InteractionsManager.getInstance().getTradableFromPlayer(player);
+                Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
 
-                tradable.sell(j, player.getUniqueId(), true);
+                item.sell(j, player.getUniqueId(), true);
                 updateButtonPrice(player, interaction);
             });
         }
@@ -164,7 +153,8 @@ public class LayoutModifier implements LayoutExtension {
         // Childs
         componentTree.locate("ChildHitbox").setClickAction((interaction, player, primaryTrigger) -> {
 
-            InteractionsManager.getInstance().rotateChilds(player);
+            InteractionsManager.getInstance().rotateOptions(player);
+
             updateChilds(player, interaction.getComponentTree());
             updateButtonPrice(player, interaction);
 
@@ -284,7 +274,7 @@ public class LayoutModifier implements LayoutExtension {
                 componentTree.locate("t" + position + j + "2", TextComponent.class).setText(Formatter.format(item.getPrice().getValue(), Style.REDUCED_LENGTH));
 
                 ImageComponent ic = componentTree.locate("asdi" + position + "" + j, ImageComponent.class);
-                ic.setImage(Images.getInstance().getImage(item, 32, 32, false));
+                ic.setImage(Images.getProcessedImage(item, 32, 32, false));
 
                 ic.setClickAction((interaction, player, primaryTrigger) -> {
 
@@ -318,7 +308,7 @@ public class LayoutModifier implements LayoutExtension {
     public void updateTrending(GroupComponent icTree) {
         Item trendingItem = null;
 
-        for (Item item : MarketManager.getInstance().getAllItems()) {
+        for (Item item : MarketManager.getInstance().getAllParentItems()) {
             if ((trendingItem == null || trendingItem.getOperations() < item.getOperations()) && item.getOperations() > 10) trendingItem = item;
         }
 
@@ -327,14 +317,15 @@ public class LayoutModifier implements LayoutExtension {
             ImageComponent ic = icTree.locate("trend", ImageComponent.class);
 
             BufferedImage bi = (BufferedImage) ic.getImage();
-            if (!Images.areEqual(Images.getInstance().getImage(trendingItem, 33, 33, false), bi)) {
-                ic.setImage(Images.getInstance().getImage(trendingItem, 33, 33, false));
+            if (!Images.areEqual(Images.getProcessedImage(trendingItem, 33, 33, false), bi)) {
+                ic.setImage(Images.getProcessedImage(trendingItem, 33, 33, false));
             }
 
             Item finalTrendingItem = trendingItem;
             ic.setClickAction((interaction, player, primaryTrigger) -> {
                 changeMaterial(player, finalTrendingItem, interaction);
                 updateButtonPrice(player, interaction);
+                updateChilds(player, interaction.getComponentTree());
             });
         } else {
             icTree.locate("trend1", GroupComponent.class).setHidden(true);
@@ -343,7 +334,7 @@ public class LayoutModifier implements LayoutExtension {
 
     public void updateTopMovers(GroupComponent icTree) {
 
-        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllItems());
+        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
 
         // We get up to three items. In each loop we get the item with the biggest change, and we remove it from the initial list.
         for (int i = 1; i <= 3 ; i++) {
@@ -351,10 +342,10 @@ public class LayoutModifier implements LayoutExtension {
             Item imax = items.get(0);
             for (Item item : items) {
 
-                float variation = RoundUtils.roundToOne(-100 + 100*(item.getPrice().getValue()/item.getPrices(TimeSpan.HOUR).get(0)));
+                float variation = RoundUtils.roundToOne(-100 + 100*(item.getPrice().getValue()/item.getPrice().getValueAnHourAgo()));
 
                 if (variation != 0) {
-                    if (abs(variation) > abs(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.HOUR).get(0)))){
+                    if (abs(variation) > abs(-100 + 100*(imax.getPrice().getValue()/imax.getPrice().getValueAnHourAgo()))){
                         imax = item;
                     }
                 }
@@ -364,17 +355,18 @@ public class LayoutModifier implements LayoutExtension {
             ImageComponent ic = icTree.locate("top" + i, ImageComponent.class);
 
             BufferedImage bi = (BufferedImage) ic.getImage();
-            if (!Images.areEqual(Images.getInstance().getImage(imax, 33, 33, false), bi)) {
-                ic.setImage(Images.getInstance().getImage(imax, 33, 33, false));
+            if (!Images.areEqual(Images.getProcessedImage(imax, 33, 33, false), bi)) {
+                ic.setImage(Images.getProcessedImage(imax, 33, 33, false));
             }
 
             Item finalImax = imax;
             icTree.locate("top" + i, ImageComponent.class).setClickAction((interaction, player, primaryTrigger) -> {
                 changeMaterial(player, finalImax, interaction);
                 updateButtonPrice(player, interaction);
+                updateChilds(player, interaction.getComponentTree());
             });
 
-            float fvar = RoundUtils.roundToOne(-100 + 100*(imax.getPrice().getValue()/imax.getPrices(TimeSpan.HOUR).get(0)));
+            float fvar = RoundUtils.roundToOne(-100 + 100*(imax.getPrice().getValue()/imax.getPrice().getValueAnHourAgo()));
 
             if (fvar != 0){
                 if (fvar > 0) {
@@ -395,51 +387,49 @@ public class LayoutModifier implements LayoutExtension {
     }
 
     public void updateButtonPrice(Player player, Interaction interaction) {
-
-        float multiplier = InteractionsManager.getInstance().getMultiplier(player);
-
         GroupComponent ct = interaction.getComponentTree();
 
-        for (int i : Arrays.asList(1, 16, 64)) {
-            ct.locate("buyprice" + i, TextComponent.class).setText(RoundUtils.round(InteractionsManager.getInstance().getItemFromPlayer(player).getPrice().getBuyPrice()*i*multiplier) + Lang.get().message(Message.CURRENCY));
-            ct.locate("sellprice" + i, TextComponent.class).setText(RoundUtils.round(InteractionsManager.getInstance().getItemFromPlayer(player).getPrice().getSellPrice()*i*multiplier) + Lang.get().message(Message.CURRENCY));
+        Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
+
+        if (item != null) {
+
+            for (int i : Arrays.asList(1, 16, 64)) {
+                ct.locate("buyprice" + i, TextComponent.class).setText(Formatter.format(item.getPrice().getProjectedCost(-i*item.getMultiplier(), item.getPrice().getBuyTaxMultiplier()), Style.ROUND_BASIC));
+                ct.locate("sellprice" + i, TextComponent.class).setText(Formatter.format(item.getPrice().getProjectedCost(i*item.getMultiplier(), item.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC));
+            }
         }
     }
 
     public void updateChilds(Player player, GroupComponent components) {
 
-        List<ItemStack> childs = InteractionsManager.getInstance().getChildsFromPlayer(player);
+        List<Item> items = InteractionsManager.getInstance().getOptions(player);
 
         GroupComponent childsGroup = components.locate("ChildMain", GroupComponent.class);
 
-        if (childs == null || childs.size() == 1) {
+        if (items == null || items.size() == 1) {
             childsGroup.locate("childs").setHidden(true);
+            childsGroup.locate("Minichild").setHidden(true);
             return;
         }
 
         childsGroup.locate("childs").setHidden(false);
+        childsGroup.locate("Minichild").setHidden(false);
 
         for (int i = 1; i <= 8 ; i++) {
             ImageComponent imageComponent = childsGroup.locate("child" + i, ImageComponent.class);
 
-            if (childs.size() >= i) {
-                imageComponent.setImage(Images.getInstance().getImage(InteractionsManager.getInstance().getChildFromPositionAndPlayer(i-1, player).getType(), 32, 32, true));
+            if (items.size() >= i) {
+                imageComponent.setImage(Images.getProcessedImage(items.get(i-1), 32, 32, true));
                 imageComponent.setHidden(false);
             } else {
                 imageComponent.setHidden(true);
             }
         }
 
-        childsGroup.locate("childback", RectComponent.class).setWidth(10 + 33*childs.size());
+        childsGroup.locate("childback", RectComponent.class).setWidth(10 + 33*items.size());
 
-        List<ItemStack> arrayChilds = new ArrayList<>(childs);
-        List<ItemStack> defaultChilds = new ArrayList<>(InteractionsManager.getInstance().getItemFromPlayer(player).getChilds().keySet());
-
-        if (defaultChilds.get(0).equals(arrayChilds.get(0))) {
-            childsGroup.locate("Minichild").setHidden(true);
-        } else {
-            childsGroup.locate("Minichild").setHidden(false);
-            childsGroup.locate("MiniChildImage", ImageComponent.class).setImage(Images.getInstance().getImage(InteractionsManager.getInstance().getChildFromPlayer(player).getType(), 26, 26, true));
+        if (InteractionsManager.getInstance().getParent(player) != null) {
+            childsGroup.locate("MiniChildImage", ImageComponent.class).setImage(Images.getProcessedImage(InteractionsManager.getInstance().getItemFromPlayer(player), 26, 26, true));
         }
     }
 
@@ -473,7 +463,6 @@ public class LayoutModifier implements LayoutExtension {
 
         interaction.getComponentTree().locate("MainView", ViewComponent.class).setView("TradingScreen");
         interaction.getComponentTree().locate("MainText", TextComponent.class).setText(item.getName());
-        interaction.getComponentTree().locate("MainImage", ImageComponent.class).setImage(ResourceManager.getInstance().processImage(item.getIcon(), 60, 60, true));
-        interaction.getComponentTree().locate("Graph", GraphComponent.class).setTimeFrame(TimeSpan.HOUR, player);
+        interaction.getComponentTree().locate("MainImage", ImageComponent.class).setImage(Images.getProcessedImage(item, 60, 60, true));
     }
 }

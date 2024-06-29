@@ -1,9 +1,8 @@
 package me.bounser.nascraft.advancedgui.components;
 
 import me.bounser.nascraft.advancedgui.InteractionsManager;
-import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.market.unit.GraphData;
-import me.bounser.nascraft.market.resources.TimeSpan;
+import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.unit.plot.GraphData;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
@@ -31,14 +30,12 @@ public class GraphComponent extends RectangularComponent {
         this.yc = y;
 
         background = backgroundView;
-
-        this.graphData = MarketManager.getInstance().getAllItems().get(0).getGraphData(TimeSpan.HOUR);
     }
 
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
 
-        if (graphData == null) setTimeFrame(TimeSpan.HOUR, player);
+        graphData = new GraphData(InteractionsManager.getInstance().getItemFromPlayer(player));
 
         Color bgcolor = setupBackGround();
 
@@ -54,19 +51,18 @@ public class GraphComponent extends RectangularComponent {
     }
 
     @Override
-    public String getState(Player player, GuiPoint cursor) { return graphData.getGraphState(); }
+    public String getState(Player player, GuiPoint cursor) {
+
+        Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
+
+        if (item == null) return "0";
+
+        return item.getValuesPastHour() == null ? "0" : item.getValuesPastHour().toString();
+    }
 
     @Override
     public Component clone(Interaction interaction) {
         return new GraphComponent(id, clickAction, hidden, interaction, x, y, width, height, background.clone(interaction));
-    }
-
-    public void setTimeFrame(TimeSpan timeFrame, Player player) {
-
-        graphData = InteractionsManager.getInstance().getItemFromPlayer(player).getGraphData(timeFrame);
-        interaction.getComponentTree().locate("timeview", ViewComponent.class).setView("times" + timeFrame);
-
-        graphData.changeState();
     }
 
     public Color setupBackGround() {

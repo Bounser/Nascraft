@@ -41,7 +41,7 @@ public class Price {
 
         this.item = item;
 
-        value = (float) (initialValue * Math.exp(-0.0005 * elasticity * stock));
+        updateValue();
         previousValue = value;
 
         this.initialValue = initialValue;
@@ -65,7 +65,10 @@ public class Price {
 
     public float getSellPrice() { return value * taxSell; }
 
-    public void setStock(float stock) { this.stock = stock; }
+    public void setStock(float stock) {
+        this.stock = stock;
+        updateValue();
+    }
 
     public float getStock() { return stock; }
 
@@ -99,6 +102,7 @@ public class Price {
             stock += (float) ((10 - 20 * Math.random()) * noiseIntensity);
 
         }
+
         updateValue();
 
         item.addVolume(Math.abs(Math.round(stock - prevStock)));
@@ -171,48 +175,19 @@ public class Price {
     }
 
     public void addValueToShortTermStorage() {
-
         hourValues.remove(0);
         hourValues.add(value);
-
     }
 
-    public float getValueAnHourAgo() {
-        return hourValues.get(0);
-    }
+    public float getValueAnHourAgo() { return hourValues.get(0); }
 
-    public List<Float> getValuesPastHour() {
-        return hourValues;
-    }
+    public List<Float> getValuesPastHour() { return hourValues; }
 
-    public float getProjectedCost(int stockChange, float tax, float multiplier) {
+    public float getProjectedCost(float stockChange, float tax) {
 
         int maxSize = (int) Math.round((item.getItemStack().getType().getMaxStackSize())/(elasticity*4) + 0.5);
-        int orderSize = Math.abs(stockChange / maxSize);
-        int excess = Math.abs(stockChange % maxSize);
-
-        float fictitiousValue = value;
-        float fictitiousStock = stock;
-        float cost = 0;
-
-        for (int i = 0 ; i < orderSize ; i++) {
-            cost += fictitiousValue * maxSize * multiplier;
-            fictitiousStock += maxSize * Integer.signum(stockChange) * multiplier;
-            fictitiousValue = (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
-        }
-
-        if (excess > 0) {
-            cost += fictitiousValue * excess * multiplier;
-        }
-
-        return cost*tax;
-    }
-
-    public float getProjectedCost(int stockChange, float tax) {
-
-        int maxSize = (int) Math.round((item.getItemStack().getType().getMaxStackSize())/(elasticity*4) + 0.5);
-        int orderSize = Math.abs(stockChange / maxSize);
-        int excess = Math.abs(stockChange % maxSize);
+        int orderSize = (int) Math.abs(stockChange / maxSize);
+        float excess = Math.abs(stockChange % maxSize);
 
         float fictitiousValue = value;
         float fictitiousStock = stock;
@@ -220,7 +195,7 @@ public class Price {
 
         for (int i = 0 ; i < orderSize ; i++) {
             cost += fictitiousValue * maxSize;
-            fictitiousStock += maxSize * Integer.signum(stockChange);
+            fictitiousStock += maxSize * Math.signum(stockChange);
             fictitiousValue = (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
         }
 

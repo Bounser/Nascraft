@@ -32,20 +32,28 @@ public class NascraftCommand implements CommandExecutor {
             return false;
         }
 
+        String syntaxError = ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: \nreload | editmarket | save | list | cpi | locate | stop | resume | lasttrades";
+
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: reload | editmarket | save | info | locate | stop | resume");
+            sender.sendMessage(syntaxError);
             return false;
         }
 
-        switch(args[0]){
+        switch(args[0].toLowerCase()){
             case "save":
                 DatabaseManager.get().getDatabase().saveEverything();
                 sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Data saved.");
                 break;
-            case "info":
-                for (Item item : MarketManager.getInstance().getAllItems())
-                    sender.sendMessage(ChatColor.GRAY + "Mat: " + item.getIdentifier() + " value: " + item.getPrice().getValue() + " stock: " + item.getPrice().getStock());
+
+            case "list":
+                for (Item item : MarketManager.getInstance().getAllParentItems())
+                    sender.sendMessage(ChatColor.GRAY + item.getIdentifier() + ": " + Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC) + " stock: " + item.getPrice().getStock());
                 break;
+
+            case "cpi":
+                sender.sendMessage(ChatColor.BLUE + "CPI: " + MarketManager.getInstance().getConsumerPriceIndex());
+                break;
+
             case "locate":
                 sender.sendMessage(String.valueOf(GuiWallManager.getInstance().getActiveInstances((Player) sender).get(0).getInteraction((Player) sender).getComponentTree().locate(args[1]).getState((Player) sender, GuiWallManager.getInstance().getActiveInstances((Player) sender).get(0).getCursor((Player) sender))));
                 break;
@@ -73,7 +81,10 @@ public class NascraftCommand implements CommandExecutor {
 
                 Config.getInstance().reload();
 
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Reloaded! " + MarketManager.getInstance().getAllItems().size() + " items and " + Config.getInstance().getCategories().size() + " categories.");
+                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Reloaded! " +
+                        MarketManager.getInstance().getAllItems().size() + " (" +
+                        MarketManager.getInstance().getAllParentItems().size() + " parents and " + (MarketManager.getInstance().getAllItems().size() - MarketManager.getInstance().getAllParentItems().size()) +
+                        "items and " + Config.getInstance().getCategories().size() + " categories.");
                 break;
 
             case "editmarket":
@@ -87,57 +98,64 @@ public class NascraftCommand implements CommandExecutor {
 
                 int offset;
 
-                if (args.length > 2) {
+                if (args.length >= 2) {
 
                     Player player = Bukkit.getPlayer(args[1]);
 
-                    if (player == null) {
+                    if (player != null) {
+
+                        if (args.length >= 3) {
+                            try {
+                                offset = Integer.parseInt(args[2]);
+                            } catch (NumberFormatException e) {
+                                offset = 1;
+                            }
+                        } else {
+                            offset = 1;
+                        }
+
+                        if (offset < 1) offset = 1;
+
+                        String report = ChatColor.GRAY + "\nLast trades of user " + player.getName() +": (Page " + offset + ")\n\n";
+
+                        for (Trade trade : DatabaseManager.get().getDatabase().retrieveTrades((offset-1)*10)) {
+                            report += ChatColor.GRAY + getFormatedDate(trade.getDate());
+                            report += trade.isBuy() ? ChatColor.GREEN + " BOUGHT: " : ChatColor.RED + " SOLD: ";
+                            report += trade.getAmount() + " x " + trade.getItem().getIdentifier();
+                            report += " (" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + ")\n";
+                        }
+
                         if (sender instanceof Player)
-                            sender.sendMessage(ChatColor.RED + "Player not found.");
+                            sender.sendMessage(report);
                         else
-                            Nascraft.getInstance().getLogger().info(ChatColor.RED + "Player not found.");
+                            Nascraft.getInstance().getLogger().info(report);
+
                         return false;
                     }
 
                     try {
-                        offset = Integer.parseInt(args[2]);
-                    } catch (NumberFormatException e) {
-                        offset = 0;
-                    }
-
-                    String report = ChatColor.GRAY + "\nLast trades of user " + player.getName() +": (Page " + offset + ")\n\n";
-
-                    for (Trade trade : DatabaseManager.get().getDatabase().retrieveTrades(offset*10-1)) {
-                        report += ChatColor.GRAY + getFormatedDate(trade.getDate());
-                        report += trade.isBuy() ? ChatColor.GREEN + " BOUGHT: " : ChatColor.RED + " SOLD: ";
-                        report += trade.getAmount() + " x " + trade.getTradable().getIdentifier();
-                        report += " (" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + ")\n";
-                    }
-
-                    if (sender instanceof Player)
-                        sender.sendMessage(report);
-                    else
-                        Nascraft.getInstance().getLogger().info(report);
-
-                    return false;
-
-                } else if (args.length > 1) {
-                    try {
                         offset = Integer.parseInt(args[1]);
                     } catch (NumberFormatException e) {
-                        offset = 0;
+                        offset = 1;
                     }
                 } else {
-                    offset = 0;
+                    offset = 1;
                 }
+
+                if (offset < 1) offset = 1;
 
                 String report = ChatColor.GRAY + "\nLast trades: (Page " + offset + ")\n\n";
 
-                for (Trade trade : DatabaseManager.get().getDatabase().retrieveTrades(offset*10-1)) {
+                for (Trade trade : DatabaseManager.get().getDatabase().retrieveTrades((offset-1)*10)) {
                     report += ChatColor.GRAY + getFormatedDate(trade.getDate());
-                    report += " " + trade.getUuid().toString();
-                    report += trade.isBuy() ? ChatColor.GREEN + "BOUGHT: " : ChatColor.RED + "SOLD: ";
-                    report += trade.getAmount() + " x " + trade.getTradable().getIdentifier();
+
+                    Player player = Bukkit.getPlayer(trade.getUuid());
+                    if (player != null)
+                        report += " " + player.getName();
+                    else
+                        report += " " + trade.getUuid().toString();
+                    report += trade.isBuy() ? ChatColor.GREEN + " BOUGHT: " : ChatColor.RED + " SOLD: ";
+                    report += trade.getAmount() + " x " + trade.getItem().getIdentifier();
                     report += " (" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + ")\n";
                 }
 
@@ -148,7 +166,7 @@ public class NascraftCommand implements CommandExecutor {
 
                 break;
 
-            default: sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Argument not recognized. Available arguments: reload | editmarket | save | info | locate | stop | resume");
+            default: sender.sendMessage(syntaxError);
         }
         return false;
     }

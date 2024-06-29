@@ -1,6 +1,7 @@
-package me.bounser.nascraft.market.unit;
+package me.bounser.nascraft.market.unit.stats;
 
-import me.bounser.nascraft.database.SQLite;
+import me.bounser.nascraft.database.sqlite.SQLite;
+import me.bounser.nascraft.market.unit.Item;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -37,7 +38,7 @@ public class ItemStats {
 
             while (dataDay.size() > 288)  dataDay.remove(0);
 
-            if (dataDay.size() < 12) return;
+            // if (dataDay.size() < 12) return;
 
             Instant bigDayInstant = new Instant(
                     LocalDateTime.now(),

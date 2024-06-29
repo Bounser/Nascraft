@@ -1,7 +1,7 @@
-package me.bounser.nascraft.market.unit;
+package me.bounser.nascraft.market.unit.plot;
 
 import me.bounser.nascraft.managers.GraphManager;
-import me.bounser.nascraft.market.resources.TimeSpan;
+import me.bounser.nascraft.market.unit.Item;
 
 import java.util.Collections;
 import java.util.List;
@@ -9,24 +9,24 @@ import java.util.List;
 public class GraphData {
 
     // Object intrinsically related to the GraphComponent.
-
     private int[] x;
     private int[] y;
     private int[] px;
     private int[] py;
 
     private List<Float> values;
-    private final TimeSpan timeSpan;
+    private Item item;
     private String state;
     private final int[] size = GraphManager.getInstance().getSize();
     private final int[] offset = GraphManager.getInstance().getOffset();
 
-    public GraphData(TimeSpan timeSpan, List<Float> values) {
-        this.timeSpan = timeSpan;
-        this.values = values;
+    public GraphData(Item item) {
+        this.item = item;
+
+        values = item.getValuesPastHour();
     }
 
-    public TimeSpan getTimeSpan() { return timeSpan; }
+    public Item getItem() { return item; }
 
     public void clear() { y = null; py = null;}
 

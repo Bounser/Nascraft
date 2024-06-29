@@ -5,7 +5,6 @@ import me.bounser.nascraft.commands.discord.DiscordInventoryInGame;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.market.unit.Tradable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -104,8 +103,8 @@ public class DiscordInventory {
             
             float value = 0;
             
-            for (Tradable tradable : inventory.keySet())
-                if (tradable != null) value += tradable.sell(inventory.get(tradable), uuid, false);
+            for (Item item : inventory.keySet())
+                if (item != null) value += item.sell(inventory.get(item), uuid, false);
 
             inventory.clear();
             updateInventoryInGame();
@@ -113,7 +112,5 @@ public class DiscordInventory {
 
             callback.accept(value);
         });
-       
     }
-
 }

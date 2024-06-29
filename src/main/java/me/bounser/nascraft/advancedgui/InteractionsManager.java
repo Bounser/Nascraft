@@ -1,10 +1,9 @@
 package me.bounser.nascraft.advancedgui;
 
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.market.unit.Tradable;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
@@ -15,11 +14,7 @@ public class InteractionsManager {
     // Offset of items of the selected category.
     public HashMap<Player, Integer> playerOffset = new HashMap<>();
 
-    private final HashMap<Player, Tradable> tradables = new HashMap<>();
-
-    public HashMap<Player, Item> items = new HashMap<>();
-
-    public HashMap<Player, List<ItemStack>> childs = new HashMap<>();
+    public HashMap<Player, List<Item>> options = new HashMap<>();
 
     private static InteractionsManager instance;
 
@@ -27,47 +22,46 @@ public class InteractionsManager {
         return instance == null ? instance = new InteractionsManager() : instance;
     }
 
-    public Item getItemFromPlayer(Player player) { return items.get(player); }
+    public Item getItemFromPlayer(Player player) {
 
-    public Tradable getTradableFromPlayer(Player player) { return tradables.get(player); }
+        if (!options.containsKey(player)) return MarketManager.getInstance().getAllItems().get(0);
 
-    public void setTradableOfPlayer(Player player, Tradable tradable) {
-        tradables.put(player, tradable);
+        return options.get(player).get(0);
     }
 
     public void setItemOfPlayer(Player player, Item item) {
 
-        childs.put(player, new ArrayList<>(item.getChilds().keySet()));
+        List<Item> options = new ArrayList<>();
 
-        items.put(player, item);
+        options.add(item);
+
+        options.addAll(item.getChilds());
+
+        this.options.put(player, options);
     }
 
-    public void rotateChilds(Player player) {
+    public void rotateOptions(Player player) {
 
-        List<ItemStack> playerChilds = childs.get(player);
+        List<Item> playerOptions = options.get(player);
 
-        Collections.rotate(playerChilds, -1);
+        Collections.rotate(playerOptions, -1);
 
-        childs.put(player, playerChilds);
+        options.put(player, playerOptions);
     }
 
-    public ItemStack getChildFromPlayer(Player player) {
-        return childs.get(player).get(0);
+    public List<Item> getOptions(Player player) {
+        return options.get(player);
     }
 
-    public ItemStack getChildFromPositionAndPlayer(int position, Player player) {
-        return childs.get(player).get(position);
-    }
+    public Item getParent(Player player) {
 
-    public float getMultiplier(Player player) {
+        List<Item> items = options.get(player);
 
-        if (childs.get(player) == null) return 1;
+        if (items == null) return null;
 
-        return items.get(player).getChilds().get(childs.get(player).get(0));
-    }
+        if (items.get(0).isParent()) return items.get(0);
+        else return items.get(0).getParent();
 
-    public List<ItemStack> getChildsFromPlayer(Player player) {
-        return childs.get(player);
     }
 
 }

@@ -493,7 +493,6 @@ public class DiscordButtons extends ListenerAdapter {
                         .queue();
 
                 return;
-
         }
 
         if (event.getComponentId().startsWith("time")) {
@@ -580,7 +579,7 @@ public class DiscordButtons extends ListenerAdapter {
                 Trade buyTrade = new Trade(item, LocalDateTime.now(), value, quantity, true, true, uuid);
 
                 database.saveTrade(buyTrade);
-                DiscordBot.getInstance().sendTradeLog(buyTrade);
+                DiscordLog.getInstance().sendTradeLog(buyTrade);
 
                 event.reply(buyText)
                         .setEphemeral(true)
@@ -617,7 +616,7 @@ public class DiscordButtons extends ListenerAdapter {
                 Trade sellTrade = new Trade(item, LocalDateTime.now(), value, quantity, false, true, uuid);
 
                 database.saveTrade(sellTrade);
-                DiscordBot.getInstance().sendTradeLog(sellTrade);
+                DiscordLog.getInstance().sendTradeLog(sellTrade);
 
                 event.reply(sellText)
                         .setEphemeral(true)

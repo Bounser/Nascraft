@@ -11,23 +11,9 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
-public class VirutalInventory {
+public class VirtualInventory {
 
-
-    public VirutalInventory(Connection connection) {
-
-        createTable(connection, "inventories",
-                "uuid VARCHAR(36) NOT NULL," +
-                        "identifier TEXT," +
-                        "amount INT");
-
-        createTable(connection, "capacities",
-                "uuid VARCHAR(36) PRIMARY KEY," +
-                        "capacity INT");
-
-    }
-
-    public void updateItem(Connection connection, UUID uuid, Item item, int quantity) {
+    public static void updateItem(Connection connection, UUID uuid, Item item, int quantity) {
         try {
             String sql1 = "SELECT amount FROM inventories WHERE uuid=? AND identifier=?;";
             PreparedStatement prep1 =  connection.prepareStatement(sql1);
@@ -55,7 +41,7 @@ public class VirutalInventory {
         }
     }
 
-    public void removeItem(Connection connection, UUID uuid, Item item) {
+    public static void removeItem(Connection connection, UUID uuid, Item item) {
         try {
             String sql = "DELETE FROM inventories WHERE uuid=? AND identifier=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
@@ -67,7 +53,7 @@ public class VirutalInventory {
         }
     }
 
-    public void clearInventory(Connection connection, UUID uuid) {
+    public static void clearInventory(Connection connection, UUID uuid) {
         try {
             String sql = "DELETE FROM inventories WHERE uuid=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
@@ -78,7 +64,7 @@ public class VirutalInventory {
         }
     }
 
-    public void updateCapacity(Connection connection, UUID uuid, int capacity) {
+    public static void updateCapacity(Connection connection, UUID uuid, int capacity) {
         try {
             String sql = "UPDATE capacities SET capacity=? WHERE uuid=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
@@ -90,7 +76,7 @@ public class VirutalInventory {
         }
     }
 
-    public LinkedHashMap<Item, Integer> retrieveInventory(Connection connection, UUID uuid) {
+    public static LinkedHashMap<Item, Integer> retrieveInventory(Connection connection, UUID uuid) {
 
         LinkedHashMap<Item, Integer> content = new LinkedHashMap<>();
 
@@ -119,7 +105,7 @@ public class VirutalInventory {
         return content;
     }
 
-    public int retrieveCapacity(Connection connection, UUID uuid) {
+    public static int retrieveCapacity(Connection connection, UUID uuid) {
         try {
             String sql = "SELECT capacity FROM capacities WHERE uuid=?";
             PreparedStatement prep = connection.prepareStatement(sql);

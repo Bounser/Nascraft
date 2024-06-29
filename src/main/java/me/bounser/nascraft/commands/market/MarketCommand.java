@@ -6,7 +6,6 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.market.unit.Tradable;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -48,19 +47,19 @@ public class MarketCommand implements CommandExecutor {
                 return false;
             }
 
-            Tradable tradable = MarketManager.getInstance().getTradable(args[1]);
+            Item item = MarketManager.getInstance().getItem(args[1]);
 
-            if (tradable == null) {
+            if (item == null) {
                 player.sendMessage(ChatColor.RED + "That identifier isn't valid!");
                 return false;
             }
 
             switch (args[0]){
                 case "buy":
-                    tradable.buy(quantity, player.getUniqueId(), true);
+                    item.buy(quantity, player.getUniqueId(), true);
                     break;
                 case "sell":
-                    tradable.sell(quantity, player.getUniqueId(), true);
+                    item.sell(quantity, player.getUniqueId(), true);
                     break;
                 default:
                     player.sendMessage(ChatColor.RED + "Wrong command.");
@@ -78,13 +77,13 @@ public class MarketCommand implements CommandExecutor {
                 Nascraft.getInstance().getLogger().info(ChatColor.RED + "Invalid player");
                 return false;
             }
-            Tradable tradable = MarketManager.getInstance().getTradable(args[1]);
+            Item item = MarketManager.getInstance().getItem(args[1]);
             switch (args[0]){
                 case "buy":
-                    tradable.buy(Integer.parseInt(args[2]), player.getUniqueId(), true);
+                    item.buy(Integer.parseInt(args[2]), player.getUniqueId(), true);
                     break;
                 case "sell":
-                    tradable.sell(Integer.parseInt(args[2]), player.getUniqueId(), true);
+                    item.sell(Integer.parseInt(args[2]), player.getUniqueId(), true);
                     break;
                 default:
                     sender.sendMessage(ChatColor.RED + "Wrong command.");

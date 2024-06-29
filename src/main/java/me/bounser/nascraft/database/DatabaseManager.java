@@ -13,16 +13,19 @@ public class DatabaseManager {
 
     private static DatabaseManager instance;
 
-    public static DatabaseManager getInstance() { return instance == null ? instance = new DatabaseManager() : instance; }
+    public static DatabaseManager get() { return instance == null ? instance = new DatabaseManager() : instance; }
 
     public DatabaseManager() {
+
         databaseType = Config.getInstance().getDatabaseType();
+
+        if (databaseType == null)
+            throw new IllegalArgumentException("Database type not recognized!");
 
         switch (databaseType) {
 
             case SQLITE:
-                database = new SQLite();
-                return;
+                database = SQLite.getInstance(); break;
 
             case MYSQL:
                 database = new MySQL(
@@ -32,10 +35,14 @@ public class DatabaseManager {
                         Config.getInstance().getUser(),
                         Config.getInstance().getPassword()
                 );
-                return;
+                break;
         }
+
+        database.connect();
     }
 
-    public Database getDatabase() { return database; }
+    public Database getDatabase() {
+        return database;
+    }
 
 }

@@ -3,7 +3,7 @@ package me.bounser.nascraft.commands.discord;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.database.SQLite;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
 import me.bounser.nascraft.formatter.Formatter;
@@ -81,7 +81,7 @@ public class DiscordInventoryInGame implements Listener {
             return;
         }
 
-        if (event.getClickedInventory().getSize() == 45 && (event.getCursor() != null) && MarketManager.getInstance().isValidItem(event.getCursor())) {
+        if (event.getClickedInventory().getSize() == 45 && (event.getCursor() != null) && MarketManager.getInstance().isAValidItem(event.getCursor())) {
 
             Item item = MarketManager.getInstance().getItem(event.getCursor());
 
@@ -148,7 +148,7 @@ public class DiscordInventoryInGame implements Listener {
         meta.setLore(Arrays.asList(Lang.get().message(Message.DISINV_LOCKED_LORE, "0", Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getNextSlotPrice(), Style.ROUND_BASIC), "0").split("\\n")));
         filler.setItemMeta(meta);
 
-        for(int i = 9 + SQLite.getInstance().retrieveCapacity(uuid); i < 40 ; i++) {
+        for(int i = 9 + DatabaseManager.get().getDatabase().retrieveCapacity(uuid); i < 40 ; i++) {
             inventory.setItem(i, filler);
         }
     }

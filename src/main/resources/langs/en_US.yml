@@ -63,6 +63,7 @@ alerts_list_segment: "\n&6> &l[MATERIAL] &r&eat price &l[WORTH]"
 
 sellwand_estimated_value: "<gradient:#FF00CD:#DA58FF>Estimated value:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
 sellwand_sold: "<gradient:#FF00CD:#DA58FF>Sold content for:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
+sellwand_sold_with_multiplier: "<gradient:#FF00CD:#DA58FF>Sold content for:</gradient> <light_purple>[INITIAL-WORTH] x [MULTIPLIER] = <bold>[WORTH]</bold></light_purple>"
 sellwand_ran_out: "<gradient:#FB6363:#C4B3FD>That sell wand doesn't have any more uses left.</gradient>"
 sellwand_nothing_to_sell: "<gradient:#FB6363:#C4B3FD>There's nothing to sell!</gradient>"
 sellwand_cooldown: "<gradient:#FB6363:#C4B3FD>On cooldown, [TIME] left!</gradient>"
@@ -77,6 +78,7 @@ link_wrong_use: "<gradient:#FB6363:#C4B3FD>Wrong use of the command!</gradient>"
 link_wrong_format:  "<gradient:#FB6363:#C4B3FD>Wrong code format!</gradient>"
 link_no_process_found: "<gradient:#FB6363:#C4B3FD>No linking process found with that code.</gradient>"
 link_success: "<gradient:#FF00CD:#DA58FF>Linked successfully with user:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+link_unlinked: "<gradient:#FF00CD:#DA58FF>You have been unlinked from user:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
 link_direct_message: ":link: Your discords account has been successfully linked to the minecraft user: ``[USER]``"
 
 # DISCORD COMMAND
@@ -100,10 +102,12 @@ discord_status: "how prices move"
 
 # Logs
 
-discord_log_linked: "> ``[UUID]`` ([NICK] or [USER]) has [ACTION] x[QUANTITY] of ``[ALIAS]`` for [WORTH]"
-discord_log_not_linked: "> ``[UUID]`` ([NICK]) has [ACTION] x[QUANTITY] of ``[ALIAS]`` for [WORTH]"
+discord_log_trade_linked: "> [[NICK]](https:[UUID]) or [[USER]](https:id-[ID]) has [ACTION] ``[QUANTITY]`` of ``[ALIAS]`` for **[WORTH]**"
+discord_log_trade_not_linked: "> [[NICK]](https:[UUID]) has [ACTION] ``[QUANTITY]`` of ``[ALIAS]`` for **[WORTH]**"
 discord_log_buy: ":inbox_tray: bought"
 discord_log_sell: ":outbox_tray: sold"
+discord_log_linked: "> :link: User [[NICK]](https:[UUID]) has been linked with discord account [[DISCORD-NAME]](https:id-[ID])"
+discord_log_unlinked: "> :chains: User [[NICK]](https:[UUID]) has been unlinked from discord account [[DISCORD-NAME]](https:id-[ID])"
 
 # Main menu
 

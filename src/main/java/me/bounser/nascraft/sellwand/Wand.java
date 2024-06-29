@@ -78,18 +78,18 @@ public class Wand {
         NamespacedKey keyType = new NamespacedKey(Nascraft.getInstance(), "wand-type");
         itemMeta.getPersistentDataContainer().set(keyType, PersistentDataType.STRING, name);
 
-        if (defaultUses != -1) {
+        if (defaultUses > 0) {
             NamespacedKey keyUses = new NamespacedKey(Nascraft.getInstance(), "wand-uses");
             itemMeta.getPersistentDataContainer().set(keyUses, PersistentDataType.INTEGER, defaultUses);
         }
 
-        if (maxProfit != -1) {
+        if (maxProfit > 0) {
             NamespacedKey keyMaxProfit = new NamespacedKey(Nascraft.getInstance(), "wand-max-profit");
             itemMeta.getPersistentDataContainer().set(keyMaxProfit, PersistentDataType.FLOAT, maxProfit);
         }
 
         if (glim) {
-            itemMeta.addEnchant(Enchantment.DURABILITY, 1, true);
+            itemMeta.addEnchant(Enchantment.UNBREAKING, 1, true);
             itemMeta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
 

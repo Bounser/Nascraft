@@ -3,9 +3,9 @@ package me.bounser.nascraft.chart.price;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
-import me.bounser.nascraft.database.SQLite;
-import me.bounser.nascraft.market.unit.Instant;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.unit.stats.Instant;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
@@ -40,28 +40,28 @@ public class ItemChart {
 
             case DAY:
                 simpleDateFormat = new SimpleDateFormat("HH:mm");
-                data = SQLite.getInstance().getDayPrices(item);
+                data = DatabaseManager.get().getDatabase().getDayPrices(item);
                 break;
             case MONTH:
                 simpleDateFormat = new SimpleDateFormat("d-MMM");
-                data = SQLite.getInstance().getMonthPrices(item);
+                data = DatabaseManager.get().getDatabase().getMonthPrices(item);
                 break;
             case YEAR:
                 simpleDateFormat = new SimpleDateFormat("d-MMM-yyyy");
-                data = SQLite.getInstance().getYearPrices(item);
+                data = DatabaseManager.get().getDatabase().getYearPrices(item);
                 break;
             case ALL:
                 simpleDateFormat = new SimpleDateFormat("d-MMM-yyyy");
-                data = SQLite.getInstance().getAllPrices(item);
+                data = DatabaseManager.get().getDatabase().getAllPrices(item);
                 break;
 
             default:
                 simpleDateFormat = new SimpleDateFormat("HH:mm");
-                data = SQLite.getInstance().getDayPrices(item);
+                data = DatabaseManager.get().getDatabase().getDayPrices(item);
 
         }
 
-        XYDataset priceData = createPriceDataset(data, chartType);
+        XYDataset priceData = createPriceDataset(data);
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 null,
                 null,
@@ -133,7 +133,7 @@ public class ItemChart {
         return chart;
     }
 
-    private static XYDataset createPriceDataset(List<Instant> intants, ChartType chartType) {
+    private static XYDataset createPriceDataset(List<Instant> intants) {
 
         TimeSeries series1 = new TimeSeries("Price");
 

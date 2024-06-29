@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class DiscordLink {
 
-    public void saveLink(Connection connection, String userId, UUID uuid, String nickname) {
+    public static void saveLink(Connection connection, String userId, UUID uuid, String nickname) {
         try {
             String sql = "INSERT INTO discord_links (userid, uuid, nickname) VALUES (?,?,?);";
             PreparedStatement prep = connection.prepareStatement(sql);
@@ -22,7 +22,7 @@ public class DiscordLink {
         }
     }
 
-    public void removeLink(Connection connection, String userId) {
+    public static void removeLink(Connection connection, String userId) {
         try {
             String sql = "DELETE FROM discord_links WHERE userid=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
@@ -33,7 +33,7 @@ public class DiscordLink {
         }
     }
 
-    public UUID getUUID(Connection connection, String userId) {
+    public static UUID getUUID(Connection connection, String userId) {
         try {
             String sql = "SELECT uuid FROM discord_links WHERE userid=?";
             PreparedStatement prep = connection.prepareStatement(sql);
@@ -48,7 +48,7 @@ public class DiscordLink {
         }
     }
 
-    public String getNickname(Connection connection, String userId) {
+    public static String getNickname(Connection connection, String userId) {
         try {
             String sql = "SELECT nickname FROM discord_links WHERE userid=?";
             PreparedStatement prep = connection.prepareStatement(sql);
@@ -63,7 +63,7 @@ public class DiscordLink {
         }
     }
 
-    public String getUserId(Connection connection, UUID uuid) {
+    public static String getUserId(Connection connection, UUID uuid) {
         try {
             String sql = "SELECT userid FROM discord_links WHERE uuid=?";
             PreparedStatement prep = connection.prepareStatement(sql);

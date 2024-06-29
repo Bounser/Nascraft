@@ -132,11 +132,20 @@ public class Item {
         if (!checkBalance(player, feedback, worth)) return;
         if (!checkInventory(player, feedback, amount)) return;
 
-        ItemStack operationItemStack = itemStack.clone();
+        if (player != null && feedback) {
+            ItemStack operationItemStack = itemStack.clone();
 
-        operationItemStack.setAmount(amount);
+            int stacks = amount / itemStack.getMaxStackSize();
 
-        if (player != null && feedback) player.getInventory().addItem(operationItemStack);
+            operationItemStack.setAmount(itemStack.getMaxStackSize());
+
+            for (int i = 0; i < stacks; i++)
+                player.getInventory().addItem(operationItemStack);
+
+            operationItemStack.setAmount(amount - stacks * itemStack.getMaxStackSize());
+
+            player.getInventory().addItem(operationItemStack);
+        }
 
         MoneyManager.getInstance().withdraw(offlinePlayer, worth);
 
@@ -247,9 +256,9 @@ public class Item {
                     price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
 
 
-        MoneyManager.getInstance().deposit(offlinePlayer, worth*multiplier);
+        MoneyManager.getInstance().deposit(offlinePlayer, worth);
 
-        worth = RoundUtils.round(worth*multiplier);
+        worth = RoundUtils.round(worth);
 
         if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(worth, Style.ROUND_BASIC), String.valueOf(amount), alias);
 

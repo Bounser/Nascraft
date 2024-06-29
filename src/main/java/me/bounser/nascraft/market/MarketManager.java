@@ -11,6 +11,7 @@ import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
 import org.bukkit.inventory.ItemStack;
 
+import javax.xml.crypto.Data;
 import java.awt.image.BufferedImage;
 import java.util.*;
 
@@ -78,6 +79,8 @@ public class MarketManager {
                     image
             );
 
+            DatabaseManager.get().getDatabase().retrieveItem(item);
+
             items.add(item);
             category.addItem(item);
 
@@ -87,10 +90,8 @@ public class MarketManager {
             }
         }
 
-        DatabaseManager.get().getDatabase().retrieveItems();
-
         if (categories.size() < 4) {
-            Nascraft.getInstance().getLogger().warning("You need to have at least 4 categories!");
+            Nascraft.getInstance().getLogger().severe("You need to have at least 4 categories! Disabling plugin...");
             Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
         }
 
@@ -285,8 +286,13 @@ public class MarketManager {
     }
 
     public float getChange1h(){
-        List<Float> benchmark = getBenchmark1h(1);
-        return -100f + 100f*benchmark.get(benchmark.size()-1);
+
+        float change = 0;
+
+        for (Item item : getAllParentItems())
+            change += item.getPrice().getValue()/item.getPrice().getValueAnHourAgo()-1;
+
+        return change*100;
     }
 
     public float getLastChange() { return lastChange; }

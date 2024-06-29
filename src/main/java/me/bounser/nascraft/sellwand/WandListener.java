@@ -1,13 +1,14 @@
 package me.bounser.nascraft.sellwand;
 
+import jdk.vm.ci.code.site.Mark;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.managers.MoneyManager;
+import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -52,13 +53,13 @@ public class WandListener implements Listener {
             !event.getClickedBlock().getType().equals(Material.BARREL) &&
             !event.getClickedBlock().getType().equals(Material.TRAPPED_CHEST)) return;
 
-        NamespacedKey keyType = new NamespacedKey(Nascraft.getInstance(), "wand-type");
-
         if (event.getItem() == null) return;
 
         ItemMeta meta = event.getItem().getItemMeta();
 
         if (meta == null) return;
+
+        NamespacedKey keyType = new NamespacedKey(Nascraft.getInstance(), "wand-type");
 
         if (meta.getPersistentDataContainer().has(keyType)) {
 
@@ -97,25 +98,40 @@ public class WandListener implements Listener {
 
             Inventory inventory = getInventory(event.getClickedBlock());
 
-            float totalWorth = 0;
+            float expectedWorth = 0;
+
+            HashMap<Item, Float> valuableItems = new HashMap<>();
 
             if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
 
                 for (ItemStack itemStack : inventory.getContents()) {
 
-                    if (MarketManager.getInstance().isValidItem(itemStack)) {
+                    if (itemStack == null) continue;
 
-                        Item item = MarketManager.getInstance().getItem(itemStack);
+                    Item item = MarketManager.getInstance().getItem(itemStack);
 
-                        totalWorth += itemStack.getAmount() * item.getPrice().getSellPrice() * wand.getMultiplier();
+                    if (item == null) continue;
 
+                    Item parent = item.isParent() ? item : item.getParent();
+
+                    if (valuableItems.containsKey(parent)) {
+                        valuableItems.put(parent, valuableItems.get(parent) + itemStack.getAmount() * item.getMultiplier());
+                    } else {
+                        valuableItems.put(parent, itemStack.getAmount() * item.getMultiplier());
                     }
                 }
 
-                Lang.get().message(event.getPlayer(), Message.SELLWAND_ESTIMATED_VALUE, Formatter.format(totalWorth, Style.ROUND_BASIC), "0", "0");
+                for (Item item : valuableItems.keySet())
+                    expectedWorth += item.getPrice().getProjectedCost(valuableItems.get(item), item.getPrice().getSellTaxMultiplier());
+
+                expectedWorth *= wand.getMultiplier();
+
+                Lang.get().message(event.getPlayer(), Message.SELLWAND_ESTIMATED_VALUE, Formatter.format(expectedWorth, Style.ROUND_BASIC), "0", "0");
 
                 return;
             }
+
+            ////////////////////////////////////////////////////////////////
 
             if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
 
@@ -148,31 +164,22 @@ public class WandListener implements Listener {
                     }
                 }
 
-                float expectedWorth = 0;
+                float expected = getWorthOfInventory(inventory);
 
-                for (ItemStack itemStack : inventory.getContents()) {
-
-                    if (MarketManager.getInstance().isValidItem(itemStack)) {
-
-                        Item item = MarketManager.getInstance().getItem(itemStack);
-
-                        expectedWorth += item.getPrice().getSellPrice() * wand.getMultiplier() * itemStack.getAmount();
-
-                    }
-                }
-
-                if (maxProfitLeft != -1 && maxProfitLeft < expectedWorth) {
+                if (maxProfitLeft != -1 && maxProfitLeft < expected*wand.getMultiplier()) {
                     Lang.get().message(event.getPlayer(), Message.SELLWAND_TOO_MUCH);
                     return;
                 }
 
+                float totalWorth = 0;
+
                 for (ItemStack itemStack : inventory.getContents()) {
 
-                    if (MarketManager.getInstance().isValidItem(itemStack)) {
+                    if (MarketManager.getInstance().isAValidItem(itemStack)) {
 
                         Item item = MarketManager.getInstance().getItem(itemStack);
 
-                        totalWorth += item.sellItem(itemStack.getAmount(), event.getPlayer().getUniqueId(), false, item.getItemStack().getType());
+                        totalWorth += item.sell(itemStack.getAmount(), event.getPlayer().getUniqueId(), false);
 
                         itemStack.setAmount(0);
                     }
@@ -187,8 +194,6 @@ public class WandListener implements Listener {
                     uses--;
                     meta.getPersistentDataContainer().set(keyUses, PersistentDataType.INTEGER, uses);
                 }
-
-                totalWorth *= wand.getMultiplier();
 
                 if (maxProfitLeft != -1) {
                     maxProfitLeft -= totalWorth;
@@ -209,8 +214,20 @@ public class WandListener implements Listener {
                 meta.setLore(replacedLore);
                 event.getItem().setItemMeta(meta);
 
-                Lang.get().message(event.getPlayer(), Message.SELLWAND_SOLD, Formatter.format(totalWorth, Style.ROUND_BASIC), "0", "0");
-                MoneyManager.getInstance().deposit(event.getPlayer(), totalWorth);
+                if (wand.getMultiplier() != 1) {
+
+                    float result = totalWorth * wand.getMultiplier() - totalWorth;
+
+                    if (result > 0) {
+                        MoneyManager.getInstance().deposit(event.getPlayer(), result);
+                    } else {
+                        MoneyManager.getInstance().withdraw(event.getPlayer(), Math.abs(result));
+                    }
+
+                    Lang.get().message(event.getPlayer(), Message.SELLWAND_SOLD_WITH_MULTIPLIER, "[INITIAL-WORTH]", Formatter.format(totalWorth, Style.ROUND_BASIC), "[MULTIPLIER]", String.valueOf(wand.getMultiplier()), "[WORTH]", Formatter.format(totalWorth * wand.getMultiplier(), Style.ROUND_BASIC));
+                } else {
+                    Lang.get().message(event.getPlayer(), Message.SELLWAND_SOLD, Formatter.format(totalWorth, Style.ROUND_BASIC), "0", "0");
+                }
 
                 if (wand.getCooldown() > 0) {
                     HashMap<Player, Instant> players = onCooldown.get(wand);
@@ -247,5 +264,34 @@ public class WandListener implements Listener {
                 break;
         }
         return inventory;
+    }
+
+    public float getWorthOfInventory(Inventory inventory) {
+
+        HashMap<Item, Float> content = new HashMap<>();
+
+        for (ItemStack itemStack : inventory.getContents()) {
+
+            if (itemStack == null) continue;
+
+            Item item = MarketManager.getInstance().getItem(itemStack);
+
+            if (item == null) continue;
+
+            Item parent = item.isParent() ? item : item.getParent();
+
+            if (content.containsKey(parent)) {
+                content.put(parent, content.get(parent) + itemStack.getAmount() * item.getMultiplier());
+            } else {
+                content.put(parent, itemStack.getAmount() * item.getMultiplier());
+            }
+        }
+
+        float worth = 0;
+
+        for (Item item : content.keySet())
+            worth += item.getPrice().getProjectedCost(content.get(item) * item.getMultiplier(), item.getPrice().getSellTaxMultiplier());
+
+        return worth;
     }
 }

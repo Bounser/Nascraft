@@ -5,7 +5,8 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.database.SQLite;
+import me.bounser.nascraft.database.sqlite.SQLite;
+import me.bounser.nascraft.discord.DiscordBot;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -118,6 +119,8 @@ public class LinkManager {
 
             SQLite.getInstance().saveLink(String.valueOf(confirmingCodes.get(code)), uuid, nickname);
 
+            DiscordBot.getInstance().sendLinkLog(confirmingCodes.get(code), uuid, nickname, true);
+
             confirmingCodes.remove(code);
 
             return true;
@@ -141,13 +144,25 @@ public class LinkManager {
                     return false;
                 }
 
+                UUID uuid = userToUUID.get(userId);
+                userToUUID.remove(userId);
+
+                DiscordBot.getInstance().sendLinkLog(userId, uuid, SQLite.getInstance().getNickname(userId), false);
+
                 SQLite.getInstance().removeLink(userId);
 
-                Player player = Bukkit.getPlayer(userToUUID.get(userId));
-                if (player != null && player.getOpenInventory().getTitle().equals(Lang.get().message(Message.DISINV_TITLE)))
-                    Bukkit.getScheduler().runTask(Nascraft.getInstance(), player::closeInventory);
+                Player player = Bukkit.getPlayer(uuid);
 
-                userToUUID.remove(userId);
+                if (player == null) return true;
+
+                DiscordBot.getInstance().getJDA().retrieveUserById(userId).queue(user -> {
+
+                    Lang.get().message(player, Message.LINK_UNLINKED, "[USER]", user.getName());
+
+                });
+
+                if (player.getOpenInventory().getTitle().equals(Lang.get().message(Message.DISINV_TITLE)))
+                    Bukkit.getScheduler().runTask(Nascraft.getInstance(), player::closeInventory);
         }
 
         return true;

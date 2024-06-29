@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.UUID;
 
 
-public class GetSellWandCommand implements CommandExecutor {
+public class GiveSellWandCommand implements CommandExecutor {
 
 
     @Override
@@ -29,7 +29,7 @@ public class GetSellWandCommand implements CommandExecutor {
         if (!(sender instanceof Player)) {
 
             if (args.length != 2) {
-                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Invalid use of command. /getsellwand [sellwand] [player]");
+                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Invalid use of command. /givesellwand [sellwand] [player]");
                 return false;
             } else {
 
@@ -84,7 +84,7 @@ public class GetSellWandCommand implements CommandExecutor {
             ((Player) sender).getInventory().addItem(wandItemStack);
 
         } else {
-            sender.sendMessage(ChatColor.RED + "Invalid use of command. /getsellwand [Sell Wand ID]");
+            sender.sendMessage(ChatColor.RED + "Invalid use of command. /givesellwand [Sell Wand ID]");
         }
         return false;
     }

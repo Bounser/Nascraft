@@ -18,8 +18,8 @@ import me.bounser.nascraft.commands.sell.sellall.SellAllCommand;
 import me.bounser.nascraft.commands.sell.sellall.SellAllTabCompleter;
 import me.bounser.nascraft.commands.sell.sellinv.SellInvListener;
 import me.bounser.nascraft.commands.sell.sellinv.SellInvCommand;
-import me.bounser.nascraft.commands.sellwand.GetSellWandCommand;
-import me.bounser.nascraft.commands.sellwand.GetSellWandTabCompleter;
+import me.bounser.nascraft.commands.sellwand.GiveSellWandCommand;
+import me.bounser.nascraft.commands.sellwand.GiveSellWandTabCompleter;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.linking.LinkCommand;
@@ -64,7 +64,7 @@ public final class Nascraft extends JavaPlugin {
     private static NascraftAPI apiInstance;
     private static Economy economy = null;
 
-    private static final String AGUI_VERSION = "2.2.7";
+    private static final String AGUI_VERSION = "2.2.8";
 
     private BukkitAudiences adventure;
 
@@ -112,7 +112,7 @@ public final class Nascraft extends JavaPlugin {
         }
 
         if (config.getDiscordEnabled()) {
-            getLogger().info("Enabling discord extension!");
+            getLogger().info("Enabling discord extension...");
 
             if (Config.getInstance().getLinkingMethod().equals(LinkingMethod.NATIVE)) getCommand("link").setExecutor(new LinkCommand());
             getCommand("setalert").setExecutor(new SetAlertCommand());
@@ -122,11 +122,12 @@ public final class Nascraft extends JavaPlugin {
             Bukkit.getPluginManager().registerEvents(new DiscordInventoryInGame(), this);
 
             new DiscordBot();
+            getLogger().info("Discord extension loaded!");
         }
 
         if (config.getSellWandsEnabled()) {
-            getCommand("getsellwand").setExecutor(new GetSellWandCommand());
-            getCommand("getsellwand").setTabCompleter(new GetSellWandTabCompleter());
+            getCommand("givesellwand").setExecutor(new GiveSellWandCommand());
+            getCommand("givesellwand").setTabCompleter(new GiveSellWandTabCompleter());
             Bukkit.getPluginManager().registerEvents(new WandListener(), this);
             WandsManager.getInstance();
         }
@@ -159,15 +160,15 @@ public final class Nascraft extends JavaPlugin {
             getCommand("sellall").setExecutor(new SellAllCommand());
             getCommand("sellall").setTabCompleter(new SellAllTabCompleter());
         }
-
     }
 
     @Override
     public void onDisable() {
+        getLogger().info("Saving and closing connection with database...");
         DatabaseManager.get().getDatabase().disconnect();
+        getLogger().info("Done!");
 
         if (Config.getInstance().getDiscordEnabled() && DiscordBot.getInstance() != null) {
-            DiscordBot.getInstance().removeAllMessages();
             DiscordBot.getInstance().sendClosedMessage();
             DiscordBot.getInstance().getJDA().shutdown();
         }

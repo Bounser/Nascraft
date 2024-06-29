@@ -3,6 +3,7 @@ package me.bounser.nascraft.discord.images;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.unit.plot.PlotData;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -23,8 +24,10 @@ public class ItemAdvancedImage {
 
         graphics.fillRoundRect(0,3*128+9,8*128-1, 102, 20, 20);
 
-        int[] xPositions = item.getPlotData().getXPositions(8*128-3, -11, false);
-        int[] yPositions = item.getPlotData().getYPositions(3*128-5, 5, false, true);
+        PlotData pd = new PlotData(item);
+
+        int[] xPositions = pd.getXPositions(8*128-3, -11, false);
+        int[] yPositions = pd.getYPositions(3*128-5, 5, false, true);
 
         int prevY = yPositions[0];
         for (int i = 1; i < 60 ; i++) {

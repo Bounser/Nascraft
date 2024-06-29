@@ -2,12 +2,12 @@ package me.bounser.nascraft.managers;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
-import me.bounser.nascraft.database.SQLite;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.discord.DiscordAlerts;
 import me.bounser.nascraft.discord.DiscordBot;
+import me.bounser.nascraft.discord.DiscordLog;
 import me.bounser.nascraft.market.MarketManager;
-import me.bounser.nascraft.market.brokers.BrokersManager;
-import me.bounser.nascraft.market.unit.Instant;
+import me.bounser.nascraft.market.unit.stats.Instant;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
 import me.leoko.advancedgui.manager.GuiWallManager;
@@ -34,7 +34,6 @@ public class TasksManager {
         saveDataTask();
         shortTermPricesTask();
         hourlyTask();
-        dailyTask();
         saveInstants();
     }
 
@@ -48,16 +47,16 @@ public class TasksManager {
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
             float allChanges = 0;
-            for (Item item : MarketManager.getInstance().getAllItems()) {
+            for (Item item : MarketManager.getInstance().getAllParentItems()) {
                 if (Config.getInstance().getPriceNoise())
                     allChanges += item.getPrice().applyNoise();
 
                 item.lowerOperations();
 
-                item.addValueToHour(item.getPrice().getValue());
+                item.getPrice().addValueToShortTermStorage();
             }
 
-            MarketManager.getInstance().updateMarketChange1h(allChanges/MarketManager.getInstance().getAllItems().size());
+            MarketManager.getInstance().updateMarketChange1h(allChanges/MarketManager.getInstance().getAllParentItems().size());
 
             if (AGUI != null &&
                 AGUI.isEnabled() &&
@@ -72,15 +71,16 @@ public class TasksManager {
 
                 }
 
-            GraphManager.getInstance().outdatedCollector();
-
-            BrokersManager.getInstance().operateBrokers();
+            // FundsManager.getInstance().operateBrokers();
 
             // LimitOrdersManager.getInstance().checkOrders();
 
             if (Config.getInstance().getDiscordEnabled()) {
-                DiscordBot.getInstance().update();
-                DiscordAlerts.getInstance().updateAlerts();
+                if (Config.getInstance().getDiscordMenuEnabled()) {
+                    DiscordBot.getInstance().update();
+                    DiscordAlerts.getInstance().updateAlerts();
+                }
+                if (Config.getInstance().getLogChannelEnabled()) DiscordLog.getInstance().flushBuffer();
             }
 
         }, timeRemaining.getSeconds()*ticksPerSecond, 60L * ticksPerSecond);
@@ -90,16 +90,18 @@ public class TasksManager {
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
-            SQLite.getInstance().saveEverything();
+            DatabaseManager.get().getDatabase().saveEverything();
 
-        }, 2400, 60L * 5 * ticksPerSecond); // 5 min
+            DatabaseManager.get().getDatabase().saveCPIValue(MarketManager.getInstance().getConsumerPriceIndex());
+
+        }, 60L * 5 * ticksPerSecond, 60L * 5 * ticksPerSecond); // 5 min
     }
 
     private void saveInstants() {
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
-            for (Item item : MarketManager.getInstance().getAllItems()) {
+            for (Item item : MarketManager.getInstance().getAllParentItems()) {
 
                 item.getItemStats().addInstant(new Instant(
                         LocalDateTime.now(),
@@ -122,27 +124,12 @@ public class TasksManager {
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
             for (Item item : MarketManager.getInstance().getAllItems()) {
-                item.addValueToDay(item.getPrice().getValue());
                 item.getPrice().restartHourLimits();
             }
 
             MarketManager.getInstance().setOperationsLastHour(0);
 
         }, timeRemaining.getSeconds()*ticksPerSecond, 60 * 60 * ticksPerSecond); // 1 hour
-    }
-
-    private void dailyTask() {
-
-        LocalTime timeNow = LocalTime.now();
-
-        LocalTime midnight = LocalTime.MIDNIGHT;
-        Duration timeRemaining = Duration.between(timeNow, midnight);
-
-        Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
-
-            for (Item item : MarketManager.getInstance().getAllItems()) item.dailyUpdate();
-
-        }, timeRemaining.getSeconds()*ticksPerSecond, 24 * 60 * 60 * ticksPerSecond);
     }
 
 }

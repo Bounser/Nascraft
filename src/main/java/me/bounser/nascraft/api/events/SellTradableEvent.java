@@ -1,6 +1,6 @@
 package me.bounser.nascraft.api.events;
 
-import me.bounser.nascraft.market.unit.Tradable;
+import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -13,15 +13,15 @@ public class SellTradableEvent extends Event implements Cancellable {
     private boolean cancelled;
 
     private Player player;
-    private Tradable tradable;
-    private int amount;
+    private Item item;
+    private float amount;
 
 
-    public SellTradableEvent(Player player, Tradable tradable, int amount) {
+    public SellTradableEvent(Player player, Item item, float amount) {
         cancelled = false;
 
         this.player = player;
-        this.tradable = tradable;
+        this.item = item;
         this.amount = amount;
     }
 
@@ -44,11 +44,11 @@ public class SellTradableEvent extends Event implements Cancellable {
         return player;
     }
 
-    public Tradable getTradable() {
-        return tradable;
+    public Item getTradable() {
+        return item;
     }
 
-    public int getAmount() {
+    public float getAmount() {
         return amount;
     }
 }

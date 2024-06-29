@@ -1,9 +1,8 @@
 package me.bounser.nascraft.config;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.DatabaseType;
-import me.bounser.nascraft.database.SQLite;
-import me.bounser.nascraft.market.funds.Fund;
 import me.bounser.nascraft.market.funds.FundsManager;
 import me.bounser.nascraft.market.funds.Strategy;
 import me.bounser.nascraft.sellwand.Wand;
@@ -16,9 +15,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
-import org.checkerframework.checker.units.qual.N;
 
-import javax.xml.crypto.Data;
 import java.io.File;
 import java.util.*;
 
@@ -32,7 +29,6 @@ public class Config {
     private static Config instance;
     private Nascraft main;
 
-
     public static Config getInstance() { return instance == null ? instance = new Config() : instance; }
 
     private Config() {
@@ -42,7 +38,7 @@ public class Config {
 
         items = setupFile("items.yml");
         categories = setupFile("categories.yml");
-        investments = setupFile("investments.yml");
+        // investments = setupFile("investments.yml");
         // inventorygui = setupFile("inventorygui.yml");
     }
 
@@ -57,14 +53,13 @@ public class Config {
 
     public void reload() {
 
-        SQLite.getInstance().saveEverything();
+        DatabaseManager.get().getDatabase().saveEverything();
 
         items = setupFile("items.yml");
         categories = setupFile("categories.yml");
-        investments = setupFile("investments.yml");
+        // investments = setupFile("investments.yml");
 
         MarketManager.getInstance().reload();
-
     }
     public FileConfiguration getItemsFileConfiguration() { return items; }
 
@@ -98,7 +93,6 @@ public class Config {
         }
 
         return databaseType;
-
     }
 
     public String getHost() { return config.getString("database.mysql.host"); }
@@ -198,24 +192,30 @@ public class Config {
 
     public boolean getDiscordEnabled() { return config.getBoolean("discord-bot.enabled"); }
 
-    public LinkingMethod getLinkingMethod() { return LinkingMethod.valueOf(config.getString("discord-bot.link-method").toUpperCase()); }
+    public LinkingMethod getLinkingMethod() { return LinkingMethod.valueOf(config.getString("discord-bot..main-menu.link-method").toUpperCase()); }
 
     public String getToken() { return config.getString("discord-bot.token"); }
 
-    public String getChannel() { return config.getString("discord-bot.channel"); }
+    public boolean getLogChannelEnabled() { return config.getBoolean("discord-bot.log-trades.enabled"); }
+
+    public String getLogChannel() { return config.getString("discord-bot.log-trades.channel"); }
+
+    public boolean getDiscordMenuEnabled() { return config.getBoolean("discord-bot.main-menu.enabled"); }
+
+    public String getChannel() { return config.getString("discord-bot.main-menu.channel"); }
 
     public String getAdminRoleID() { return config.getString("discord-bot.admin-role-id"); }
 
-    public int getDefaultSlots() { return config.getInt("discord-bot.default-inventory"); }
+    public int getDefaultSlots() { return config.getInt("discord-bot.main-menu.default-inventory"); }
 
-    public float getSlotPriceFactor() { return (float) config.getDouble("discord-bot.slot-price-factor"); }
+    public float getSlotPriceFactor() { return (float) config.getDouble("discord-bot.main-menu.slot-price-factor"); }
 
-    public float getSlotPriceBase() { return (float) config.getDouble("discord-bot.slot-price-base"); }
+    public float getSlotPriceBase() { return (float) config.getDouble("discord-bot.main-menu.slot-price-base"); }
 
     public float getDiscordBuyTax() {
 
-        if (config.getBoolean("discord-bot.slot-price.taxation.override")) {
-            return (float) (1 + config.getDouble("discord-bot.slot-price.taxation.buy"));
+        if (config.getBoolean("discord-bot.main-menu.slot-price.taxation.override")) {
+            return (float) (1 + config.getDouble("discord-bot.main-menu.slot-price.taxation.buy"));
         } else {
             return 1 + (float) config.getDouble("market-control.taxation.buy");
         }
@@ -223,8 +223,8 @@ public class Config {
 
     public float getDiscordSellTax() {
 
-        if (config.getBoolean("discord-bot.slot-price.taxation.override")) {
-            return (float) (1 - config.getDouble("discord-bot.slot-price.taxation.sell"));
+        if (config.getBoolean("discord-bot.main-menu.slot-price.taxation.override")) {
+            return (float) (1 - config.getDouble("discord-bot.main-menu.slot-price.taxation.sell"));
         } else {
             return 1 - (float) config.getDouble("market-control.taxation.sell");
         }
@@ -245,22 +245,34 @@ public class Config {
         return 1;
     }
 
-    public HashMap<ItemStack, Float> getChilds(Item item) {
+    public List<Item> getChilds(String identifier) {
 
-        HashMap<ItemStack, Float> childs = new LinkedHashMap<>();
-
-        childs.put(item.getItemStack(), 1f);
+        List<Item> childs = new ArrayList<>();
 
         Set<String> section = null;
 
-        if(items.getConfigurationSection("items." + item.getIdentifier() + ".child.") != null) {
-            section = items.getConfigurationSection("items." + item.getIdentifier() + ".child.").getKeys(false);
+        if(items.getConfigurationSection("items." + identifier + ".child.") != null) {
+            section = items.getConfigurationSection("items." + identifier + ".child.").getKeys(false);
         }
 
-        if (section == null || section.size() == 0) return childs;
+        Item parent = MarketManager.getInstance().getItem(identifier);
 
-        for (String childMat : section) {
-            childs.put(new ItemStack(Material.getMaterial(childMat.toUpperCase())), (float) items.getDouble("items." +item.getIdentifier() + ".child." + childMat + ".multiplier"));
+        if (section == null || section.isEmpty()) return childs;
+
+        for (String childIdentifier : section) {
+
+            ItemStack itemStack = getItemStackOfChild(identifier, childIdentifier);
+            float multiplier = (float) items.getDouble("items." + identifier + ".child." + childIdentifier + ".multiplier");
+
+            String alias = childIdentifier;
+            
+            if (items.contains("items." + identifier + ".child." + childIdentifier + ".alias")) {
+                alias = items.getString("items." + identifier + ".child." + childIdentifier + ".alias");
+            } else {
+                alias = (Character.toUpperCase(alias.charAt(0)) + alias.substring(1)).replace("_", " ");
+            }
+            
+            childs.add(new Item(parent, multiplier, itemStack, childIdentifier, alias));
         }
 
         return childs;
@@ -268,10 +280,43 @@ public class Config {
 
     public ItemStack getItemStackOfItem(String identifier) {
 
-        if (!items.contains("items." + identifier + ".item-stack")) return null;
+        ItemStack itemStack = null;
 
-        return items.getSerializable("items." + identifier + ".item-stack", ItemStack.class);
+        if (items.contains("items." + identifier + ".item-stack"))
+            itemStack = items.getSerializable("items." + identifier + ".item-stack", ItemStack.class);
 
+        if (itemStack == null)
+            try {
+                itemStack = new ItemStack(Material.getMaterial(identifier.replaceAll("\\d", "").toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                Nascraft.getInstance().getLogger().severe("Couldn't load item with identifier: " + identifier);
+                Nascraft.getInstance().getLogger().severe("Reason: Material " + identifier.replaceAll("\\d", "").toUpperCase() + " is not valid!");
+                Nascraft.getInstance().getLogger().severe("Does the item exist in the version of your server?");
+                Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
+            }
+
+        return itemStack;
+
+    }
+
+    public ItemStack getItemStackOfChild(String identifier, String childIdentifier) {
+
+        ItemStack itemStack = null;
+
+        if (items.contains("items." + identifier + ".childs." + childIdentifier + "item-stack"))
+            itemStack = items.getSerializable("items." + identifier + ".childs." + childIdentifier + "item-stack", ItemStack.class);
+
+        if (itemStack == null)
+            try {
+                itemStack = new ItemStack(Material.getMaterial(childIdentifier.replaceAll("\\d", "").toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                Nascraft.getInstance().getLogger().severe("Couldn't load item with identifier: " + identifier);
+                Nascraft.getInstance().getLogger().severe("Reason: Material " + identifier.replaceAll("\\d", "").toUpperCase() + " is not valid!");
+                Nascraft.getInstance().getLogger().severe("Does the item exist in the version of your server?");
+                Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
+            }
+
+        return itemStack;
     }
 
     public String getAlias(String identifier) {
@@ -344,9 +389,7 @@ public class Config {
         return null;
     }
 
-    public List<Fund> getFunds() {
-
-        List<Fund> brokers = new ArrayList<>();
+    public void setupFunds() {
 
         for (String identifier : investments.getConfigurationSection("investments.funds.").getKeys(false)) {
 
@@ -371,8 +414,6 @@ public class Config {
             }
             FundsManager.getInstance().createFund(identifier, weightedStrategy);
         }
-
-        return brokers;
     }
 
 

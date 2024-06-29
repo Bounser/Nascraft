@@ -14,7 +14,7 @@ import java.util.List;
 
 public class HistorialData {
 
-    public void saveDayPrice(Connection connection, Item item, Instant instant) {
+    public static void saveDayPrice(Connection connection, Item item, Instant instant) {
 
         try {
             String insert = "INSERT INTO prices_day (day, identifier, date, price, volume) VALUES (?,?,?,?,?);";
@@ -42,7 +42,7 @@ public class HistorialData {
         }
     }
 
-    public void saveMonthPrice(Connection connection, Item item, Instant instant) {
+    public static void saveMonthPrice(Connection connection, Item item, Instant instant) {
 
         try {
             String select = "SELECT date FROM prices_month WHERE identifier=? ORDER BY id DESC LIMIT 1;";
@@ -54,6 +54,7 @@ public class HistorialData {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (!resultSet.next()) {
+
                 String insert = "INSERT INTO prices_month (day, date, identifier, price, volume) VALUES (?,?,?,?,?);";
 
                 PreparedStatement insertStatement = connection.prepareStatement(insert);
@@ -90,6 +91,7 @@ public class HistorialData {
                     insertStatement.executeUpdate();
 
                 } else {
+
                     float averagePrice = 0;
                     int totalVolume = 0;
 
@@ -102,6 +104,8 @@ public class HistorialData {
                             totalVolume += resultSetDay.getInt("volume");
                         }
                     }
+
+                    if (averagePrice == 0) return;
 
                     String insert = "INSERT INTO prices_month (day, date, identifier, price, volume) VALUES (?,?,?,?,?);";
 
@@ -129,7 +133,7 @@ public class HistorialData {
         }
     }
 
-    public void saveHistoryPrices(Connection connection, Item item, Instant instant) {
+    public static void saveHistoryPrices(Connection connection, Item item, Instant instant) {
 
         try {
             String select = "SELECT date FROM prices_history WHERE day=?;";
@@ -198,7 +202,7 @@ public class HistorialData {
     }
 
 
-    public List<Instant> getDayPrices(Connection connection, Item item) {
+    public static List<Instant> getDayPrices(Connection connection, Item item) {
 
         List<Instant> prices = new LinkedList<>();
 
@@ -254,7 +258,7 @@ public class HistorialData {
         return prices;
     }
 
-    public List<Instant> getMonthPrices(Connection connection, Item item) {
+    public static List<Instant> getMonthPrices(Connection connection, Item item) {
 
         List<Instant> prices = new LinkedList<>();
 
@@ -310,7 +314,7 @@ public class HistorialData {
         return prices;
     }
 
-    public List<Instant> getYearPrices(Connection connection, Item item) {
+    public static List<Instant> getYearPrices(Connection connection, Item item) {
 
         List<Instant> prices = new LinkedList<>();
 
@@ -366,7 +370,7 @@ public class HistorialData {
         return prices;
     }
 
-    public List<Instant> getAllPrices(Connection connection, Item item) {
+    public static List<Instant> getAllPrices(Connection connection, Item item) {
 
         List<Instant> prices = new LinkedList<>();
 

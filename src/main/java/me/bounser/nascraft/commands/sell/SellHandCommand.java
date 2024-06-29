@@ -63,7 +63,7 @@ public class SellHandCommand implements CommandExecutor {
             Component hoverText = MiniMessage.miniMessage().deserialize(
                     Lang.get().message(Message.SELLHAND_ESTIMATED_VALUE) +
                             Lang.get().message(Message.LIST_SEGMENT,
-                                    Formatter.format(item.getPrice().getProjectedCost(handItem.getAmount(), item.getPrice().getSellTaxMultiplier()) , Style.ROUND_BASIC),
+                                    Formatter.format(item.getPrice().getProjectedCost(handItem.getAmount()*item.getMultiplier(), item.getPrice().getSellTaxMultiplier()) , Style.ROUND_BASIC),
                                     String.valueOf(handItem.getAmount()),
                                     item.getName())
             );

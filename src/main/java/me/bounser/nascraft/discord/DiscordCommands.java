@@ -313,6 +313,8 @@ public class DiscordCommands extends ListenerAdapter {
                                                 .setEphemeral(true)
                                                 .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
+                                        return;
+
                                     case "seebal":
 
                                         OfflinePlayer player2 = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(user.getId()));
@@ -354,6 +356,7 @@ public class DiscordCommands extends ListenerAdapter {
                                 }
                             }
                     );
+
                 } catch (Exception e) {
 
                     event.reply("Invalid user id! Make sure its in a valid format. Example of a valid ID (yours): ``" + event.getUser().getId() + "``")

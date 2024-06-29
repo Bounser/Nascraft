@@ -22,7 +22,7 @@ public class MarketTabCompleter implements TabCompleter {
             case 1:
                 return StringUtil.copyPartialMatches(args[0], Arrays.asList("buy", "sell"), new ArrayList<>());
             case 2:
-                return StringUtil.copyPartialMatches(args[1], MarketManager.getInstance().getAllTradablesIdentifiers(), new ArrayList<>());
+                return StringUtil.copyPartialMatches(args[1], MarketManager.getInstance().getAllItemsAndChildsIdentifiers(), new ArrayList<>());
             case 3:
                 return Collections.singletonList("quantity");
         }

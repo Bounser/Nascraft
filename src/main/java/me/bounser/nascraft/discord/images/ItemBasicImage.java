@@ -8,6 +8,7 @@ import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.unit.plot.PlotData;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -31,7 +32,7 @@ public class ItemBasicImage {
         BufferedImage backgroundImage;
 
         try {
-            if(item.getPlotData().isGoingUp()) {
+            if(item.getPrice().getValueAnHourAgo() < item.getPrice().getValue()) {
                 backgroundImage = ImageIO.read(Objects.requireNonNull(Nascraft.getInstance().getResource("images/gradient_up.png")));
             } else {
                 backgroundImage = ImageIO.read(Objects.requireNonNull(Nascraft.getInstance().getResource("images/gradient_down.png")));
@@ -47,22 +48,24 @@ public class ItemBasicImage {
 
         graphics2D.drawImage(backgroundImage, 0, 0, null);
 
-        if(item.getPlotData().isGoingUp()) {
+        if(item.getPrice().getValueAnHourAgo() < item.getPrice().getValue()) {
             graphics2D.setColor(new Color(30, 150, 30));
         } else {
             graphics2D.setColor(new Color(150, 30, 30));
         }
 
-        graphics2D.drawPolyline(item.getPlotData().getXPositions(backgroundImage.getWidth(), 0, false) , item.getPlotData().getYPositions(backgroundImage.getHeight(), 1, false, false), item.getPlotData().getNPoints(false));
-        graphics2D.drawPolyline(item.getPlotData().getXPositions(backgroundImage.getWidth(), 1, false) , item.getPlotData().getYPositions(backgroundImage.getHeight(), 2, false, false), item.getPlotData().getNPoints(false));
-        graphics2D.drawPolyline(item.getPlotData().getXPositions(backgroundImage.getWidth(), -1, false) , item.getPlotData().getYPositions(backgroundImage.getHeight(), 2, false, false), item.getPlotData().getNPoints(false));
+        PlotData pd = new PlotData(item);
+
+        graphics2D.drawPolyline(pd.getXPositions(backgroundImage.getWidth(), 0, false) , pd.getYPositions(backgroundImage.getHeight(), 1, false, false), pd.getNPoints(false));
+        graphics2D.drawPolyline(pd.getXPositions(backgroundImage.getWidth(), 1, false) , pd.getYPositions(backgroundImage.getHeight(), 2, false, false), pd.getNPoints(false));
+        graphics2D.drawPolyline(pd.getXPositions(backgroundImage.getWidth(), -1, false) , pd.getYPositions(backgroundImage.getHeight(), 2, false, false), pd.getNPoints(false));
 
         graphics2D.setComposite(AlphaComposite.Clear);
 
         graphics2D.fillPolygon(
-                item.getPlotData().getXPositions(backgroundImage.getWidth(), 0, true),
-                item.getPlotData().getYPositions(backgroundImage.getHeight(), 0, true, false),
-                item.getPlotData().getNPoints(true));
+                pd.getXPositions(backgroundImage.getWidth(), 0, true),
+                pd.getYPositions(backgroundImage.getHeight(), 0, true, false),
+                pd.getNPoints(true));
 
         graphics2D.setComposite(AlphaComposite.SrcOver);
 
@@ -73,18 +76,18 @@ public class ItemBasicImage {
 
         graphics.drawImage(tempImage, 0, 128, 1024, 370, null);
 
-        int[] height = item.getPlotData().getExtremePositions(0, backgroundImage.getHeight());
+        int[] height = pd.getExtremePositions(0, backgroundImage.getHeight());
         if (height[0] != 0 && height[1] != 0) {
 
-            if(item.getPlotData().isGoingUp())
+            if(pd.isGoingUp())
                 graphics.setColor(new Color(100, 250, 100));
             else
                 graphics.setColor(new Color(250, 100, 100));
 
             graphics.setFont(new Font("Arial", Font.BOLD, 22));
 
-            float[] high = item.getPlotData().getHighestValue(8*128, item.getPrices(TimeSpan.HOUR).size());
-            float[] low = item.getPlotData().getLowestValue(8*128, item.getPrices(TimeSpan.HOUR).size());
+            float[] high = pd.getHighestValue(8*128, 60);
+            float[] low = pd.getLowestValue(8*128, 60);
 
             drawCenteredString(graphics, Formatter.format(high[0], Style.ROUND_BASIC), Math.round(high[1]), 135, 8*128);
             drawCenteredString(graphics, Formatter.format(low[0], Style.ROUND_BASIC), Math.round(low[1]), 475, 8*128);
@@ -130,7 +133,7 @@ public class ItemBasicImage {
         graphics.drawString(lang.message(Message.DISCORD_DAILY_VOLUME) + Formatter.format(item.getVolume(), Style.REDUCED_LENGTH), 670, 420+128);
         graphics.drawString(lang.message(Message.DISCORD_POSITION) + MarketManager.getInstance().getPositionByVolume(item), 670, 460+128);
         NumberFormat formatter = new DecimalFormat("#0.0");
-        graphics.drawString(lang.message(Message.DISCORD_TREND) + formatter.format((-100 + item.getPrice().getValue()*100/item.getPrices(TimeSpan.DAY).get(0))) + "%" , 670, 500+128);
+        graphics.drawString(lang.message(Message.DISCORD_TREND) + formatter.format((-100 + item.getPrice().getValue()*100/item.getPrice().getValueAnHourAgo())) + "%" , 670, 500+128);
 
         graphics.dispose();
 
