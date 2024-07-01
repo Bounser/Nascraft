@@ -9,7 +9,6 @@ import me.bounser.nascraft.discord.images.ItemBasicImage;
 import me.bounser.nascraft.discord.images.MainImage;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
-import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
@@ -23,6 +22,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.components.ItemComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -61,25 +61,30 @@ public class DiscordBot {
                 .setStatus(OnlineStatus.ONLINE)
                 .build();
 
-        jda.updateCommands().addCommands(
-                Commands.slash("alert", "Set up an alert based on prices changes!")
-                        .addOption(OptionType.STRING, "material", "Material name of the item.")
-                        .addOption(OptionType.NUMBER, "price", "Price at which you will receive a mention."),
-                Commands.slash("alerts", "List all your current alerts."),
-                Commands.slash("remove-alert", "Remove an alert.")
-                        .addOption(OptionType.STRING, "material", "Material name of the item to remove."),
-                Commands.slash("link", "Link a minecraft account to use all the functionalities"),
-                Commands.slash("balance", "Checks available balance."),
-                Commands.slash("inventory", "Check your inventory."),
-                Commands.slash("search", "Search an item by name to operate with it.")
-                        .addOption(OptionType.STRING, "material", "Name (material) of the item."),
-                Commands.slash("stop", "While the market is stopped no one will be able to buy or sell."),
-                Commands.slash("resume", "Resume the market functionalities."),
-                Commands.slash("seeinv", "See discord inventories of players by their discord ID.")
-                        .addOption(OptionType.STRING, "userid", "ID of the discord user"),
-                Commands.slash("seebal", "See discord balances of players by their discord ID.")
-                        .addOption(OptionType.STRING, "userid", "ID of the discord user")
-        ).queue();
+        List<CommandData> commandList = new ArrayList<>();
+
+        if (Config.getInstance().getOptionAlertEnabled()) {
+            commandList.add(Commands.slash("alert", "Set up an alert based on prices changes!")
+                    .addOption(OptionType.STRING, "material", "Material name of the item.")
+                    .addOption(OptionType.NUMBER, "price", "Price at which you will receive a mention."));
+
+            commandList.add(Commands.slash("alerts", "List all your current alerts."));
+            commandList.add(Commands.slash("remove-alert", "Remove an alert."));
+        }
+
+        commandList.add(Commands.slash("link", "Link a minecraft account to use all the functionalities"));
+        commandList.add(Commands.slash("balance", "Checks available balance."));
+        commandList.add(Commands.slash("inventory", "Check your inventory."));
+        commandList.add(Commands.slash("search", "Search an item by name to operate with it.")
+                .addOption(OptionType.STRING, "material", "Name (material) of the item."));
+        commandList.add(Commands.slash("stop", "While the market is stopped no one will be able to buy or sell."));
+        commandList.add(Commands.slash("resume", "Resume the market functionalities."));
+        commandList.add(Commands.slash("seeinv", "See discord inventories of players by their discord ID.")
+                .addOption(OptionType.STRING, "userid", "ID of the discord user"));
+        commandList.add(Commands.slash("seebal", "See discord balances of players by their discord ID.")
+                .addOption(OptionType.STRING, "userid", "ID of the discord user"));
+
+        jda.updateCommands().addCommands(commandList).queue();
 
         removeAllMessages();
 
@@ -105,25 +110,34 @@ public class DiscordBot {
             List<ItemComponent> componentList1 = new ArrayList<>();
             List<ItemComponent> componentList2 = new ArrayList<>();
 
-            componentList1.add(Button.primary("data", Emoji.fromFormatted("U+2754")));
+            if (Config.getInstance().getOptionWikiEnabled()) componentList1.add(Button.primary("data", Emoji.fromFormatted("U+2754")));
             componentList1.add(Button.secondary("search", Lang.get().message(Message.DISCORD_BUTTON_1)).withEmoji(Emoji.fromFormatted("U+1F50D")));
-            componentList1.add(Button.secondary("history", Lang.get().message(Message.DISCORD_BUTTON_2)).withEmoji(Emoji.fromFormatted("U+1F4DC")));
-            componentList1.add(Button.secondary("advanced", Lang.get().message(Message.DISCORD_BUTTON_3)).withEmoji(Emoji.fromFormatted("U+1F4CA")));
+            if (Config.getInstance().getOptionPersonalLogEnabled()) componentList1.add(Button.secondary("history", Lang.get().message(Message.DISCORD_BUTTON_2)).withEmoji(Emoji.fromFormatted("U+1F4DC")));
+            if (Config.getInstance().getOptionCPIEnabled() || Config.getInstance().getOptionAlertEnabled()) componentList1.add(Button.secondary("advanced", Lang.get().message(Message.DISCORD_BUTTON_3)).withEmoji(Emoji.fromFormatted("U+1F4CA")));
 
             componentList2.add(Button.secondary("link", Lang.get().message(Message.DISCORD_BUTTON_4)).withEmoji(Emoji.fromFormatted("U+1F517")));
             componentList2.add(Button.secondary("inventory", Lang.get().message(Message.DISCORD_BUTTON_5)).withEmoji(Emoji.fromFormatted("U+1F392")));
             componentList2.add(Button.secondary("balance", Lang.get().message(Message.DISCORD_BUTTON_6)).withEmoji(Emoji.fromFormatted("U+1FA99")));
-            componentList2.add(Button.secondary("manager", Lang.get().message(Message.DISCORD_BUTTON_7)).withEmoji(Emoji.fromFormatted("U+1F4BC")).asDisabled());
+            // componentList2.add(Button.secondary("manager", Lang.get().message(Message.DISCORD_BUTTON_7)).withEmoji(Emoji.fromFormatted("U+1F4BC")).asDisabled());
 
-            textChannel.sendMessageEmbeds(getEmbedded())
-                    .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(MainImage.getImage()), "image.png"))
-                    .addActionRow(getOptionsList())
-                    .addActionRow(componentList1)
-                    .addActionRow(componentList2)
-                    .queue(message -> {
-                        message.delete().queueAfter(60, TimeUnit.SECONDS);
-                    });
-
+            if (Config.getInstance().getOptionSelectionEnabled()) {
+                textChannel.sendMessageEmbeds(getEmbedded())
+                        .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(MainImage.getImage()), "image.png"))
+                        .addActionRow(getOptionsList())
+                        .addActionRow(componentList1)
+                        .addActionRow(componentList2)
+                        .queue(message -> {
+                            message.delete().queueAfter(60, TimeUnit.SECONDS);
+                        });
+            } else {
+                textChannel.sendMessageEmbeds(getEmbedded())
+                        .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(MainImage.getImage()), "image.png"))
+                        .addActionRow(componentList1)
+                        .addActionRow(componentList2)
+                        .queue(message -> {
+                            message.delete().queueAfter(60, TimeUnit.SECONDS);
+                        });
+            }
         });
 
     }
@@ -136,15 +150,11 @@ public class DiscordBot {
 
         eb.setTitle(Lang.get().message(Message.DISCORD_MAIN_TITLE));
 
-        float avgChange = MarketManager.getInstance().getChange1h();;
-
-        eb.setDescription("Avg change (1h): " + RoundUtils.roundToTwo(avgChange) + "%");
-
         eb.setImage("attachment://image.png");
 
         eb.setFooter(Lang.get().message(Message.DISCORD_MAIN_FOOTER));
 
-        eb.setColor(getColorByValue(avgChange));
+        eb.setColor(getColorByValue(MarketManager.getInstance().getChange1h()));
 
         return eb.build();
     }
@@ -186,7 +196,7 @@ public class DiscordBot {
         }
 
         for (Item item : items)
-            builder.addOption(item.getName(), item.getIdentifier(), Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC) + " - Buy: " + Formatter.format(item.getPrice().getBuyPrice(), Style.ROUND_BASIC)+ " Sell: " + Formatter.format(item.getPrice().getSellPrice(), Style.ROUND_BASIC));
+            builder.addOption(item.getName(), item.getIdentifier(), Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC) + " - " + Lang.get().message(Message.DISCORD_BUY) + ": " + Formatter.format(item.getPrice().getBuyPrice(), Style.ROUND_BASIC)+ " " + Lang.get().message(Message.DISCORD_SELL) + ": " + Formatter.format(item.getPrice().getSellPrice(), Style.ROUND_BASIC));
 
         return builder.build();
     }
@@ -222,7 +232,7 @@ public class DiscordBot {
             if (textChannel == null) {
                 Nascraft.getInstance().getLogger().info("textChannel is null"); return;
             }
-            textChannel.sendMessage(":pause_button: Market paused! Will be resumed once the server gets online again.").queue();
+            textChannel.sendMessage(Lang.get().message(Message.DISCORD_MARKET_PAUSED)).queue();
         });
 
     }
@@ -233,11 +243,13 @@ public class DiscordBot {
 
         List<ItemComponent> timeComponents = new ArrayList<>();
 
-        timeComponents.add(Button.secondary("time" + item.getIdentifier(), "Change Time: ").asDisabled());
-        timeComponents.add(Button.secondary("time1" + item.getIdentifier(), "1 Day"));
-        timeComponents.add(Button.secondary("time2" + item.getIdentifier(), "1 Month"));
-        timeComponents.add(Button.secondary("time3" + item.getIdentifier(), "1 Year"));
-        timeComponents.add(Button.secondary("time4" + item.getIdentifier(), "All"));
+        if (Config.getInstance().getOptionGraphsEnabled()) {
+            timeComponents.add(Button.secondary("time" + item.getIdentifier(), Lang.get().message(Message.DISCORD_DETAILED_GRAPH_OF)).asDisabled());
+            timeComponents.add(Button.secondary("time1" + item.getIdentifier(), Lang.get().message(Message.DISCORD_1_DAY)));
+            timeComponents.add(Button.secondary("time2" + item.getIdentifier(), Lang.get().message(Message.DISCORD_1_MONTH)));
+            timeComponents.add(Button.secondary("time3" + item.getIdentifier(), Lang.get().message(Message.DISCORD_1_YEAR)));
+            timeComponents.add(Button.secondary("time4" + item.getIdentifier(), Lang.get().message(Message.DISCORD_ALL)));
+        }
 
         List<ItemComponent> componentList = new ArrayList<>();
 
@@ -246,7 +258,7 @@ public class DiscordBot {
             componentList.add(Button.success("b32" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(-32, discordBuyTax), Style.REDUCED_LENGTH)).asDisabled());
             componentList.add(Button.danger("s32" + item.getIdentifier(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(32, discordSellTax), Style.REDUCED_LENGTH)).asDisabled());
             componentList.add(Button.danger("s01" + item.getIdentifier(), lang.message(Message.DISCORD_SELL) + " 1 x " + Formatter.format(item.getPrice().getSellPrice(), Style.REDUCED_LENGTH)).asDisabled());
-            componentList.add(Button.secondary("info" + item.getIdentifier(), "Not linked!").withEmoji(Emoji.fromFormatted("U+1F517")));
+            componentList.add(Button.secondary("info" + item.getIdentifier(), Lang.get().message(Message.DISCORD_NOT_LINKED_SHORT)).withEmoji(Emoji.fromFormatted("U+1F517")));
         } else {
             componentList.add(Button.success("b01" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 1 x " + Formatter.format(item.getPrice().getBuyPrice(), Style.REDUCED_LENGTH)));
             componentList.add(Button.success("b32" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(-32, discordBuyTax), Style.REDUCED_LENGTH)));

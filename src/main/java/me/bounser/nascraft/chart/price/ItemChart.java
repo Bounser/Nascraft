@@ -3,6 +3,8 @@ package me.bounser.nascraft.chart.price;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
@@ -65,7 +67,7 @@ public class ItemChart {
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 null,
                 null,
-                "Price ($)",
+                Lang.get().message(Message.DISCORD_GRAPH_Y_LEFT),
                 priceData,
                 false,
                 false,
@@ -90,7 +92,7 @@ public class ItemChart {
 
         renderer1.setSeriesPaint(0, new Color(100, 200, 255));
 
-        NumberAxis rangeAxis2 = new NumberAxis("Volume");
+        NumberAxis rangeAxis2 = new NumberAxis(Lang.get().message(Message.DISCORD_GRAPH_Y_RIGHT));
 
         rangeAxis2.setUpperMargin(1.00);  // to leave room for price line
         plot.setRangeAxis(1, rangeAxis2);

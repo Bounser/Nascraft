@@ -86,6 +86,25 @@ discord-bot:
       # By default, we apply a reduced tax to persuade users to operate through discord.
       buy: 0.04
       sell: 0.05
+    options:
+      # Button to access to the discord wiki.
+      wiki:
+        enabled: true
+      # Both in-game commands and discord command/button.
+      alerts:
+        enabled: true
+      # Graphs of individual items (1 day, 1 month, 1 year, all)
+      detailed-graphs:
+        enabled: true
+      # Access with the button to the personal log of trades.
+      personal-log:
+        enabled: true
+      # Quick selection bar with the items of the main menu
+      selection_bar:
+        enabled: true
+      # Button to generate a graph with the evolution of the CPI inside advanced options
+      cpi:
+        enabled: true
 
 sell-wands:
   enabled: true

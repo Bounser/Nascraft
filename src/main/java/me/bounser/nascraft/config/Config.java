@@ -202,6 +202,18 @@ public class Config {
 
     public boolean getDiscordMenuEnabled() { return config.getBoolean("discord-bot.main-menu.enabled"); }
 
+    public boolean getOptionWikiEnabled() { return config.getBoolean("discord-bot.main-menu.options.wiki.enabled"); }
+
+    public boolean getOptionAlertEnabled() { return config.getBoolean("discord-bot.main-menu.options.alerts.enabled"); }
+
+    public boolean getOptionGraphsEnabled() { return config.getBoolean("discord-bot.main-menu.options.detailed-graphs.enabled"); }
+
+    public boolean getOptionPersonalLogEnabled() { return config.getBoolean("discord-bot.main-menu.options.personal-log.enabled"); }
+
+    public boolean getOptionSelectionEnabled() { return config.getBoolean("discord-bot.main-menu.options.selection_bar.enabled"); }
+
+    public boolean getOptionCPIEnabled() { return config.getBoolean("discord-bot.main-menu.options.cpi.enabled"); }
+
     public String getChannel() { return config.getString("discord-bot.main-menu.channel"); }
 
     public String getAdminRoleID() { return config.getString("discord-bot.admin-role-id"); }

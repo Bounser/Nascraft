@@ -1,9 +1,11 @@
 package me.bounser.nascraft.discord;
 
+import github.scarsz.discordsrv.DiscordSRV;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.discord.images.BalanceImage;
 import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.discord.images.InventoryImage;
@@ -17,7 +19,6 @@ import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.exceptions.ContextException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.FileUpload;
@@ -124,19 +125,42 @@ public class DiscordCommands extends ListenerAdapter {
 
             case "link":
 
-                if (LinkManager.getInstance().getUUID(event.getUser().getId()) != null) {
+                switch (LinkManager.getInstance().getLinkingMethod()) {
 
-                    event.reply(":link: Already linked! (With UUID " + LinkManager.getInstance().getUUID(event.getUser().getId()) + ")")
-                            .setEphemeral(true)
-                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
-                    return;
-                } else {
+                    case DISCORDSRV:
 
-                    event.reply(":link: Link your account using ``/link " + LinkManager.getInstance().startLinkingProcess(event.getUser().getId()) + "`` in-game!")
-                            .setEphemeral(true)
-                            .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                        if (DiscordSRV.getPlugin().getAccountLinkManager().getUuid(event.getUser().getId()) == null) {
+
+                            event.reply(Lang.get().message(Message.DISCORD_LINK_DISCORDSRV_EXTENSIVE))
+                                    .setEphemeral(true)
+                                    .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
+                        } else {
+
+                            event.reply( Lang.get().message(Message.DISCORD_LINK_DISCORDSRV_ALREADY, "[UUID]", DiscordSRV.getPlugin().getAccountLinkManager().getUuid(event.getUser().getId()).toString()))
+                                    .setEphemeral(true)
+                                    .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                        }
+                        return;
+
+                    case NATIVE:
+
+                        if (LinkManager.getInstance().getUUID(event.getUser().getId()) == null) {
+
+                            event.reply(Lang.get().message(Message.DISCORD_LINK_NATIVE_EXTENSIVE, "[CODE]", String.valueOf(LinkManager.getInstance().startLinkingProcess(event.getUser().getId()))))
+                                    .setEphemeral(true)
+                                    .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
+                        } else {
+
+                            event.reply(Lang.get().message(Message.DISCORD_LINK_NATIVE_ALREADY, "[NICKNAME]", DatabaseManager.get().getDatabase().getNickname(event.getUser().getId())))
+                                    .setEphemeral(true)
+                                    .addActionRow(Button.danger("unlink", Lang.get().message(Message.DISCORD_UNLINK_BUTTON)))
+                                    .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+
+                        }
+                        return;
                 }
-                break;
 
             case "balance":
 
@@ -151,23 +175,20 @@ public class DiscordCommands extends ListenerAdapter {
                     float brokerValue = 0;
                     double total = purse + inventory + brokerValue;
 
-                    String text =
-                            "\n> :green_circle: :dollar: **Purse** (Minecraft): ``" + Formatter.formatDouble(purse) +
-                                    "``\n> :yellow_circle: :school_satchel: **Discord Inventory**: ``" + Formatter.format(inventory, Style.ROUND_BASIC) +
-                                    "``\n> :red_circle: :man_office_worker: **Broker-Managed**: ``" + Formatter.format(brokerValue, Style.ROUND_BASIC) +
-                                    "``\n> \n" +
-                                    ">  :abacus: **Total**: ``" + Formatter.formatDouble(total) + "``\n";
+                    String report = Lang.get().message(Message.DISCORD_BALANCE_REPORT)
+                            .replace("[PURSE]", Formatter.formatDouble(purse))
+                            .replace("[INVENTORY-VALUE]", Formatter.format(inventory, Style.ROUND_BASIC))
+                            .replace("[TOTAL]", Formatter.formatDouble(total));
 
                     EmbedBuilder eb = new EmbedBuilder();
 
                     eb.setImage("attachment://image.png");
 
-                    eb.setTitle(":coin:  **Balance**:");
+                    eb.setTitle(Lang.get().message(Message.DISCORD_BALANCE_TITLE));
 
-                    eb.setFooter("Purse: " + RoundUtils.roundToOne((float) (purse*100/total)) + "% Inventory: " + RoundUtils.roundToOne((float) (inventory*100/total)) + "% Broker: " + RoundUtils.roundToOne((float) (brokerValue*100/total)) + "%");
+                    eb.setFooter(Lang.get().message(Message.DISCORD_PURSE) + ": " + RoundUtils.roundToOne((float) (purse*100/total)) + "% " + Lang.get().message(Message.DISCORD_INVENTORY) + ": " + RoundUtils.roundToOne((float) (inventory*100/total)) + "%");
 
-                    eb.setDescription(text);
-
+                    eb.setDescription(report);
 
                     eb.setColor(DiscordBot.mixColors(new Color(100,250,100),
                             new Color(250,250,100),
@@ -180,7 +201,7 @@ public class DiscordCommands extends ListenerAdapter {
                             .queue(message -> message.deleteOriginal().queueAfter(15, TimeUnit.SECONDS));
 
                 } else
-                    event.reply(":x: You don't have any account linked!")
+                    event.reply(Lang.get().message(Message.DISCORD_NOT_LINKED))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
 
@@ -189,7 +210,7 @@ public class DiscordCommands extends ListenerAdapter {
             case "inventory":
 
                 if (LinkManager.getInstance().getUUID(event.getUser().getId()) == null) {
-                    event.reply(":x: You don't have any account linked!")
+                    event.reply(Lang.get().message(Message.DISCORD_NOT_LINKED))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
@@ -224,7 +245,7 @@ public class DiscordCommands extends ListenerAdapter {
                 }
 
                 if (itemSearched == null) {
-                    event.reply("Item not recognized!")
+                    event.reply(Lang.get().message(Message.DISCORD_MATERIAL_NOT_RECOGNIZED))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                 } else {
@@ -236,7 +257,7 @@ public class DiscordCommands extends ListenerAdapter {
             case "stop":
             case "resume":
                 if (!event.getMember().getRoles().stream().anyMatch(role -> role.getId().equals(Config.getInstance().getAdminRoleID()))) {
-                    event.reply(":exclamation: You are not allowed to use this command!")
+                    event.reply(Lang.get().message(Message.DISCORD_NOT_ALLOWED_COMMAND))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
@@ -271,7 +292,7 @@ public class DiscordCommands extends ListenerAdapter {
             case "seebal":
 
                 if (!event.getMember().getRoles().stream().anyMatch(role -> role.getId().equals(Config.getInstance().getAdminRoleID()))) {
-                    event.reply(":exclamation: You are not allowed to use this command!")
+                    event.reply(Lang.get().message(Message.DISCORD_NOT_ALLOWED_COMMAND))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;

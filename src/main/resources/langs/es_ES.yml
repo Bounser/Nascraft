@@ -116,8 +116,8 @@ discord_main_footer: "Selecciona un item para operar (Comprar/Vender) con el. \n
 discord_top_gainers: "Mayores ganadores"
 discord_most_popular: "Más populares"
 discord_big_dippers: "Grandes perdedores"
-discord_buy: "COMPRAR "
-discord_sell: "VENDER "
+discord_buy: "Com"
+discord_sell: "Ven"
 discord_outdated: ":warning: CUIDADO: Información desactualizada!"
 discord_day_high: "Alto del día: "
 discord_day_low: "Bajo del día: "
@@ -130,6 +130,16 @@ discord_buy_slot: "Comprar ranura por "
 discord_sell_all: "Vender Todo"
 discord_confirm: "Confirmar"
 
+discord_market_paused: ":pause_button: Mercado pausado! Se reanudará cuando el servidor vuelva a estar disponible."
+
+discord_detailed_graph_of: "Gráfico detallado:"
+discord_1_day: "1 Día"
+discord_1_month: "1 Mes"
+discord_1_year: "1 Año"
+discord_all: "Todo"
+
+discord_CPI_evolution: "Evolución Inflación"
+
 discord_button_1: "Buscar Objeto"
 discord_button_2: "Historial"
 discord_button_3: "Avanzado"
@@ -137,6 +147,9 @@ discord_button_4: "Enlazar cuenta"
 discord_button_5: "Inventario"
 discord_button_6: "Balance"
 discord_button_7: "Brokers"
+
+discord_graph_Y_left: "Precio (€)"
+discord_graph_Y_right: "Volumen"
 
 discord_wiki: "# :information_source: Información del mercado\n> En este canal podrás **comprar/vender objetos y muchas otras cosas sin estar dentro del juego!** Para empezar a usarlo debes enlazar tu cuenta, para hacerlo presiona el botón :link: **Enlazar cuenta** y sigue las instrucciones.\n## Haz click en una categoría para aprender más."
 discord_wiki_1: "Inventario"
@@ -187,6 +200,42 @@ discord_alert_already_listed: "¡Ese item ya esta en tu lista!"
 discord_alert_reached_segment: ":bell: [EMOJI] Alerta alcanzada para: ``[MATERIAL] ([PRICE1])`` con precio actual: ``[PRICE2]``"
 discord_alert_not_in_watchlist: ":x: Ese item no esta en tu lista de seguimiento."
 discord_alert_removed: ":no_bell: Alerta para **[MATERIAL]** eliminada."
+
+discord_link_discordsrv: ":link: ¡Usa ``/link `` dentro del juego para comenzar el proceso de enlazado!"
+discord_link_native: ":link: ¡Enlaza tu cuenta usando ``/link [CODE]`` dentro del juego!"
+discord_link_discordsrv_extensive: ":link: Para interactuar con el mercado debes enlazar tu cuenta de minecraft y discord.\nPara comenzar el proceso usa ``/discord link`` dentro del juego!"
+discord_link_discordsrv_already: ":link: Tienes tu cuenta vinculada con el usuario: ``[UUID]``"
+discord_link_native_extensive: ":link: Para interactuar con el mercado debes enlazar tu cuenta de minecraft y discord.\n> Link your account using ``/link [CODE]`` dentro del juego!"
+discord_link_native_already: ":link: Tienes tu cuenta vinculada con el usuario: ``[NICKNAME]``"
+discord_unlink_button: "Desvincular cuenta"
+discord_unlinked: ":link: Te has desvinculado del usuario ``[NICKNAME]``"
+discord_already_unlinked: ":exclamation: ¡No estás vinculado con nadie!"
+
+discord_market_closed: ":lock: ¡El mercado esta cerrado!"
+
+discord_buy_feedback: ":inbox_tray: Has comprado **[QUANTITY]** de **[ALIAS]** por **[WORTH]**\n\n:coin: Ahora dispones de: **[BALANCE]**"
+discord_buy_more_feedback: ":inbox_tray: Has comprado **[QUANTITY]** de **[ALIAS]** por **[WORTH]** ([WORTH-EACH] cada uno)\n\n:coin: Ahora dispones de: **[BALANCE]**"
+
+discord_not_enough_items: ":x: ¡No tienes suficiente de este item en tu inventario!"
+discord_sell_feedback: ":outbox_tray: Has vendido **[QUANTITY]** de **[ALIAS]** por **[WORTH]**\n\n:coin: Ahora dispones de: **[BALANCE]**"
+discord_sell_more_feedback: ":outbox_tray: Has vendido **[QUANTITY]** de **[ALIAS]** por **[WORTH]** ([WORTH-EACH] each)\n\n:coin: Ahora dispones de: **[BALANCE]**"
+discord_sold_everything: "Acabas de vender todo por: **[VALUE]**"
+
+discord_not_enough_slot: ":x: ¡No tienes suficiente dinero para comprar otra ranura! Necesitas mínimo **[PRICE]**"
+discord_already_max_slots: ":x: ¡Ya tienes el numero máximo de ranuras disponibles!"
+discord_slot_bought: "¡Ranura nº[NUM] comprada!"
+
+discord_trade_history_title: ":scroll: **Historial:** Página [PAGE] ([NUM-TRADES]/15)"
+
+discord_balance_title: ":coin:  **Balance**:"
+discord_balance_report: "\n> :green_circle: :dollar: **Dinero** (Minecraft): ``[PURSE]``\n> :yellow_circle: :school_satchel: **Inventario de discord**: ``[INVENTORY-VALUE]``\n>\n> :abacus: **Total**: ``[TOTAL]``\n"
+discord_purse: "Dinero"
+discord_inventory: "Inventario"
+
+discord_material_to_operate: "Material con el que deseas operar"
+discord_material_not_recognized: ":x: ¡Objeto no reconocido!"
+
+discord_not_allowed_command: ":exclamation: ¡No puedes ejectuar este comando!"
 
 # LAYOUT TEXTS:
 # Main title.

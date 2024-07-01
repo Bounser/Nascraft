@@ -131,7 +131,7 @@ public class DiscordButtons extends ListenerAdapter {
                 for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
                     builder.addOption(item.getName(), "alert-" + item.getIdentifier(),
                             Lang.get().message(Message.DISCORD_ALERT_AT_PRICE)
-                                    .replace("PRICE", Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC)));
+                                    .replace("[PRICE]", Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC)));
 
                 event.reply(Lang.get().message(Message.DISCORD_ALERT_REMOVE_SELECT))
                         .setEphemeral(true)
@@ -145,11 +145,11 @@ public class DiscordButtons extends ListenerAdapter {
 
                 // componentList.add(Button.secondary("limit", "Limit orders").withEmoji(Emoji.fromFormatted("U+1F3AF")).asDisabled());
                 // componentList.add(Button.secondary("opensession", "Open session").withEmoji(Emoji.fromFormatted("U+1F5A5")).asDisabled());
-                componentList.add(Button.secondary("alerts", Lang.get().message(Message.DISCORD_ALERTS_NAME)).withEmoji(Emoji.fromFormatted("U+1F514")));
+                if (Config.getInstance().getOptionAlertEnabled()) componentList.add(Button.secondary("alerts", Lang.get().message(Message.DISCORD_ALERTS_NAME)).withEmoji(Emoji.fromFormatted("U+1F514")));
                 //componentList.add(Button.secondary("ositions", "Open positions").withEmoji(Emoji.fromFormatted("U+231B")).asDisabled());
-                componentList.add(Button.secondary("cpi", "CPI Evolution").withEmoji(Emoji.fromFormatted("U+1F4C8")));
+                if (Config.getInstance().getOptionCPIEnabled()) componentList.add(Button.secondary("cpi", Lang.get().message(Message.DISCORD_CPI_EVOLUTION)).withEmoji(Emoji.fromFormatted("U+1F4C8")));
 
-                event.reply(":bar_chart: Advanced Mode: Select an option.")
+                event.reply(".")
                         .addActionRow(componentList)
                         .setEphemeral(true)
                         .queue();
@@ -217,35 +217,31 @@ public class DiscordButtons extends ListenerAdapter {
 
                         if (DiscordSRV.getPlugin().getAccountLinkManager().getUuid(event.getUser().getId()) == null) {
 
-                            event.reply(":link: To be able to interact with the market you have to link your minecraft and discord's account." +
-                                            "\nTo start the process use ``/discord link`` in-game!")
+                            event.reply(Lang.get().message(Message.DISCORD_LINK_DISCORDSRV_EXTENSIVE))
                                     .setEphemeral(true)
                                     .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
 
                         } else {
 
-                            event.reply(":link: You have your account linked with the user: ``" + DiscordSRV.getPlugin().getAccountLinkManager().getUuid(event.getUser().getId()) + "``")
+                            event.reply( Lang.get().message(Message.DISCORD_LINK_DISCORDSRV_ALREADY, "[UUID]", DiscordSRV.getPlugin().getAccountLinkManager().getUuid(event.getUser().getId()).toString()))
                                     .setEphemeral(true)
                                     .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
-
                         }
-
                         return;
 
                     case NATIVE:
 
                         if (LinkManager.getInstance().getUUID(event.getUser().getId()) == null) {
 
-                            event.reply(":link: To be able to interact with the market you have to link your minecraft and discord's account." +
-                                            "\nLink your account using ``/link " + LinkManager.getInstance().startLinkingProcess(event.getUser().getId()) + "`` in-game!")
+                            event.reply(Lang.get().message(Message.DISCORD_LINK_NATIVE_EXTENSIVE, "[CODE]", String.valueOf(LinkManager.getInstance().startLinkingProcess(event.getUser().getId()))))
                                     .setEphemeral(true)
                                     .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
 
                         } else {
 
-                            event.reply(":link: You have your account linked with the user: ``" + database.getNickname(event.getUser().getId()) + "``")
+                            event.reply(Lang.get().message(Message.DISCORD_LINK_NATIVE_ALREADY, "[NICKNAME]", database.getNickname(event.getUser().getId())))
                                     .setEphemeral(true)
-                                    .addActionRow(Button.danger("unlink", "Unlink account"))
+                                    .addActionRow(Button.danger("unlink", Lang.get().message(Message.DISCORD_UNLINK_BUTTON)))
                                     .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
 
                         }
@@ -261,9 +257,9 @@ public class DiscordButtons extends ListenerAdapter {
                 String nickname = database.getNickname(event.getUser().getId());
                 String text;
                 if (LinkManager.getInstance().unlink(event.getUser().getId())) {
-                    text = ":link: You have un-linked your account from ``" + nickname + "``";
+                    text = Lang.get().message(Message.DISCORD_UNLINKED, "[NICKNAME]", nickname);
                 } else {
-                    text = ":exclamation: You are already not linked!";
+                    text = Lang.get().message(Message.DISCORD_ALREADY_UNLINKED);
                 }
 
                 event.reply(text)
@@ -275,7 +271,7 @@ public class DiscordButtons extends ListenerAdapter {
             case "search":
 
                 TextInput material2 = TextInput.create("material", Lang.get().message(Message.MATERIAL), TextInputStyle.SHORT)
-                        .setPlaceholder("Material of the item you want to operate with.")
+                        .setPlaceholder(Lang.get().message(Message.DISCORD_MATERIAL_TO_OPERATE))
                         .setRequiredRange(1, 40)
                         .build();
 
@@ -332,14 +328,13 @@ public class DiscordButtons extends ListenerAdapter {
             switch (LinkManager.getInstance().getLinkingMethod()) {
 
                 case DISCORDSRV:
-                    event.reply(":link: Use ``/link `` in-game to start the linking process!")
+                    event.reply(Lang.get().message(Message.DISCORD_LINK_DISCORDSRV))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
 
-
                 case NATIVE:
-                    event.reply(":link: Link your account using ``/link " + LinkManager.getInstance().startLinkingProcess(event.getUser().getId()) + "`` in-game!")
+                    event.reply(Lang.get().message(Message.DISCORD_LINK_NATIVE, "[CODE]", String.valueOf(LinkManager.getInstance().startLinkingProcess(event.getUser().getId()))))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     return;
@@ -382,14 +377,14 @@ public class DiscordButtons extends ListenerAdapter {
             case "sellallconfirmed":
 
                 if (!MarketManager.getInstance().getActive()) {
-                    event.reply(":lock: Market is currently closed!")
+                    event.reply(Lang.get().message(Message.DISCORD_MARKET_CLOSED))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS));
                     return;
                 }
 
                 DiscordInventories.getInstance().getInventory(uuid).sellAll(
-                        value -> event.reply("You just sold everything for: **" + Formatter.format(value, Style.ROUND_BASIC) + "**")
+                        value -> event.reply( Lang.get().message(Message.DISCORD_SOLD_EVERYTHING, "[VALUE]", Formatter.format(value, Style.ROUND_BASIC)))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS))
                 );
@@ -403,23 +398,29 @@ public class DiscordButtons extends ListenerAdapter {
                 float brokerValue = 0;
                 double total = purse + inventory + brokerValue;
 
+                String report = Lang.get().message(Message.DISCORD_BALANCE_REPORT)
+                        .replace("[PURSE]", Formatter.formatDouble(purse))
+                        .replace("[INVENTORY-VALUE]", Formatter.format(inventory, Style.ROUND_BASIC))
+                        .replace("[TOTAL]", Formatter.formatDouble(total));
+
+                /*
                 String text =
                         "\n> :green_circle: :dollar: **Purse** (Minecraft): ``" + Formatter.formatDouble(purse) +
                         "``\n> :yellow_circle: :school_satchel: **Discord Inventory**: ``" + Formatter.format(inventory, Style.ROUND_BASIC) +
                         "``\n> :red_circle: :man_office_worker: **Broker-Managed**: ``" + Formatter.format(brokerValue, Style.ROUND_BASIC) +
                         "``\n> \n" +
                         ">  :abacus: **Total**: ``" + Formatter.formatDouble(total) + "``\n";
+                        */
 
                 EmbedBuilder eb = new EmbedBuilder();
 
                 eb.setImage("attachment://image.png");
 
-                eb.setTitle(":coin:  **Balance**:");
+                eb.setTitle(Lang.get().message(Message.DISCORD_BALANCE_TITLE));
 
-                eb.setFooter("Purse: " + RoundUtils.roundToOne((float) (purse*100/total)) + "% Inventory: " + RoundUtils.roundToOne((float) (inventory*100/total)) + "% Broker: " + RoundUtils.roundToOne((float) (brokerValue*100/total)) + "%");
+                eb.setFooter(Lang.get().message(Message.DISCORD_PURSE) + ": " + RoundUtils.roundToOne((float) (purse*100/total)) + "% " + Lang.get().message(Message.DISCORD_INVENTORY) + ": " + RoundUtils.roundToOne((float) (inventory*100/total)) + "%");
 
-                eb.setDescription(text);
-
+                eb.setDescription(report);
 
                 eb.setColor(DiscordBot.mixColors(new Color(100,250,100),
                                       new Color(250,250,100),
@@ -448,15 +449,17 @@ public class DiscordButtons extends ListenerAdapter {
 
                 List<Trade> trades = database.retrieveTrades(uuid, 15*offset);
 
-                String history = ":scroll: **Trade history:** Page " +  (1 + offset)  + " (" + (trades.size() == 16 ? 15 : trades.size()) + "/15)\n";
+                String history = Lang.get().message(Message.DISCORD_TRADE_HISTORY_TITLE)
+                        .replace("[PAGE]", String.valueOf(1+offset))
+                        .replace("[NUM-TRADES]", String.valueOf(trades.size() == 16 ? 15 : trades.size())) + "\n";
 
                 for (Trade trade : trades) {
 
                     if (trade.getItem() != null) {
                         if (trade.isBuy())
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **BUY " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **-" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **" + Lang.get().message(Message.DISCORD_BUY) + " " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **-" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
                         else
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **SELL " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **+" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **" + Lang.get().message(Message.DISCORD_SELL) + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **+" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
 
                         if (trade.throughDiscord()) {
                             history = history + " (Discord)";
@@ -514,7 +517,7 @@ public class DiscordButtons extends ListenerAdapter {
         }
 
         if (!MarketManager.getInstance().getActive()) {
-            event.reply(":lock: Market is currently closed!")
+            event.reply(Lang.get().message(Message.DISCORD_MARKET_CLOSED))
                     .setEphemeral(true)
                     .queue(message -> message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS));
             return;
@@ -569,11 +572,18 @@ public class DiscordButtons extends ListenerAdapter {
 
                 String buyText;
                 if (quantity == 1) {
-                    buyText = ":inbox_tray: You just bought **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_BASIC) + "**" +
-                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
+                    buyText = Lang.get().message(Message.DISCORD_BUY_FEEDBACK)
+                            .replace("[QUANTITY]", String.valueOf(quantity))
+                            .replace("[ALIAS]", item.getName())
+                            .replace("[WORTH]", Formatter.format(value, Style.ROUND_BASIC))
+                            .replace("[BALANCE]", Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC));
                 } else {
-                    buyText = ":inbox_tray: You just bought **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_BASIC) + "** (" + Formatter.format(value/quantity, Style.ROUND_BASIC) + " each)" +
-                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
+                    buyText = Lang.get().message(Message.DISCORD_BUY_FEEDBACK)
+                            .replace("[QUANTITY]", String.valueOf(quantity))
+                            .replace("[ALIAS]", item.getName())
+                            .replace("[WORTH]", Formatter.format(value, Style.ROUND_BASIC))
+                            .replace("[BALANCE]", Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC))
+                            .replace("[WORTH-EACH]", Formatter.format(value/quantity, Style.ROUND_BASIC));
                 }
 
                 Trade buyTrade = new Trade(item, LocalDateTime.now(), value, quantity, true, true, uuid);
@@ -593,7 +603,7 @@ public class DiscordButtons extends ListenerAdapter {
             case "s":
 
                 if (!discordInventory.hasItem(item, quantity)) {
-                    event.reply(":x: You don't have this item in your discord inventory!")
+                    event.reply(Lang.get().message(Message.DISCORD_NOT_ENOUGH_ITEMS))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
 
@@ -606,11 +616,18 @@ public class DiscordButtons extends ListenerAdapter {
 
                 String sellText;
                 if(quantity == 1) {
-                    sellText = ":outbox_tray: You just sold **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_BASIC) + "**" +
-                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
+                    sellText = Lang.get().message(Message.DISCORD_SELL_FEEDBACK)
+                            .replace("[QUANTITY]", String.valueOf(quantity))
+                            .replace("[ALIAS]", item.getName())
+                            .replace("[WORTH]", Formatter.format(value, Style.ROUND_BASIC))
+                            .replace("[BALANCE]", Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC));
                 } else {
-                    sellText = ":outbox_tray: You just sold **" + quantity + "** of **" + item.getName() + "** worth **" + Formatter.format(value, Style.ROUND_BASIC) + "** (" + Formatter.format(value/quantity, Style.ROUND_BASIC) + " each)" +
-                            "\n\n:coin: Your balance is now: **" + Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC) + "**";
+                    sellText = Lang.get().message(Message.DISCORD_SELL_MORE_FEEDBACK)
+                            .replace("[QUANTITY]", String.valueOf(quantity))
+                            .replace("[ALIAS]", item.getName())
+                            .replace("[WORTH]", Formatter.format(value, Style.ROUND_BASIC))
+                            .replace("[BALANCE]", Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC))
+                            .replace("[WORTH-EACH]", Formatter.format(value/quantity, Style.ROUND_BASIC));
                 }
 
                 Trade sellTrade = new Trade(item, LocalDateTime.now(), value, quantity, false, true, uuid);
@@ -633,14 +650,14 @@ public class DiscordButtons extends ListenerAdapter {
 
                 if (balance < price) {
 
-                    event.reply(":x: You don't have enough money to buy another slot! You need **" +  Formatter.format(price, Style.ROUND_BASIC) + "**")
+                    event.reply(Lang.get().message(Message.DISCORD_NOT_ENOUGH_SLOT, "[PRICE]", Formatter.format(price, Style.ROUND_BASIC)))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
                     return;
                 }
 
                 if (discordInventory.getCapacity() >= 40) {
-                    event.reply(":x: You already have bought the maximum number of slots!")
+                    event.reply(Lang.get().message(Message.DISCORD_ALREADY_MAX_SLOTS))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
                     return;
@@ -650,7 +667,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                 discordInventory.increaseCapacity();
 
-                event.getInteraction().editComponents().setActionRow(Button.success("info", "Slot nº" + discordInventory.getCapacity() + " bought!").asDisabled().withEmoji(Emoji.fromFormatted("U+2705"))).queue();
+                event.getInteraction().editComponents().setActionRow(Button.success("info", Lang.get().message(Message.DISCORD_SLOT_BOUGHT, "[NUM]", String.valueOf(discordInventory.getCapacity()))).asDisabled().withEmoji(Emoji.fromFormatted("U+2705"))).queue();
 
         }
     }

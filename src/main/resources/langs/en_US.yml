@@ -116,8 +116,8 @@ discord_main_footer: "Select an item to get more details and to operate (Buy/sel
 discord_top_gainers: "Top gainers"
 discord_most_popular: "Most popular"
 discord_big_dippers: "Big dippers"
-discord_buy: "BUY "
-discord_sell: "SELL "
+discord_buy: "Buy"
+discord_sell: "Sell"
 discord_outdated: ":warning: Caution: Information outdated!"
 discord_day_high: "1 day high: "
 discord_day_low: "1 day low: "
@@ -130,6 +130,16 @@ discord_buy_slot: "Buy slot for "
 discord_sell_all: "Sell All"
 discord_confirm: "Confirm"
 
+discord_market_paused: ":pause_button: Market paused! Will be resumed once the server gets online again."
+
+discord_detailed_graph_of: "Detailed graph of"
+discord_1_day: "1 Day"
+discord_1_month: "1 Month"
+discord_1_year: "1 Year"
+discord_all: "All"
+
+discord_CPI_evolution: "CPI Evolution"
+
 discord_button_1: "Search Item"
 discord_button_2: "Trades History"
 discord_button_3: "Advanced"
@@ -137,6 +147,9 @@ discord_button_4: "Link Account"
 discord_button_5: "Inventory"
 discord_button_6: "Balance"
 discord_button_7: "Brokers"
+
+discord_graph_Y_left: "Price ($)"
+discord_graph_Y_right: "Volume"
 
 discord_wiki: "# :information_source: Market information\n> Using this channel you will be able to **buy/sell items and much more without being in the game!** To start using this you have to link your discord account, to do so just press the :link: **Account linking** button and  follow instructions.\n## Click on a category to learn more"
 discord_wiki_1: "Inventory"
@@ -187,6 +200,43 @@ discord_alert_already_listed: "That item is already on you watchlist!"
 discord_alert_reached_segment: ":bell: [EMOJI] Alert reached for item: ``[MATERIAL] ([PRICE1])`` with current price: ``[PRICE2]``"
 discord_alert_not_in_watchlist: ":x: Item is not in your watchlist."
 discord_alert_removed: ":no_bell: Alert for **[MATERIAL]** removed."
+
+discord_link_discordsrv: ":link: Use ``/link `` in-game to start the linking process!"
+discord_link_native: ":link: Link your account using ``/link [CODE]`` in-game!"
+discord_link_discordsrv_extensive: ":link: To be able to interact with the market you have to link your minecraft and discord's account.\nTo start the process use ``/discord link`` in-game!"
+discord_link_discordsrv_already: ":link: You have your account linked with the user: ``[UUID]``"
+discord_link_native_extensive: ":link: To be able to interact with the market you have to link your minecraft and discord's account.\n> Link your account using ``/link [CODE]`` in-game!"
+discord_link_native_already: ":link: You have your account linked with the user: ``[NICKNAME]``"
+discord_unlink_button: "Unlink account"
+discord_unlinked: ":link: You have un-linked your account from ``[NICKNAME]``"
+discord_already_unlinked: ":exclamation: You are already not linked!"
+
+discord_market_closed: ":lock: Market is currently closed!"
+
+discord_buy_feedback: ":inbox_tray: You just bought **[QUANTITY]** of **[ALIAS]** worth **[WORTH]**\n\n:coin: Your balance is now: **[BALANCE]**"
+discord_buy_more_feedback: ":inbox_tray: You just bought **[QUANTITY]** of **[ALIAS]** worth **[WORTH]** ([WORTH-EACH] each)\n\n:coin: Your balance is now: **[BALANCE]**"
+
+discord_not_enough_items: ":x: You don't have enough of this item in your discord inventory!"
+
+discord_sell_feedback: ":outbox_tray: You just sold **[QUANTITY]** of **[ALIAS]** worth **[WORTH]**\n\n:coin: Your balance is now: **[BALANCE]**"
+discord_sell_more_feedback: ":outbox_tray: You just sold **[QUANTITY]** of **[ALIAS]** worth **[WORTH]** ([WORTH-EACH] each)\n\n:coin: Your balance is now: **[BALANCE]**"
+discord_sold_everything: "You just sold everything for: **[VALUE]**"
+
+discord_not_enough_slot: ":x: You don't have enough money to buy another slot! You need **[PRICE]**"
+discord_already_max_slots: ":x: You already have bought the maximum number of slots!"
+discord_slot_bought: "Slot nº[NUM] bought!"
+
+discord_trade_history_title: ":scroll: **Trade history:** Page [PAGE] ([NUM-TRADES]/15)"
+
+discord_balance_title: ":coin:  **Balance**:"
+discord_balance_report: "\n> :green_circle: :dollar: **Purse** (Minecraft): ``[PURSE]``\n> :yellow_circle: :school_satchel: **Discord Inventory**: ``[INVENTORY-VALUE]``\n>\n> :abacus: **Total**: ``[TOTAL]``\n"
+discord_purse: "Purse"
+discord_inventory: "Inventory"
+
+discord_material_to_operate: "Material of the item you want to operate with"
+discord_material_not_recognized: ":x: Item not recognized!"
+
+discord_not_allowed_command: ":exclamation: You are not allowed to use this command!"
 
 # LAYOUT TEXTS:
 # Main title.
