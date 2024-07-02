@@ -3,6 +3,9 @@ package me.bounser.nascraft.sellwand;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
+import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -26,6 +29,7 @@ public class Wand {
     private final float multiplier;
     private final float maxProfit;
     private final int cooldown;
+    private final boolean glim;
 
     private final ItemStack itemStack;
 
@@ -33,19 +37,23 @@ public class Wand {
 
         this.name = name;
         this.material = material;
-        this.displayName = displayName;
+
+        Component displayNameComponent = MiniMessage.miniMessage().deserialize(displayName);
+        this.displayName = BukkitComponentSerializer.legacy().serialize(displayNameComponent);
 
         this.lore = new ArrayList<>();
-        for (String s : lore) {
-            this.lore.add(s.replace("&", "§"));
+        for (String line : lore) {
+            Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+            this.lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
         }
 
         this.defaultUses = uses;
         this.multiplier = multiplier;
         this.maxProfit = maxProfit;
         this.cooldown = cooldown;
+        this.glim = glim;
 
-        this.itemStack = generateItemStackOfNewWand(glim);
+        this.itemStack = generateItemStackOfNewWand();
     }
 
     public String getName() { return name; }
@@ -58,7 +66,7 @@ public class Wand {
 
     public int getCooldown() { return cooldown; }
 
-    public ItemStack generateItemStackOfNewWand(boolean glim) {
+    public ItemStack generateItemStackOfNewWand() {
 
         ItemStack wand = new ItemStack(material, 1);
 
