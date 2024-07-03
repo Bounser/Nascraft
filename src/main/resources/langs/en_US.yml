@@ -15,43 +15,45 @@ material: "Item Material"
 buy_message: "<gradient:#00E3FB:#F9ABFD>You just bought <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> worth </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
 sell_message: "<gradient:#00E3FB:#F9ABFD>You just sold <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> worth </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
 
-not_enough_money: "<gradient:#FB6363:#C4B3FD>You can't afford to pay that!</gradient>"
-not_enough_items: "<gradient:#FB6363:#C4B3FD>Not enough items to sell!</gradient>"
-not_enough_space: "<gradient:#FB6363:#C4B3FD>Not enough space in inventory!</gradient>"
-shop_closed: "<gradient:#FB6363:#C4B3FD>Error while buying: Shop is closed</gradient>"
+not_enough_money: "<gradient:#FB6363:#C4B3FD>✘ You can't afford to pay that!</gradient>"
+not_enough_items: "<gradient:#FB6363:#C4B3FD>✘ Not enough items to sell!</gradient>"
+not_enough_space: "<gradient:#FB6363:#C4B3FD>✘ Not enough space in inventory!</gradient>"
+shop_closed: "<gradient:#FB6363:#C4B3FD>✘ Error while buying: Shop is closed</gradient>"
 
 # Commands
-no_permission: "<gradient:#FB6363:#C4B3FD>Permission required.</gradient>"
+no_permission: "<gradient:#FB6363:#C4B3FD>✘ Permission required.</gradient>"
 click_to_confirm: "\n<gold>[ <gradient:#F5FFD5:#FFA200:#F5FFD5>Click here to confirm</gradient> ]</gold>\n"
 list_segment: "\n<gray>> <gradient:#FF00CD:#DA58FF>[MATERIAL] x [AMOUNT] = [WORTH]</gradient>"
 
 # nsellall
-sellall_everything_error: "<gradient:#FF0000:#FF7E7E:#FF0000>You don't have anything to sell!</gradient>"
+sellall_everything_error: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ You don't have anything to sell!</gradient>"
 sellall: "<gradient:#FF00CD:#DA58FF>You just sold <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[MATERIAL]</light_purple></bold> worth <green>[WORTH]</green></gradient>"
-sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>You don't have any [MATERIAL] to sell!</gradient>"
-sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>Material not recognized. Usage: /sellall [material]</gradient>"
+sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ You don't have any [MATERIAL] to sell!</gradient>"
+sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ Material not recognized. Usage: /sellall [material]</gradient>"
 sellall_estimated_value: "<gray>Estimated value:</gray> <green>[WORTH]</green>"
 
 # nsell
-sell_title: "&8&lSelling menu"
-sell_close: "&cCLOSE"
-sell_button_name: "&6SELL CONTENT"
-sell_button_lore: "&eSell for approximately: &l[WORTH]"
-sell_remove_item: "&cClick to remove from sell list"
+sell_title: "           <b><gradient:#12438c:#91196f>Selling menu</gradient></b>"
+sell_close: "<b><gradient:#ff0000:#ff3b05>CLOSE</gradient></b>"
+sell_button_name: "<b><gradient:#ffd857:#ff6f00>SELL CONTENT</gradient></b>"
+sell_button_lore: "<color:#85784d>Sell for approximately:</color> <b><gradient:#ffe869:#ffc745>[WORTH]</gradient></b>"
+sell_remove_item: "<u><color:#ff2424>⏵ Click to remove from sell list</color></u>"
+sell_help_title: "<b><gradient:#7f60ab:#ab3f7a>How does this work?</gradient></b>"
+sell_help_lore: "<color:#ab898d>Select all items you want to sell.</color>\n<color:#ab898d>Estimated value isn't guaranteed and will</color>\n<color:#ab898d>change once the operation is finished.</color>"
 sell_action_message: "<gradient:#FF00CD:#DA58FF>You just sold <bold><light_purple>[WORTH]</light_purple></bold> worth of items</gradient>"
-sell_item_not_allowed: "<gradient:#FB6363:#C4B3FD>That's not a valid item!</gradient>"
-sell_full: "<gradient:#FB6363:#C4B3FD>Sell inventory is full!</gradient>"
-sell_help_title: "&dHow does this work?"
-sell_help_lore: " \n&7Select all items you want to sell.\n \n&7Estimated value isn't guaranteed and will\n&7change once the operation is finished."
+sell_item_not_allowed: "<gradient:#FB6363:#C4B3FD>✘ That's not a valid item!</gradient>"
+sell_full: "<gradient:#FB6363:#C4B3FD>✘ Sell inventory is full!</gradient>"
+
 # sellhand
 sellhand_invalid: "<gradient:#FF0000:#FF7E7E:#FF0000>Hold a valid item!</gradient>"
-sellhand_error_hand: "<gradient:#FF0000:#FF7E7E:#FF0000>Error! Don't change your hand before confirming</gradient>"
+sellhand_error_hand: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ Error! Don't change your hand before confirming</gradient>"
 sellhand_estimated_value: "<gray>Estimated value:</gray> \n"
+
 # alert - Currently not activated.
 alert_invalid_use: "<gradient:#FB6363:#C4B3FD>Invalid use of command. /setalert [material] [price]</gradient>"
-alert_not_linked: "<gradient:#FB6363:#C4B3FD>You have to link your account to use this command!</gradient>"
+alert_not_linked: "<gradient:#FB6363:#C4B3FD>✘ You have to link your account to use this command!</gradient>"
 alert_in_watchlist: "<gradient:#FB6363:#C4B3FD>Item already on your watchlist.</gradient>"
-alert_invalid_price: "<gradient:#FB6363:#C4B3FD>Invalid use of command. Price must be a number. (Ex 120.90)</gradient>"
+alert_invalid_price: "<gradient:#FB6363:#C4B3FD>✘ Invalid use of command. Price must be a number. (Ex 120.90)</gradient>"
 alert_not_recognized: "<gradient:#FB6363:#C4B3FD>Item not recognized.</gradient>"
 alert_setup: "<gradient:#00E3FB:#F9ABFD>Alert setup correctly! You'll receive a DM when the price is reached.</gradient>"
 # alerts - Currently not activated.
@@ -64,32 +66,32 @@ alerts_list_segment: "\n&6> &l[MATERIAL] &r&eat price &l[WORTH]"
 sellwand_estimated_value: "<gradient:#FF00CD:#DA58FF>Estimated value:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
 sellwand_sold: "<gradient:#FF00CD:#DA58FF>Sold content for:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
 sellwand_sold_with_multiplier: "<gradient:#FF00CD:#DA58FF>Sold content for:</gradient> <light_purple>[INITIAL-WORTH] x [MULTIPLIER] = <bold>[WORTH]</bold></light_purple>"
-sellwand_ran_out: "<gradient:#FB6363:#C4B3FD>That sell wand doesn't have any more uses left.</gradient>"
-sellwand_nothing_to_sell: "<gradient:#FB6363:#C4B3FD>There's nothing to sell!</gradient>"
+sellwand_ran_out: "<gradient:#FB6363:#C4B3FD>✘ That sell wand doesn't have any more uses left.</gradient>"
+sellwand_nothing_to_sell: "<gradient:#FB6363:#C4B3FD>✘ There is nothing to sell!</gradient>"
 sellwand_cooldown: "<gradient:#FB6363:#C4B3FD>On cooldown, [TIME] left!</gradient>"
 sellwand_minutes: "[MINUTES] minutes and [SECONDS] seconds"
 sellwand_seconds: "[SECONDS] second(s)"
-sellwand_too_much: "<gradient:#FB6363:#C4B3FD>You can't sell that much with this wand!</gradient>"
+sellwand_too_much: "<gradient:#FB6363:#C4B3FD>✘ You can't sell that much with this wand!</gradient>"
 
 # LINK COMMAND
 
 link_already_linked: "<gradient:#FF00CD:#DA58FF>Already linked!</gradient>"
-link_wrong_use: "<gradient:#FB6363:#C4B3FD>Wrong use of the command!</gradient>"
-link_wrong_format:  "<gradient:#FB6363:#C4B3FD>Wrong code format!</gradient>"
-link_no_process_found: "<gradient:#FB6363:#C4B3FD>No linking process found with that code.</gradient>"
+link_wrong_use: "<gradient:#FB6363:#C4B3FD>✘ Wrong use of the command!</gradient>"
+link_wrong_format:  "<gradient:#FB6363:#C4B3FD>✘ Wrong code format!</gradient>"
+link_no_process_found: "<gradient:#FB6363:#C4B3FD>✘ No linking process found with that code.</gradient>"
 link_success: "<gradient:#FF00CD:#DA58FF>Linked successfully with user:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
 link_unlinked: "<gradient:#FF00CD:#DA58FF>You have been unlinked from user:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
 link_direct_message: ":link: Your discords account has been successfully linked to the minecraft user: ``[USER]``"
 
 # DISCORD COMMAND
 
-discordcmd_not_linked: "<gradient:#FB6363:#C4B3FD>You are not linked!</gradient>"
+discordcmd_not_linked: "<gradient:#FB6363:#C4B3FD>✘ You are not linked!</gradient>"
 discordcmd_linked: "<gradient:#FF00CD:#DA58FF>You are linked with:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
 
 # DISCORD INVENTORY
 
 disinv_title: "&lDiscord Inventory"
-disinv_cant_afford_expansion: "<gradient:#FB6363:#C4B3FD>You don't have enough money!</gradient>"
+disinv_cant_afford_expansion: "<gradient:#FB6363:#C4B3FD>✘ You don't have enough money!</gradient>"
 disinv_locked_title: "&c&lLOCKED"
 disinv_locked_lore: "&7Click to buy next slot for:\n&6[AMOUNT]"
 disinv_info_title: "&dDiscord Inventory"
@@ -138,7 +140,7 @@ discord_1_month: "1 Month"
 discord_1_year: "1 Year"
 discord_all: "All"
 
-discord_CPI_evolution: "CPI Evolution"
+discord_cpi_evolution: "CPI Evolution"
 
 discord_button_1: "Search Item"
 discord_button_2: "Trades History"
@@ -148,8 +150,8 @@ discord_button_5: "Inventory"
 discord_button_6: "Balance"
 discord_button_7: "Brokers"
 
-discord_graph_Y_left: "Price ($)"
-discord_graph_Y_right: "Volume"
+discord_graph_y_left: "Price ($)"
+discord_graph_y_right: "Volume"
 
 discord_wiki: "# :information_source: Market information\n> Using this channel you will be able to **buy/sell items and much more without being in the game!** To start using this you have to link your discord account, to do so just press the :link: **Account linking** button and  follow instructions.\n## Click on a category to learn more"
 discord_wiki_1: "Inventory"
@@ -249,3 +251,21 @@ advancedgui_sell: "Sell"
 advancedgui_price: "Price:"
 advancedgui_amount_selection: "Select amount:"
 advancedgui_trend: "Trend:"
+
+# Market GUI
+
+gui_main_menu_title: "        <b><gradient:#12438c:#91196f>Live Item Market</gradient></b>"
+
+gui_alerts_name_linked: "<gradient:#ffbf00:#ff4800>Alerts</gradient>"
+gui_alerts_lore_linked: " "
+
+gui_alerts_name_not_linked: "<st><gradient:#ffbf00:#ff4800>Alerts</gradient></st>"
+gui_alerts_lore_not_linked: " "
+
+gui_information_name: " "
+gui_information_lore: " "
+
+gui_favourites_name: " "
+gui_favourites_lore: " "
+
+gui_fillers_name: " "

@@ -45,6 +45,21 @@ commands:
     - 'sell'
     - 'sellall'
     - 'sellhand'
+  sell-menu:
+    size: 45
+    help:
+      enabled: true
+      slot: 4
+      texture: 'bc8ea1f51f253ff5142ca11ae45193a4ad8c3ab5e9c6eec8ba7a4fcb7bac40'
+    filler:
+      material: 'black_stained_glass_pane'
+    sell-button:
+      slot: 40
+      material: 'yellow_stained_glass_pane'
+    close-button:
+      enabled: true
+      slot: 8
+      material: 'red_stained_glass_pane'
 
 placeholders:
   # Number of decimals to display in prices.
@@ -115,48 +130,54 @@ sell-wands:
       # Recommended site to follow the format: https://webui.advntr.dev/
       display-name: '<b><gradient:#19e312:#a3e300>BASIC WAND</gradient></b>'
       lore:
-        - '<b><gradient:#00eeff:#2e69ff>RIGHT CLICK</gradient></b> <color:#8077ba>to estimate value.</color>'
-        - '<b><gradient:#ff383b:#ff2403>LEFT CLICK</gradient></b> <color:#8077ba>a container to</color>'
-        - '<color:#8077ba>sell all its content to the market!</color>'
+        - '<b><gradient:#00eeff:#2e69ff>⏵ RIGHT CLICK</gradient></b> <color:#517d58>to estimate value.</color>'
+        - '<b><gradient:#ff383b:#ff2403>⏵ LEFT CLICK</gradient></b> <color:#517d58>a container to</color>'
+        - '<color:#517d58>sell all its content to the market!</color>'
         - ' '
-        - '<color:#8077ba>Uses left:</color> <b><color:#19e312>[USES]</color></b>'
+        - '<color:#517d58>Uses left:</color> <b><color:#a3e300>[USES]</color></b>'
       # Maximum uses of the wand. Alternatively you can place a limit on
       # the quantity of the sells. See "MILLONAIRE WAND".
       # If you don't set any of these, the wand can be used without limits. (See "PERMANENT WAND").
       uses: 10
       # Permission to use this specific wand. If not defined, no permission will be required.
       permission: 'nascraft.wand.basic'
+
     permanent:
       material: 'blaze_rod'
       enchanted: true
       display-name: '<b><gradient:#e74cf5:#f51d41>PERMANENT WAND</gradient></b>'
       lore:
-        - '<b><gradient:#00eeff:#2e69ff>RIGHT CLICK</gradient></b> <color:#8077ba>to estimate value.</color>'
-        - '<b><gradient:#ff383b:#ff2403>LEFT CLICK</gradient></b> <color:#8077ba>a container to</color>'
+        - '<b><gradient:#00eeff:#2e69ff>⏵ RIGHT CLICK</gradient></b> <color:#8077ba>to estimate value.</color>'
+        - '<b><gradient:#ff383b:#ff2403>⏵ LEFT CLICK</gradient></b> <color:#8077ba>a container to</color>'
         - '<color:#8077ba>sell all its content to the market</color>'
         - '<color:#8077ba>for <b><color:#ff2403>50%</color></b> of its value.</color>'
-        - '<i><color:#343d66>5 minutes of cooldown between uses.</color></i>'
+        - '<i><color:#343d66>⌛ 5 minutes of cooldown between uses.</color></i>'
         - ' '
         - '<b><gradient:#f51d41:#e74cf5>UNLIMITED USES</gradient><b>'
       multiplier: 0.5
       # Set a minimum cooldown between uses in seconds.
       cooldown: 300 # 300/60 = 5 min of cooldown.
       permission: 'nascraft.wand.advanced'
+
     millionaire:
       material: 'blaze_rod'
       enchanted: true
       display-name: '<b><gradient:#f57e00:#eff551>MILLIONARIE WAND</gradient></b>'
       lore:
-        - '<b><gradient:#00eeff:#2e69ff>RIGHT CLICK</gradient></b> <color:#8077ba>to estimate value.</color>'
-        - '<b><gradient:#ff383b:#ff2403>LEFT CLICK</gradient></b> <color:#8077ba>a container to</color>'
-        - '<color:#8077ba>sell all its content to the market</color>'
-        - '<color:#8077ba>for <color:#eff551>150%</color> its value.</color>'
+        - '<b><gradient:#ff383b:#ff2403>⏵ LEFT CLICK</gradient></b> <color:#85784d>to estimate value.</color>'
+        - '<b><gradient:#00eeff:#2e69ff>⏵ RIGHT CLICK</gradient></b> <color:#85784d>a container to</color>'
+        - '<color:#85784d>sell all its content to the market</color>'
+        - '<color:#85784d>for <color:#eff551>150%</color> its value.</color>'
         - ' '
-        - '<color:#8077ba>Left to sell:</color> <b><gradient:#eff551:#f57e00>[PROFIT]</gradient></b>'
+        - '<color:#85784d>Left to sell:</color> <b><gradient:#eff551:#f57e00>[PROFIT-LEFT]</gradient></b>'
       # With this wand you can sell a maximum of 1.000.000$ (Including the multiplier) worth of items.
       max-profit: 1000000
       multiplier: 1.5
       permission: 'nascraft.wand.millonaire'
+      # Change which click will be used to each action. Use 'none' to disable.
+      # By default: sell: left estimate: right
+      sell: 'right'
+      estimate: 'left'
 
 # Verify whether the AdvancedGUI's layout is present, and if it is not, place it in the layout folder of AdvancedGUI.
 auto-resources-injection: true

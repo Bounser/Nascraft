@@ -1,5 +1,6 @@
 package me.bounser.nascraft.commands.sell.sellinv;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
@@ -7,6 +8,9 @@ import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.Item;
+import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -28,11 +32,11 @@ public class SellInvListener implements Listener {
     @EventHandler
     public void onClickInventory(InventoryClickEvent event) {
 
-        if (event.getView().getTopInventory().getSize() != 45 || !event.getView().getTitle().equals(Lang.get().message(Message.SELL_TITLE)) || event.getCurrentItem() == null) { return; }
+        Player player = (Player) event.getWhoClicked();
+
+        if (!player.hasMetadata("NascraftSell")) return;
 
         event.setCancelled(true);
-
-        Player player = (Player) event.getWhoClicked();
 
         if (event.getClickedInventory().getType() == InventoryType.PLAYER) {
 
@@ -140,11 +144,17 @@ public class SellInvListener implements Listener {
     @EventHandler
     public void onCloseInventory(InventoryCloseEvent event) {
 
-        if (!event.getView().getTitle().equals(Lang.get().message(Message.SELL_TITLE)) || playerItems.get(event.getPlayer()) == null)  return;
+        Player player = (Player) event.getPlayer();
 
-        for (ItemStack itemStack : playerItems.get(event.getPlayer())) { event.getPlayer().getInventory().addItem(itemStack); }
+        if (player.hasMetadata("NascraftSell")) {
+            player.removeMetadata("NascraftSell", Nascraft.getInstance());
 
-        playerItems.remove(event.getPlayer());
+            if (playerItems.containsKey(player)) {
+                for (ItemStack itemStack : playerItems.get(event.getPlayer())) { event.getPlayer().getInventory().addItem(itemStack); }
+
+                playerItems.remove(event.getPlayer());
+            }
+        }
     }
 
     public void renderInv(Inventory inventory, Player player) {
@@ -193,17 +203,20 @@ public class SellInvListener implements Listener {
 
         ItemMeta meta = clonedItem.getItemMeta();
 
+        Component remove = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.SELL_REMOVE_ITEM));
+        String removeLore = BukkitComponentSerializer.legacy().serialize(remove);
+
         if (meta.hasLore()) {
 
             List<String> lore = meta.getLore();
 
             lore.add("");
-            lore.add(Lang.get().message(Message.SELL_REMOVE_ITEM));
+            lore.add(removeLore);
 
             meta.setLore(lore);
 
         } else {
-            meta.setLore(Arrays.asList("", Lang.get().message(Message.SELL_REMOVE_ITEM)));
+            meta.setLore(Arrays.asList("", removeLore));
         }
 
         clonedItem.setItemMeta(meta);
@@ -217,7 +230,13 @@ public class SellInvListener implements Listener {
 
         ItemMeta meta = sellButton.getItemMeta();
 
-        meta.setLore(Arrays.asList(Lang.get().message(Message.SELL_BUTTON_LORE, Formatter.format(getSellInventoryValue(player), Style.ROUND_BASIC), "", "")));
+        List<String> lore = new ArrayList<>();
+        for (String line : Lang.get().message(Message.SELL_BUTTON_LORE, Formatter.format(getSellInventoryValue(player), Style.ROUND_BASIC), "", "").split("\\n")) {
+            Component loreLine = MiniMessage.miniMessage().deserialize(line);
+            lore.add(BukkitComponentSerializer.legacy().serialize(loreLine));
+        }
+
+        meta.setLore(lore);
 
         sellButton.setItemMeta(meta);
 
