@@ -1,6 +1,5 @@
 package me.bounser.nascraft.sellwand;
 
-import jdk.vm.ci.code.site.Mark;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
@@ -20,7 +19,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -69,8 +67,8 @@ public class WandListener implements Listener {
 
             event.setCancelled(true);
 
-            if (Config.getInstance().getSellWandsPermissionNeeded(wand.getName())) {
-                if (!event.getPlayer().hasPermission(Config.getInstance().getSellWandPermission(wand.getName()))) {
+            if (wand.getPermission() != null) {
+                if (!event.getPlayer().hasPermission(wand.getPermission())) {
                     Lang.get().message(Message.NO_PERMISSION);
                     return;
                 }
@@ -102,7 +100,8 @@ public class WandListener implements Listener {
 
             HashMap<Item, Float> valuableItems = new HashMap<>();
 
-            if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            // ESTIMATE
+            if (wand.getEstimateAction() != null && event.getAction().equals(wand.getEstimateAction())) {
 
                 for (ItemStack itemStack : inventory.getContents()) {
 
@@ -133,7 +132,8 @@ public class WandListener implements Listener {
 
             ////////////////////////////////////////////////////////////////
 
-            if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
+            // SELL
+            if (wand.getSellAction() != null &&  event.getAction().equals(wand.getSellAction())) {
 
                 NamespacedKey keyUses = new NamespacedKey(Nascraft.getInstance(), "wand-uses");
 
@@ -147,7 +147,6 @@ public class WandListener implements Listener {
                         Lang.get().message(event.getPlayer(), Message.SELLWAND_RAN_OUT);
                         return;
                     }
-
                 }
 
                 NamespacedKey keyMaxProfit = new NamespacedKey(Nascraft.getInstance(), "wand-max-profit");
@@ -204,14 +203,8 @@ public class WandListener implements Listener {
                     meta.getPersistentDataContainer().set(keyMaxProfit, PersistentDataType.FLOAT, maxProfitLeft);
                 }
 
-                List<String> replacedLore = new ArrayList<>();
+                meta.setLore(wand.getLore(uses, maxProfitLeft));
 
-                for (String loreString : wand.getLore())
-                    replacedLore.add(loreString
-                            .replace("[USES]", String.valueOf(uses))
-                            .replace("[PROFIT]", Formatter.format(maxProfitLeft, Style.ROUND_BASIC)));
-
-                meta.setLore(replacedLore);
                 event.getItem().setItemMeta(meta);
 
                 if (wand.getMultiplier() != 1) {
