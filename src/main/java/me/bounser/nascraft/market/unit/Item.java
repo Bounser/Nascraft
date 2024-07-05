@@ -7,7 +7,6 @@ import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.api.events.BuyTradableEvent;
 import me.bounser.nascraft.api.events.SellTradableEvent;
 import me.bounser.nascraft.database.commands.resources.Trade;
-import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.DiscordLog;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
@@ -17,6 +16,10 @@ import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.stats.ItemStats;
+import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -32,6 +35,7 @@ public class Item {
     private ItemStack itemStack;
     private final String identifier;
     private String alias;
+    private String formatedAlias;
     private final BufferedImage icon;
     private Category category;
 
@@ -57,7 +61,16 @@ public class Item {
 
         this.itemStack = itemStack;
         this.identifier = identifier;
-        this.alias = alias;
+
+        Component miniMessageAlias = MiniMessage.miniMessage().deserialize(alias);
+
+        this.alias = PlainTextComponentSerializer.plainText().serialize(miniMessageAlias);;
+        this.formatedAlias = BukkitComponentSerializer.legacy().serialize(miniMessageAlias);
+
+        if (alias.equals(formatedAlias)) {
+            Component defaultMiniMessageAlias = MiniMessage.miniMessage().deserialize("<gradient:#8ae6ff:#ebffc4>" + alias + "</gradient>");
+            formatedAlias = BukkitComponentSerializer.legacy().serialize(defaultMiniMessageAlias);
+        }
 
         this.price = new Price(
                 this,
@@ -105,6 +118,8 @@ public class Item {
     }
 
     public String getName() { return alias; }
+
+    public String getFormatedName() { return formatedAlias; }
 
 
     public float buyPrice(int amount) {

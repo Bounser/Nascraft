@@ -2,6 +2,10 @@ package me.bounser.nascraft.market.resources;
 
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
+import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Material;
 
 import java.util.ArrayList;
@@ -15,13 +19,19 @@ public class Category {
 
     private String displayName;
 
+    private String formattedDisplayName;
+
     private Material material;
 
     private List<Item> items = new ArrayList<>();
 
     public Category(String identifier) {
         this.identifier = identifier;
-        this.displayName = Config.getInstance().getDisplayName(this);
+
+        Component miniMessageDisplayName = MiniMessage.miniMessage().deserialize(Config.getInstance().getDisplayName(this));
+
+        this.formattedDisplayName = BukkitComponentSerializer.legacy().serialize(miniMessageDisplayName);
+        this.displayName = PlainTextComponentSerializer.plainText().serialize(miniMessageDisplayName);
         this.material = Config.getInstance().getMaterialOfCategory(this);
     }
 
@@ -44,6 +54,8 @@ public class Category {
     public String getIdentifier() { return identifier; }
 
     public String getDisplayName() { return displayName; }
+
+    public String getFormattedDisplayName() { return formattedDisplayName; }
 
     public Material getMaterial() { return material; }
 

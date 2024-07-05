@@ -4,7 +4,7 @@ categories:
   # Reference of the category. Categories are displayed in the main menu.
   1:
     # Display name of the category (cannot be very long).
-    display-name: 'Stone age'
+    display-name: '<gradient:#8c8c8c:#a17d8d>Stone age</gradient>'
     # (OPTIONAL) Display item of the category.
     # If not specified the material of the first item will be used.
     display-material: 'stone_pickaxe'
@@ -18,7 +18,7 @@ categories:
       - 'granite'
       - 'tuff'
   2:
-    display-name: 'In the depths'
+    display-name: '<gradient:#9493cc:#a17d8d>In the depths</gradient>'
     display-material: 'lantern'
     items:
       - 'cobbled_deepslate'
@@ -27,7 +27,7 @@ categories:
       - 'amethyst_shard'
       - 'sculk'
   3:
-    display-name: 'Even deeper'
+    display-name: '<gradient:#a3433e:#bd6939>Even deeper</gradient>'
     display-material: 'netherrack'
     items:
       - 'basalt'
@@ -40,7 +40,7 @@ categories:
       - 'quartz'
       - 'soul_sand'
   4:
-    display-name: 'The End'
+    display-name: '<gradient:#8639bd:#bd91bc>The End</gradient>'
     display-material: 'end_stone'
     items:
       - 'end_stone'
@@ -49,7 +49,7 @@ categories:
       - 'ender_pearl'
       - 'chorus_fruit'
   5:
-    display-name: 'Wet'
+    display-name: '<gradient:#53bdad:#717dbd>Wet</gradient>'
     display-material: 'water_bucket'
     items:
       - 'sand'
@@ -62,7 +62,7 @@ categories:
       - 'salmon'
       - 'pufferfish'
   6:
-    display-name: 'Tech'
+    display-name: '<gradient:#bd534a:#bd1125>Tech</gradient>'
     display-material: 'redstone'
     items:
       - 'redstone'
@@ -73,7 +73,7 @@ categories:
       - 'piston'
       - 'sculk_sensor'
   7:
-    display-name: 'In the woods'
+    display-name: '<gradient:#bd4626:#993000>In the woods</gradient>'
     display-material: 'oak_sapling'
     items:
       - 'oak_log'
@@ -85,7 +85,7 @@ categories:
       - 'mangrove_log'
       - 'cherry_log'
   8:
-    display-name: 'Loot'
+    display-name: '<gradient:#299942:#739931>Loot</gradient>'
     display-material: 'stone_sword'
     items:
       - 'rotten_flesh'
@@ -97,7 +97,7 @@ categories:
       - 'gunpowder'
       - 'phantom_membrane'
   9:
-    display-name: 'Valuables'
+    display-name: '<gradient:#d18624:#d1a802>Valuables</gradient>'
     display-material: 'chest'
     items:
       - 'diamond'
@@ -108,13 +108,13 @@ categories:
       - 'golden_apple'
       - 'golden_carrot'
   10:
-    display-name: 'Fuel'
+    display-name: '<gradient:#826f7c:#6d826b>Fuel</gradient>'
     display-material: 'furnace'
     items:
       - 'coal'
       - 'dried_kelp_block'
   11:
-    display-name: 'Ingots & Bricks'
+    display-name: '<gradient:#82482b:#78825f>Ingots & Bricks</gradient>'
     display-material: 'blast_furnace'
     items:
       - 'iron_ingot'
@@ -124,7 +124,7 @@ categories:
       - 'brick'
       - 'nether_brick'
   12:
-    display-name: 'Agriculture'
+    display-name: '<gradient:#82651a:#82554a>Agriculture</gradient>'
     display-material: 'stone_hoe'
     items:
       - 'apple'
@@ -135,7 +135,7 @@ categories:
       - 'melon'
       - 'honey_bottle'
   13:
-    display-name: 'Livestock'
+    display-name: '<gradient:#497882:#4a5082>Livestock</gradient>'
     display-material: 'wheat'
     items:
       - 'beef'
