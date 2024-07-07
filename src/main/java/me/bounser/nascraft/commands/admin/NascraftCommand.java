@@ -32,7 +32,7 @@ public class NascraftCommand implements CommandExecutor {
             return false;
         }
 
-        String syntaxError = ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: \nreload | editmarket | save | list | cpi | locate | stop | resume | lasttrades";
+        String syntaxError = ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: \nreload | editmarket | save | list | cpi | stop | resume | lasttrades";
 
         if (args.length == 0) {
             sender.sendMessage(syntaxError);
@@ -52,10 +52,6 @@ public class NascraftCommand implements CommandExecutor {
 
             case "cpi":
                 sender.sendMessage(ChatColor.BLUE + "CPI: " + MarketManager.getInstance().getConsumerPriceIndex());
-                break;
-
-            case "locate":
-                sender.sendMessage(String.valueOf(GuiWallManager.getInstance().getActiveInstances((Player) sender).get(0).getInteraction((Player) sender).getComponentTree().locate(args[1]).getState((Player) sender, GuiWallManager.getInstance().getActiveInstances((Player) sender).get(0).getCursor((Player) sender))));
                 break;
 
             case "stop":
