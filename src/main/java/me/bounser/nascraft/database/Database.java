@@ -1,8 +1,8 @@
 package me.bounser.nascraft.database;
 
+import me.bounser.nascraft.chart.cpi.CPIInstant;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
-import me.bounser.nascraft.market.unit.Tradable;
 import me.bounser.nascraft.market.unit.stats.Instant;
 
 import java.util.LinkedHashMap;
@@ -41,12 +41,14 @@ public interface Database {
 
     void saveItem(Item item);
     void retrieveItem(Item item);
+    void retrieveItems();
     float retrieveLastPrice(Item item);
 
     //
 
-    void saveTrade(UUID uuid, Tradable tradable, int amount, float value, boolean buy, boolean discord);
+    void saveTrade(Trade trade);
     List<Trade> retrieveTrades(UUID uuid, int offset);
+    List<Trade> retrieveTrades(int offset);
     void purgeHistory();
 
     //
@@ -58,5 +60,16 @@ public interface Database {
     LinkedHashMap<Item, Integer> retrieveInventory(UUID uuid);
     int retrieveCapacity(UUID uuid);
 
+    //
+
+    void saveCPIValue(float indexValue);
+
+    List<CPIInstant> getCPIHistory();
+
+    void addAlert(String userid, Item item, float price);
+    void removeAlert(String userid, Item item);
+    void retrieveAlerts();
+    void removeAllAlerts(String userid);
+    void purgeAlerts();
 
 }

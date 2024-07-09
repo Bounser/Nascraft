@@ -1,32 +1,46 @@
-package me.bounser.nascraft.discord;
+package me.bounser.nascraft.discord.alerts;
 
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.database.DatabaseManager;
+import me.bounser.nascraft.discord.DiscordBot;
+import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
 
 import java.util.HashMap;
+import java.util.UUID;
 
-public class DiscordAlerts {
+public class DiscordAlerts implements Listener {
 
-    private HashMap<String, HashMap<Item, Float>> alerts = new HashMap<>();
+    // UserId -> (Item, Price)
+    private final HashMap<String, HashMap<Item, Float>> alerts = new HashMap<>();
 
     private static DiscordAlerts instance;
 
-    public static DiscordAlerts getInstance() { return instance == null ? instance = new DiscordAlerts() : instance; }
+    public static DiscordAlerts getInstance() {
+        if (instance == null) {
+            instance = new DiscordAlerts();
 
+            DatabaseManager.get().getDatabase().purgeAlerts();
+            DatabaseManager.get().getDatabase().retrieveAlerts();
+        }
+        return instance;
+    }
 
-    public String setAlert(String userID, String identifier, Float price) {
+    public OperationResult setAlert(String userID, String identifier, Float price) {
 
         Item item = MarketManager.getInstance().getItem(identifier);
 
-        if (item == null) return "not_valid";
+        if (item == null) return OperationResult.NOT_VALID;
 
-        if (alerts.containsKey(userID) && alerts.get(userID).size() > 20) return "limit_reached";
+        if (alerts.containsKey(userID) && alerts.get(userID).size() > 8) return OperationResult.LIMIT_REACHED;
 
-        if (alerts.containsKey(userID) && alerts.get(userID).containsKey(item)) return "repeated";
+        if (alerts.containsKey(userID) && alerts.get(userID).containsKey(item)) return OperationResult.REPEATED;
 
         HashMap<Item, Float> content;
         if (alerts.get(userID) == null) content = new HashMap<>();
@@ -36,25 +50,29 @@ public class DiscordAlerts {
         else content.put(item, price);
 
         alerts.put(userID, content);
+        DatabaseManager.get().getDatabase().addAlert(userID, item, price);
 
-        return "success";
+        return OperationResult.SUCCESS;
     }
 
-    public String removeAlert(String userID, Item item) {
+    public OperationResult removeAlert(String userID, Item item) {
 
         HashMap<Item, Float> content = alerts.get(userID);
 
-        if (content == null ||!content.containsKey(item)) {
-            return "not_found";
+        if (content == null || !content.containsKey(item)) {
+            return OperationResult.NOT_FOUND;
         }
 
         content.remove(item);
+        DatabaseManager.get().getDatabase().removeAlert(userID, item);
 
         alerts.put(userID, content);
-        return "success";
+        return OperationResult.SUCCESS;
     }
 
     public void updateAlerts() {
+
+        HashMap<String, Item> alertsToRemove = new HashMap<>();
 
         for (String userID : alerts.keySet()) {
 
@@ -62,23 +80,33 @@ public class DiscordAlerts {
 
                 if (alerts.get(userID).get(item) < 0) {
 
-                    if (!(item.getPrice().getValue() < Math.abs(alerts.get(userID).get(item)))) return;
+                    if (!(item.getPrice().getValue() < Math.abs(alerts.get(userID).get(item)))) continue;
 
                     reachedMessage(userID, item, Math.abs(alerts.get(userID).get(item)), ":chart_with_downwards_trend:" );
-                    alerts.get(userID).remove(item);
 
                 } else {
 
-                    if (!(item.getPrice().getValue() > alerts.get(userID).get(item))) return;
+                    if (!(item.getPrice().getValue() > alerts.get(userID).get(item))) continue;
 
                     reachedMessage(userID, item, Math.abs(alerts.get(userID).get(item)), ":chart_with_upwards_trend:" );
-                    alerts.get(userID).remove(item);
                 }
+                alertsToRemove.put(userID, item);
             }
+        }
+
+        for (String userid : alertsToRemove.keySet()) {
+            removeAlert(userid, alertsToRemove.get(userid));
         }
     }
 
     public HashMap<String, HashMap<Item, Float>> getAlerts() { return alerts; }
+
+    public HashMap<Item, Float> getAlertsOfUUID(UUID uuid) {
+
+        String userid = LinkManager.getInstance().getUserDiscordID(uuid);
+
+        return alerts.get(userid);
+    }
 
     public void reachedMessage(String userId, Item item, float price, String emoji) {
 

@@ -201,5 +201,30 @@ public class MySQL implements Database {
         return null;
     }
 
+    @Override
+    public void addAlert(String userid, Item item, float price) {
+
+    }
+
+    @Override
+    public void removeAlert(String userid, Item item) {
+
+    }
+
+    @Override
+    public void retrieveAlerts() {
+
+    }
+
+    @Override
+    public void removeAllAlerts(String userid) {
+
+    }
+
+    @Override
+    public void purgeAlerts() {
+
+    }
+
 
 }
