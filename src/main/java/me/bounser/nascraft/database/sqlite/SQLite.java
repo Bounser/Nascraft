@@ -151,6 +151,12 @@ public class SQLite implements Database {
                         "date TEXT NOT NULL," +
                         "value DOUBLE NOT NULL");
 
+        createTable(connection, "alerts",
+                "day INT NOT NULL," +
+                        "userid TEXT NOT NULL," +
+                        "identifier TEXT NOT NULL," +
+                        "price DOUBLE NOT NULL");
+
         /*
 
         createTable(connection, "broker_shares",
@@ -203,6 +209,23 @@ public class SQLite implements Database {
     public void saveEverything() {
         for (Item item : MarketManager.getInstance().getAllParentItems()) {
             saveItem(item);
+        }
+    }
+
+    public void flush() {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        try {
+            if (connection == null || connection.isClosed())
+                connection = DriverManager.getConnection("jdbc:sqlite:" + PATH);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -344,6 +367,31 @@ public class SQLite implements Database {
     @Override
     public List<CPIInstant> getCPIHistory() {
         return Statistics.getAllCPI(connection);
+    }
+
+    @Override
+    public void addAlert(String userid, Item item, float price) {
+        Alerts.addAlert(connection, userid, item, price);
+    }
+
+    @Override
+    public void removeAlert(String userid, Item item) {
+        Alerts.removeAlert(connection, userid, item);
+    }
+
+    @Override
+    public void retrieveAlerts() {
+        Alerts.retrieveAlerts(connection);
+    }
+
+    @Override
+    public void removeAllAlerts(String userid) {
+        Alerts.removeAllAlerts(connection, userid);
+    }
+
+    @Override
+    public void purgeAlerts() {
+        Alerts.purgeAlerts(connection);
     }
 
 

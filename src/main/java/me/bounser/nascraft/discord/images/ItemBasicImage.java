@@ -113,11 +113,11 @@ public class ItemBasicImage {
         graphics.setFont(new Font("Arial", Font.BOLD, 26));
         graphics.setColor(new Color(150, 255, 150));
 
-        graphics.drawString(lang.message(Message.DISCORD_BUY) + Formatter.format(item.getPrice().getBuyPrice(), Style.ROUND_BASIC), 20, 440+128);
+        graphics.drawString(lang.message(Message.DISCORD_BUY) + " " + Formatter.format(item.getPrice().getBuyPrice(), Style.ROUND_BASIC), 20, 440+128);
 
         graphics.setColor(new Color(255, 150, 150));
 
-        graphics.drawString(lang.message(Message.DISCORD_SELL) + Formatter.format(item.getPrice().getSellPrice(), Style.ROUND_BASIC), 20, 480+128);
+        graphics.drawString(lang.message(Message.DISCORD_SELL) + " " + Formatter.format(item.getPrice().getSellPrice(), Style.ROUND_BASIC), 20, 480+128);
 
 
         graphics.setFont(new Font("Arial", Font.BOLD, 47));

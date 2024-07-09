@@ -6,6 +6,7 @@ import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.unit.plot.PlotData;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -102,15 +103,17 @@ public class MainImage {
 
     public static void setSegment(Item item, int[] offset, Graphics graphics, Color color) {
 
-        if(item.getPlotData().isGoingUp()) {
+        PlotData pd = new PlotData(item);
+
+        if(pd.isGoingUp()) {
             graphics.setColor(new Color(10, 250, 10));
         } else {
             graphics.setColor(new Color(250, 10, 10));
         }
 
-        graphics.drawPolyline(item.getPlotData().getXPositions(295, offset[0] + 2, false) , item.getPlotData().getYPositions(90, 30+ offset[1], false, false), item.getPlotData().getNPoints(false));
-        graphics.drawPolyline(item.getPlotData().getXPositions(295, offset[0] + 3, false) , item.getPlotData().getYPositions(90, 30+ offset[1], false, false), item.getPlotData().getNPoints(false));
-        graphics.drawPolyline(item.getPlotData().getXPositions(295, offset[0] + 2, false) , item.getPlotData().getYPositions(90, 31+ offset[1], false, false), item.getPlotData().getNPoints(false));
+        graphics.drawPolyline(pd.getXPositions(295, offset[0] + 2, false) , pd.getYPositions(90, 30+ offset[1], false, false), pd.getNPoints(false));
+        graphics.drawPolyline(pd.getXPositions(295, offset[0] + 3, false) , pd.getYPositions(90, 30+ offset[1], false, false), pd.getNPoints(false));
+        graphics.drawPolyline(pd.getXPositions(295, offset[0] + 2, false) , pd.getYPositions(90, 31+ offset[1], false, false), pd.getNPoints(false));
 
         graphics.setColor(new Color(255, 255, 255));
 
@@ -123,7 +126,7 @@ public class MainImage {
         graphics.drawLine(52 + offset[0], 30 + offset[1], 150 + offset[0], 30 + offset[1]);
         graphics.drawLine(52 + offset[0], 29 + offset[1], 150 + offset[0], 29 + offset[1]);
 
-        if(item.getPlotData().isGoingUp()) {
+        if(pd.isGoingUp()) {
             graphics.setColor(new Color(100, 250, 100));
         } else {
             graphics.setColor(new Color(250, 100, 100));
@@ -131,7 +134,7 @@ public class MainImage {
 
         graphics.setFont(new Font("Arial", Font.BOLD, 15));
 
-        graphics.drawString(item.getPlotData().getChange(), 15 + offset[0], 110 + offset[1]);
+        graphics.drawString(pd.getChange(), 15 + offset[0], 110 + offset[1]);
 
         graphics.setColor(color);
 
@@ -148,7 +151,10 @@ public class MainImage {
         graphics.drawImage(item.getIcon(), offset[0]+7+intraOffset, offset[1], 45, 45, null);
 
         graphics.setColor(color);
-        graphics.drawString(item.getPlotData().getChange(), 15 - Math.round(item.getPlotData().getChange().getBytes().length) + offset[0] + intraOffset, offset[1]+60);
+
+        PlotData pd = new PlotData(item);
+
+        graphics.drawString(pd.getChange(), 15 - Math.round(pd.getChange().getBytes().length) + offset[0] + intraOffset, offset[1]+60);
     }
 
 

@@ -4,6 +4,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.Category;
@@ -18,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MainMenu implements MenuPage {
@@ -51,7 +53,20 @@ public class MainMenu implements MenuPage {
 
             Component alert = MiniMessage.miniMessage().deserialize(Lang.get().message(linked ? Message.GUI_ALERTS_NAME_LINKED : Message.GUI_ALERTS_NAME_NOT_LINKED));
 
-            for (String line : Lang.get().message(linked ? Message.GUI_ALERTS_LORE_LINKED : Message.GUI_ALERTS_LORE_NOT_LINKED).split("\\n")) {
+            String alertLore = Lang.get().message(linked ? Message.GUI_ALERTS_LORE_LINKED : Message.GUI_ALERTS_LORE_NOT_LINKED);
+
+            if (linked) {
+
+                HashMap<Item, Float> alerts = DiscordAlerts.getInstance().getAlertsOfUUID(player.getUniqueId());
+
+                if (alerts == null || alerts.isEmpty()) {
+                    alertLore = alertLore.replace("[ALERTS]", "0");
+                } else {
+                    alertLore = alertLore.replace("[ALERTS]", String.valueOf(alerts.keySet().size()));
+                }
+            }
+
+            for (String line : alertLore.split("\\n")) {
                 Component loreComponent = MiniMessage.miniMessage().deserialize(line);
                 lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
             }

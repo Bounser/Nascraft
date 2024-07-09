@@ -5,6 +5,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.sqlite.SQLite;
 import me.bounser.nascraft.discord.DiscordBot;
 import org.bukkit.Bukkit;
@@ -119,7 +120,8 @@ public class LinkManager {
 
             SQLite.getInstance().saveLink(String.valueOf(confirmingCodes.get(code)), uuid, nickname);
 
-            DiscordBot.getInstance().sendLinkLog(confirmingCodes.get(code), uuid, nickname, true);
+            if (Config.getInstance().getLogChannelEnabled())
+                DiscordBot.getInstance().sendLinkLog(confirmingCodes.get(code), uuid, nickname, true);
 
             confirmingCodes.remove(code);
 
@@ -137,6 +139,8 @@ public class LinkManager {
 
                 if (DiscordSRV.getPlugin().getAccountLinkManager().getUuid(userId) != null) return false;
 
+                DatabaseManager.get().getDatabase().removeAllAlerts(userId);
+
                 DiscordSRV.getPlugin().getAccountLinkManager().unlink(userId); return true;
 
             case NATIVE:
@@ -149,7 +153,8 @@ public class LinkManager {
 
                 DiscordBot.getInstance().sendLinkLog(userId, uuid, SQLite.getInstance().getNickname(userId), false);
 
-                SQLite.getInstance().removeLink(userId);
+                DatabaseManager.get().getDatabase().removeLink(userId);
+                DatabaseManager.get().getDatabase().removeAllAlerts(userId);
 
                 Player player = Bukkit.getPlayer(uuid);
 

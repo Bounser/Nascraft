@@ -5,6 +5,9 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.linking.LinkManager;
+import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -12,11 +15,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 
 
 public class DiscordCommand implements CommandExecutor {
-
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
@@ -48,8 +51,11 @@ public class DiscordCommand implements CommandExecutor {
             case "inv":
             case "inventory":
 
-                Inventory inventory = Bukkit.createInventory(player, 45, Lang.get().message(Message.DISINV_TITLE));
+                Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.DISINV_TITLE));
+
+                Inventory inventory = Bukkit.createInventory(player, 45, BukkitComponentSerializer.legacy().serialize(title));
                 player.openInventory(inventory);
+                player.setMetadata("NascraftDiscordInventory", new FixedMetadataValue(Nascraft.getInstance(),true));
 
                 DiscordInventoryInGame.getInstance().updateDiscordInventory(player);
                 return false;

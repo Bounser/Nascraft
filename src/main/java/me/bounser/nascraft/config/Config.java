@@ -31,7 +31,9 @@ public class Config {
     private static Config instance;
     private Nascraft main;
 
-    public static Config getInstance() { return instance == null ? instance = new Config() : instance; }
+    public static Config getInstance() {
+        return instance == null ? instance = new Config() : instance;
+    }
 
     private Config() {
         main = Nascraft.getInstance();
@@ -63,17 +65,28 @@ public class Config {
 
         MarketManager.getInstance().reload();
     }
-    public FileConfiguration getItemsFileConfiguration() { return items; }
 
-    public File getItemsFile() { return new File(main.getDataFolder(), "items.yml");}
+    public FileConfiguration getItemsFileConfiguration() {
+        return items;
+    }
 
-    public FileConfiguration getCategoriesFileConfiguration() { return categories; }
+    public File getItemsFile() {
+        return new File(main.getDataFolder(), "items.yml");
+    }
 
-    public File getCategoriesFile() { return new File(main.getDataFolder(), "categories.yml");}
+    public FileConfiguration getCategoriesFileConfiguration() {
+        return categories;
+    }
+
+    public File getCategoriesFile() {
+        return new File(main.getDataFolder(), "categories.yml");
+    }
 
     // Config:
 
-    public Boolean getCheckResources() { return config.getBoolean("auto-resources-injection"); }
+    public Boolean getCheckResources() {
+        return config.getBoolean("auto-resources-injection");
+    }
 
     public DatabaseType getDatabaseType() {
 
@@ -97,15 +110,33 @@ public class Config {
         return databaseType;
     }
 
-    public String getHost() { return config.getString("database.mysql.host"); }
-    public int getPort() { return config.getInt("database.mysql.port"); }
-    public String getDatabase() { return config.getString("database.mysql.database"); }
-    public String getUser() { return config.getString("database.mysql.user"); }
-    public String getPassword() { return config.getString("database.mysql.password"); }
+    public String getHost() {
+        return config.getString("database.mysql.host");
+    }
 
-    public int getDatabasePurgeDays() { return config.getInt("database.days-until-history-removed"); }
+    public int getPort() {
+        return config.getInt("database.mysql.port");
+    }
 
-    public String getSelectedLanguage() { return config.getString("language"); }
+    public String getDatabase() {
+        return config.getString("database.mysql.database");
+    }
+
+    public String getUser() {
+        return config.getString("database.mysql.user");
+    }
+
+    public String getPassword() {
+        return config.getString("database.mysql.password");
+    }
+
+    public int getDatabasePurgeDays() {
+        return config.getInt("database.days-until-history-removed");
+    }
+
+    public String getSelectedLanguage() {
+        return config.getString("language");
+    }
 
     public float[] getLimits() {
         float[] limit = new float[2];
@@ -114,7 +145,9 @@ public class Config {
         return limit;
     }
 
-    public boolean getPriceNoise() { return config.getBoolean("price-options.noise.enabled"); }
+    public boolean getPriceNoise() {
+        return config.getBoolean("price-options.noise.enabled");
+    }
 
     public float getTaxBuy(String identifier) {
 
@@ -134,35 +167,67 @@ public class Config {
         }
     }
 
-    public boolean getMarketPermissionRequirement() { return config.getBoolean("market-control.market-permission"); }
+    public boolean getMarketPermissionRequirement() {
+        return config.getBoolean("market-control.market-permission");
+    }
 
-    public List<String> getCommands() { return config.getStringList("commands.enabled"); }
+    public List<String> getCommands() {
+        return config.getStringList("commands.enabled");
+    }
 
-    public int getGetSellMenuSize() { return config.getInt("commands.sell-menu.size"); }
+    public int getGetSellMenuSize() {
+        return config.getInt("commands.sell-menu.size");
+    }
 
-    public boolean getHelpEnabled() { return config.getBoolean("commands.sell-menu.help.enabled"); }
+    public boolean getHelpEnabled() {
+        return config.getBoolean("commands.sell-menu.help.enabled");
+    }
 
-    public int getHelpSlot() { return config.getInt("commands.sell-menu.help.slot"); }
+    public int getHelpSlot() {
+        return config.getInt("commands.sell-menu.help.slot");
+    }
 
-    public String getHelpTexture() { return config.getString("commands.sell-menu.help.texture"); }
+    public String getHelpTexture() {
+        return config.getString("commands.sell-menu.help.texture");
+    }
 
-    public Material getFillerMaterial() { return Material.getMaterial(config.getString("commands.sell-menu.filler.material").toUpperCase()); }
+    public Material getFillerMaterial() {
+        return Material.getMaterial(config.getString("commands.sell-menu.filler.material").toUpperCase());
+    }
 
-    public int getSellButtonSlot() { return config.getInt("commands.sell-menu.sell-button.slot"); }
+    public int getSellButtonSlot() {
+        return config.getInt("commands.sell-menu.sell-button.slot");
+    }
 
-    public Material getSellButtonMaterial() { return Material.getMaterial(config.getString("commands.sell-menu.sell-button.material").toUpperCase()); }
+    public Material getSellButtonMaterial() {
+        return Material.getMaterial(config.getString("commands.sell-menu.sell-button.material").toUpperCase());
+    }
 
 
-    public boolean getCloseButtonEnabled() { return config.getBoolean("commands.sell-menu.close-button.enabled"); }
-    public int getCloseButtonSlot() { return config.getInt("commands.sell-menu.close-button.slot"); }
-    public Material getCloseButtonMaterial() { return Material.getMaterial(config.getString("commands.sell-menu.close-button.material").toUpperCase()); }
+    public boolean getCloseButtonEnabled() {
+        return config.getBoolean("commands.sell-menu.close-button.enabled");
+    }
+
+    public int getCloseButtonSlot() {
+        return config.getInt("commands.sell-menu.close-button.slot");
+    }
+
+    public Material getCloseButtonMaterial() {
+        return Material.getMaterial(config.getString("commands.sell-menu.close-button.material").toUpperCase());
+    }
 
 
-    public boolean getSellWandsEnabled() { return config.getBoolean("sell-wands.enabled"); }
+    public boolean getSellWandsEnabled() {
+        return config.getBoolean("sell-wands.enabled");
+    }
 
-    public boolean getSellWandsPermissionNeeded(String wandName) { return config.contains("sell-wands." + wandName + ".permission"); }
+    public boolean getSellWandsPermissionNeeded(String wandName) {
+        return config.contains("sell-wands." + wandName + ".permission");
+    }
 
-    public String getSellWandPermission(String wandName) { return config.getString("sell-wands.wands." + wandName + ".permission"); }
+    public String getSellWandPermission(String wandName) {
+        return config.getString("sell-wands.wands." + wandName + ".permission");
+    }
 
     public List<Wand> getWands() {
 
@@ -171,57 +236,67 @@ public class Config {
         for (String name : config.getConfigurationSection("sell-wands.wands").getKeys(false)) {
 
             float multiplier = 1;
-            if (config.contains("sell-wands.wands." + name +  ".multiplier")) {
+            if (config.contains("sell-wands.wands." + name + ".multiplier")) {
                 multiplier = (float) config.getDouble("sell-wands.wands." + name + ".multiplier");
             }
 
             int uses = -1;
-            if (config.contains("sell-wands.wands." + name +  ".uses")) {
+            if (config.contains("sell-wands.wands." + name + ".uses")) {
                 uses = config.getInt("sell-wands.wands." + name + ".uses");
             }
 
             float maxProfit = -1;
-            if (config.contains("sell-wands.wands." + name +  ".max-profit")) {
+            if (config.contains("sell-wands.wands." + name + ".max-profit")) {
                 maxProfit = (float) config.getDouble("sell-wands.wands." + name + ".max-profit");
             }
 
             boolean enchanted = false;
-            if (config.contains("sell-wands.wands." + name +  ".enchanted")) {
+            if (config.contains("sell-wands.wands." + name + ".enchanted")) {
                 enchanted = config.getBoolean("sell-wands.wands." + name + ".enchanted");
             }
 
             int cooldown = 3;
-            if (config.contains("sell-wands.wands." + name +  ".cooldown")) {
+            if (config.contains("sell-wands.wands." + name + ".cooldown")) {
                 cooldown = config.getInt("sell-wands.wands." + name + ".cooldown");
             }
 
             String permission = null;
-            if (config.contains("sell-wands.wands." + name +  ".permission")) {
+            if (config.contains("sell-wands.wands." + name + ".permission")) {
                 cooldown = config.getInt("sell-wands.wands." + name + ".permission");
             }
 
             Action sell = Action.LEFT_CLICK_BLOCK;
-            if (config.contains("sell-wands.wands." + name +  ".sell")) {
+            if (config.contains("sell-wands.wands." + name + ".sell")) {
                 switch (config.getString("sell-wands.wands." + name + ".sell").toLowerCase()) {
-                    case "left": sell = Action.LEFT_CLICK_BLOCK; break;
-                    case "right": sell = Action.RIGHT_CLICK_BLOCK; break;
-                    case "none": sell = null;
+                    case "left":
+                        sell = Action.LEFT_CLICK_BLOCK;
+                        break;
+                    case "right":
+                        sell = Action.RIGHT_CLICK_BLOCK;
+                        break;
+                    case "none":
+                        sell = null;
                 }
             }
 
             Action estimate = Action.RIGHT_CLICK_BLOCK;
-            if (config.contains("sell-wands.wands." + name +  ".estimate")) {
+            if (config.contains("sell-wands.wands." + name + ".estimate")) {
                 switch (config.getString("sell-wands.wands." + name + ".estimate").toLowerCase()) {
-                    case "left": estimate = Action.LEFT_CLICK_BLOCK; break;
-                    case "right": estimate = Action.RIGHT_CLICK_BLOCK; break;
-                    case "none": estimate = null;
+                    case "left":
+                        estimate = Action.LEFT_CLICK_BLOCK;
+                        break;
+                    case "right":
+                        estimate = Action.RIGHT_CLICK_BLOCK;
+                        break;
+                    case "none":
+                        estimate = null;
                 }
             }
 
             wands.add(new Wand(name,
-                    Material.getMaterial(config.getString("sell-wands.wands." + name +  ".material").toUpperCase()),
-                    config.getString("sell-wands.wands." + name +  ".display-name"),
-                    config.getStringList("sell-wands.wands." + name +  ".lore"),
+                    Material.getMaterial(config.getString("sell-wands.wands." + name + ".material").toUpperCase()),
+                    config.getString("sell-wands.wands." + name + ".display-name"),
+                    config.getStringList("sell-wands.wands." + name + ".lore"),
                     uses,
                     multiplier,
                     maxProfit,
@@ -230,47 +305,103 @@ public class Config {
                     permission,
                     sell,
                     estimate
-                    ));
+            ));
         }
 
         return wands;
     }
 
-    public int getPlaceholderPrecission() { return config.getInt("placeholders.decimal-precision"); }
+    public int getPlaceholderPrecission() {
+        return config.getInt("placeholders.decimal-precision");
+    }
 
-    public boolean getDiscordEnabled() { return config.getBoolean("discord-bot.enabled"); }
+    public boolean getDiscordEnabled() {
+        return config.getBoolean("discord-bot.enabled");
+    }
 
-    public LinkingMethod getLinkingMethod() { return LinkingMethod.valueOf(config.getString("discord-bot..main-menu.link-method").toUpperCase()); }
+    public LinkingMethod getLinkingMethod() {
+        return LinkingMethod.valueOf(config.getString("discord-bot..main-menu.link-method").toUpperCase());
+    }
 
-    public String getToken() { return config.getString("discord-bot.token"); }
+    public String getToken() {
+        return config.getString("discord-bot.token");
+    }
 
-    public boolean getLogChannelEnabled() { return config.getBoolean("discord-bot.log-trades.enabled"); }
+    public boolean getLogChannelEnabled() {
+        return config.getBoolean("discord-bot.log-trades.enabled");
+    }
 
-    public String getLogChannel() { return config.getString("discord-bot.log-trades.channel"); }
+    public String getLogChannel() {
+        return config.getString("discord-bot.log-trades.channel");
+    }
 
-    public boolean getDiscordMenuEnabled() { return config.getBoolean("discord-bot.main-menu.enabled"); }
+    public boolean getDiscordMenuEnabled() {
+        return config.getBoolean("discord-bot.main-menu.enabled");
+    }
 
-    public boolean getOptionWikiEnabled() { return config.getBoolean("discord-bot.main-menu.options.wiki.enabled"); }
+    public boolean getOptionWikiEnabled() {
+        return config.getBoolean("discord-bot.main-menu.options.wiki.enabled");
+    }
 
-    public boolean getOptionAlertEnabled() { return config.getBoolean("discord-bot.main-menu.options.alerts.enabled"); }
+    public boolean getOptionAlertEnabled() {
+        return config.getBoolean("discord-bot.main-menu.options.alerts.enabled");
+    }
 
-    public boolean getOptionGraphsEnabled() { return config.getBoolean("discord-bot.main-menu.options.detailed-graphs.enabled"); }
+    public int getAlertsDaysUntilExpired() {
+        return config.getInt("discord-bot.main-menu.options.alerts.expiration");
+    }
 
-    public boolean getOptionPersonalLogEnabled() { return config.getBoolean("discord-bot.main-menu.options.personal-log.enabled"); }
+    public boolean getOptionGraphsEnabled() {
+        return config.getBoolean("discord-bot.main-menu.options.detailed-graphs.enabled");
+    }
 
-    public boolean getOptionSelectionEnabled() { return config.getBoolean("discord-bot.main-menu.options.selection-bar.enabled"); }
+    public boolean getOptionPersonalLogEnabled() {
+        return config.getBoolean("discord-bot.main-menu.options.personal-log.enabled");
+    }
 
-    public boolean getOptionCPIEnabled() { return config.getBoolean("discord-bot.main-menu.options.cpi.enabled"); }
+    public boolean getOptionSelectionEnabled() {
+        return config.getBoolean("discord-bot.main-menu.options.selection-bar.enabled");
+    }
 
-    public String getChannel() { return config.getString("discord-bot.main-menu.channel"); }
+    public boolean getOptionCPIEnabled() {
+        return config.getBoolean("discord-bot.main-menu.options.cpi.enabled");
+    }
 
-    public String getAdminRoleID() { return config.getString("discord-bot.admin-role-id"); }
+    public String getChannel() {
+        return config.getString("discord-bot.main-menu.channel");
+    }
 
-    public int getDefaultSlots() { return config.getInt("discord-bot.main-menu.default-inventory"); }
+    public String getAdminRoleID() {
+        return config.getString("discord-bot.admin-role-id");
+    }
 
-    public float getSlotPriceFactor() { return (float) config.getDouble("discord-bot.main-menu.slot-price-factor"); }
+    public int getDefaultSlots() {
+        return config.getInt("discord-bot.main-menu.default-inventory");
+    }
 
-    public float getSlotPriceBase() { return (float) config.getDouble("discord-bot.main-menu.slot-price-base"); }
+    public float getSlotPriceFactor() {
+        return (float) config.getDouble("discord-bot.main-menu.slot-price-factor");
+    }
+
+    public float getSlotPriceBase() {
+        return (float) config.getDouble("discord-bot.main-menu.slot-price-base");
+    }
+
+    public Material getDiscordInvFillersMaterial() {
+        return Material.getMaterial(config.getString("discord-bot.main-menu.in-game-gui.fillers.material").toUpperCase());
+    }
+
+    public Material getDiscordInvLockedMaterial() {
+        return Material.getMaterial(config.getString("discord-bot.main-menu.in-game-gui.locked.material").toUpperCase());
+    }
+
+    public int getDiscordInvInfoSlot() {
+        return config.getInt("discord-bot.main-menu.in-game-gui.info.slot");
+    }
+
+    public String getDiscordInvInfoTexture() {
+        return config.getString("discord-bot.main-menu.in-game-gui.info.texture");
+    }
 
     public float getDiscordBuyTax() {
 
@@ -298,7 +429,7 @@ public class Config {
 
     public float getInitialPrice(String identifier) {
         for (String item : getAllMaterials()) {
-            if (identifier.equalsIgnoreCase(item)){
+            if (identifier.equalsIgnoreCase(item)) {
                 return (float) items.getDouble("items." + item + ".initial-price");
             }
         }
@@ -311,7 +442,7 @@ public class Config {
 
         Set<String> section = null;
 
-        if(items.getConfigurationSection("items." + identifier + ".child.") != null) {
+        if (items.getConfigurationSection("items." + identifier + ".child.") != null) {
             section = items.getConfigurationSection("items." + identifier + ".child.").getKeys(false);
         }
 
@@ -325,13 +456,13 @@ public class Config {
             float multiplier = (float) items.getDouble("items." + identifier + ".child." + childIdentifier + ".multiplier");
 
             String alias = childIdentifier;
-            
+
             if (items.contains("items." + identifier + ".child." + childIdentifier + ".alias")) {
                 alias = items.getString("items." + identifier + ".child." + childIdentifier + ".alias");
             } else {
                 alias = (Character.toUpperCase(alias.charAt(0)) + alias.substring(1)).replace("_", " ");
             }
-            
+
             childs.add(new Item(parent, multiplier, itemStack, childIdentifier, alias));
         }
 
@@ -379,8 +510,12 @@ public class Config {
         return itemStack;
     }
 
+    public boolean hasAlias(String identifier) {
+        return items.contains("items." + identifier + ".alias");
+    }
+
     public String getAlias(String identifier) {
-        if(!items.contains("items." + identifier + ".alias")) {
+        if (!items.contains("items." + identifier + ".alias")) {
             return (Character.toUpperCase(identifier.charAt(0)) + identifier.substring(1)).replace("_", " ");
         } else {
             return items.getString("items." + identifier + ".alias");
@@ -388,28 +523,28 @@ public class Config {
     }
 
     public float getSupport(String identifier) {
-        if(items.contains("items." + identifier + ".support")) {
+        if (items.contains("items." + identifier + ".support")) {
             return (float) items.getDouble("items." + identifier + ".support");
         }
         return 0;
     }
 
     public float getResistance(String identifier) {
-        if(items.contains("items." + identifier + ".resistance")) {
+        if (items.contains("items." + identifier + ".resistance")) {
             return (float) items.getDouble("items." + identifier + ".resistance");
         }
         return 0;
     }
 
     public float getElasticity(String identifier) {
-        if(items.contains("items." + identifier + ".elasticity")) {
+        if (items.contains("items." + identifier + ".elasticity")) {
             return (float) items.getDouble("items." + identifier + ".elasticity");
         }
         return (float) config.getDouble("price-options.default-elasticity");
     }
 
     public float getNoiseIntensity(String identifier) {
-        if(items.contains("items." + identifier + ".noise-intensity")) {
+        if (items.contains("items." + identifier + ".noise-intensity")) {
             return (float) items.getDouble("items." + identifier + ".noise-intensity");
         }
         return (float) config.getDouble("price-options.noise.default-intensity");
@@ -417,9 +552,11 @@ public class Config {
 
     // Categories:
 
-    public Set<String> getCategories() { return categories.getConfigurationSection("categories.").getKeys(false); }
+    public Set<String> getCategories() {
+        return categories.getConfigurationSection("categories.").getKeys(false);
+    }
 
-    public String getDisplayName(Category category){
+    public String getDisplayName(Category category) {
         return categories.getString("categories." + category.getIdentifier() + ".display-name");
     }
 
@@ -441,8 +578,8 @@ public class Config {
 
     public Category getCategoryFromMaterial(String identifier) {
 
-        for(Category category : MarketManager.getInstance().getCategories()) {
-            if(categories.getList("categories." + category.getIdentifier() + ".items").contains(identifier)) {
+        for (Category category : MarketManager.getInstance().getCategories()) {
+            if (categories.getList("categories." + category.getIdentifier() + ".items").contains(identifier)) {
                 return category;
             }
         }
@@ -476,6 +613,10 @@ public class Config {
         }
     }
 
+    public int getMainMenuSize() {
+        return inventorygui.getInt("main-menu.size");
+    }
+
     public boolean getAlertsMenuEnabled() {
         return inventorygui.getBoolean("main-menu.alerts.enabled");
     }
@@ -503,12 +644,18 @@ public class Config {
         return Material.getMaterial(inventorygui.getString("main-menu.information.material").toUpperCase());
     }
 
-    public boolean getFavouritesMenuEnabled() {
-        return inventorygui.getBoolean("main-menu.favourites.enabled");
+    public boolean getDiscordMarketMenuEnabled() {
+        return inventorygui.getBoolean("main-menu.discord.enabled");
     }
 
-    public int getFavouritesSlot() {
-        return inventorygui.getInt("main-menu.favourites.slot");
+    public int getDiscordSlot() {
+        return inventorygui.getInt("main-menu.discord.slot");
+    }
+
+    public Material getDiscordMaterial(boolean linked) {
+        if (linked)
+            return Material.getMaterial(inventorygui.getString("main-menu.discord.linked.material").toUpperCase());
+        return Material.getMaterial(inventorygui.getString("main-menu.discord.not-linked.material").toUpperCase());
     }
 
     public Material getFillersMaterial() {
@@ -523,5 +670,152 @@ public class Config {
         return inventorygui.getIntegerList("main-menu.categories.slots");
     }
 
-}
+    public int getCategoriesMenuSize() {
+        return inventorygui.getInt("category-section.size");
+    }
 
+    public int getCategoryItemSlot() {
+        return inventorygui.getInt("category-section.category-item.slot");
+    }
+
+    public boolean getCategoryBackEnabled() {
+        return inventorygui.getBoolean("category-section.back-button.enabled");
+    }
+
+    public int getCategoryBackSlot() {
+        return inventorygui.getInt("category-section.back-button.slot");
+    }
+
+    public Material getCategoryBackMaterial() {
+        return Material.getMaterial(inventorygui.getString("category-section.back-button.material").toUpperCase());
+    }
+
+    public Material getCategoryFillersMaterial() {
+        return Material.getMaterial(inventorygui.getString("category-section.fillers.material").toUpperCase());
+    }
+
+    public List<Integer> getCategoryFillersSlots() {
+        return inventorygui.getIntegerList("category-section.fillers.slots");
+    }
+
+    public List<Integer> getCategoryItemsSlots() {
+        return inventorygui.getIntegerList("category-section.items.slots");
+    }
+
+    public int getBuySellMenuSize() {
+        return inventorygui.getInt("buy-sell.size");
+    }
+
+    public int getBuySellMenuItemSlot() { return inventorygui.getInt("buy-sell.item.slot"); }
+
+
+    public boolean getAlertsBuySellEnabled() {
+        return inventorygui.getBoolean("buy-sell.alerts.enabled");
+    }
+
+    public int getAlertsBuySellSlot() {
+        return inventorygui.getInt("buy-sell.alerts.slot");
+    }
+
+    public Material getAlertsBuySellMaterial() {
+        return Material.getMaterial(inventorygui.getString("buy-sell.alerts.material").toUpperCase());
+    }
+
+    public boolean getInfoBuySellEnabled() {
+        return inventorygui.getBoolean("buy-sell.info.enabled");
+    }
+
+    public int getInfoBuySellSlot() {
+        return inventorygui.getInt("buy-sell.info.slot");
+    }
+
+    public Material getInfoBuySellMaterial() {
+        return Material.getMaterial(inventorygui.getString("buy-sell.info.material").toUpperCase());
+    }
+
+    public boolean getBuySellBackEnabled() {
+        return inventorygui.getBoolean("buy-sell.back-button.enabled");
+    }
+
+    public int getBuySellBackSlot() {
+        return inventorygui.getInt("buy-sell.back-button.slot");
+    }
+
+    public Material getBuySellBackMaterial() {
+        return Material.getMaterial(inventorygui.getString("buy-sell.back-button.material").toUpperCase());
+    }
+
+    public List<Integer> getBuySellFillersSlots() {
+        return inventorygui.getIntegerList("buy-sell.fillers.slots");
+    }
+
+    public Material getBuySellFillersMaterial() {
+        return Material.getMaterial(inventorygui.getString("buy-sell.fillers.material").toUpperCase());
+    }
+
+    //
+
+    public Material getBuySellBuyMaterial() {
+        return Material.getMaterial(inventorygui.getString("buy-sell.buy-buttons.material").toUpperCase());
+    }
+
+    public HashMap<Integer, Integer> getBuySellBuySlots() {
+
+        HashMap<Integer, Integer> buttons = new HashMap<>();
+
+        for (String weight : inventorygui.getConfigurationSection("buy-sell.buy-buttons.buttons").getKeys(false)) {
+            int slot = inventorygui.getInt("buy-sell.buy-buttons.buttons." + weight + ".slot");
+            buttons.put(Integer.valueOf(weight), slot);
+        }
+
+        return buttons;
+    }
+
+    //
+
+
+    public Material getBuySellSellMaterial() {
+        return Material.getMaterial(inventorygui.getString("buy-sell.sell-buttons.material").toUpperCase());
+    }
+
+    public HashMap<Integer, Integer> getBuySellSellSlots() {
+
+        HashMap<Integer, Integer> buttons = new HashMap<>();
+
+        for (String weight : inventorygui.getConfigurationSection("buy-sell.sell-buttons.buttons").getKeys(false)) {
+            int slot = inventorygui.getInt("buy-sell.sell-buttons.buttons." + weight + ".slot");
+            buttons.put(Integer.valueOf(weight), slot);
+        }
+
+        return buttons;
+    }
+
+    public int getAlertsMenuSize() {
+        return inventorygui.getInt("alerts.size");
+    }
+
+    public boolean getAlertsMenuBackEnabled() {
+        return inventorygui.getBoolean("alerts.back-button.enabled");
+    }
+
+    public int getAlertsMenuBackSlot() {
+        return inventorygui.getInt("alerts.back-button.slot");
+    }
+
+    public Material getAlertsMenuBackMaterial() {
+        return Material.getMaterial(inventorygui.getString("alerts.back-button.material").toUpperCase());
+    }
+
+    public Material getAlertsMenuFillersMaterial() {
+        return Material.getMaterial(inventorygui.getString("alerts.fillers.material").toUpperCase());
+    }
+
+    public List<Integer> getAlertsMenuFillersSlots() {
+        return inventorygui.getIntegerList("alerts.fillers.slots");
+    }
+
+    public List<Integer> getAlertsMenuSlots() {
+        return inventorygui.getIntegerList("alerts.alerts.slots");
+    }
+
+}

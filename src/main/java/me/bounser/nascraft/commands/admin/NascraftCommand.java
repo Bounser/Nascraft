@@ -11,7 +11,6 @@ import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.MarketManager;
-import me.leoko.advancedgui.manager.GuiWallManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

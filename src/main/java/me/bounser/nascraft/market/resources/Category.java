@@ -1,5 +1,7 @@
 package me.bounser.nascraft.market.resources;
 
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
@@ -32,6 +34,12 @@ public class Category {
 
         this.formattedDisplayName = BukkitComponentSerializer.legacy().serialize(miniMessageDisplayName);
         this.displayName = PlainTextComponentSerializer.plainText().serialize(miniMessageDisplayName);
+
+        if (displayName.equals(formattedDisplayName)) {
+            Component defaultMiniMessageName = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.DEFAULT_CATEGORY_FORMAT).replace("[NAME]", displayName));
+            formattedDisplayName = BukkitComponentSerializer.legacy().serialize(defaultMiniMessageName);
+        }
+
         this.material = Config.getInstance().getMaterialOfCategory(this);
     }
 

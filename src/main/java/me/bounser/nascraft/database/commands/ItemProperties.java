@@ -1,5 +1,6 @@
 package me.bounser.nascraft.database.commands;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
@@ -14,7 +15,6 @@ public class ItemProperties {
     public static void saveItem(Connection connection, Item item) {
 
         try {
-
             String sql = "SELECT stock FROM items WHERE identifier=?;";
 
             PreparedStatement prep = connection.prepareStatement(sql);
@@ -48,7 +48,6 @@ public class ItemProperties {
 
                 prepInsert.executeUpdate();
             }
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -93,6 +92,7 @@ public class ItemProperties {
     }
 
     public static float retrieveLastPrice(Connection connection, Item item) {
+
         try {
             String selectSQL = "SELECT lastprice FROM items WHERE identifier = ?;";
             PreparedStatement preparedStatement = connection.prepareStatement(selectSQL);

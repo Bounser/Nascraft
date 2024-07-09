@@ -31,7 +31,6 @@ public class Lang {
 
         saveResourceIfNotExists("langs/en_US.yml");
         saveResourceIfNotExists("langs/es_ES.yml");
-        // saveResourceIfNotExists("langs/ca_ES.yml");
 
         File language = new File(main.getDataFolder().getPath() + "/langs/" + Config.getInstance().getSelectedLanguage() + ".yml");
 
@@ -55,6 +54,11 @@ public class Lang {
     public void message(Player player, Message lang) {
         audience.player(player).sendMessage(miniMessage.deserialize(this.lang.getString(lang.name().toLowerCase())));
     }
+
+    public void message(Player player, String msg) {
+        audience.player(player).sendMessage(miniMessage.deserialize(msg));
+    }
+
 
     public String message(Message lang) { return this.lang.getString(lang.name().toLowerCase()).replace("&", "§"); }
 
@@ -100,7 +104,6 @@ public class Lang {
                 .replace(placeholder1, replacement1)
                 .replace(placeholder2, replacement2)
                 .replace(placeholder3, replacement3);
-
     }
 
     public boolean after() { return lang.getBoolean("after"); }

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class NascraftTabCompleter implements TabCompleter {
 
-    private final List<String> arguments = Arrays.asList("reload", "editmarket", "stop", "resume", "locate", "list", "cpi", "save", "lasttrades");
+    private final List<String> arguments = Arrays.asList("reload", "editmarket", "stop", "resume", "list", "cpi", "save", "lasttrades");
 
     @Nullable
     @Override

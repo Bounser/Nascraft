@@ -10,6 +10,7 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.Database;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.commands.resources.Trade;
+import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.images.*;
 import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
@@ -644,6 +645,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                 break;
 
+           // Buying capacity expansion
             case "i":
 
                 float price = discordInventory.getNextSlotPrice();

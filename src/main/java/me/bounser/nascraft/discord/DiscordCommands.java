@@ -6,6 +6,8 @@ import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
+import me.bounser.nascraft.discord.alerts.DiscordAlerts;
+import me.bounser.nascraft.discord.alerts.OperationResult;
 import me.bounser.nascraft.discord.images.BalanceImage;
 import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.discord.images.InventoryImage;
@@ -40,19 +42,19 @@ public class DiscordCommands extends ListenerAdapter {
 
                 switch (DiscordAlerts.getInstance().setAlert(event.getUser().getId(), event.getOption("material").getAsString(), (float) event.getOption("price").getAsDouble())) {
 
-                    case "success":
+                    case SUCCESS:
                         event.reply(Lang.get().message(Message.DISCORD_ALERT_SUCCESS))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
 
-                    case "repeated":
+                    case REPEATED:
                         event.reply(Lang.get().message(Message.DISCORD_ALERT_ALREADY_LISTED))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
 
-                    case "not_valid":
+                    case NOT_VALID:
                         event.reply(Lang.get().message(Message.DISCORD_ALERT_INVALID_MATERIAL))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
@@ -110,13 +112,13 @@ public class DiscordCommands extends ListenerAdapter {
 
                 switch (DiscordAlerts.getInstance().removeAlert(event.getUser().getId(), item)) {
 
-                    case "not_found":
+                    case NOT_FOUND:
                         event.reply(Lang.get().message(Message.DISCORD_ALERT_NOT_IN_WATCHLIST))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
 
-                    case "success":
+                    case SUCCESS:
                         event.reply(Lang.get().message(Message.DISCORD_ALERT_REMOVED).replace("[MATERIAL]", MarketManager.getInstance().getItem(event.getOption("material").getAsString()).getName()))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));

@@ -35,6 +35,7 @@ public class Item {
     private ItemStack itemStack;
     private final String identifier;
     private String alias;
+    private String taggedAlias;
     private String formatedAlias;
     private final BufferedImage icon;
     private Category category;
@@ -62,15 +63,7 @@ public class Item {
         this.itemStack = itemStack;
         this.identifier = identifier;
 
-        Component miniMessageAlias = MiniMessage.miniMessage().deserialize(alias);
-
-        this.alias = PlainTextComponentSerializer.plainText().serialize(miniMessageAlias);;
-        this.formatedAlias = BukkitComponentSerializer.legacy().serialize(miniMessageAlias);
-
-        if (alias.equals(formatedAlias)) {
-            Component defaultMiniMessageAlias = MiniMessage.miniMessage().deserialize("<gradient:#8ae6ff:#ebffc4>" + alias + "</gradient>");
-            formatedAlias = BukkitComponentSerializer.legacy().serialize(defaultMiniMessageAlias);
-        }
+        setupAlias(alias);
 
         this.price = new Price(
                 this,
@@ -100,9 +93,26 @@ public class Item {
         this.itemStack = itemStack;
         this.multiplier = multiplier;
         this.identifier = identifier;
-        this.alias = alias;
         this.price = parent.getPrice();
         this.icon = Images.getInstance().getImage(itemStack.getType());
+
+        setupAlias(alias);
+    }
+
+    public void setupAlias(String alias) {
+
+        taggedAlias = alias;
+
+        Component miniMessageAlias = MiniMessage.miniMessage().deserialize(alias);
+
+        this.alias = PlainTextComponentSerializer.plainText().serialize(miniMessageAlias);;
+        this.formatedAlias = BukkitComponentSerializer.legacy().serialize(miniMessageAlias);
+
+        if (alias.equals(formatedAlias)) {
+            taggedAlias = Lang.get().message(Message.DEFAULT_ITEM_FORMAT).replace("[ALIAS]", alias);
+            Component defaultMiniMessageAlias = MiniMessage.miniMessage().deserialize(taggedAlias);
+            formatedAlias = BukkitComponentSerializer.legacy().serialize(defaultMiniMessageAlias);
+        }
     }
 
     public void addChildItem(Item item) {
@@ -119,7 +129,9 @@ public class Item {
 
     public String getName() { return alias; }
 
-    public String getFormatedName() { return formatedAlias; }
+    public String getTaggedName() { return taggedAlias; }
+
+    public String getFormattedName() { return formatedAlias; }
 
 
     public float buyPrice(int amount) {
@@ -164,7 +176,7 @@ public class Item {
 
         MoneyManager.getInstance().withdraw(offlinePlayer, worth);
 
-        if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(worth, Style.ROUND_BASIC), String.valueOf(amount), alias);
+        if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(worth, Style.ROUND_BASIC), String.valueOf(amount), taggedAlias);
 
         if (parent != null)
             parent.updateInternalValues(amount,
@@ -275,7 +287,7 @@ public class Item {
 
         worth = RoundUtils.round(worth);
 
-        if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(worth, Style.ROUND_BASIC), String.valueOf(amount), alias);
+        if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(worth, Style.ROUND_BASIC), String.valueOf(amount), taggedAlias);
 
         Trade trade = new Trade(this, LocalDateTime.now(), worth, amount, false, false, uuid);
 

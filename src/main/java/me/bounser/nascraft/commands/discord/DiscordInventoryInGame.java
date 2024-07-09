@@ -1,6 +1,7 @@
 package me.bounser.nascraft.commands.discord;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
@@ -11,6 +12,9 @@ import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -19,6 +23,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -40,7 +45,9 @@ public class DiscordInventoryInGame implements Listener {
     @EventHandler
     public void onClickInventory(InventoryClickEvent event) {
 
-        if (event.getClickedInventory() == null || event.getView().getTopInventory().getSize() != 45 || !event.getView().getTitle().equals(Lang.get().message(Message.DISINV_TITLE))) { return; }
+        if (!event.getWhoClicked().hasMetadata("NascraftDiscordInventory")) return;
+
+        if (event.getClickedInventory() == null || event.getView().getTopInventory().getSize() != 45) { return; }
 
         if (event.getClickedInventory().getSize() == 45 || event.isShiftClick() || event.isRightClick()) { event.setCancelled(true); }
 
@@ -48,7 +55,7 @@ public class DiscordInventoryInGame implements Listener {
 
         DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(event.getWhoClicked().getUniqueId());
 
-        if (event.getClickedInventory().getSize() == 45 && event.getCurrentItem() != null && event.getCurrentItem().getItemMeta().getDisplayName().equals(Lang.get().message(Message.DISINV_LOCKED_TITLE))) {
+        if (event.getClickedInventory().getSize() == 45 && event.getCurrentItem() != null && event.getRawSlot() > 8+discordInventory.getCapacity() && event.getRawSlot() < 40) {
             if (MoneyManager.getInstance().hasEnoughMoney((OfflinePlayer) event.getWhoClicked(), discordInventory.getNextSlotPrice())) {
                 Nascraft.getEconomy().withdrawPlayer((OfflinePlayer) event.getView().getPlayer(), discordInventory.getNextSlotPrice());
                 discordInventory.increaseCapacity();
@@ -99,9 +106,16 @@ public class DiscordInventoryInGame implements Listener {
         if (event.getView().getTopInventory().getSize() == 45 && event.getView().getTitle().equals(Lang.get().message(Message.DISINV_TITLE))) { event.setCancelled(true); }
     }
 
+    @EventHandler
+    public void onInventoryClose(InventoryCloseEvent event) {
+        if (event.getPlayer().hasMetadata("NascraftDiscordInventory")) {
+            event.getPlayer().removeMetadata("NascraftDiscordInventory", Nascraft.getInstance());
+        }
+    }
+
     public void updateDiscordInventory(Player player) {
 
-        if (!player.getOpenInventory().getTitle().equals(Lang.get().message(Message.DISINV_TITLE)) || player.getOpenInventory().getTopInventory().getSize() != 45) return;
+        if (!player.hasMetadata("NascraftDiscordInventory")) return;
 
         Inventory inventory = player.getOpenInventory().getTopInventory();
 
@@ -115,7 +129,7 @@ public class DiscordInventoryInGame implements Listener {
 
     public void insertFillers(Inventory inventory) {
 
-        ItemStack filler = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+        ItemStack filler = new ItemStack(Config.getInstance().getDiscordInvFillersMaterial());
         ItemMeta meta = filler.getItemMeta();
         meta.setDisplayName(" ");
         filler.setItemMeta(meta);
@@ -127,25 +141,43 @@ public class DiscordInventoryInGame implements Listener {
 
     public void insertDiscordHead(Inventory inventory, UUID uuid) {
 
-        String TEXTURE = "b722098ae79c7abf002fe9684c773ea71db8919bb2ef2053ea0c0684c5a1ce4f";
+        String TEXTURE = Config.getInstance().getDiscordInvInfoTexture();
 
         PlayerProfile profile = getProfile(TEXTURE);
         ItemStack head = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) head.getItemMeta();
-        meta.setDisplayName(Lang.get().message(Message.DISINV_INFO_TITLE));
-        meta.setLore(Arrays.asList(Lang.get().message(Message.DISINV_INFO_LORE, "0", Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getInventoryValue(), Style.ROUND_BASIC), "0").split("\\n")));
+
+        Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.DISINV_INFO_TITLE));
+        meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(title));
+
+        List<String> lore = new ArrayList<>();
+        for (String line : Lang.get().message(Message.DISINV_INFO_LORE, "0", Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getInventoryValue(), Style.ROUND_BASIC), "0").split("\\n")) {
+            Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+            lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
+        }
+
+        meta.setLore(lore);
         meta.setOwnerProfile(profile);
         head.setItemMeta(meta);
 
-        inventory.setItem(4, head);
+        inventory.setItem(Config.getInstance().getDiscordInvInfoSlot(), head);
     }
 
     public void insertLockedSpaces(Inventory inventory, UUID uuid) {
 
-        ItemStack filler = new ItemStack(Material.RED_STAINED_GLASS_PANE);
+        ItemStack filler = new ItemStack(Config.getInstance().getDiscordInvLockedMaterial());
         ItemMeta meta = filler.getItemMeta();
-        meta.setDisplayName(Lang.get().message(Message.DISINV_LOCKED_TITLE));
-        meta.setLore(Arrays.asList(Lang.get().message(Message.DISINV_LOCKED_LORE, "0", Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getNextSlotPrice(), Style.ROUND_BASIC), "0").split("\\n")));
+
+        Component lockName = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.DISINV_LOCKED_TITLE));
+        meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(lockName));
+
+        List<String> lore = new ArrayList<>();
+        for (String line : Lang.get().message(Message.DISINV_LOCKED_LORE, "0", Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getNextSlotPrice(), Style.ROUND_BASIC), "0").split("\\n")) {
+            Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+            lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
+        }
+
+        meta.setLore(lore);
         filler.setItemMeta(meta);
 
         for(int i = 9 + DatabaseManager.get().getDatabase().retrieveCapacity(uuid); i < 40 ; i++) {
@@ -165,18 +197,27 @@ public class DiscordInventoryInGame implements Listener {
             ItemStack itemStack = item.getItemStack();
             ItemMeta meta = itemStack.getItemMeta();
 
+            List<String> finalLore = new ArrayList<>();
+
             if (meta.hasLore()) {
 
                 List<String> lore = meta.getLore();
 
                 lore.add("");
-                lore.add(Lang.get().message(Message.DISINV_AMOUNT, "0", String.valueOf(content.get(item)), "0"));
+                Component loreComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.DISINV_AMOUNT, "0", String.valueOf(content.get(item)), "0"));
+                lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
 
-                meta.setLore(lore);
+                finalLore = lore;
 
             } else {
-                meta.setLore(Arrays.asList("", Lang.get().message(Message.DISINV_AMOUNT, "0", String.valueOf(content.get(item)), "0")));
+
+                for (String line : Lang.get().message(Message.DISINV_AMOUNT, "0", String.valueOf(content.get(item)), "0").split("\\n")) {
+                    Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+                    finalLore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
+                }
             }
+
+            meta.setLore(finalLore);
 
             itemStack.setItemMeta(meta);
             inventory.setItem(i, itemStack);

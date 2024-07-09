@@ -3,7 +3,7 @@ package me.bounser.nascraft.commands.alert;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.discord.DiscordAlerts;
+import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.formatter.Formatter;
@@ -47,7 +47,7 @@ public class AlertsCommand implements CommandExecutor {
         for (Item item : DiscordAlerts.getInstance().getAlerts().get(userID).keySet())
             alerts = alerts + Lang.get().message(Message.ALERTS_LIST_SEGMENT, Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(userID).get(item)), Style.ROUND_BASIC), "0", item.getName());
 
-        player.sendMessage(alerts);
+        Lang.get().message(player, alerts);
 
         return false;
     }

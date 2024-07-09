@@ -4,6 +4,8 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.Style;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -99,7 +101,7 @@ public class SellInvCommand implements CommandExecutor {
 
         List<String> lore = new ArrayList<>();
 
-        for (String line : Lang.get().message(Message.SELL_BUTTON_LORE, "0", "", "").split("\\n")) {
+        for (String line : Lang.get().message(Message.SELL_BUTTON_LORE, Formatter.format(0, Style.ROUND_BASIC), "", "").split("\\n")) {
             Component loreLine = MiniMessage.miniMessage().deserialize(line);
             lore.add(BukkitComponentSerializer.legacy().serialize(loreLine));
         }

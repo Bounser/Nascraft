@@ -3,7 +3,8 @@ package me.bounser.nascraft.managers;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.database.DatabaseManager;
-import me.bounser.nascraft.discord.DiscordAlerts;
+import me.bounser.nascraft.database.sqlite.SQLite;
+import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.DiscordLog;
 import me.bounser.nascraft.market.MarketManager;
@@ -80,7 +81,9 @@ public class TasksManager {
                     DiscordBot.getInstance().update();
                     DiscordAlerts.getInstance().updateAlerts();
                 }
-                if (Config.getInstance().getLogChannelEnabled()) DiscordLog.getInstance().flushBuffer();
+                if (Config.getInstance().getLogChannelEnabled()) {
+                    DiscordLog.getInstance().flushBuffer();
+                }
             }
 
         }, timeRemaining.getSeconds()*ticksPerSecond, 60L * ticksPerSecond);
@@ -129,7 +132,12 @@ public class TasksManager {
 
             MarketManager.getInstance().setOperationsLastHour(0);
 
+            if (DatabaseManager.get().getDatabase() instanceof SQLite) {
+                ((SQLite) DatabaseManager.get().getDatabase()).flush();
+            }
+
+            if (Config.getInstance().getAlertsMenuEnabled()) DatabaseManager.get().getDatabase().purgeAlerts();
+
         }, timeRemaining.getSeconds()*ticksPerSecond, 60 * 60 * ticksPerSecond); // 1 hour
     }
-
 }

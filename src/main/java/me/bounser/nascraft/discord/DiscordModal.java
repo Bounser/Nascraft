@@ -2,6 +2,7 @@ package me.bounser.nascraft.discord;
 
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.images.ImagesManager;
 import me.bounser.nascraft.discord.images.ItemAdvancedImage;
 import me.bounser.nascraft.market.MarketManager;
@@ -54,25 +55,25 @@ public class DiscordModal extends ListenerAdapter {
 
             switch (DiscordAlerts.getInstance().setAlert(event.getUser().getId(), item.getIdentifier(), price)) {
 
-                case "success":
+                case SUCCESS:
                     event.reply(Lang.get().message(Message.DISCORD_ALERT_SUCCESS))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     break;
 
-                case "limit_reached":
+                case LIMIT_REACHED:
                     event.reply(Lang.get().message(Message.DISCORD_ALERT_LIMIT_REACHED))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     break;
 
-                case "repeated":
+                case REPEATED:
                     event.reply(Lang.get().message(Message.DISCORD_ALERT_ALREADY_LISTED))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                     break;
 
-                case "not_valid":
+                case NOT_VALID:
                     event.reply(Lang.get().message(Message.DISCORD_ALERT_INVALID_MATERIAL))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));

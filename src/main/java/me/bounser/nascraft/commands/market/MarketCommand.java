@@ -3,6 +3,7 @@ package me.bounser.nascraft.commands.market;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.inventorygui.MarketMenuManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.unit.Item;
@@ -28,8 +29,13 @@ public class MarketCommand implements CommandExecutor {
                 return false;
             }
 
+            if (args.length == 0 && player.hasPermission("nascraft.market.gui")) {
+                MarketMenuManager.getInstance().openMenu(player);
+                return false;
+            }
+
             if (args.length != 3) {
-                player.sendMessage(ChatColor.RED  + "Invalid use of command. /market <Buy/Sell> <Material> <Quantity>");
+                Lang.get().message(player, Message.MARKET_CMD_INVALID_USE);
                 return false;
             }
 
@@ -38,23 +44,23 @@ public class MarketCommand implements CommandExecutor {
             try {
                 quantity = Integer.parseInt(args[2]);
             } catch (NumberFormatException e) {
-                player.sendMessage(ChatColor.RED  + "Invalid quantity.");
+                Lang.get().message(player, Message.MARKET_CMD_INVALID_QUANTITY);
                 return false;
             }
 
             if (quantity > 64) {
-                player.sendMessage(ChatColor.RED + "Quantity can't be higher than 64!");
+                Lang.get().message(player, Message.MARKET_CMD_MAX_QUANTITY_REACHED);
                 return false;
             }
 
             Item item = MarketManager.getInstance().getItem(args[1]);
 
             if (item == null) {
-                player.sendMessage(ChatColor.RED + "That identifier isn't valid!");
+                Lang.get().message(player, Message.MARKET_CMD_INVALID_IDENTIFIER);
                 return false;
             }
 
-            switch (args[0]){
+            switch (args[0].toLowerCase()){
                 case "buy":
                     item.buy(quantity, player.getUniqueId(), true);
                     break;
@@ -62,7 +68,7 @@ public class MarketCommand implements CommandExecutor {
                     item.sell(quantity, player.getUniqueId(), true);
                     break;
                 default:
-                    player.sendMessage(ChatColor.RED + "Wrong command.");
+                    Lang.get().message(player, Message.MARKET_CMD_INVALID_OPTION);
             }
 
         } else {
@@ -86,7 +92,7 @@ public class MarketCommand implements CommandExecutor {
                     item.sell(Integer.parseInt(args[2]), player.getUniqueId(), true);
                     break;
                 default:
-                    sender.sendMessage(ChatColor.RED + "Wrong command.");
+                    sender.sendMessage(ChatColor.RED + "Wrong option: buy / sell");
             }
         }
         return false;

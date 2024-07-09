@@ -25,6 +25,7 @@ import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.linking.LinkCommand;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
+import me.bounser.nascraft.inventorygui.InventoryListener;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.config.Config;
@@ -37,6 +38,7 @@ import me.leoko.advancedgui.manager.GuiWallManager;
 import me.leoko.advancedgui.manager.LayoutManager;
 import me.leoko.advancedgui.utils.VersionMediator;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.milkbowl.vault.permission.Permission;
 import org.apache.commons.io.FileUtils;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.AdvancedPie;
@@ -63,6 +65,7 @@ public final class Nascraft extends JavaPlugin {
     private static Nascraft main;
     private static NascraftAPI apiInstance;
     private static Economy economy = null;
+    private static Permission perms = null;
 
     private static final String AGUI_VERSION = "2.2.8";
 
@@ -89,10 +92,11 @@ public final class Nascraft extends JavaPlugin {
         this.adventure = BukkitAudiences.create(this);
 
         if (!setupEconomy()) {
-            getLogger().severe("Nascraft failed to load! Vault is required.");
-            getServer().getPluginManager().disablePlugin(this);
+            getLogger().severe("Nascraft failed to load! Vault and an economy plugin are required.");
             return;
         }
+
+        setupPermissions();
 
         Plugin AGUI = Bukkit.getPluginManager().getPlugin("AdvancedGUI");
 
@@ -115,8 +119,10 @@ public final class Nascraft extends JavaPlugin {
             getLogger().info("Enabling discord extension...");
 
             if (Config.getInstance().getLinkingMethod().equals(LinkingMethod.NATIVE)) getCommand("link").setExecutor(new LinkCommand());
-            getCommand("setalert").setExecutor(new SetAlertCommand());
-            getCommand("alerts").setExecutor(new AlertsCommand());
+            if (Config.getInstance().getOptionAlertEnabled()) {
+                getCommand("alerts").setExecutor(new AlertsCommand());
+                getCommand("setalert").setExecutor(new SetAlertCommand());
+            }
             getCommand("discord").setExecutor(new DiscordCommand());
 
             Bukkit.getPluginManager().registerEvents(new DiscordInventoryInGame(), this);
@@ -147,6 +153,8 @@ public final class Nascraft extends JavaPlugin {
 
         getCommand("market").setExecutor(new MarketCommand());
         getCommand("market").setTabCompleter(new MarketTabCompleter());
+
+        Bukkit.getPluginManager().registerEvents(new InventoryListener(), this);
 
         List<String> commands = config.getCommands();
         if (commands == null) return;
@@ -214,6 +222,8 @@ public final class Nascraft extends JavaPlugin {
 
     public static Economy getEconomy() { return economy; }
 
+    public static Permission getPermissions() { return perms; }
+
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) { return false; }
 
@@ -222,6 +232,12 @@ public final class Nascraft extends JavaPlugin {
 
         economy = rsp.getProvider();
         return economy != null;
+    }
+
+    private boolean setupPermissions() {
+        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+        perms = rsp.getProvider();
+        return perms != null;
     }
 
     public @NonNull BukkitAudiences adventure() {
