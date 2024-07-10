@@ -108,6 +108,8 @@ public enum Message {
     DISINV_INFO_TITLE,
     DISINV_INFO_LORE,
     DISINV_AMOUNT,
+    DISINV_NO_SPACE,
+    DISINV_INVALID,
 
     // DISCORD
 

@@ -99,6 +99,8 @@ disinv_locked_lore: "<gradient:#6c65b5:#7aad63>Click to buy next slot for:</grad
 disinv_info_title: "<b><gradient:#8c2eff:#cd75ff>Discord Inventory</gradient></b>"
 disinv_info_lore: "<gradient:#6c65b5:#7aad63>Inventory Value: </gradient><b><gradient:#ffbb29:#efff78>[AMOUNT]</gradient></b>"
 disinv_amount: "<gradient:#6c65b5:#7aad63>Amount: </gradient><color:#66ff40>[AMOUNT]</color>"
+disinv_no_space: "<gradient:#FB6363:#C4B3FD>✘ You don't have space in your inventory to move that item!</gradient>"
+disinv_invalid: "<gradient:#FB6363:#C4B3FD>✘ Invalid item!</gradient>"
 
 # DISCORD - No MiniMessage support. ---------------------------------
 

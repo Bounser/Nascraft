@@ -99,6 +99,8 @@ disinv_locked_lore: "<gradient:#6c65b5:#7aad63>Clic para comprar la siguiente ra
 disinv_info_title: "<b><gradient:#8c2eff:#cd75ff>Inventario de Discord</gradient></b>"
 disinv_info_lore: "<gradient:#6c65b5:#7aad63>Valor del inventario: </gradient><b><gradient:#ffbb29:#efff78>[AMOUNT]</gradient></b>"
 disinv_amount: "<gradient:#6c65b5:#7aad63>Cantidad: </gradient><color:#66ff40>[AMOUNT]</color>"
+disinv_no_space: "<gradient:#FB6363:#C4B3FD>✘ ¡No tienes espacio suficiente para mover ese objeto!</gradient>"
+disinv_invalid: "<gradient:#FB6363:#C4B3FD>✘ ¡Objeto inválido!</gradient>"
 
 # DISCORD - Sin soporte para MiniMessage.
 
