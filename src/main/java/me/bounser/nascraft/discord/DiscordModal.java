@@ -113,7 +113,7 @@ public class DiscordModal extends ListenerAdapter {
 
             Item item = null;
 
-            for (Item itemCandidate : MarketManager.getInstance().getAllItems()) {
+            for (Item itemCandidate : MarketManager.getInstance().getAllParentItems()) {
                 if (itemCandidate.getIdentifier().equalsIgnoreCase(event.getValue("material").getAsString()) ||
                         itemCandidate.getName().equalsIgnoreCase(event.getValue("material").getAsString())) {
                     item = itemCandidate; break;
