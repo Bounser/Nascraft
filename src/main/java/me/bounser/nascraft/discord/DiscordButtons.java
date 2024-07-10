@@ -590,7 +590,7 @@ public class DiscordButtons extends ListenerAdapter {
                 Trade buyTrade = new Trade(item, LocalDateTime.now(), value, quantity, true, true, uuid);
 
                 database.saveTrade(buyTrade);
-                DiscordLog.getInstance().sendTradeLog(buyTrade);
+                if (Config.getInstance().getLogChannelEnabled()) DiscordLog.getInstance().sendTradeLog(buyTrade);
 
                 event.reply(buyText)
                         .setEphemeral(true)
@@ -634,7 +634,7 @@ public class DiscordButtons extends ListenerAdapter {
                 Trade sellTrade = new Trade(item, LocalDateTime.now(), value, quantity, false, true, uuid);
 
                 database.saveTrade(sellTrade);
-                DiscordLog.getInstance().sendTradeLog(sellTrade);
+                if (Config.getInstance().getLogChannelEnabled()) DiscordLog.getInstance().sendTradeLog(sellTrade);
 
                 event.reply(sellText)
                         .setEphemeral(true)

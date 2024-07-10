@@ -170,6 +170,14 @@ public class MarketManager {
         return false;
     }
 
+    public boolean isAValidParentItem(ItemStack itemStack) {
+
+        for (Item item : getAllParentItems())
+            if (item.getItemStack().isSimilar(itemStack)) return true;
+
+        return false;
+    }
+
     public List<Item> getTopGainers(int quantity) {
 
         List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
