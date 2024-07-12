@@ -338,12 +338,16 @@ public class MarketManager {
     public float getConsumerPriceIndex() {
 
         float index = 0;
+        int numOfItems = 0;
 
         for (Item item : getAllParentItems()) {
-            index += item.getPrice().getValue()/item.getPrice().getInitialValue();
+            if (Config.getInstance().includeInCPI(item)) {
+                index += item.getPrice().getValue()/item.getPrice().getInitialValue();
+                numOfItems++;
+            }
         }
 
-        return (index/getAllParentItems().size())*100;
+        return (index/numOfItems)*100;
     }
 
 }

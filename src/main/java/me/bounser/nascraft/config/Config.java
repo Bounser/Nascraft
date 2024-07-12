@@ -436,6 +436,14 @@ public class Config {
         return 1;
     }
 
+    public boolean includeInCPI(Item item) {
+
+        if (items.contains("items." + item.getIdentifier() + ".exclude-from-cpi"))
+            return (!items.getBoolean("items." + item.getIdentifier() + ".exclude-from-cpi"));
+
+        return true;
+    }
+
     public List<Item> getChilds(String identifier) {
 
         List<Item> childs = new ArrayList<>();

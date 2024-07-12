@@ -36,6 +36,9 @@ items:
     # Upload an image to /Nascraft/images/ and add:
     # icon: 'Name of the image'
 
+    # OPTIONAL: Exclude the price of this item from the calculation of the CPI.
+    # exclude-from-cpi: true
+
     # OPTIONAL: Child items. The price of these items will be determined by their parent item.
     child:
       cobblestone_slab:
