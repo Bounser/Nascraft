@@ -1,0 +1,315 @@
+# Nascraft it_IT - ${project.version}
+
+# Specifica la valuta da utilizzare accanto ai prezzi.
+currency: "€"
+# Il simbolo della valuta dovrebbe essere dopo (o prima) del prezzo? ($50 o 50$)
+after: false
+# Separatore decimale. Disponibile: point (.), comma (,)
+separator: "comma"
+
+# Generale:
+price: "Prezzo"
+material: "Materiale dell'oggetto"
+default_item_format: "<gradient:#8ae6ff:#ebffc4>[ALIAS]</gradient>"
+default_category_format: "<gradient:#6b86ff:#3d67ff>[NAME]</gradient>"
+
+# Placeholder disponibili: [AMOUNT], [MATERIAL], [WORTH]
+buy_message: "<gradient:#00E3FB:#F9ABFD>Hai appena comprato <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> del valore di </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+sell_message: "<gradient:#00E3FB:#F9ABFD>Hai appena venduto <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> del valore di </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+
+not_enough_money: "<gradient:#FB6363:#C4B3FD>Non hai abbastanza soldi per pagare questo!</gradient>"
+not_enough_items: "<gradient:#FB6363:#C4B3FD>Non hai abbastanza oggetti da vendere!</gradient>"
+not_enough_space: "<gradient:#FB6363:#C4B3FD>Non c'è abbastanza spazio nell'inventario!</gradient>"
+shop_closed: "<gradient:#FB6363:#C4B3FD>Errore durante l'acquisto: Negozio chiuso</gradient>"
+
+# Comandi
+no_permission: "<gradient:#FB6363:#C4B3FD>Permesso richiesto.</gradient>"
+click_to_confirm: "\n<gold>[ <gradient:#F5FFD5:#FFA200:#F5FFD5>Clicca qui per confermare</gradient> ]</gold>\n"
+list_segment: "\n<gray>> <gradient:#FF00CD:#DA58FF>[MATERIAL] x [AMOUNT] = [WORTH]</gradient>"
+
+# nsellall
+sellall_everything_error: "<gradient:#FF0000:#FF7E7E:#FF0000>Non hai nulla da vendere!</gradient>"
+sellall: "<gradient:#FF00CD:#DA58FF>Hai appena venduto <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[MATERIAL]</light_purple></bold> del valore di <green>[WORTH]</green></gradient>"
+sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>Non hai nessun [MATERIAL] da vendere!</gradient>"
+sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>Materiale non riconosciuto. Utilizzo: /sellall [MATERIAL]</gradient>"
+sellall_estimated_value: "<gray>Valore stimato:</gray> <green>[WORTH]</green>"
+
+# nsell
+sell_title: "&8&lMenu di vendita"
+sell_close: "&cCHIUDI"
+sell_button_name: "&6VENDI CONTENUTO"
+sell_button_lore: "&eVendi per circa: &l[WORTH]"
+sell_remove_item: "&cClicca per rimuovere dalla lista di vendita"
+sell_action_message: "<gradient:#FF00CD:#DA58FF>Hai appena venduto del valore di <bold><light_purple>[WORTH]</light_purple></bold></gradient>"
+sell_item_not_allowed: "<gradient:#FB6363:#C4B3FD>Non è un oggetto valido!</gradient>"
+sell_full: "<gradient:#FB6363:#C4B3FD>L'inventario di vendita è pieno!</gradient>"
+sell_help_title: "&dCome funziona questo?"
+sell_help_lore: " \n&7Seleziona tutti gli oggetti che desideri vendere.\n \n&7Il valore stimato non è garantito e cambierà\n&7una volta completata l'operazione."
+# sellhand
+sellhand_invalid: "<gradient:#FF0000:#FF7E7E:#FF0000>Tieni in mano un oggetto valido!</gradient>"
+sellhand_error_hand: "<gradient:#FF0000:#FF7E7E:#FF0000>Errore! Non cambiare oggetto prima di confermare</gradient>"
+sellhand_estimated_value: "<gray>Valore stimato:</gray> \n"
+# alert
+alert_invalid_use: "<gradient:#FB6363:#C4B3FD>Utilizzo non valido del comando. /setalert [MATERIAL] [prezzo]</gradient>"
+alert_not_linked: "<gradient:#FB6363:#C4B3FD>Devi collegare il tuo account per usare questo comando!</gradient>"
+alert_in_watchlist: "<gradient:#FB6363:#C4B3FD>Oggetto già nella tua lista di monitoraggio.</gradient>"
+alert_invalid_price: "<gradient:#FB6363:#C4B3FD>Utilizzo non valido del comando. Il prezzo deve essere un numero. (Es 120.90)</gradient>"
+alert_not_recognized: "<gradient:#FB6363:#C4B3FD>Oggetto non riconosciuto.</gradient>"
+alert_setup: "<gradient:#00E3FB:#F9ABFD>Allerta impostata correttamente! Riceverai un messaggio privato quando il prezzo sarà raggiunto.</gradient>"
+# alerts
+alerts_empty: "<gradient:#FB6363:#C4B3FD>Non hai impostato nessun avviso.</gradient>"
+alerts_header: "&eAvvisi attivi:\n"
+alerts_list_segment: "\n&6> &l[MATERIAL] &r&ea prezzo &l[WORTH]"
+
+# SELLWAND
+
+sellwand_estimated_value: "<gradient:#FF00CD:#DA58FF>Valore stimato:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
+sellwand_sold: "<gradient:#FF00CD:#DA58FF>Venduto per:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
+sellwand_sold_with_multiplier: "<gradient:#FF00CD:#DA58FF>Venduto contenuto per:</gradient> <light_purple>[INITIAL-WORTH] x [MULTIPLIER] = <bold>[WORTH]</bold></light_purple>"
+ellwand_ran_out: "<gradient:#FB6363:#C4B3FD>La bacchetta di vendita ha esaurito le cariche disponibili.</gradient>"
+sellwand_nothing_to_sell: "<gradient:#FB6363:#C4B3FD>Non c'è nulla da vendere!</gradient>"
+sellwand_cooldown: "<gradient:#FB6363:#C4B3FD>In cooldown, rimangono [TIME]!</gradient>"
+sellwand_minutes: "[MINUTES] minuti e [SECONDS] secondi"
+sellwand_seconds: "[SECONDS] secondo(i)"
+sellwand_too_much: "<gradient:#FB6363:#C4B3FD>Non puoi vendere così tanto con questa bacchetta!</gradient>"
+
+# COMANDO LINK
+
+link_already_linked: "<gradient:#FF00CD:#DA58FF>Già collegato!</gradient>"
+link_wrong_use: "<gradient:#FB6363:#C4B3FD>Utilizzo errato del comando!</gradient>"
+link_wrong_format:  "<gradient:#FB6363:#C4B3FD>Formato codice errato!</gradient>"
+link_no_process_found: "<gradient:#FB6363:#C4B3FD>Nessun processo di collegamento trovato con quel codice.</gradient>"
+link_success: "<gradient:#FF00CD:#DA58FF>Collegato con successo all'utente:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+link_unlinked: "<gradient:#FF00CD:#DA58FF>Sei stato scollegato dall'utente:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+link_direct_message: ":link: Il tuo account Discord è stato collegato con successo all'utente Minecraft: `[USER]`"
+
+# COMANDO DISCORD
+
+discordcmd_not_linked: "<gradient:#FB6363:#C4B3FD>Non sei collegato!</gradient>"
+discordcmd_linked: "<gradient:#FF00CD:#DA58FF>Sei collegato con:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+
+# INVENTARIO DISCORD
+
+disinv_title: "&lInventario Discord"
+disinv_cant_afford_expansion: "<gradient:#FB6363:#C4B3FD>Non hai abbastanza soldi!</gradient>"
+disinv_locked_title: "&c&lBLOCCATO"
+disinv_locked_lore: "&7Clicca per comprare il prossimo slot per:\n&6[AMOUNT]"
+disinv_info_title: "&dInventario Discord"
+disinv_info_lore: "&7Valore: &6[AMOUNT]"
+disinv_amount: "&7Quantità: &6[AMOUNT]"
+disinv_no_space: "gradient:#FB6363:#C4B3FD✘ Non hai spazio nel tuo inventario per spostare quell'oggetto!"
+disinv_invalid: "gradient:#FB6363:#C4B3FD✘ Oggetto non valido!"
+
+# Mercato
+
+market_cmd_invalid_use: "<gradient:#FB6363:#C4B3FD>✘ Utilizzo non valido del comando. /market <Compra/Vendi> <Oggetto> <Quantità></gradient>"
+market_cmd_invalid_quantity: "<gradient:#FB6363:#C4B3FD>✘ Quantità non valida</gradient>"
+market_cmd_max_quantity_reached: "<gradient:#FB6363:#C4B3FD>✘ La quantità non può essere superiore a 64!</gradient>"
+market_cmd_invalid_identifier: "<gradient:#FB6363:#C4B3FD>✘ Quell'identificatore non è valido!</gradient>"
+market_cmd_invalid_option: "<gradient:#FB6363:#C4B3FD>✘ Quell'opzione non è valida! </gradient>"
+
+# Interfaccia grafica del Mercato
+
+gui_fillers_name: " "
+
+gui_positive_change: "<gradient:#4cf000:#66f043>+[PERCENTAGE]%</gradient>"
+gui_no_change: "<gradient:#fffdbd:#aea4ba>~[PERCENTAGE]%</gradient>"
+gui_negative_change: "<gradient:#f00008:#f05c3e>[PERCENTAGE]%</gradient>"
+
+gui_main_menu_title: "        <b><gradient:#12438c:#91196f>Mercato Oggetti Live</gradient></b>"
+
+gui_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Avvisi</gradient></b>"
+gui_alerts_lore_linked: "<color:#cc801d>Ricevi una notifica (DM) su <color:#4931e8>Discord</color></color>\n<color:#cc801d>quando un oggetto raggiunge un certo prezzo</color>\n\n<color:#cc801d>Hai attualmente [ALERTS] avvisi attivi</color>\n\n<gradient:#ffa930:#ffca85>Clicca per gestirli.</gradient>"
+gui_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Avvisi</gradient>"
+gui_alerts_lore_not_linked: "<color:#cc801d>Ricevi una notifica su <color:#4931e8>Discord</color></color>\n<color:#cc801d>quando un oggetto raggiunge un certo prezzo</color>\n \n<gradient:#ff3650:#ff1100>✘ Il tuo account non è collegato a Discord.</gradient>"
+gui_information_name: "<b><gradient:#622eff:#ff21c8>Menu Mercato</gradient></b>"
+gui_information_lore: "<color:#5446b0>Compra e vendi nel mercato.</color>\n<color:#5446b0>Sfoglia le categorie qui sotto per commerciare</color>\n<color:#5446b0>una vasta gamma di oggetti.</color>"
+gui_discord_name_linked: "<b><gradient:#8c2eff:#cd75ff>Inventario Discord</gradient></b>"
+gui_discord_name_not_linked: "<b><gradient:#8c2eff:#cd75ff>Inventario Discord</gradient></b>"
+gui_discord_lore_linked: "<gradient:#6c65b5:#7aad63>Clicca per accedere al tuo inventario su Discord</gradient>"
+gui_discord_lore_not_linked: " \n<gradient:#6c65b5:#7aad63>Clicca per accedere al tuo inventario su Discord</gradient>\n \n<gradient:#ff5e4f:#ff2e4a>✘ Il tuo account non è collegato a Discord.</gradient> "
+
+gui_categories_lore_segment: "<color:#7b8dba>●</color> <color:#81889c>[ALIAS]</color>"
+gui_category_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Indietro</gradient></b>"
+gui_category_item_lore: " \n<gradient:#497882:#4a5082>Prezzo: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Cambiamento nell'ultima ora: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● ACQUISTA:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● VENDI:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>\n \n<u><gradient:#747cc2:#ebffc4>⏵ Clicca per operare con questo oggetto</gradient></u>"
+
+gui_buysell_item_lore: " \n<gradient:#497882:#4a5082>Prezzo: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Cambiamento nell'ultima ora: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● ACQUISTA:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● VENDI:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>"
+gui_buysell_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Imposta avviso per oggetto</gradient></b>"
+gui_buysell_alerts_name_setup: "<b><gradient:#ffbf00:#ff4800>Avviso</gradient></b>"
+gui_buysell_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Imposta avviso per oggetto</gradient></b>"
+gui_buysell_alerts_lore_linked: "<gradient:#cc801d:#4a5082>Clicca per selezionare un prezzo. Riceverai una notifica</gradient>\n<gradient:#cc801d:#4a5082>tramite Discord una volta raggiunto il prezzo.</gradient>"
+gui_buysell_alerts_lore_setup: "<gradient:#cc801d:#4a5082>Hai un avviso per questo oggetto a questo prezzo:</gradient>\n\n<gradient:#ffa930:#ffca85>> [PRICE]</gradient>\n\n<gradient:#cc801d:#4a5082>Clicca per rimuoverlo.</gradient>"
+gui_buysell_alerts_lore_not_linked: "<gradient:#cc801d:#4a5082>Clicca per selezionare un prezzo. Riceverai una notifica</gradient>\n<gradient:#cc801d:#4a5082>una volta raggiunto il prezzo.</gradient>\n\n<gradient:#ff3650:#ff1100>✘ Non puoi impostare avvisi perché</gradient>\n<gradient:#ff3650:#ff1100>il tuo account non è collegato.</gradient>"
+gui_buysell_info_name: "<b><gradient:#ffc457:#ffb5d0>Tieni presente!</gradient></b>"
+gui_buysell_info_lore: "<gradient:#ffe712:#c7a987>⚠ I prezzi non sono garantiti ⚠</gradient>"
+gui_buysell_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Indietro</gradient></b>"
+
+gui_buysell_buy_buttons_name: "<b><gradient:#44ff3d:#94ff42>COMPRA [AMOUNT]</gradient></b>"
+gui_buysell_buy_buttons_lore: " \n<gradient:#6c65b5:#7aad63>⏵ Clicca per comprare [AMOUNT] per </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
+
+gui_buysell_sell_buttons_name: "<b><gradient:#eb3926:#eb8063>VENDI [AMOUNT]</gradient></b>"
+gui_buysell_sell_buttons_lore: " \n<gradient:#6c65b5:#e3326a>⏵ Clicca per vendere [AMOUNT] per </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
+
+gui_alerts_title: "<b><gradient:#ff9305:#ffeb38>Avvisi</gradient></b>"
+gui_alerts_lore: "\n<gradient:#6c65b5:#7aad63>Prezzo da raggiungere: </gradient><gradient:#ff9305:#ffeb38>[PRICE]</gradient>\n\n<gradient:#6c65b5:#7aad63>⏵ Clicca per rimuovere questo avviso.</gradient>"
+gui_alerts_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Indietro</gradient></b>"
+
+anvil_alert_title: "Avviso: [ALIAS]"
+anvil_alert_text: "Prezzo: "
+anvil_alert_invalid_price: "Prezzo non valido."
+anvil_alert_invalid: "Non valido"
+anvil_alert_limit_reached: "Limite di avvisi raggiunto"
+anvil_alert_repeated: "Avviso ripetuto"
+
+# DISCORD - Nessun supporto per MiniMessage.
+
+discord_status: "come variano i prezzi"
+
+# Logs
+
+discord_log_trade_linked: "> [[NICK]](https:[UUID]) o [[USER]](https:id-[ID]) ha [ACTION] ``[QUANTITY]`` di ``[ALIAS]`` per **[WORTH]**"
+discord_log_trade_not_linked: "> [[NICK]](https:[UUID]) ha [ACTION] ``[QUANTITY]`` di ``[ALIAS]`` per **[WORTH]**"
+discord_log_buy: ":inbox_tray: comprato"
+discord_log_sell: ":outbox_tray: venduto"
+discord_log_linked: "> :link: L'utente [[NICK]](https:[UUID]) è stato collegato con l'account Discord [[DISCORD-NAME]](https:id-[ID])"
+discord_log_unlinked: "> :chains: L'utente [[NICK]](https:[UUID]) è stato scollegato dall'account Discord [[DISCORD-NAME]](https:id-[ID])"
+
+# Menu
+
+discord_main_title: ":green_circle: Mercato degli oggetti in tempo reale"
+discord_main_footer: "Seleziona un oggetto per ulteriori dettagli e per operazioni (Acquista/vendi) con esso. \nI prezzi nelle operazioni possono variare."
+discord_top_gainers: "Maggiori aumenti"
+discord_most_popular: "Più popolari"
+discord_big_dippers: "Grandi ribassi"
+discord_buy: "COMPRA "
+discord_sell: "VENDI "
+discord_outdated: ":warning: Attenzione: Informazioni obsolete!"
+discord_day_high: "Massimo del giorno: "
+discord_day_low: "Minimo del giorno: "
+discord_historical_high: "Massimo storico: "
+discord_daily_volume: "Volume (24h): "
+discord_position: "Posizione nel mercato: "
+discord_trend: "Trend (24h): "
+discord_inventory_value: "Valore: "
+discord_buy_slot: "Compra slot per "
+discord_sell_all: "Vendi tutto"
+discord_confirm: "Conferma"
+
+discord_market_paused: ":pause_button: Mercato in pausa! Riprenderà una volta che il server tornerà online."
+
+discord_detailed_graph_of: "Grafico dettagliato di"
+discord_1_day: "1 Giorno"
+discord_1_month: "1 Mese"
+discord_1_year: "1 Anno"
+discord_all: "Tutto"
+
+discord_cpi_evolution: "Evoluzione CPI"
+
+discord_button_1: "Cerca Oggetto"
+discord_button_2: "Storico Transazioni"
+discord_button_3: "Avanzate"
+discord_button_4: "Collega Account"
+discord_button_5: "Inventario"
+discord_button_6: "Bilancio"
+discord_button_7: "Broker"
+
+discord_graph_y_left: "Prezzo ($)"
+discord_graph_y_right: "Volume"
+
+discord_wiki: "# :information_source: Informazioni sul Mercato\n> Utilizzando questo canale potrai **comprare/vendere oggetti e molto altro senza essere nel gioco!** Per iniziare, devi collegare il tuo account Discord, per farlo premi il pulsante :link: **Collega Account** e segui le istruzioni.\n## Clicca su una categoria per saperne di più"
+discord_wiki_1: "Inventario"
+discord_wiki_2: "Bilancio"
+discord_wiki_3: "Avvisi"
+discord_wiki_4: "Ordini Dinamici"
+discord_wiki_5: "Sessioni"
+discord_wiki_6: "Broker"
+
+discord_wiki_inventory: "## :school_satchel: Inventario\n> Una volta collegato il tuo account, **il tuo denaro in-game verrà condiviso con il tuo account Discord** e viceversa, e **riceverai un inventario virtuale**, nel quale potrai conservare gli oggetti che acquisti tramite Discord. Ogni slot può contenere **fino a 999 unità di un tipo di oggetto**. Due slot non possono contenere lo stesso tipo di materiale. Puoi acquistare più slot e controllare i contenuti e il valore premendo il pulsante :school_satchel: **Inventario**."
+discord_wiki_balance: "## :coin: Bilancio\n> Se sei collegato, il pulsante :coin: **Bilancio** ti mostrerà alcune statistiche sul tuo stato finanziario. Visualizzerà la **borsa condivisa tra il tuo account Discord e Minecraft**, e altre informazioni come il **valore attuale del tuo inventario Discord** e il denaro **sotto gestione dei broker**."
+discord_wiki_alerts: "## :bell: Avvisi\n> Se sei interessato a un determinato oggetto, puoi impostare un **avviso** per ricevere un **messaggio privato quando il prezzo di un oggetto raggiunge una soglia** che hai registrato in precedenza. Per impostare i tuoi avvisi personalizzati usa :bell:**Avvisi**."
+discord_wiki_dynamic: "## :dart: Ordini Dinamici\n> Imposta ordini che possono reagire al prezzo dell'attivo. Puoi piazzare ordini Limit, per acquistare/vendere un attivo quando raggiunge un certo prezzo, o take profit/stoploss, con il quale venderai la tua posizione una volta che il prezzo viene raggiunto. Per accedere a questa funzionalità, premi :bar_chart: **Opzioni Avanzate** e poi :dart: **Ordini Dinamici**."
+discord_wiki_sessions: "## :desktop:  **Sessioni**: \n
+                         > Selezionando un oggetto si apre una sessione, nella quale avrai accesso a operazioni più avanzate:
+                         \n\n> :chart_with_upwards_trend: **Prezzo al rialzo**: Scommetti sul rialzo del prezzo. Prenderai un prestito contro il tuo Inventario, fino al 50% del suo valore (Durante l'operazione tutti gli asset saranno bloccati, quindi non potrai venderli), e moltiplicherai i movimenti del prezzo per un fattore di 3. Ciò significa che un guadagno del 33% si tradurrà in un guadagno del 100%, e una perdita del -33% in una perdita totale (-100%).
+                         \n\n> :chart_with_downwards_trend: **Prezzo al ribasso**: Scommetti sul ribasso del prezzo. È l'inverso del long. Lo stesso principio, con un fattore di 2. Guadagnerai un 10% se il prezzo scende del 5%, e perderai tutto se il prezzo sale del 50%.
+                         \n\n> :bookmark_tabs: **Futures**: Sono contratti in cui puoi definire un'operazione futura con i prezzi attuali, pagando una commissione. Se non hai soldi subito e vuoi comprare o vendere, ad esempio diamanti, se pensi che il prezzo di oggi sia buono, puoi firmare un contratto futuro, pagando il 10% in anticipo, e avrai il diritto di comprare l'oggetto tra una settimana (commissione del 10%) o un mese (commissione del 20%) al prezzo di oggi.
+                         \n\n> :date: **Azioni Programmate**: Con questa opzione potrai vendere/comprare oggetti regolarmente in un intervallo di tempo fisso. Ad esempio, puoi comprare 64 diamanti ogni settimana o vendere 200 lingotti di ferro al giorno."
+discord_wiki_brokers: "## :man_office_worker: Broker:\n
+                        Puoi assumere un broker per automatizzare il processo di investimento, anche se a un costo sotto forma di una commissione. I broker disponibili sono:
+                        \n\n> :man_office_worker: **Broker Aggressivo**: Assegnagli una quantità di denaro e cercherà automaticamente di guadagnare di più in qualsiasi modo, inclusi derivati complessi. Applica una commissione del **8% al giorno**. Nessun profitto è garantito e puoi perdere tutti i soldi investiti.
+                        \n\n> :man_teacher:  **Broker Regolare**: Assegnagli una quantità di denaro e cercherà automaticamente di guadagnare in modo più conservativo. Applica una commissione del **4% al giorno**. Nessun profitto è garantito e puoi perdere tutti i soldi investiti.
+                        \n\n> :man_technologist:**Broker Pigro**: Assegnagli una quantità di denaro e lui garantirà i rendimenti del mercato (Medi) meno una commissione giornaliera del **1%**."
+
+discord_not_linked_short: "Non collegato!"
+discord_not_linked: ":exclamation: Il tuo account non è collegato! Esegui `/link in-game` per avviare il processo di collegamento degli account."
+discord_insufficient_balance: ":x: Fondi insufficienti! Il tuo saldo attuale è: **[VALUE1]** e hai bisogno almeno di **[VALUE2]**"
+discord_without_space: ":x: Spazio insufficiente nel tuo inventario Discord!"
+
+discord_alert_name: "Avviso"
+discord_alerts_name: "Avvisi"
+discord_no_alerts_setup: "Non hai impostato alcun avviso!"
+discord_alert_header: "Avvisi :bell:\n\n"
+discord_alert_segment: "> `[MATERIAL] a prezzo: [PRICE]"
+
+discord_add_alert_button: "Aggiungi Avviso"
+discord_remove_alert_button: "Rimuovi Avviso"
+discord_add_alert_argument_material: "Materiale dell'oggetto da monitorare."
+discord_add_alert_argument_price: "Prezzo al quale desideri ricevere una notifica una volta raggiunto."
+discord_create_alert: "Crea Avviso"
+discord_alert_at_price: "A prezzo: [PRICE]"
+discord_alert_remove_select: "Seleziona l'avviso che desideri rimuovere."
+discord_alert_invalid_material: "Questo materiale non è valido!"
+discord_alert_invalid_price: "Questo prezzo non è valido!"
+discord_alert_success: "Successo! Riceverai un messaggio quando il prezzo raggiungerà il valore impostato."
+discord_alert_limit_reached: "Limite di avvisi raggiunto! Rimuovi avvisi prima di crearne di nuovi."
+discord_alert_already_listed: "Questo oggetto è già nella tua lista di monitoraggio!"
+discord_alert_removed: ":no_bell: **[MATERIAL]** rimosso."
+
+discord_link_discordsrv: ":link: Usa ``/link`` in-game per avviare il processo di collegamento!"
+discord_link_native: ":link: Collega il tuo account usando ``/link [CODICE]`` in-game!"
+discord_link_discordsrv_extensive: ":link: Per poter interagire con il mercato devi collegare il tuo account Minecraft e Discord.\nPer iniziare il processo usa ``/discord link`` in-game!"
+discord_link_discordsrv_already: ":link: Hai già il tuo account collegato con l'utente: ``[UUID]``"
+discord_link_native_extensive: ":link: Per poter interagire con il mercato devi collegare il tuo account Minecraft e Discord.\n\n> Collega il tuo account usando ``/link [CODICE]`` in-game!"
+discord_link_native_already: ":link: Hai già il tuo account collegato con l'utente: ``[NICKNAME]``"
+discord_unlink_button: "Scollega account"
+discord_unlinked: ":link: Hai scollegato il tuo account da ``[NICKNAME]``"
+discord_already_unlinked: ":exclamation: Sei già scollegato!"
+
+discord_market_closed: ":lock: Il mercato è attualmente chiuso!"
+
+discord_buy_feedback: ":inbox_tray: Hai appena comprato **[QUANTITY]** di **[ALIAS]** del valore di **[WORTH]**\n\n:coin: Il tuo saldo è ora: **[BALANCE]**"
+discord_buy_more_feedback: ":inbox_tray: Hai appena comprato **[QUANTITY]** di **[ALIAS]** del valore di **[WORTH]** ([WORTH-EACH] ciascuno)\n\n:coin: Il tuo saldo è ora: **[BALANCE]**"
+
+discord_not_enough_items: ":x: Non hai abbastanza di questo oggetto nel tuo inventario su Discord!"
+
+discord_sell_feedback: ":outbox_tray: Hai appena venduto **[QUANTITY]** di **[ALIAS]** del valore di **[WORTH]**\n\n:coin: Il tuo saldo è ora: **[BALANCE]**"
+discord_sell_more_feedback: ":outbox_tray: Hai appena venduto **[QUANTITY]** di **[ALIAS]** del valore di **[WORTH]** ([WORTH-EACH] ciascuno)\n\n:coin: Il tuo saldo è ora: **[BALANCE]**"
+discord_sold_everything: "Hai appena venduto tutto per: **[VALUE]**"
+
+discord_not_enough_slot: ":x: Non hai abbastanza denaro per comprare un altro slot! Hai bisogno di **[PRICE]**"
+discord_already_max_slots: ":x: Hai già acquistato il numero massimo di slot!"
+discord_slot_bought: "Slot nº[NUM] acquistato!"
+
+discord_trade_history_title: ":scroll: **Storia degli scambi:** Pagina [PAGE] ([NUM-SCAMBI]/15)"
+
+discord_balance_title: ":coin:  **Bilancio**:"
+discord_balance_report: "\n> :green_circle: :dollar: **Portafoglio** (Minecraft): ``[PURSE]``\n> :yellow_circle: :school_satchel: **Inventario Discord**: ``[INVENTORY-VALUE]``\n>\n> :abacus: **Totale**: ``[TOTAL]``\n"
+discord_purse: "Portafoglio"
+discord_inventory: "Inventario"
+
+discord_material_to_operate: "Materiale dell'oggetto con cui vuoi operare"
+discord_material_not_recognized: ":x: Oggetto non riconosciuto!"
+
+discord_not_allowed_command: ":exclamation: Non hai il permesso di usare questo comando!"
+
+# LAYOUT TEXTS:
+# Main title.
+advancedgui_title: "Mercato degli Oggetti"
+# Ulteriori testi:
+advancedgui_top_movers: "Più Grandi Spostamenti"
+advancedgui_subtop: "negli ultimi 30 minuti"
+advancedgui_buy: "Compra"
+advancedgui_sell: "Vendi"
+advancedgui_price: "Prezzo:"
+advancedgui_amount_selection: "Seleziona quantità:"
+advancedgui_trend: "Trend:"
