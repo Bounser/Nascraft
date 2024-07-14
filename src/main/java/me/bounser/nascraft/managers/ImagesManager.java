@@ -1,4 +1,4 @@
-package me.bounser.nascraft.discord.images;
+package me.bounser.nascraft.managers;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
@@ -23,30 +23,26 @@ public class ImagesManager {
 
         FileConfiguration items = Config.getInstance().getItemsFileConfiguration();
 
-        if (items.contains("items." + identifier + ".icon")) {
+        BufferedImage image = null;
+        String imageName;
+        String imagePath = Nascraft.getInstance().getDataFolder().getPath() + "/images/" + identifier + ".png";
 
-            BufferedImage image = null;
-            String imageName = items.getString("items." + identifier + ".icon") + ".png";
-            String imagePath = Nascraft.getInstance().getDataFolder().getPath() + "/images/" + imageName;
+        try (InputStream input = Files.newInputStream(new File(imagePath).toPath())) {
 
-            try (InputStream input = Files.newInputStream(new File(imagePath).toPath())) {
+            image = ImageIO.read(input);
 
-                image = ImageIO.read(input);
-
-            } catch (IOException e) {
-                Nascraft.getInstance().getLogger().info("Unable to read image: " + imageName);
-            } catch (IllegalArgumentException e) {
-                Nascraft.getInstance().getLogger().info("Invalid argument for image: " + imageName);
-            }
-
-            return image;
+        } catch (IOException ignored) {
+            // No image specified.
+        } catch (IllegalArgumentException e) {
+            Nascraft.getInstance().getLogger().info("Invalid argument for image: " + identifier);
         }
+
+        if (image != null) return image;
 
         if (items.contains("items." + identifier + ".item-stack.type")) {
 
-            BufferedImage image = null;
-            String imageName = items.getString("items." + identifier + ".item-stack.type").toLowerCase() + ".png";
-            String imagePath = "1-21-materials/" + imageName;
+            imageName = items.getString("items." + identifier + ".item-stack.type").toLowerCase() + ".png";
+            imagePath = "1-21-materials/" + imageName;
 
             try (InputStream input = Nascraft.getInstance().getResource(imagePath)) {
                 if (input != null) {
@@ -61,12 +57,10 @@ public class ImagesManager {
             }
 
             return image;
-
         }
 
-        BufferedImage image = null;
-        String imageName = identifier.replaceAll("\\d", "").toLowerCase() + ".png";
-        String imagePath = "1-21-materials/" + imageName;
+        imageName = identifier.replaceAll("\\d", "").toLowerCase() + ".png";
+        imagePath = "1-21-materials/" + imageName;
 
         try (InputStream input = Nascraft.getInstance().getResource(imagePath)) {
             if (input != null) {
@@ -81,7 +75,6 @@ public class ImagesManager {
         }
 
         return image;
-
     }
 
     public static byte[] getBytesOfImage(BufferedImage image) {

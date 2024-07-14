@@ -31,11 +31,6 @@ items:
       # Tax of 10% when selling cobblestone.
       sell: 0.1
 
-    # OPTIONAL: Change the icon of the item to a custom one.
-    # This only has effect with AdvancedGUI layouts and the discord extension.
-    # Upload an image to /Nascraft/images/ and add:
-    # icon: 'Name of the image'
-
     # OPTIONAL: Exclude the price of this item from the calculation of the CPI.
     # exclude-from-cpi: true
 
