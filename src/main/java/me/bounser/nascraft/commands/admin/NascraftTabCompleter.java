@@ -13,12 +13,20 @@ import java.util.List;
 
 public class NascraftTabCompleter implements TabCompleter {
 
-    private final List<String> arguments = Arrays.asList("reload", "editmarket", "stop", "resume", "list", "cpi", "save", "lasttrades");
+    private final List<String> arguments = Arrays.asList("reload", "editmarket", "stop", "resume", "cpi", "save", "logs");
+
+    private final List<String> tradesArguments = Arrays.asList("<player>", "<item>", "global");
 
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+
+        if (args.length > 1) {
+            if (args[0].equalsIgnoreCase("logs")) {
+                return StringUtil.copyPartialMatches(args[1], tradesArguments, new ArrayList<>());
+            }
+        }
+
         return StringUtil.copyPartialMatches(args[0], arguments, new ArrayList<>());
     }
-
 }
