@@ -1,4 +1,4 @@
-package me.bounser.nascraft.commands.admin;
+package me.bounser.nascraft.commands.admin.nascraft;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorManager;
@@ -9,17 +9,23 @@ import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
-import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.UUID;
 
 public class NascraftCommand implements CommandExecutor {
 
@@ -44,9 +50,58 @@ public class NascraftCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Data saved.");
                 break;
 
-            case "list":
-                for (Item item : MarketManager.getInstance().getAllParentItems())
-                    sender.sendMessage(ChatColor.GRAY + item.getIdentifier() + ": " + Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC) + " stock: " + item.getPrice().getStock());
+            case "logs":
+
+                if (args.length != 2) {
+                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments for /nascraft logs: global, <item>, <player nick or uuid>");
+                    return false;
+                }
+
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "That command can only be used in-game.");
+                    return false;
+                }
+
+                Player playerLog = (Player) sender;
+
+                if (args[1].equalsIgnoreCase("global")) {
+
+                    playerLog.setMetadata("NascraftLogInventory", new FixedMetadataValue(Nascraft.getInstance(),"global"));
+                    playerLog.setMetadata("NascraftLogInventoryPage", new FixedMetadataValue(Nascraft.getInstance(), 0));
+                    NascraftLogListener.createTradePage(playerLog, null, null);
+
+                } else {
+
+                    Item item = MarketManager.getInstance().getItem(args[1].toLowerCase());
+
+                    if (item != null) {
+                        playerLog.setMetadata("NascraftLogInventory", new FixedMetadataValue(Nascraft.getInstance(), "item-" + item.getIdentifier()));
+                        playerLog.setMetadata("NascraftLogInventoryPage", new FixedMetadataValue(Nascraft.getInstance(), 0));
+                        NascraftLogListener.createTradePage(playerLog, item, null);
+                    } else {
+                        Player player = Bukkit.getPlayer(args[1]);
+
+                        if (player == null) {
+
+                            if (isValidUUID(args[1])) {
+
+                                playerLog.setMetadata("NascraftLogInventory", new FixedMetadataValue(Nascraft.getInstance(), "uuid-" + args[1]));
+                                playerLog.setMetadata("NascraftLogInventoryPage", new FixedMetadataValue(Nascraft.getInstance(), 0));
+                                NascraftLogListener.createTradePage(playerLog, null, UUID.fromString(args[1]));
+                                break;
+                            }
+
+                            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Argument not identified.");
+                            return false;
+                        } else {
+
+                            playerLog.setMetadata("NascraftLogInventory", new FixedMetadataValue(Nascraft.getInstance(), "uuid-" + player.getUniqueId()));
+                            playerLog.setMetadata("NascraftLogInventoryPage", new FixedMetadataValue(Nascraft.getInstance(), 0));
+                            NascraftLogListener.createTradePage(playerLog, null, player.getUniqueId());
+
+                        }
+                    }
+                }
                 break;
 
             case "cpi":
@@ -86,90 +141,16 @@ public class NascraftCommand implements CommandExecutor {
 
                 if (sender instanceof Player) { MarketEditorManager.getInstance().startEditing((Player) sender); }
                 else Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console.");
-
-                break;
-
-            case "lasttrades":
-
-                int offset;
-
-                if (args.length >= 2) {
-
-                    Player player = Bukkit.getPlayer(args[1]);
-
-                    if (player != null) {
-
-                        if (args.length >= 3) {
-                            try {
-                                offset = Integer.parseInt(args[2]);
-                            } catch (NumberFormatException e) {
-                                offset = 1;
-                            }
-                        } else {
-                            offset = 1;
-                        }
-
-                        if (offset < 1) offset = 1;
-
-                        String report = ChatColor.GRAY + "\nLast trades of user " + player.getName() +": (Page " + offset + ")\n\n";
-
-                        for (Trade trade : DatabaseManager.get().getDatabase().retrieveTrades((offset-1)*10)) {
-                            report += ChatColor.GRAY + getFormatedDate(trade.getDate());
-                            report += trade.isBuy() ? ChatColor.GREEN + " BOUGHT: " : ChatColor.RED + " SOLD: ";
-                            report += trade.getAmount() + " x " + trade.getItem().getIdentifier();
-                            report += " (" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + ")\n";
-                        }
-
-                        if (sender instanceof Player)
-                            sender.sendMessage(report);
-                        else
-                            Nascraft.getInstance().getLogger().info(report);
-
-                        return false;
-                    }
-
-                    try {
-                        offset = Integer.parseInt(args[1]);
-                    } catch (NumberFormatException e) {
-                        offset = 1;
-                    }
-                } else {
-                    offset = 1;
-                }
-
-                if (offset < 1) offset = 1;
-
-                String report = ChatColor.GRAY + "\nLast trades: (Page " + offset + ")\n\n";
-
-                for (Trade trade : DatabaseManager.get().getDatabase().retrieveTrades((offset-1)*10)) {
-                    report += ChatColor.GRAY + getFormatedDate(trade.getDate());
-
-                    Player player = Bukkit.getPlayer(trade.getUuid());
-                    if (player != null)
-                        report += " " + player.getName();
-                    else
-                        report += " " + trade.getUuid().toString();
-                    report += trade.isBuy() ? ChatColor.GREEN + " BOUGHT: " : ChatColor.RED + " SOLD: ";
-                    report += trade.getAmount() + " x " + trade.getItem().getIdentifier();
-                    report += " (" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + ")\n";
-                }
-
-                if (sender instanceof Player)
-                    sender.sendMessage(report);
-                else
-                    Nascraft.getInstance().getLogger().info(report);
-
-                break;
-
-            default: sender.sendMessage(syntaxError);
         }
         return false;
     }
 
-    private String getFormatedDate(LocalDateTime date) {
-
-        String minute = String.valueOf(date.getMinute()).length() == 1 ? "0" + date.getMinute() : String.valueOf(date.getMinute());
-
-        return date.getDayOfMonth() + "/" + date.getMonthValue() + "/" + date.getYear() + " " + date.getHour() + ":" + minute;
+    public static boolean isValidUUID(String uuidString) {
+        try {
+            UUID uuid = UUID.fromString(uuidString);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }

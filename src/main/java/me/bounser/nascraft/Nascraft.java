@@ -2,8 +2,9 @@ package me.bounser.nascraft;
 
 import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.api.NascraftAPI;
-import me.bounser.nascraft.commands.admin.NascraftCommand;
-import me.bounser.nascraft.commands.admin.NascraftTabCompleter;
+import me.bounser.nascraft.commands.admin.nascraft.NascraftCommand;
+import me.bounser.nascraft.commands.admin.nascraft.NascraftLogListener;
+import me.bounser.nascraft.commands.admin.nascraft.NascraftTabCompleter;
 import me.bounser.nascraft.commands.admin.marketeditor.edit.item.EditItemMenuListener;
 import me.bounser.nascraft.commands.admin.marketeditor.edit.category.CategoryEditorListener;
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorInvListener;
@@ -146,6 +147,7 @@ public final class Nascraft extends JavaPlugin {
 
         getCommand("nascraft").setExecutor(new NascraftCommand());
         getCommand("nascraft").setTabCompleter(new NascraftTabCompleter());
+        Bukkit.getPluginManager().registerEvents(new NascraftLogListener(), this);
 
         Bukkit.getPluginManager().registerEvents(new MarketEditorInvListener(), this);
         Bukkit.getPluginManager().registerEvents(new EditItemMenuListener(), this);

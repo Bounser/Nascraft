@@ -1,4 +1,4 @@
-package me.bounser.nascraft.commands.admin;
+package me.bounser.nascraft.commands.admin.nascraft;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -15,7 +15,7 @@ public class NascraftTabCompleter implements TabCompleter {
 
     private final List<String> arguments = Arrays.asList("reload", "editmarket", "stop", "resume", "cpi", "save", "logs");
 
-    private final List<String> tradesArguments = Arrays.asList("<player>", "<item>", "global");
+    private final List<String> tradesArguments = Arrays.asList("<player nick or uuid>", "<item>", "global");
 
     @Nullable
     @Override
