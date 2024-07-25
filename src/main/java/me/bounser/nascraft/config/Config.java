@@ -367,6 +367,16 @@ public class Config {
         return config.getBoolean("discord-bot.main-menu.options.cpi.enabled");
     }
 
+    public boolean getOptionCPIComparisonEnabled() {
+        if (!config.contains("discord-bot.main-menu.options.cpi-comparison.enabled")) return true;
+        return config.getBoolean("discord-bot.main-menu.options.cpi-comparison.enabled");
+    }
+
+    public boolean getOptionFlowsEnabled() {
+        if (!config.contains("discord-bot.main-menu.options.flows.enabled")) return true;
+        return config.getBoolean("discord-bot.main-menu.options.flows.enabled");
+    }
+
     public String getChannel() {
         return config.getString("discord-bot.main-menu.channel");
     }
@@ -557,6 +567,21 @@ public class Config {
         }
         return (float) config.getDouble("price-options.noise.default-intensity");
     }
+
+    public float getNoiseMultiplier() {
+        if (items.contains("price-options.noise.intensity-multiplier")) {
+            return (float) items.getDouble("price-options.noise.intensity-multiplier");
+        }
+        return 1;
+    }
+
+    public float getElasticityMultiplier() {
+        if (items.contains("price-options.elasticity-multiplier")) {
+            return (float) items.getDouble("price-options.elasticity-multiplier");
+        }
+        return 1;
+    }
+
 
     // Categories:
 

@@ -1,7 +1,10 @@
 package me.bounser.nascraft.database.commands;
 
 import me.bounser.nascraft.chart.cpi.CPIInstant;
+import me.bounser.nascraft.database.commands.resources.DayInfo;
 import me.bounser.nascraft.database.commands.resources.NormalisedDate;
+import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.market.unit.stats.Instant;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Statistics {
@@ -59,6 +63,111 @@ public class Statistics {
             }
 
             return cpiInstants;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static List<Instant> getPriceAgainstCPI(Connection connection, Item item) {
+
+        try {
+
+            String query = "SELECT MIN(day) AS min_value FROM cpi;";
+
+            PreparedStatement prep = connection.prepareStatement(query);
+            ResultSet rs = prep.executeQuery();
+
+            int minValue = -1;
+
+            if (rs.next()) {
+                minValue = rs.getInt("min_value");
+            }
+
+            if (minValue == -1) {
+                return Collections.singletonList(new Instant(LocalDateTime.now(), item.getPrice().getValue(), 0));
+            }
+
+            if (NormalisedDate.getDays() - 30 > minValue) {
+                return HistorialData.getMonthPrices(connection, item);
+            }
+
+            return HistorialData.getAllPrices(connection, item);
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void addTransaction(Connection connection, float newFlow, float effectiveTaxes) {
+
+        try {
+
+            String query = "SELECT flow, operations, taxes FROM flows WHERE day=?;";
+
+            PreparedStatement prep = connection.prepareStatement(query);
+            prep.setInt(1, NormalisedDate.getDays());
+            ResultSet rs = prep.executeQuery();
+
+            if (rs.next()) {
+                float flow = rs.getFloat("flow");
+                float taxes = rs.getFloat("taxes");
+                int operations = rs.getInt("operations");
+
+                flow += newFlow;
+                taxes += Math.abs(effectiveTaxes);
+                operations++;
+
+                String sqlreplace = "REPLACE INTO flows(day, flow, taxes, operations) VALUES (?,?,?,?);";
+
+                PreparedStatement replacePrep = connection.prepareStatement(sqlreplace);
+                replacePrep.setInt(1, NormalisedDate.getDays());
+                replacePrep.setFloat(2, flow);
+                replacePrep.setFloat(3, taxes);
+                replacePrep.setInt(4, operations);
+
+                replacePrep.executeUpdate();
+
+            } else {
+
+                String sqlinsert = "INSERT INTO flows (day, flow, taxes, operations) VALUES (?,?,?,?);";
+
+                PreparedStatement insertPrep = connection.prepareStatement(sqlinsert);
+                insertPrep.setInt(1, NormalisedDate.getDays());
+                insertPrep.setFloat(2, newFlow);
+                insertPrep.setFloat(3, effectiveTaxes);
+                insertPrep.setInt(4, 1);
+
+                insertPrep.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static List<DayInfo> getDayInfos(Connection connection) {
+
+        try {
+
+            List<DayInfo> dayInfos = new ArrayList<>();
+
+            String query = "SELECT * FROM flows;";
+
+            PreparedStatement prep = connection.prepareStatement(query);
+            ResultSet rs = prep.executeQuery();
+
+            while (rs.next()) {
+                dayInfos.add(
+                        new DayInfo(
+                                rs.getInt("day"),
+                                rs.getFloat("flow"),
+                                rs.getFloat("taxes")
+                        )
+                );
+            }
+
+            return dayInfos;
+
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

@@ -1,5 +1,7 @@
 package me.bounser.nascraft.chart.cpi;
 
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
@@ -42,7 +44,7 @@ public class ItemAndCPIChart {
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 null,
                 null,
-                "CPI vs " + item.getName() + " (Relative return)",
+                Lang.get().message(Message.DISCORD_CPI_VS_ITEM).replace("[NAME]", item.getName()),
                 priceData,
                 false,
                 false,
@@ -67,7 +69,6 @@ public class ItemAndCPIChart {
         renderer1.setSeriesPaint(0, new Color(100, 200, 255));
         renderer1.setSeriesPaint(1, new Color(255, 100, 100));
 
-        // Use the same renderer for both series and set different colors
         plot.setRenderer(renderer1);
 
         renderer1.setSeriesStroke(0, new BasicStroke(1.5f));
@@ -101,7 +102,7 @@ public class ItemAndCPIChart {
 
     private static XYDataset createPriceDataset(List<CPIInstant> instants, Item item) {
 
-        TimeSeries series1 = new TimeSeries("CPI");
+        TimeSeries series1 = new TimeSeries(Lang.get().message(Message.DISCORD_CPI));
         TimeSeries series2 = new TimeSeries(item.getName());
 
         for (CPIInstant instant : instants) {

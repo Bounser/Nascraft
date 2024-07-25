@@ -51,14 +51,14 @@ sellhand_invalid: "<gradient:#FF0000:#FF7E7E:#FF0000>Hold a valid item!</gradien
 sellhand_error_hand: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ Error! Don't change your hand before confirming</gradient>"
 sellhand_estimated_value: "<gray>Estimated value:</gray> \n"
 
-# alert - Currently not activated.
+# alert
 alert_invalid_use: "<gradient:#FB6363:#C4B3FD>Invalid use of command. /setalert [material] [price]</gradient>"
 alert_not_linked: "<gradient:#FB6363:#C4B3FD>✘ You have to link your account to use this command!</gradient>"
 alert_in_watchlist: "<gradient:#FB6363:#C4B3FD>Item already on your watchlist.</gradient>"
 alert_invalid_price: "<gradient:#FB6363:#C4B3FD>✘ Invalid use of command. Price must be a number. (Ex 120.90)</gradient>"
 alert_not_recognized: "<gradient:#FB6363:#C4B3FD>Item not recognized.</gradient>"
 alert_setup: "<gradient:#00E3FB:#F9ABFD>Alert setup correctly! You'll receive a DM when the price is reached.</gradient>"
-# alerts - Currently not activated.
+# alerts
 alerts_empty: "<gradient:#FB6363:#C4B3FD>You don't have any alert setup.</gradient>"
 alerts_header: "&eActive alerts:\n"
 alerts_list_segment: "\n&6> &l[MATERIAL] &r&eat price &l[WORTH]"
@@ -101,6 +101,67 @@ disinv_info_lore: "<gradient:#6c65b5:#7aad63>Inventory Value: </gradient><b><gra
 disinv_amount: "<gradient:#6c65b5:#7aad63>Amount: </gradient><color:#66ff40>[AMOUNT]</color>"
 disinv_no_space: "<gradient:#FB6363:#C4B3FD>✘ You don't have space in your inventory to move that item!</gradient>"
 disinv_invalid: "<gradient:#FB6363:#C4B3FD>✘ Invalid item!</gradient>"
+
+# Market
+
+market_cmd_invalid_use: "<gradient:#FB6363:#C4B3FD>✘ Invalid use of command. /market <Buy/Sell> <Item> <Quantity></gradient>"
+market_cmd_invalid_quantity: "<gradient:#FB6363:#C4B3FD>✘ Invalid quantity</gradient>"
+market_cmd_max_quantity_reached: "<gradient:#FB6363:#C4B3FD>✘ Quantity can't be higher than 64!</gradient>"
+market_cmd_invalid_identifier: "<gradient:#FB6363:#C4B3FD>✘ That identifier isn't valid!</gradient>"
+market_cmd_invalid_option: "<gradient:#FB6363:#C4B3FD>✘ That option isn't valid! </gradient>"
+
+# Market GUI
+
+gui_fillers_name: " "
+
+gui_positive_change: "<gradient:#4cf000:#66f043>+[PERCENTAGE]%</gradient>"
+gui_no_change: "<gradient:#fffdbd:#aea4ba>~[PERCENTAGE]%</gradient>"
+gui_negative_change: "<gradient:#f00008:#f05c3e>[PERCENTAGE]%</gradient>"
+
+gui_main_menu_title: "        <b><gradient:#12438c:#91196f>Live Item Market</gradient></b>"
+
+gui_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Alerts</gradient></b>"
+gui_alerts_lore_linked: "<color:#cc801d>Receive a notification (DM) in <color:#4931e8>Discord</color></color>\n<color:#cc801d>whenever an item reaches a certain price</color>\n\n<color:#cc801d>You have currently [ALERTS] alerts</color>\n\n<gradient:#ffa930:#ffca85>Click to manage them.</gradient>"
+gui_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Alerts</gradient>"
+gui_alerts_lore_not_linked: "<color:#cc801d>Receive a notification or a DM in <color:#4931e8>Discord</color></color>\n<color:#cc801d>whenever an item reaches a certain price</color>\n \n<gradient:#ff3650:#ff1100>✘ Your account is not linked with Discord.</gradient>"
+gui_information_name: "<b><gradient:#622eff:#ff21c8>Market Menu</gradient></b>"
+gui_information_lore: "<color:#5446b0>Buy from the market and sell to it.</color>\n<color:#5446b0>Browse the categories below to trade</color>\n<color:#5446b0>with a wide variety of items.</color>"
+gui_discord_name_linked: "<b><gradient:#8c2eff:#cd75ff>Discord Inventory</gradient></b>"
+gui_discord_name_not_linked: "<b><gradient:#8c2eff:#cd75ff>Discord Inventory</gradient></b>"
+gui_discord_lore_linked: "<gradient:#6c65b5:#7aad63>Click to access your discord inventory</gradient>"
+gui_discord_lore_not_linked: " \n<gradient:#6c65b5:#7aad63>Click to access your discord inventory</gradient>\n \n<gradient:#ff5e4f:#ff2e4a>✘ Your account is not linked with Discord.</gradient> "
+
+gui_categories_lore_segment: "<color:#7b8dba>●</color> <color:#81889c>[ALIAS]</color>"
+gui_category_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Return</gradient></b>"
+gui_category_item_lore: " \n<gradient:#497882:#4a5082>Price: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Last hour change: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● BUY:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● SELL:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>\n \n<u><gradient:#747cc2:#ebffc4>⏵ Click to operate with this item</gradient></u>"
+
+gui_buysell_item_lore: " \n<gradient:#497882:#4a5082>Price: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Last hour change: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● BUY:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● SELL:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>"
+gui_buysell_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Set alert for item</gradient></b>"
+gui_buysell_alerts_name_setup: "<b><gradient:#ffbf00:#ff4800>Alert</gradient></b>"
+gui_buysell_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Set alert for item</gradient></b>"
+gui_buysell_alerts_lore_linked: "<gradient:#cc801d:#4a5082>Click to select a price. You will be notified</gradient>\n<gradient:#cc801d:#4a5082>through Discord once the price is reached.</gradient>"
+gui_buysell_alerts_lore_setup: "<gradient:#cc801d:#4a5082>You have an alert for this item at price:</gradient>\n\n<gradient:#ffa930:#ffca85>> [PRICE]</gradient>\n\n<gradient:#cc801d:#4a5082>Click to remove it.</gradient>"
+gui_buysell_alerts_lore_not_linked: "<gradient:#cc801d:#4a5082>Click to select a price. You will be notified</gradient>\n<gradient:#cc801d:#4a5082>once the price is reached.</gradient>\n\n<gradient:#ff3650:#ff1100>✘ You can't set up alerts because</gradient>\n<gradient:#ff3650:#ff1100>your account is not linked.</gradient>"
+gui_buysell_info_name: "<b><gradient:#ffc457:#ffb5d0>Keep in mind!</gradient></b>"
+gui_buysell_info_lore: "<gradient:#ffe712:#c7a987>⚠ Prices are not guaranteed ⚠</gradient>"
+gui_buysell_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Return</gradient></b>"
+
+gui_buysell_buy_buttons_name: "<b><gradient:#44ff3d:#94ff42>BUY [AMOUNT]</gradient></b>"
+gui_buysell_buy_buttons_lore: " \n<gradient:#6c65b5:#7aad63>⏵ Click to buy [AMOUNT] for </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
+
+gui_buysell_sell_buttons_name: "<b><gradient:#eb3926:#eb8063>SELL [AMOUNT]</gradient></b>"
+gui_buysell_sell_buttons_lore: " \n<gradient:#6c65b5:#e3326a>⏵ Click to sell [AMOUNT] for </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
+
+gui_alerts_title: "<b><gradient:#ff9305:#ffeb38>Alerts</gradient></b>"
+gui_alerts_lore: "\n<gradient:#6c65b5:#7aad63>Price to reach: </gradient><gradient:#ff9305:#ffeb38>[PRICE]</gradient>\n\n<gradient:#6c65b5:#7aad63>⏵ Click to remove this alert.</gradient>"
+gui_alerts_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Return</gradient></b>"
+
+anvil_alert_title: "Alert: [ALIAS]"
+anvil_alert_text: "Price: "
+anvil_alert_invalid_price: "Invalid price."
+anvil_alert_invalid: "Invalid"
+anvil_alert_limit_reached: "Limit of alerts reached"
+anvil_alert_repeated: "Alert repeated"
 
 # DISCORD - No MiniMessage support. ---------------------------------
 
@@ -145,6 +206,23 @@ discord_1_year: "1 Year"
 discord_all: "All"
 
 discord_cpi_evolution: "CPI Evolution"
+discord_compare_cpi: "Compare CPI and Item"
+discord_flows: "Market Flows"
+
+discord_material_to_compare: "Name of the item you want to compare."
+discord_comparison_title: "Compare CPI to Object"
+discord_comparison_label: "Item Name"
+
+discord_cpi_y: "CPI"
+discord_cpi: "CPI"
+discord_cpi_vs_item: "CPI vs [NAME] (Relative Return)"
+discord_flow_y_1: "Accumulated Flow ($)"
+discord_flow_y_2: "Daily Variation ($)"
+discord_flow_legend_1: "Market Flow"
+discord_flow_legend_2: "Taxes Collected"
+
+discord_advanced_tools: "Tools:"
+discord_advanced_graphs: "Graphs:"
 
 discord_button_1: "Search Item"
 discord_button_2: "Trades History"
@@ -255,64 +333,3 @@ advancedgui_sell: "Sell"
 advancedgui_price: "Price:"
 advancedgui_amount_selection: "Select amount:"
 advancedgui_trend: "Trend:"
-
-# Market
-
-market_cmd_invalid_use: "<gradient:#FB6363:#C4B3FD>✘ Invalid use of command. /market <Buy/Sell> <Item> <Quantity></gradient>"
-market_cmd_invalid_quantity: "<gradient:#FB6363:#C4B3FD>✘ Invalid quantity</gradient>"
-market_cmd_max_quantity_reached: "<gradient:#FB6363:#C4B3FD>✘ Quantity can't be higher than 64!</gradient>"
-market_cmd_invalid_identifier: "<gradient:#FB6363:#C4B3FD>✘ That identifier isn't valid!</gradient>"
-market_cmd_invalid_option: "<gradient:#FB6363:#C4B3FD>✘ That option isn't valid! </gradient>"
-
-# Market GUI
-
-gui_fillers_name: " "
-
-gui_positive_change: "<gradient:#4cf000:#66f043>+[PERCENTAGE]%</gradient>"
-gui_no_change: "<gradient:#fffdbd:#aea4ba>~[PERCENTAGE]%</gradient>"
-gui_negative_change: "<gradient:#f00008:#f05c3e>[PERCENTAGE]%</gradient>"
-
-gui_main_menu_title: "        <b><gradient:#12438c:#91196f>Live Item Market</gradient></b>"
-
-gui_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Alerts</gradient></b>"
-gui_alerts_lore_linked: "<color:#cc801d>Receive a notification (DM) in <color:#4931e8>Discord</color></color>\n<color:#cc801d>whenever an item reaches a certain price</color>\n\n<color:#cc801d>You have currently [ALERTS] alerts</color>\n\n<gradient:#ffa930:#ffca85>Click to manage them.</gradient>"
-gui_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Alerts</gradient>"
-gui_alerts_lore_not_linked: "<color:#cc801d>Receive a notification or a DM in <color:#4931e8>Discord</color></color>\n<color:#cc801d>whenever an item reaches a certain price</color>\n \n<gradient:#ff3650:#ff1100>✘ Your account is not linked with Discord.</gradient>"
-gui_information_name: "<b><gradient:#622eff:#ff21c8>Market Menu</gradient></b>"
-gui_information_lore: "<color:#5446b0>Buy from the market and sell to it.</color>\n<color:#5446b0>Browse the categories below to trade</color>\n<color:#5446b0>with a wide variety of items.</color>"
-gui_discord_name_linked: "<b><gradient:#8c2eff:#cd75ff>Discord Inventory</gradient></b>"
-gui_discord_name_not_linked: "<b><gradient:#8c2eff:#cd75ff>Discord Inventory</gradient></b>"
-gui_discord_lore_linked: "<gradient:#6c65b5:#7aad63>Click to access your discord inventory</gradient>"
-gui_discord_lore_not_linked: " \n<gradient:#6c65b5:#7aad63>Click to access your discord inventory</gradient>\n \n<gradient:#ff5e4f:#ff2e4a>✘ Your account is not linked with Discord.</gradient> "
-
-gui_categories_lore_segment: "<color:#7b8dba>●</color> <color:#81889c>[ALIAS]</color>"
-gui_category_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Return</gradient></b>"
-gui_category_item_lore: " \n<gradient:#497882:#4a5082>Price: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Last hour change: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● BUY:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● SELL:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>\n \n<u><gradient:#747cc2:#ebffc4>⏵ Click to operate with this item</gradient></u>"
-
-gui_buysell_item_lore: " \n<gradient:#497882:#4a5082>Price: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Last hour change: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● BUY:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● SELL:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>"
-gui_buysell_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Set alert for item</gradient></b>"
-gui_buysell_alerts_name_setup: "<b><gradient:#ffbf00:#ff4800>Alert</gradient></b>"
-gui_buysell_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Set alert for item</gradient></b>"
-gui_buysell_alerts_lore_linked: "<gradient:#cc801d:#4a5082>Click to select a price. You will be notified</gradient>\n<gradient:#cc801d:#4a5082>through Discord once the price is reached.</gradient>"
-gui_buysell_alerts_lore_setup: "<gradient:#cc801d:#4a5082>You have an alert for this item at price:</gradient>\n\n<gradient:#ffa930:#ffca85>> [PRICE]</gradient>\n\n<gradient:#cc801d:#4a5082>Click to remove it.</gradient>"
-gui_buysell_alerts_lore_not_linked: "<gradient:#cc801d:#4a5082>Click to select a price. You will be notified</gradient>\n<gradient:#cc801d:#4a5082>once the price is reached.</gradient>\n\n<gradient:#ff3650:#ff1100>✘ You can't set up alerts because</gradient>\n<gradient:#ff3650:#ff1100>your account is not linked.</gradient>"
-gui_buysell_info_name: "<b><gradient:#ffc457:#ffb5d0>Keep in mind!</gradient></b>"
-gui_buysell_info_lore: "<gradient:#ffe712:#c7a987>⚠ Prices are not guaranteed ⚠</gradient>"
-gui_buysell_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Return</gradient></b>"
-
-gui_buysell_buy_buttons_name: "<b><gradient:#44ff3d:#94ff42>BUY [AMOUNT]</gradient></b>"
-gui_buysell_buy_buttons_lore: " \n<gradient:#6c65b5:#7aad63>⏵ Click to buy [AMOUNT] for </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
-
-gui_buysell_sell_buttons_name: "<b><gradient:#eb3926:#eb8063>SELL [AMOUNT]</gradient></b>"
-gui_buysell_sell_buttons_lore: " \n<gradient:#6c65b5:#e3326a>⏵ Click to sell [AMOUNT] for </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
-
-gui_alerts_title: "<b><gradient:#ff9305:#ffeb38>Alerts</gradient></b>"
-gui_alerts_lore: "\n<gradient:#6c65b5:#7aad63>Price to reach: </gradient><gradient:#ff9305:#ffeb38>[PRICE]</gradient>\n\n<gradient:#6c65b5:#7aad63>⏵ Click to remove this alert.</gradient>"
-gui_alerts_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Return</gradient></b>"
-
-anvil_alert_title: "Alert: [ALIAS]"
-anvil_alert_text: "Price: "
-anvil_alert_invalid_price: "Invalid price."
-anvil_alert_invalid: "Invalid"
-anvil_alert_limit_reached: "Limit of alerts reached"
-anvil_alert_repeated: "Alert repeated"

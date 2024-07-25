@@ -204,6 +204,23 @@ discord_1_year: "1 Anno"
 discord_all: "Tutto"
 
 discord_cpi_evolution: "Evoluzione CPI"
+discord_compare_cpi: "Compare CPI and Item"
+discord_flows: "Market Flows"
+
+discord_material_to_compare: "Name of the item you want to compare."
+discord_comparison_title: "Compare CPI to Object"
+discord_comparison_label: "Item Name"
+
+discord_cpi_y: "CPI"
+discord_cpi: "CPI"
+discord_cpi_vs_item: "CPI vs [NAME] (Relative Return)"
+discord_flow_y_1: "Accumulated Flow ($)"
+discord_flow_y_2: "Daily Variation ($)"
+discord_flow_legend_1: "Market Flow"
+discord_flow_legend_2: "Taxes Collected"
+
+discord_advanced_tools: "Tools:"
+discord_advanced_graphs: "Graphs:"
 
 discord_button_1: "Cerca Oggetto"
 discord_button_2: "Storico Transazioni"

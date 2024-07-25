@@ -1,5 +1,7 @@
 package me.bounser.nascraft.chart.cpi;
 
+import me.bounser.nascraft.config.lang.Lang;
+import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
@@ -38,7 +40,7 @@ public class CPIChart {
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 null,
                 null,
-                "CPI",
+                Lang.get().message(Message.DISCORD_CPI_Y),
                 priceData,
                 false,
                 false,

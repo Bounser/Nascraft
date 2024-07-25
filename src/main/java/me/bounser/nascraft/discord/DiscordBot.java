@@ -4,7 +4,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.discord.images.ImagesManager;
+import me.bounser.nascraft.managers.ImagesManager;
 import me.bounser.nascraft.discord.images.ItemBasicImage;
 import me.bounser.nascraft.discord.images.MainImage;
 import me.bounser.nascraft.discord.linking.LinkManager;

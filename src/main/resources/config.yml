@@ -21,8 +21,12 @@ price-options:
     enabled: true
     # Change the default intensity of the noise with this factor.
     default-intensity: 1
+    # Global multiplier
+    intensity-multiplier: 1
   # The default elasticity applies to all items unless otherwise explicitly stated at items.yml.
   default-elasticity: 1
+  # Global multiplier
+  elasticity-multiplier: 1
 
 market-control:
   # Although taxation gets applied for buying and selling actions separately, the total tax paid is the same regardless of how it is split
@@ -129,6 +133,10 @@ discord-bot:
         enabled: true
       # Button to generate a graph with the evolution of the CPI inside advanced options
       cpi:
+        enabled: true
+      cpi-comparison:
+        enabled: true
+      flows:
         enabled: true
 
 sell-wands:

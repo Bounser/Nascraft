@@ -4,6 +4,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.chart.cpi.CPIInstant;
 import me.bounser.nascraft.database.Database;
 import me.bounser.nascraft.database.commands.*;
+import me.bounser.nascraft.database.commands.resources.DayInfo;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
@@ -156,6 +157,13 @@ public class SQLite implements Database {
                         "userid TEXT NOT NULL," +
                         "identifier TEXT NOT NULL," +
                         "price DOUBLE NOT NULL");
+
+        createTable(connection, "flows",
+                "day INT PRIMARY KEY," +
+                        "flow DOUBLE NOT NULL," +
+                        "taxes DOUBLE NOT NULL," +
+                        "operations INT NOT NULL," +
+                        "UNIQUE(day)");
 
         /*
 
@@ -315,13 +323,18 @@ public class SQLite implements Database {
     }
 
     @Override
-    public List<Trade> retrieveTrades(UUID uuid, int offset) {
-        return TradesLog.retrieveTrades(connection, uuid, offset);
+    public List<Trade> retrieveTrades(UUID uuid, int offset, int limit) {
+        return TradesLog.retrieveTrades(connection, uuid, offset, limit);
     }
 
     @Override
-    public List<Trade> retrieveTrades(int offset) {
-        return TradesLog.retrieveLastTrades(connection, offset);
+    public List<Trade> retrieveTrades(Item item, int offset, int limit) {
+        return TradesLog.retrieveTrades(connection, item, offset, limit);
+    }
+
+    @Override
+    public List<Trade> retrieveTrades(int offset, int limit) {
+        return TradesLog.retrieveLastTrades(connection, offset, limit);
     }
 
     @Override
@@ -367,6 +380,21 @@ public class SQLite implements Database {
     @Override
     public List<CPIInstant> getCPIHistory() {
         return Statistics.getAllCPI(connection);
+    }
+
+    @Override
+    public List<Instant> getPriceAgainstCPI(Item item) {
+        return Statistics.getPriceAgainstCPI(connection, item);
+    }
+
+    @Override
+    public void addTransaction(float newFlow, float effectiveTaxes) {
+        Statistics.addTransaction(connection, newFlow, effectiveTaxes);
+    }
+
+    @Override
+    public List<DayInfo> getDayInfos() {
+        return Statistics.getDayInfos(connection);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package me.bounser.nascraft.database;
 
 import me.bounser.nascraft.chart.cpi.CPIInstant;
+import me.bounser.nascraft.database.commands.resources.DayInfo;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
@@ -47,8 +48,9 @@ public interface Database {
     //
 
     void saveTrade(Trade trade);
-    List<Trade> retrieveTrades(UUID uuid, int offset);
-    List<Trade> retrieveTrades(int offset);
+    List<Trade> retrieveTrades(UUID uuid, int offset, int limit);
+    List<Trade> retrieveTrades(Item item, int offset, int limit);
+    List<Trade> retrieveTrades(int offset, int limit);
     void purgeHistory();
 
     //
@@ -65,6 +67,9 @@ public interface Database {
     void saveCPIValue(float indexValue);
 
     List<CPIInstant> getCPIHistory();
+    List<Instant> getPriceAgainstCPI(Item item);
+    void addTransaction(float newFlow, float effectiveTaxes);
+    List<DayInfo> getDayInfos();
 
     void addAlert(String userid, Item item, float price);
     void removeAlert(String userid, Item item);

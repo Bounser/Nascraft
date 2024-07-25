@@ -3,6 +3,7 @@ package me.bounser.nascraft.discord;
 import github.scarsz.discordsrv.DiscordSRV;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.chart.cpi.CPIChart;
+import me.bounser.nascraft.chart.flows.FlowChart;
 import me.bounser.nascraft.chart.price.ChartType;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
@@ -18,6 +19,7 @@ import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.managers.ImagesManager;
 import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
@@ -142,16 +144,26 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "advanced":
 
-                List<ItemComponent> componentList = new ArrayList<>();
+                Config config = Config.getInstance();
 
-                // componentList.add(Button.secondary("limit", "Limit orders").withEmoji(Emoji.fromFormatted("U+1F3AF")).asDisabled());
-                // componentList.add(Button.secondary("opensession", "Open session").withEmoji(Emoji.fromFormatted("U+1F5A5")).asDisabled());
-                if (Config.getInstance().getOptionAlertEnabled()) componentList.add(Button.secondary("alerts", Lang.get().message(Message.DISCORD_ALERTS_NAME)).withEmoji(Emoji.fromFormatted("U+1F514")));
-                //componentList.add(Button.secondary("ositions", "Open positions").withEmoji(Emoji.fromFormatted("U+231B")).asDisabled());
-                if (Config.getInstance().getOptionCPIEnabled()) componentList.add(Button.secondary("cpi", Lang.get().message(Message.DISCORD_CPI_EVOLUTION)).withEmoji(Emoji.fromFormatted("U+1F4C8")));
+                List<ItemComponent> firstRow = new ArrayList<>();
+                List<ItemComponent> secondRow = new ArrayList<>();
+
+                if (config.getOptionAlertEnabled()) firstRow.add(Button.primary("nothing1", Lang.get().message(Message.DISCORD_ADVANCED_TOOLS)).asDisabled());
+                if (config.getOptionAlertEnabled()) firstRow.add(Button.secondary("alerts", Lang.get().message(Message.DISCORD_ALERTS_NAME)).withEmoji(Emoji.fromFormatted("U+1F514")));
+
+                if (config.getOptionCPIComparisonEnabled() ||
+                    config.getOptionCPIComparisonEnabled() ||
+                    config.getOptionFlowsEnabled())
+                    secondRow.add(Button.primary("nothing2", Lang.get().message(Message.DISCORD_ADVANCED_GRAPHS)).asDisabled());
+
+                if (config.getOptionCPIEnabled()) secondRow.add(Button.secondary("cpi", Lang.get().message(Message.DISCORD_CPI_EVOLUTION)).withEmoji(Emoji.fromFormatted("U+1F4C8")));
+                if (config.getOptionCPIEnabled()) secondRow.add(Button.secondary("compare-to-cpi", Lang.get().message(Message.DISCORD_COMPARE_CPI)).withEmoji(Emoji.fromFormatted("U+1F4C8")));
+                if (config.getOptionFlowsEnabled()) secondRow.add(Button.secondary("flows", Lang.get().message(Message.DISCORD_FLOWS)).withEmoji(Emoji.fromFormatted("U+1F4C8")));
 
                 event.reply(".")
-                        .addActionRow(componentList)
+                        .addActionRow(firstRow)
+                        .addActionRow(secondRow)
                         .setEphemeral(true)
                         .queue();
 
@@ -166,7 +178,37 @@ public class DiscordButtons extends ListenerAdapter {
                 embedBuilder.setImage("attachment://image.png");
 
                 event.replyEmbeds(embedBuilder.build())
-                        .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(CPIChart.getImage(500, 200)), "image.png"))
+                        .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(CPIChart.getImage(500, 250)), "image.png"))
+                        .setEphemeral(true)
+                        .queue();
+
+                return;
+
+            case "compare-to-cpi":
+
+                TextInput material2 = TextInput.create("material", Lang.get().message(Message.DISCORD_COMPARISON_LABEL), TextInputStyle.SHORT)
+                        .setPlaceholder(Lang.get().message(Message.DISCORD_MATERIAL_TO_COMPARE))
+                        .setRequiredRange(1, 40)
+                        .build();
+
+                Modal modal2 = Modal.create("compare-item-cpi", Lang.get().message(Message.DISCORD_COMPARISON_TITLE))
+                        .addComponents(ActionRow.of(material2))
+                        .build();
+
+                event.replyModal(modal2).queue();
+
+                return;
+
+            case "flows":
+
+                EmbedBuilder embedBuilderFlow = new EmbedBuilder();
+
+                embedBuilderFlow.setColor(new Color(100, 50, 150));
+
+                embedBuilderFlow.setImage("attachment://image.png");
+
+                event.replyEmbeds(embedBuilderFlow.build())
+                        .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(FlowChart.getImage(700, 400)), "image.png"))
                         .setEphemeral(true)
                         .queue();
 
@@ -271,16 +313,16 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "search":
 
-                TextInput material2 = TextInput.create("material", Lang.get().message(Message.MATERIAL), TextInputStyle.SHORT)
+                TextInput material3 = TextInput.create("material", Lang.get().message(Message.MATERIAL), TextInputStyle.SHORT)
                         .setPlaceholder(Lang.get().message(Message.DISCORD_MATERIAL_TO_OPERATE))
                         .setRequiredRange(1, 40)
                         .build();
 
-                Modal modal2 = Modal.create("basic", Lang.get().message(Message.DISCORD_BUTTON_1))
-                        .addComponents(ActionRow.of(material2))
+                Modal modal3 = Modal.create("basic", Lang.get().message(Message.DISCORD_BUTTON_1))
+                        .addComponents(ActionRow.of(material3))
                         .build();
 
-                event.replyModal(modal2).queue();
+                event.replyModal(modal3).queue();
 
                 return;
 
@@ -448,7 +490,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                 if (event.getComponentId().equals("hnext")) { offset++; }
 
-                List<Trade> trades = database.retrieveTrades(uuid, 15*offset);
+                List<Trade> trades = database.retrieveTrades(uuid, 15*offset, 16);
 
                 String history = Lang.get().message(Message.DISCORD_TRADE_HISTORY_TITLE)
                         .replace("[PAGE]", String.valueOf(1+offset))
@@ -569,7 +611,7 @@ public class DiscordButtons extends ListenerAdapter {
                     return;
                 }
 
-                MoneyManager.getInstance().withdraw(player, value);
+                MoneyManager.getInstance().withdraw(player, value, Config.getInstance().getDiscordBuyTax());
 
                 String buyText;
                 if (quantity == 1) {
@@ -613,7 +655,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                 value = item.getPrice().getProjectedCost(quantity, DiscordBot.getInstance().getDiscordSellTax());
 
-                MoneyManager.getInstance().deposit(player, value);
+                MoneyManager.getInstance().deposit(player, value, Config.getInstance().getDiscordSellTax());
 
                 String sellText;
                 if(quantity == 1) {
