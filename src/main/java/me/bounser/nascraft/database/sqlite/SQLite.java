@@ -328,6 +328,12 @@ public class SQLite implements Database {
     }
 
     @Override
+    public List<Trade> retrieveTrades(UUID uuid, Item item, int offset, int limit) {
+        return TradesLog.retrieveTrades(connection, uuid, item, offset, limit);
+    }
+
+
+    @Override
     public List<Trade> retrieveTrades(Item item, int offset, int limit) {
         return TradesLog.retrieveTrades(connection, item, offset, limit);
     }
