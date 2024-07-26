@@ -36,7 +36,10 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
         Item item;
 
-        switch (dividedParams[0]) {
+        switch (dividedParams[0].toLowerCase()) {
+
+            case "cpi":
+                return String.valueOf(Math.round((MarketManager.getInstance().getConsumerPriceIndex()-100)*100.0)/100.0);
 
             case "linked":
                 return String.valueOf(LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null);
