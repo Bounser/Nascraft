@@ -25,7 +25,8 @@ price-options:
     intensity-multiplier: 1
   # The default elasticity applies to all items unless otherwise explicitly stated at items.yml.
   default-elasticity: 1
-  # Global multiplier
+  # Global multiplier - Take into account that this variable will change the shape of all
+  # price curves, changing the price instantly for all current items.
   elasticity-multiplier: 1
 
 market-control:
@@ -40,6 +41,7 @@ market-control:
   taxation:
     sell: 0.06 # 6% taxation when players sell items.
     buy: 0.04 # 4% taxation when players buy items.
+
   # Do players need the permission "nascraft.market" to operate directly with commands?
   market-permission: true
 

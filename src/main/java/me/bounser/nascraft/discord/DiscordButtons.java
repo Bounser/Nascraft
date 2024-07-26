@@ -552,7 +552,7 @@ public class DiscordButtons extends ListenerAdapter {
             embedBuilder.setImage("attachment://image.png");
 
             event.replyEmbeds(embedBuilder.build())
-                    .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(ItemTimeGraph.getImage(MarketManager.getInstance().getItem(event.getComponentId().substring(5)), chartType)), "image.png"))
+                    .addFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(ItemTimeGraph.getImage(MarketManager.getInstance().getItem(event.getComponentId().substring(5)), chartType, event.getUser().getId())), "image.png"))
                     .setEphemeral(true)
                     .queue();
 

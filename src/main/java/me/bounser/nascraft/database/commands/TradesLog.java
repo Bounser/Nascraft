@@ -5,6 +5,7 @@ import me.bounser.nascraft.database.commands.resources.NormalisedDate;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.market.unit.Item;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,10 +38,10 @@ public class TradesLog {
         }
     }
 
-    public static List<Trade> retrieveTrades(Connection connection, UUID uuid, int offset) {
+    public static List<Trade> retrieveTrades(Connection connection, UUID uuid, int offset, int limit) {
         try {
             List<Trade> trades = new ArrayList<>();
-            String sql = "SELECT * FROM trade_log WHERE uuid = ? ORDER BY id DESC LIMIT 16 OFFSET ?;";
+            String sql = "SELECT * FROM trade_log WHERE uuid = ? ORDER BY id DESC LIMIT " + limit + " OFFSET ?;";
 
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, uuid.toString());
@@ -50,6 +51,69 @@ public class TradesLog {
 
                 Trade trade = new Trade(
                         MarketManager.getInstance().getItem(rs.getString("identifier")),
+                        NormalisedDate.parseDateTime(rs.getString("date")),
+                        rs.getFloat("value"),
+                        rs.getInt("amount"),
+                        rs.getBoolean("buy"),
+                        rs.getBoolean("discord"),
+                        uuid
+                );
+
+                trades.add(trade);
+            }
+            return trades;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static List<Trade> retrieveTrades(Connection connection, UUID uuid, Item item, int offset, int limit) {
+        try {
+            List<Trade> trades = new ArrayList<>();
+            String sql = "SELECT * FROM trade_log WHERE uuid = ? AND identifier = ? ORDER BY id DESC LIMIT " + limit + " OFFSET ?;";
+
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, uuid.toString());
+            statement.setString(2, item.getIdentifier());
+            statement.setInt(3, offset);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+
+                Trade trade = new Trade(
+                        MarketManager.getInstance().getItem(rs.getString("identifier")),
+                        NormalisedDate.parseDateTime(rs.getString("date")),
+                        rs.getFloat("value"),
+                        rs.getInt("amount"),
+                        rs.getBoolean("buy"),
+                        rs.getBoolean("discord"),
+                        uuid
+                );
+
+                trades.add(trade);
+            }
+            return trades;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static List<Trade> retrieveTrades(Connection connection, Item item, int offset, int limit) {
+        try {
+            List<Trade> trades = new ArrayList<>();
+            String sql = "SELECT * FROM trade_log WHERE identifier = ? ORDER BY id DESC LIMIT " + limit + " OFFSET ?;";
+
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, item.getIdentifier());
+            statement.setInt(2, offset);
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+
+                Trade trade = new Trade(
+                        item,
                         NormalisedDate.parseDateTime(rs.getString("date")),
                         rs.getFloat("value"),
                         rs.getInt("amount"),
@@ -68,10 +132,10 @@ public class TradesLog {
         return null;
     }
 
-    public static List<Trade> retrieveLastTrades(Connection connection, int offset) {
+    public static List<Trade> retrieveLastTrades(Connection connection, int offset, int limit) {
         try {
             List<Trade> trades = new ArrayList<>();
-            String sql = "SELECT * FROM trade_log ORDER BY id DESC LIMIT 10 OFFSET ?;";
+            String sql = "SELECT * FROM trade_log ORDER BY id DESC LIMIT " + limit + " OFFSET ?;";
 
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setInt(1, offset);

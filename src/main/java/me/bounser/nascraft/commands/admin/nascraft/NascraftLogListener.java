@@ -57,7 +57,7 @@ public class NascraftLogListener implements Listener {
                         } else if (mode.startsWith("item-")) {
                             updateTradePage(event.getInventory(), page - 1, MarketManager.getInstance().getItem(mode.substring(5)), null);
                         } else if (mode.startsWith("uuid-")){
-                            updateTradePage(event.getInventory(), page - 1, null, UUID.fromString(mode.substring(7)));
+                            updateTradePage(event.getInventory(), page - 1, null, UUID.fromString(mode.substring(5)));
                         }
 
                         break;
@@ -71,7 +71,7 @@ public class NascraftLogListener implements Listener {
                         } else if (mode.startsWith("item-")) {
                             updateTradePage(event.getInventory(), page +1, MarketManager.getInstance().getItem(mode.substring(5)), null);
                         } else if (mode.startsWith("uuid-")){
-                            updateTradePage(event.getInventory(), page +1, null, UUID.fromString(mode.substring(7)));
+                            updateTradePage(event.getInventory(), page +1, null, UUID.fromString(mode.substring(5)));
                         }
                 }
             }
@@ -195,11 +195,12 @@ public class NascraftLogListener implements Listener {
                     lore.add("");
                 }
 
-                if (trade.getAmount() == 1) {
-                    lore.add(ChatColor.BLUE + "Price paid: " + ChatColor.GREEN + Formatter.format(trade.getValue(), Style.ROUND_BASIC));
-                } else {
-                    lore.add(ChatColor.BLUE + "Price paid: " + ChatColor.GREEN + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + " → " + Formatter.format(trade.getValue()/trade.getAmount(), Style.ROUND_BASIC) + " each");
-                }
+                String price = ChatColor.BLUE + (trade.isBuy() ? "Price paid: " : "Price received: ");
+
+                if (trade.getAmount() == 1) price += ChatColor.GREEN + Formatter.format(trade.getValue(), Style.ROUND_BASIC);
+                else price += ChatColor.GREEN + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + " → " + Formatter.format(trade.getValue()/trade.getAmount(), Style.ROUND_BASIC) + " each";
+
+                lore.add(price);
 
                 lore.add("");
                 lore.add(ChatColor.BLUE + getFormattedTime(trade.getDate()));

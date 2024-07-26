@@ -52,8 +52,8 @@ public class Price {
         dayLow.add(hourLow);
         this.support = support;
         this.resistance = resistance;
-        this.noiseIntensity = noiseIntensity;
-        this.elasticity = elasticity;
+        this.noiseIntensity = noiseIntensity * Config.getInstance().getNoiseMultiplier();
+        this.elasticity = elasticity * Config.getInstance().getElasticityMultiplier();
 
         taxBuy = Config.getInstance().getTaxBuy(getItem().getIdentifier());
         taxSell = Config.getInstance().getTaxSell(getItem().getIdentifier());
@@ -128,7 +128,6 @@ public class Price {
         for (float value : dayHigh) if (value > high) high = value;
 
         return Math.max(hourHigh, high);
-
     }
 
     public float getDayLow() {
@@ -217,8 +216,9 @@ public class Price {
     public float getResistance() { return resistance; }
 
     public Price setInitialValue(float initialValue) { this.initialValue = initialValue; return this; }
-    public Price setElasticity(float elasticity) { this.elasticity = elasticity; return this; }
-    public Price setNoiseIntensity(float noiseIntensity) { this.noiseIntensity = noiseIntensity; return this; }
+    public Price setElasticity(float elasticity) {
+        this.elasticity = elasticity * Config.getInstance().getElasticityMultiplier(); return this; }
+    public Price setNoiseIntensity(float noiseIntensity) { this.noiseIntensity = noiseIntensity * Config.getInstance().getNoiseMultiplier(); return this; }
     public Price setSupport(float support) { this.support = support; return this; }
     public Price setResistance(float resistance) { this.resistance = resistance; return this; }
 

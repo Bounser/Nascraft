@@ -174,7 +174,7 @@ public class Item {
             player.getInventory().addItem(operationItemStack);
         }
 
-        MoneyManager.getInstance().withdraw(offlinePlayer, worth);
+        MoneyManager.getInstance().withdraw(offlinePlayer, worth, price.getBuyTaxMultiplier());
 
         if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(worth, Style.ROUND_BASIC), String.valueOf(amount), taggedAlias);
 
@@ -283,7 +283,7 @@ public class Item {
                     price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
 
 
-        MoneyManager.getInstance().deposit(offlinePlayer, worth);
+        MoneyManager.getInstance().deposit(offlinePlayer, worth, price.getSellTaxMultiplier());
 
         worth = RoundUtils.round(worth);
 

@@ -31,6 +31,7 @@ public class Lang {
 
         saveResourceIfNotExists("langs/en_US.yml");
         saveResourceIfNotExists("langs/es_ES.yml");
+        saveResourceIfNotExists("langs/it_IT.yml");
 
         File language = new File(main.getDataFolder().getPath() + "/langs/" + Config.getInstance().getSelectedLanguage() + ".yml");
 

@@ -111,7 +111,7 @@ public class DiscordInventoryInGame implements Listener {
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getView().getTopInventory().getSize() == 45 && event.getView().getTitle().equals(Lang.get().message(Message.DISINV_TITLE))) { event.setCancelled(true); }
+        if (event.getWhoClicked().hasMetadata("NascraftDiscordInventory")) {  event.setCancelled(true); }
     }
 
     @EventHandler

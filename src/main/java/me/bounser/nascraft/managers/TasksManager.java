@@ -36,6 +36,8 @@ public class TasksManager {
         shortTermPricesTask();
         hourlyTask();
         saveInstants();
+
+        DatabaseManager.get().getDatabase().purgeHistory();
     }
 
     private void shortTermPricesTask() {

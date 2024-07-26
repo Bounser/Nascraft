@@ -4,6 +4,7 @@ import java.awt.geom.Ellipse2D;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
@@ -176,10 +177,10 @@ public class ItemChart {
             double value = trade.getValue() / trade.getAmount();
 
             if (trade.isBuy()) {
-                buySeries.add(timestamp, value);
+                buySeries.add(timestamp, trade.throughDiscord() ? value/Config.getInstance().getDiscordBuyTax() : value/item.getPrice().getBuyTaxMultiplier());
                 hasBuyData = true;
             } else {
-                sellSeries.add(timestamp, value);
+                sellSeries.add(timestamp, trade.throughDiscord() ? value/Config.getInstance().getDiscordSellTax() : value/item.getPrice().getSellTaxMultiplier());
                 hasSellData = true;
             }
         }
@@ -187,7 +188,7 @@ public class ItemChart {
         if (hasBuyData) {
             XYSeriesCollection buyDataset = new XYSeriesCollection(buySeries);
             XYShapeRenderer buyRenderer = new XYShapeRenderer();
-            buyRenderer.setSeriesShape(0, new Ellipse2D.Double(-3, -3, 6, 6));
+            buyRenderer.setSeriesShape(0, new Ellipse2D.Double(-4, -4, 8, 8));
             buyRenderer.setSeriesPaint(0, Color.GREEN);
             plot.setDataset(2, buyDataset);
             plot.setRenderer(2, buyRenderer);
@@ -196,7 +197,7 @@ public class ItemChart {
         if (hasSellData) {
             XYSeriesCollection sellDataset = new XYSeriesCollection(sellSeries);
             XYShapeRenderer sellRenderer = new XYShapeRenderer();
-            sellRenderer.setSeriesShape(0, new Ellipse2D.Double(-3, -3, 6, 6));
+            sellRenderer.setSeriesShape(0, new Ellipse2D.Double(-4, -4, 8, 8));
             sellRenderer.setSeriesPaint(0, Color.RED);
             plot.setDataset(3, sellDataset);
             plot.setRenderer(3, sellRenderer);

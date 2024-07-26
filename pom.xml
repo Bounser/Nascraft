@@ -6,7 +6,7 @@
 
     <groupId>me.bounser</groupId>
     <artifactId>Nascraft</artifactId>
-    <version>1.6.2</version>
+    <version>1.6.3</version>
     <packaging>jar</packaging>
 
     <name>Nascraft</name>
@@ -131,12 +131,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>LATEST</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
@@ -151,7 +145,7 @@
         <dependency>
             <groupId>com.discordsrv</groupId>
             <artifactId>discordsrv</artifactId>
-            <version>1.26.2</version>
+            <version>1.26.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

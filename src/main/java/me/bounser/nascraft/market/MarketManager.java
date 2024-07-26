@@ -2,7 +2,7 @@ package me.bounser.nascraft.market;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.database.DatabaseManager;
-import me.bounser.nascraft.discord.images.ImagesManager;
+import me.bounser.nascraft.managers.ImagesManager;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.managers.GraphManager;
 import me.bounser.nascraft.managers.TasksManager;
@@ -11,7 +11,6 @@ import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
 import org.bukkit.inventory.ItemStack;
 
-import javax.xml.crypto.Data;
 import java.awt.image.BufferedImage;
 import java.util.*;
 

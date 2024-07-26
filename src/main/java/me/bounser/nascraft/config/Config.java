@@ -167,6 +167,11 @@ public class Config {
         }
     }
 
+    public boolean takeIntoAccountTax() {
+        if (!config.contains("market-control-taxation.take-into-account-taxes")) return false;
+        return config.getBoolean("market-control-taxation.take-into-account-taxes");
+    }
+
     public boolean getMarketPermissionRequirement() {
         return config.getBoolean("market-control.market-permission");
     }
@@ -569,19 +574,18 @@ public class Config {
     }
 
     public float getNoiseMultiplier() {
-        if (items.contains("price-options.noise.intensity-multiplier")) {
-            return (float) items.getDouble("price-options.noise.intensity-multiplier");
+        if (config.contains("price-options.noise.intensity-multiplier")) {
+            return (float) config.getDouble("price-options.noise.intensity-multiplier");
         }
         return 1;
     }
 
     public float getElasticityMultiplier() {
-        if (items.contains("price-options.elasticity-multiplier")) {
-            return (float) items.getDouble("price-options.elasticity-multiplier");
+        if (config.contains("price-options.elasticity-multiplier")) {
+            return (float) config.getDouble("price-options.elasticity-multiplier");
         }
         return 1;
     }
-
 
     // Categories:
 

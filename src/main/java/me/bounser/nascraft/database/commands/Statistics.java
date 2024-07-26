@@ -88,7 +88,7 @@ public class Statistics {
                 return Collections.singletonList(new Instant(LocalDateTime.now(), item.getPrice().getValue(), 0));
             }
 
-            if (NormalisedDate.getDays() - 30 > minValue) {
+            if (NormalisedDate.getDays() - 30 < minValue) {
                 return HistorialData.getMonthPrices(connection, item);
             }
 

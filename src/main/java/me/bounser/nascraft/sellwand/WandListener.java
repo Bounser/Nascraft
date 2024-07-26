@@ -212,9 +212,9 @@ public class WandListener implements Listener {
                     float result = totalWorth * wand.getMultiplier() - totalWorth;
 
                     if (result > 0) {
-                        MoneyManager.getInstance().deposit(event.getPlayer(), result);
+                        MoneyManager.getInstance().deposit(event.getPlayer(), result, 0);
                     } else {
-                        MoneyManager.getInstance().withdraw(event.getPlayer(), Math.abs(result));
+                        MoneyManager.getInstance().withdraw(event.getPlayer(), Math.abs(result), 0);
                     }
 
                     Lang.get().message(event.getPlayer(), Message.SELLWAND_SOLD_WITH_MULTIPLIER, "[INITIAL-WORTH]", Formatter.format(totalWorth, Style.ROUND_BASIC), "[MULTIPLIER]", String.valueOf(wand.getMultiplier()), "[WORTH]", Formatter.format(totalWorth * wand.getMultiplier(), Style.ROUND_BASIC));

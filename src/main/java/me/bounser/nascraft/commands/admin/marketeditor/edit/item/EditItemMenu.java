@@ -3,7 +3,7 @@ package me.bounser.nascraft.commands.admin.marketeditor.edit.item;
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditor;
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorManager;
 import me.bounser.nascraft.config.Config;
-import me.bounser.nascraft.discord.images.ImagesManager;
+import me.bounser.nascraft.managers.ImagesManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.MarketManager;

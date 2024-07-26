@@ -11,13 +11,13 @@ import java.awt.image.BufferedImage;
 
 public class ItemTimeGraph {
 
-    public static BufferedImage getImage(Item item, ChartType chartType) {
+    public static BufferedImage getImage(Item item, ChartType chartType, String userid) {
 
         BufferedImage image = new BufferedImage(610, 290, BufferedImage.TYPE_INT_ARGB);
 
         Graphics graphics = image.getGraphics();
 
-        graphics.drawImage(ItemChart.getImage(item, chartType, 600, 250), 5, 40, null);
+        graphics.drawImage(ItemChart.getImage(item, chartType, userid, 600, 250), 5, 40, null);
 
         graphics.drawImage(item.getIcon(), 40, 0, 50, 50, null);
 
