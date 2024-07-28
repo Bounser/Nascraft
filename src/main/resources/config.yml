@@ -206,3 +206,6 @@ sell-wands:
 
 # Verify whether the AdvancedGUI's layout is present, and if it is not, place it in the layout folder of AdvancedGUI.
 auto-resources-injection: true
+
+# Cooldown between button uses, in seconds.
+layout-cooldown: 1

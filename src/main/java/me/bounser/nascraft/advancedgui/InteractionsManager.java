@@ -1,9 +1,13 @@
 package me.bounser.nascraft.advancedgui;
 
+import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.util.*;
 
@@ -13,6 +17,8 @@ public class InteractionsManager {
 
     // Offset of items of the selected category.
     public HashMap<Player, Integer> playerOffset = new HashMap<>();
+
+    public List<Player> playersOnCooldown = new ArrayList<>();
 
     public HashMap<Player, List<Item>> options = new HashMap<>();
 
@@ -62,6 +68,23 @@ public class InteractionsManager {
         if (items.get(0).isParent()) return items.get(0);
         else return items.get(0).getParent();
 
+    }
+
+    public boolean isOnCooldown(Player player) {
+        return playersOnCooldown.contains(player);
+    }
+
+    public void addCooldownToPlayer(Player player) {
+        if (!playersOnCooldown.contains(player)) {
+            playersOnCooldown.add(player);
+
+            Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), () -> {
+
+                if (playersOnCooldown.contains(player))
+                    playersOnCooldown.remove(player);
+
+            }, (long) (Config.getInstance().getLayoutCooldown() * 20.0));
+        }
     }
 
 }

@@ -137,16 +137,27 @@ public class LayoutModifier implements LayoutExtension {
         for (int j : Arrays.asList(1,16,64)) {
 
             componentTree.locate("buy" + j).setClickAction((interaction, player, primaryTrigger) -> {
-                Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
 
-                item.buy(j, player.getUniqueId(), true);
-                updateButtonPrice(player, interaction);
+                if (!InteractionsManager.getInstance().isOnCooldown(player)) {
+                    Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
+
+                    item.buy(j, player.getUniqueId(), true);
+                    updateButtonPrice(player, interaction);
+
+                    InteractionsManager.getInstance().addCooldownToPlayer(player);
+                }
+
             });
             componentTree.locate("sell" + j).setClickAction((interaction, player, primaryTrigger) -> {
-                Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
 
-                item.sell(j, player.getUniqueId(), true);
-                updateButtonPrice(player, interaction);
+                if (!InteractionsManager.getInstance().isOnCooldown(player)) {
+                    Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
+
+                    item.sell(j, player.getUniqueId(), true);
+                    updateButtonPrice(player, interaction);
+                    InteractionsManager.getInstance().addCooldownToPlayer(player);
+                }
+
             });
         }
 

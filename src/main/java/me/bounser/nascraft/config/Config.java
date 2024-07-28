@@ -88,6 +88,13 @@ public class Config {
         return config.getBoolean("auto-resources-injection");
     }
 
+    public float getLayoutCooldown() {
+        if (config.contains("layout-cooldown")) {
+            return (float) config.getDouble("layout-cooldown");
+        }
+        return 1;
+    }
+
     public DatabaseType getDatabaseType() {
 
         DatabaseType databaseType = null;
