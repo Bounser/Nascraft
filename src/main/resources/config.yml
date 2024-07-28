@@ -42,6 +42,11 @@ market-control:
     sell: 0.06 # 6% taxation when players sell items.
     buy: 0.04 # 4% taxation when players buy items.
 
+    # Choose whether to take into account the taxes in price fluctuations.
+    # Example: If an item has a tax when buying of a 100%, when you buy an item with this option
+    # activated, the item goes in price as if you bought 1 + 1 * 100% = 2 items.
+    take-into-account-taxes: false
+
   # Do players need the permission "nascraft.market" to operate directly with commands?
   market-permission: true
 

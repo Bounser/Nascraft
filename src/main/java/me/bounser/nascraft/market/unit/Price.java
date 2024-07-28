@@ -75,7 +75,18 @@ public class Price {
     public float getElasticity() { return elasticity; }
 
     public void changeStock(float change) {
-        stock += change;
+
+        if (Config.getInstance().takeIntoAccountTax()) {
+
+            if (change > 0) {
+                stock += change * (1 + (1-taxSell));
+            } else {
+                stock += change * taxBuy;
+            }
+
+        } else {
+            stock += change;
+        }
 
         updateValue();
     }
@@ -184,9 +195,23 @@ public class Price {
 
     public float getProjectedCost(float stockChange, float tax) {
 
+        float change;
+
+        if (Config.getInstance().takeIntoAccountTax()) {
+
+            if (stockChange > 0) {
+                change = stockChange * (1 + (1-taxSell));
+            } else {
+                change = stockChange * taxBuy;
+            }
+
+        } else {
+            change = stockChange;
+        }
+
         int maxSize = (int) Math.round((item.getItemStack().getType().getMaxStackSize())/(elasticity*4) + 0.5);
-        int orderSize = (int) Math.abs(stockChange / maxSize);
-        float excess = Math.abs(stockChange % maxSize);
+        int orderSize = (int) Math.abs(change / maxSize);
+        float excess = Math.abs(change % maxSize);
 
         float fictitiousValue = value;
         float fictitiousStock = stock;
@@ -194,7 +219,7 @@ public class Price {
 
         for (int i = 0 ; i < orderSize ; i++) {
             cost += fictitiousValue * maxSize;
-            fictitiousStock += maxSize * Math.signum(stockChange);
+            fictitiousStock += maxSize * Math.signum(change);
             fictitiousValue = (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
         }
 
