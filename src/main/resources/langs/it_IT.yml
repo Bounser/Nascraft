@@ -107,6 +107,7 @@ market_cmd_invalid_quantity: "<gradient:#FB6363:#C4B3FD>✘ Quantità non valida
 market_cmd_max_quantity_reached: "<gradient:#FB6363:#C4B3FD>✘ La quantità non può essere superiore a 64!</gradient>"
 market_cmd_invalid_identifier: "<gradient:#FB6363:#C4B3FD>✘ Quell'identificatore non è valido!</gradient>"
 market_cmd_invalid_option: "<gradient:#FB6363:#C4B3FD>✘ Quell'opzione non è valida! </gradient>"
+market_cmd_invalid_category: "<gradient:#FB6363:#C4B3FD>✘ Quell'categoria non esiste! </gradient>"
 
 # Interfaccia grafica del Mercato
 

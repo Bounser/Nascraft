@@ -109,6 +109,7 @@ market_cmd_invalid_quantity: "<gradient:#FB6363:#C4B3FD>✘ Invalid quantity</gr
 market_cmd_max_quantity_reached: "<gradient:#FB6363:#C4B3FD>✘ Quantity can't be higher than 64!</gradient>"
 market_cmd_invalid_identifier: "<gradient:#FB6363:#C4B3FD>✘ That identifier isn't valid!</gradient>"
 market_cmd_invalid_option: "<gradient:#FB6363:#C4B3FD>✘ That option isn't valid! </gradient>"
+market_cmd_invalid_category: "<gradient:#FB6363:#C4B3FD>✘ That category doesn't exist! </gradient>"
 
 # Market GUI
 

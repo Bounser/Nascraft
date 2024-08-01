@@ -3,9 +3,11 @@ package me.bounser.nascraft.commands.market;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.inventorygui.CategoryMenu;
 import me.bounser.nascraft.inventorygui.MarketMenuManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -31,6 +33,19 @@ public class MarketCommand implements CommandExecutor {
 
             if (args.length == 0 && player.hasPermission("nascraft.market.gui")) {
                 MarketMenuManager.getInstance().openMenu(player);
+                return false;
+            }
+
+            if (args.length == 2 && args[0].equalsIgnoreCase("category") && player.hasPermission("nascraft.market.gui")) {
+
+                Category category = MarketManager.getInstance().getCategoryFromIdentifier(args[1]);
+
+                if (category == null) {
+                    Lang.get().message(player, Message.MARKET_CMD_INVALID_CATEGORY);
+                    return false;
+                }
+
+                MarketMenuManager.getInstance().setMenuOfPlayer(player, new CategoryMenu(player, category));
                 return false;
             }
 
