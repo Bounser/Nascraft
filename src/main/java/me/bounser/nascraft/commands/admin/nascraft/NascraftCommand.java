@@ -6,25 +6,17 @@ import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
-import me.bounser.nascraft.database.commands.resources.Trade;
-import me.bounser.nascraft.formatter.Formatter;
-import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.UUID;
 
 public class NascraftCommand implements CommandExecutor {
@@ -37,7 +29,7 @@ public class NascraftCommand implements CommandExecutor {
             return false;
         }
 
-        String syntaxError = ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: \nreload | editmarket | save | list | cpi | stop | resume | lasttrades";
+        String syntaxError = ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: \nreload | editmarket | save | cpi | stop | resume | logs";
 
         if (args.length == 0) {
             sender.sendMessage(syntaxError);

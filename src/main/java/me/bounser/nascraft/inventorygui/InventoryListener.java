@@ -87,7 +87,9 @@ public class InventoryListener implements Listener {
 
             List<Integer> itemSlots = config.getCategoryItemsSlots();
 
-            if (itemSlots.contains(event.getRawSlot())) item = items.get(itemSlots.indexOf(event.getRawSlot()) + page * itemSlots.size());
+            if (itemSlots.contains(event.getRawSlot()) && items.size() > (itemSlots.indexOf(event.getRawSlot()) + page * itemSlots.size())) {
+                item = items.get(itemSlots.indexOf(event.getRawSlot()) + page * itemSlots.size());
+            }
 
             if (item == null) return;
 

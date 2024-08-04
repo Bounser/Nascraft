@@ -94,7 +94,7 @@ public class DiscordLog {
 
                 TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getLogChannel());
                 if (textChannel == null) {
-                    Nascraft.getInstance().getLogger().info("Log channel could not be found.");
+                    Nascraft.getInstance().getLogger().info("Log channel could not be found. (flushed)");
                     return;
                 }
 

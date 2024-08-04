@@ -49,6 +49,7 @@ public interface Database {
 
     void saveTrade(Trade trade);
     List<Trade> retrieveTrades(UUID uuid, int offset, int limit);
+    List<Trade> retrieveTrades(UUID uuid, Item item, int offset, int limit);
     List<Trade> retrieveTrades(Item item, int offset, int limit);
     List<Trade> retrieveTrades(int offset, int limit);
     void purgeHistory();

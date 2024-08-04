@@ -103,7 +103,7 @@ public class DiscordBot {
             TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
 
             if (textChannel == null) {
-                Nascraft.getInstance().getLogger().info("textChannel is null");
+                Nascraft.getInstance().getLogger().info("textChannel is null #1");
                 return;
             }
 
@@ -209,7 +209,7 @@ public class DiscordBot {
             jda.awaitReady().getGuilds().forEach(guild -> {
                 TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
                 if (textChannel == null) {
-                    Nascraft.getInstance().getLogger().info("textChannel is null");
+                    Nascraft.getInstance().getLogger().info("textChannel is null #2");
                     return;
                 }
 
@@ -230,7 +230,7 @@ public class DiscordBot {
         jda.getGuilds().forEach(guild -> {
             TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
             if (textChannel == null) {
-                Nascraft.getInstance().getLogger().info("textChannel is null"); return;
+                Nascraft.getInstance().getLogger().info("textChannel is null #3"); return;
             }
             textChannel.sendMessage(Lang.get().message(Message.DISCORD_MARKET_PAUSED)).queue();
         });
@@ -304,7 +304,7 @@ public class DiscordBot {
                 TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getLogChannel());
 
                 if (textChannel == null) {
-                    Nascraft.getInstance().getLogger().info("Log channel could not be found.");
+                    Nascraft.getInstance().getLogger().info("Log channel could not be found. (link log)");
                     return;
                 }
 
@@ -326,7 +326,6 @@ public class DiscordBot {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     private MessageEmbed getBasicEditedEmbedded() {

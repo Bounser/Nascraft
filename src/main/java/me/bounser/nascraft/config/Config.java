@@ -175,8 +175,8 @@ public class Config {
     }
 
     public boolean takeIntoAccountTax() {
-        if (!config.contains("market-control-taxation.take-into-account-taxes")) return false;
-        return config.getBoolean("market-control-taxation.take-into-account-taxes");
+        if (!config.contains("market-control.taxation.take-into-account-taxes")) return false;
+        return config.getBoolean("market-control.taxation.take-into-account-taxes");
     }
 
     public boolean getMarketPermissionRequirement() {
@@ -710,6 +710,11 @@ public class Config {
         return inventorygui.getIntegerList("main-menu.fillers.slots");
     }
 
+    public boolean getSetCategorySegments() {
+        if (!inventorygui.contains("main-menu.categories.item-list")) return true;
+        return inventorygui.getBoolean("main-menu.categories.item-list");
+    }
+
     public List<Integer> getCategoriesSlots() {
         return inventorygui.getIntegerList("main-menu.categories.slots");
     }
@@ -732,6 +737,14 @@ public class Config {
 
     public Material getCategoryBackMaterial() {
         return Material.getMaterial(inventorygui.getString("category-section.back-button.material").toUpperCase());
+    }
+
+    public int getCategoryNextSlot() {
+        return inventorygui.getInt("category-section.next-button.slot");
+    }
+
+    public Material getCategoryNextMaterial() {
+        return Material.getMaterial(inventorygui.getString("category-section.next-button.material").toUpperCase());
     }
 
     public Material getCategoryFillersMaterial() {

@@ -45,7 +45,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
                 if (cpi == null) {
 
-                    Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), () -> cpi = null, 2000);
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), () -> cpi = null, 200);
                     return cpi = String.valueOf(Math.round((MarketManager.getInstance().getConsumerPriceIndex()-100)*100.0)/100.0);
 
                 } else return cpi;

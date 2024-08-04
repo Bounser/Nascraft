@@ -3,6 +3,7 @@ package me.bounser.nascraft.commands.market;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.inventorygui.BuySellMenu;
 import me.bounser.nascraft.inventorygui.CategoryMenu;
 import me.bounser.nascraft.inventorygui.MarketMenuManager;
 import me.bounser.nascraft.market.MarketManager;
@@ -46,6 +47,19 @@ public class MarketCommand implements CommandExecutor {
                 }
 
                 MarketMenuManager.getInstance().setMenuOfPlayer(player, new CategoryMenu(player, category));
+                return false;
+            }
+
+            if (args.length == 2 && args[0].equalsIgnoreCase("item") && player.hasPermission("nascraft.market.gui")) {
+
+                Item item = MarketManager.getInstance().getItem(args[1].toLowerCase());
+
+                if (item == null) {
+                    Lang.get().message(player, Message.MARKET_CMD_INVALID_ITEM);
+                    return false;
+                }
+
+                MarketMenuManager.getInstance().setMenuOfPlayer(player, new BuySellMenu(player, item));
                 return false;
             }
 

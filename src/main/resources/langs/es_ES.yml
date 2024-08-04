@@ -110,6 +110,7 @@ market_cmd_max_quantity_reached: "<gradient:#FB6363:#C4B3FD>✘ ¡La cantidad no
 market_cmd_invalid_identifier: "<gradient:#FB6363:#C4B3FD>✘ ¡El objeto no es válido!</gradient>"
 market_cmd_invalid_option: "<gradient:#FB6363:#C4B3FD>✘ ¡Esa opción no es correcta! </gradient>"
 market_cmd_invalid_category: "<gradient:#FB6363:#C4B3FD>✘ ¡Esa categoría no existe! </gradient>"
+market_cmd_invalid_item: "<gradient:#FB6363:#C4B3FD>✘ ¡Ese item no existe! </gradient>"
 
 # Interfaz del mercado
 

@@ -1,6 +1,5 @@
 package me.bounser.nascraft.formatter;
 
-import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 
@@ -27,7 +26,7 @@ public class Formatter {
             case ROUND_BASIC:
                 DecimalFormat decimalFormat;
                 if (number >= 0.1) decimalFormat = new DecimalFormat("#,###.##");
-                else decimalFormat = new DecimalFormat(".###");
+                else decimalFormat = new DecimalFormat("#.###");
                 formattedText = decimalFormat.format(number);
 
                 break;

@@ -280,7 +280,7 @@ public class HistorialData {
 
             } else {
 
-                String select288 = "SELECT date, price, volume FROM prices_month WHERE identifier=? ORDER BY id DESC LIMIT 279;";
+                String select288 = "SELECT date, price, volume FROM prices_month WHERE identifier=? ORDER BY id DESC LIMIT 400;";
 
                 PreparedStatement preparedStatement288 = connection.prepareStatement(select288);
 
