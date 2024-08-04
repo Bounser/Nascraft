@@ -8,10 +8,13 @@ import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 public class PAPIExpansion extends PlaceholderExpansion {
+
+    private String cpi;
 
     @Override
     public String getAuthor() { return "Bounser"; }
@@ -30,7 +33,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
         String params = PlaceholderAPI.setBracketPlaceholders(player, identifier);
 
-        String[] dividedParams = params.split("_", 3);
+        String[] dividedParams = params.split("_", 2);
 
         if (dividedParams.length == 0) return "Invalid format.";
 
@@ -39,7 +42,13 @@ public class PAPIExpansion extends PlaceholderExpansion {
         switch (dividedParams[0].toLowerCase()) {
 
             case "cpi":
-                return String.valueOf(Math.round((MarketManager.getInstance().getConsumerPriceIndex()-100)*100.0)/100.0);
+
+                if (cpi == null) {
+
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), () -> cpi = null, 2000);
+                    return cpi = String.valueOf(Math.round((MarketManager.getInstance().getConsumerPriceIndex()-100)*100.0)/100.0);
+
+                } else return cpi;
 
             case "linked":
                 return String.valueOf(LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null);
@@ -51,11 +60,9 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
             case "price":
 
-                String[] dividedParamsPrice = params.split("_", 2);
+                if (dividedParams.length != 2) return "Invalid format";
 
-                if (dividedParamsPrice.length != 2) return "Invalid format";
-
-                item = getItemFromString(dividedParamsPrice[1], player.getPlayer());
+                item = getItemFromString(dividedParams[1], player.getPlayer());
 
                 if (item == null) return "0";
 
@@ -63,11 +70,9 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
             case "stock":
 
-                String[] dividedParamsStock = params.split("_", 2);
+                if (dividedParams.length != 2) return "Invalid format";
 
-                if (dividedParamsStock.length != 2) return "Invalid format";
-
-                item = getItemFromString(dividedParamsStock[1], player.getPlayer());
+                item = getItemFromString(dividedParams[1], player.getPlayer());
 
                 if (item == null) return "0";
 
@@ -77,25 +82,27 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
                 if (dividedParams.length != 2) return "Invalid format";
 
-                item = getItemFromString(dividedParams[2], player.getPlayer());
+                item = getItemFromString(dividedParams[1], player.getPlayer());
 
                 if (item == null) return "Invalid item";
 
                 return String.valueOf(RoundUtils.roundToOne(-100 + item.getPrice().getValue() *100/item.getPrice().getValueAnHourAgo()));
         }
 
-        if (dividedParams.length < 2) { return "Invalid format."; }
+        String[] threeDividedParams = params.split("_", 3);
+
+        if (threeDividedParams.length < 2) { return "Invalid format."; }
 
         int quantity;
 
-        if (dividedParams[1].equalsIgnoreCase("mainhand")) {
+        if (threeDividedParams[1].equalsIgnoreCase("mainhand")) {
             item = MarketManager.getInstance().getItem(player.getPlayer().getInventory().getItemInMainHand());
             quantity = player.getPlayer().getInventory().getItemInMainHand().getAmount();
         } else {
-            if (dividedParams.length != 3) { return "Invalid format."; }
-            item = MarketManager.getInstance().getItem(dividedParams[2]);
+            if (threeDividedParams.length != 3) { return "Invalid format."; }
+            item = MarketManager.getInstance().getItem(threeDividedParams[2]);
             try {
-                quantity = Integer.parseInt(dividedParams[1]);
+                quantity = Integer.parseInt(threeDividedParams[1]);
             } catch (NumberFormatException e) {
                 return "Invalid quantity.";
             }
@@ -103,7 +110,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
         if (item == null) return "0";
 
-        switch (dividedParams[0]) {
+        switch (threeDividedParams[0]) {
             case "buyprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getProjectedCost(-quantity, item.getPrice().getBuyTaxMultiplier()), Config.getInstance().getPlaceholderPrecission()));
             case "sellprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getProjectedCost(quantity, item.getPrice().getSellTaxMultiplier()), Config.getInstance().getPlaceholderPrecission()));
         }
