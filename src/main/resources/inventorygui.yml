@@ -44,6 +44,7 @@ main-menu:
       - 35
 
   categories:
+    item-list: true
     slots:
       - 9
       - 10
@@ -74,6 +75,11 @@ category-section:
   back-button:
     enabled: true
     slot: 0
+    material: 'arrow'
+
+  next-button:
+    enabled: true
+    slot: 8
     material: 'arrow'
 
   fillers:

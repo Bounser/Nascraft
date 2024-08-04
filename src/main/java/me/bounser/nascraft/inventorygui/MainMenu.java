@@ -15,7 +15,9 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
@@ -148,22 +150,34 @@ public class MainMenu implements MenuPage {
 
                 List<String> categoryList = new ArrayList<>();
 
-                for (Item item : category.getItems()) {
+                if (config.getSetCategorySegments()) {
 
-                    Component loreSegment = MiniMessage.miniMessage().deserialize(
-                            Lang.get().message(Message.GUI_CATEGORIES_LORE_SEGMENT)
-                    );
+                    for (Item item : category.getItems()) {
 
-                    categoryList.add(BukkitComponentSerializer.legacy().serialize(loreSegment).replace("[ALIAS]", item.getFormattedName()));
+                        Component loreSegment = MiniMessage.miniMessage().deserialize(
+                                Lang.get().message(Message.GUI_CATEGORIES_LORE_SEGMENT)
+                        );
+
+                        categoryList.add(BukkitComponentSerializer.legacy().serialize(loreSegment).replace("[ALIAS]", item.getFormattedName()));
+                    }
                 }
 
-                gui.setItem(i,
-                        MarketMenuManager.getInstance().generateItemStack(
-                                categories.get(j).getMaterial(),
-                                category.getFormattedDisplayName(),
-                                categoryList
-                        )
+                ItemStack categoryItemStack = MarketMenuManager.getInstance().generateItemStack(
+                        categories.get(j).getMaterial(),
+                        category.getFormattedDisplayName(),
+                        categoryList
                 );
+
+                ItemMeta meta = categoryItemStack.getItemMeta();
+
+                meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+                meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
+                meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+
+                categoryItemStack.setItemMeta(meta);
+
+                gui.setItem(i, categoryItemStack);
             }
             j++;
         }

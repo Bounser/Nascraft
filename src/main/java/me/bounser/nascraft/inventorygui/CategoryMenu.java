@@ -10,6 +10,7 @@ import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -44,21 +45,7 @@ public class CategoryMenu implements MenuPage {
                 config.getCategoryItemSlot(),
                 MarketMenuManager.getInstance().generateItemStack(
                         category.getMaterial(),
-                        category.getFormattedDisplayName()
-                ));
-
-        // Back button
-
-        if (config.getCategoryBackEnabled()) {
-            Component backComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_CATEGORY_BACK_NAME));
-
-            gui.setItem(
-                    config.getCategoryBackSlot(),
-                    MarketMenuManager.getInstance().generateItemStack(
-                            config.getCategoryBackMaterial(),
-                            BukkitComponentSerializer.legacy().serialize(backComponent)
-                    ));
-        }
+                        category.getFormattedDisplayName()));
 
         // Fillers
 
@@ -72,31 +59,8 @@ public class CategoryMenu implements MenuPage {
         for (int i : config.getCategoryFillersSlots())
             gui.setItem(i, filler);
 
-        // Items
-
-        List<Item> items = category.getItems();
-
-        int j = 0;
-
-        for (int i : config.getCategoryItemsSlots()) {
-
-            if (j < items.size()) {
-
-                Item item = items.get(j);
-
-                gui.setItem(i,
-                        MarketMenuManager.getInstance().generateItemStack(
-                                item.getItemStack().getType(),
-                                item.getFormattedName(),
-                                MarketMenuManager.getInstance().getLoreFromItem(item, Lang.get().message(Message.GUI_CATEGORY_ITEM_LORE))
-                        )
-                );
-            }
-            j++;
-        }
-
-        player.openInventory(gui);
-        player.setMetadata("NascraftMenu", new FixedMetadataValue(Nascraft.getInstance(), "category-menu-" + category.getIdentifier()));
+        player.setMetadata("NascraftPage", new FixedMetadataValue(Nascraft.getInstance(), 0));
+        update();
     }
 
     @Override
@@ -107,5 +71,89 @@ public class CategoryMenu implements MenuPage {
     @Override
     public void update() {
 
+        Config config = Config.getInstance();
+
+        int page = player.getMetadata("NascraftPage").get(0).asInt();
+
+        // Items
+
+        List<Item> items = category.getItems();
+
+        int j = 0;
+
+        List<Integer> categorySlots = config.getCategoryItemsSlots();
+
+        for (int i : categorySlots) {
+
+            if (j + page * categorySlots.size() < items.size()) {
+
+                Item item = items.get(j + page * categorySlots.size());
+
+                gui.setItem(i,
+                        MarketMenuManager.getInstance().generateItemStack(
+                                item.getItemStack().getType(),
+                                item.getFormattedName(),
+                                MarketMenuManager.getInstance().getLoreFromItem(item, Lang.get().message(Message.GUI_CATEGORY_ITEM_LORE))
+                        )
+                );
+            } else {
+                gui.setItem(i, new ItemStack(Material.AIR));
+            }
+            j++;
+        }
+
+        // Back button
+
+        if (page == 0) {
+            if (config.getCategoryBackEnabled()) {
+                Component backComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_CATEGORY_BACK_NAME));
+
+                gui.setItem(
+                        config.getCategoryBackSlot(),
+                        MarketMenuManager.getInstance().generateItemStack(
+                                config.getCategoryBackMaterial(),
+                                BukkitComponentSerializer.legacy().serialize(backComponent)
+                        ));
+            }
+        } else {
+            Component backComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_CATEGORY_PREVIOUS_NAME));
+
+            gui.setItem(
+                    config.getCategoryBackSlot(),
+                    MarketMenuManager.getInstance().generateItemStack(
+                            config.getCategoryBackMaterial(),
+                            BukkitComponentSerializer.legacy().serialize(backComponent)
+                    ));
+        }
+
+        // Next button
+
+        if (category.getItems().size() > categorySlots.size() * (1 + page)) {
+            Component backComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_CATEGORY_NEXT_NAME));
+
+            gui.setItem(
+                    config.getCategoryNextSlot(),
+                    MarketMenuManager.getInstance().generateItemStack(
+                            config.getCategoryNextMaterial(),
+                            BukkitComponentSerializer.legacy().serialize(backComponent)
+                    ));
+        } else {
+            Component fillerComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_FILLERS_NAME));
+
+            ItemStack filler = MarketMenuManager.getInstance().generateItemStack(
+                    config.getCategoryFillersMaterial(),
+                    BukkitComponentSerializer.legacy().serialize(fillerComponent)
+            );
+
+            gui.setItem(
+                    config.getCategoryNextSlot(),
+                    filler
+            );
+        }
+
+        player.openInventory(gui);
+        player.setMetadata("NascraftMenu", new FixedMetadataValue(Nascraft.getInstance(), "category-menu-" + category.getIdentifier()));
+        player.setMetadata("NascraftPage", new FixedMetadataValue(Nascraft.getInstance(), page));
+        MarketMenuManager.getInstance().setMenuOfPlayer(player, this);
     }
 }

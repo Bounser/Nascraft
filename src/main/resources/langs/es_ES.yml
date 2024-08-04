@@ -134,6 +134,8 @@ gui_discord_lore_not_linked: " \n<gradient:#6c65b5:#7aad63>Clic para acceder a t
 
 gui_categories_lore_segment: "<color:#7b8dba>●</color> <color:#81889c>[ALIAS]</color>"
 gui_category_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Volver</gradient></b>"
+gui_category_previous_name: "<b><gradient:#ff816b:#ff2e38>←</gradient></b>"
+gui_category_next_name: "<b><gradient:#ff816b:#ff2e38>→</gradient></b>"
 gui_category_item_lore: " \n<gradient:#497882:#4a5082>Precio: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Cambio última hora: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● COMPRAR: </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● VENDER:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>\n \n<u><gradient:#747cc2:#ebffc4>⏵ Clic para operar con este objeto</gradient></u>"
 
 gui_buysell_item_lore: " \n<gradient:#497882:#4a5082>Precio: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Cambio última hora: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● COMPRAR: </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● VENDER:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>"

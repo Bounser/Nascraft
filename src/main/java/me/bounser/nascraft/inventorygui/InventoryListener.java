@@ -47,13 +47,39 @@ public class InventoryListener implements Listener {
 
         if (metadata.startsWith("category-menu-")) {
 
-            if (config.getCategoryBackEnabled() && slot == config.getCategoryBackSlot()) {
-                MarketMenuManager.getInstance().setMenuOfPlayer(player, new MainMenu(player)); return;
-            }
-
             Category category = MarketManager.getInstance().getCategoryFromIdentifier(metadata.substring(14));
 
             if (category == null) return;
+
+            int page;
+
+            if (player.hasMetadata("NascraftPage")) {
+                page = player.getMetadata("NascraftPage").get(0).asInt();
+            } else {
+                page = 0;
+            }
+
+            if (config.getCategoryBackEnabled() && slot == config.getCategoryBackSlot()) {
+
+                if (page == 0) {
+
+                    MarketMenuManager.getInstance().setMenuOfPlayer(player, new MainMenu(player));
+
+                } else if (category.getItems().size() > config.getCategoryItemsSlots().size()) {
+
+                    player.setMetadata("NascraftPage", new FixedMetadataValue(Nascraft.getInstance(), player.getMetadata("NascraftPage").get(0).asInt() - 1));
+                    MarketMenuManager.getInstance().getMenuFromPlayer(player).update();
+
+                }
+                return;
+            }
+
+            if (category.getItems().size() > config.getCategoryItemsSlots().size() * (1 + page) && slot == config.getCategoryNextSlot()) {
+
+                player.setMetadata("NascraftPage", new FixedMetadataValue(Nascraft.getInstance(), player.getMetadata("NascraftPage").get(0).asInt() + 1));
+                MarketMenuManager.getInstance().getMenuFromPlayer(player).update();
+                return;
+            }
 
             Item item = null;
 
@@ -61,7 +87,7 @@ public class InventoryListener implements Listener {
 
             List<Integer> itemSlots = config.getCategoryItemsSlots();
 
-            if (itemSlots.contains(event.getRawSlot())) item = items.get(itemSlots.indexOf(event.getRawSlot()));
+            if (itemSlots.contains(event.getRawSlot())) item = items.get(itemSlots.indexOf(event.getRawSlot()) + page * itemSlots.size());
 
             if (item == null) return;
 
@@ -177,7 +203,6 @@ public class InventoryListener implements Listener {
             return;
         }
 
-
         switch (metadata) {
 
             case "main-menu":
@@ -211,7 +236,13 @@ public class InventoryListener implements Listener {
 
                 if (!categorySlots.contains(slot)) return;
 
-                Category category = categories.get(categorySlots.indexOf(event.getRawSlot()));
+                if (!categorySlots.contains(event.getRawSlot())) return;
+
+                int catIndex = categorySlots.indexOf(event.getRawSlot());
+
+                if (categories.size() <= catIndex) return;
+
+                Category category = categories.get(catIndex);
 
                 if (category == null) return;
 
@@ -260,6 +291,10 @@ public class InventoryListener implements Listener {
 
         if (player.hasMetadata("NascraftQuantity")) {
             player.removeMetadata("NascraftQuantity", Nascraft.getInstance());
+        }
+
+        if (player.hasMetadata("NascraftPage")) {
+            player.removeMetadata("NascraftPage", Nascraft.getInstance());
         }
     }
 }
