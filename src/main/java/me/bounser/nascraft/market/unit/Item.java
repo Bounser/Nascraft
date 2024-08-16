@@ -19,8 +19,8 @@ import me.bounser.nascraft.market.unit.stats.ItemStats;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -105,8 +105,9 @@ public class Item {
 
         Component miniMessageAlias = MiniMessage.miniMessage().deserialize(alias);
 
-        this.alias = PlainTextComponentSerializer.plainText().serialize(miniMessageAlias);;
         this.formatedAlias = BukkitComponentSerializer.legacy().serialize(miniMessageAlias);
+
+        alias = ChatColor.stripColor(formatedAlias);
 
         if (alias.equals(formatedAlias)) {
             taggedAlias = Lang.get().message(Message.DEFAULT_ITEM_FORMAT).replace("[ALIAS]", alias);
