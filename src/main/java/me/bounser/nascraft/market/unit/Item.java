@@ -1,5 +1,6 @@
 package me.bounser.nascraft.market.unit;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.Images;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
@@ -18,9 +19,9 @@ import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.stats.ItemStats;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -36,7 +37,7 @@ public class Item {
     private final String identifier;
     private String alias;
     private String taggedAlias;
-    private String formatedAlias;
+    private String formattedAlias;
     private final BufferedImage icon;
     private Category category;
 
@@ -105,15 +106,29 @@ public class Item {
 
         Component miniMessageAlias = MiniMessage.miniMessage().deserialize(alias);
 
-        this.formatedAlias = BukkitComponentSerializer.legacy().serialize(miniMessageAlias);
+        this.formattedAlias = BukkitComponentSerializer.legacy().serialize(miniMessageAlias);
 
-        alias = ChatColor.stripColor(formatedAlias);
+        this.alias = extractPlainText(miniMessageAlias);
 
-        if (alias.equals(formatedAlias)) {
+        if (alias.equals(formattedAlias)) {
             taggedAlias = Lang.get().message(Message.DEFAULT_ITEM_FORMAT).replace("[ALIAS]", alias);
             Component defaultMiniMessageAlias = MiniMessage.miniMessage().deserialize(taggedAlias);
-            formatedAlias = BukkitComponentSerializer.legacy().serialize(defaultMiniMessageAlias);
+            formattedAlias = BukkitComponentSerializer.legacy().serialize(defaultMiniMessageAlias);
         }
+    }
+
+    public String extractPlainText(Component component) {
+        StringBuilder plainText = new StringBuilder();
+
+        if (component instanceof TextComponent) {
+            plainText.append(((TextComponent) component).content());
+        }
+
+        for (Component child : component.children()) {
+            plainText.append(extractPlainText(child));
+        }
+
+        return plainText.toString();
     }
 
     public void addChildItem(Item item) {
@@ -132,7 +147,7 @@ public class Item {
 
     public String getTaggedName() { return taggedAlias; }
 
-    public String getFormattedName() { return formatedAlias; }
+    public String getFormattedName() { return formattedAlias; }
 
 
     public float buyPrice(int amount) {

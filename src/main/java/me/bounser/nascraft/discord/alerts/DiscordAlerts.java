@@ -9,7 +9,6 @@ import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
-import org.bukkit.Bukkit;
 import org.bukkit.event.Listener;
 
 import java.util.HashMap;

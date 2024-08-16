@@ -96,7 +96,7 @@ public class Price {
         value = Math.max(value, Config.getInstance().getLimits()[0]);
     }
 
-    public float applyNoise() {
+    public void applyNoise() {
 
         float prevStock = stock;
 
@@ -118,6 +118,9 @@ public class Price {
 
         item.addVolume(Math.abs(Math.round(stock - prevStock)));
 
+    }
+
+    public float getChange() {
         float change = -100 + 100*value/previousValue;
         previousValue = value;
 

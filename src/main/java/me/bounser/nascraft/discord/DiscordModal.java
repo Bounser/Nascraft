@@ -1,7 +1,6 @@
 package me.bounser.nascraft.discord;
 
 import me.bounser.nascraft.chart.cpi.ItemAndCPIChart;
-import me.bounser.nascraft.chart.flows.FlowChart;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.alerts.DiscordAlerts;

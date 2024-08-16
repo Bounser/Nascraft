@@ -144,9 +144,9 @@ items:
       blaze_powder:
         multiplier: 0.5
   glowstone_dust:
-    initial-price: 25
+    initial-price: 15
     child:
-      glowstone_dust:
+      glowstone:
         multiplier: 4
   nether_wart:
     initial-price: 80
@@ -217,15 +217,15 @@ items:
       redstone_block:
         multiplier: 9
   hopper:
-    initial-price: 500
+    initial-price: 65
   redstone_lamp:
-    initial-price: 100
+    initial-price: 60
   tnt:
-    initial-price: 500
+    initial-price: 252
   piston:
-    initial-price: 90
+    initial-price: 20
   dispenser:
-    initial-price: 100
+    initial-price: 50
   sculk_sensor:
     initial-price: 40
 
@@ -329,7 +329,7 @@ items:
     initial-price: 10
 
   diamond:
-    initial-price: 800
+    initial-price: 850
     resistance: 1000
     support: 150
     child:
@@ -351,7 +351,7 @@ items:
       buy: 0.1
       sell: 0.15
   name_tag:
-    initial-price: 5000
+    initial-price: 1000
     elasticity: 4
     noise-intensity: 0.5
   totem_of_undying:
@@ -359,9 +359,9 @@ items:
     elasticity: 4
     noise-intensity: 0.5
   golden_apple:
-    initial-price: 250
+    initial-price: 915
   golden_carrot:
-    initial-price: 150
+    initial-price: 91
 
   coal:
     initial-price: 4

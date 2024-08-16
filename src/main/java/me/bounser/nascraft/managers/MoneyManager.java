@@ -1,6 +1,5 @@
 package me.bounser.nascraft.managers;
 
-
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.database.DatabaseManager;
 import net.milkbowl.vault.economy.Economy;

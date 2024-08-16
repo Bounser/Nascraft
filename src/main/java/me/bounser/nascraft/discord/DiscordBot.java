@@ -118,7 +118,6 @@ public class DiscordBot {
             componentList2.add(Button.secondary("link", Lang.get().message(Message.DISCORD_BUTTON_4)).withEmoji(Emoji.fromFormatted("U+1F517")));
             componentList2.add(Button.secondary("inventory", Lang.get().message(Message.DISCORD_BUTTON_5)).withEmoji(Emoji.fromFormatted("U+1F392")));
             componentList2.add(Button.secondary("balance", Lang.get().message(Message.DISCORD_BUTTON_6)).withEmoji(Emoji.fromFormatted("U+1FA99")));
-            // componentList2.add(Button.secondary("manager", Lang.get().message(Message.DISCORD_BUTTON_7)).withEmoji(Emoji.fromFormatted("U+1F4BC")).asDisabled());
 
             if (Config.getInstance().getOptionSelectionEnabled()) {
                 textChannel.sendMessageEmbeds(getEmbedded())
@@ -127,7 +126,7 @@ public class DiscordBot {
                         .addActionRow(componentList1)
                         .addActionRow(componentList2)
                         .queue(message -> {
-                            message.delete().queueAfter(60, TimeUnit.SECONDS);
+                            message.delete().queueAfter(Config.getInstance().getUpdateTime(), TimeUnit.SECONDS);
                         });
             } else {
                 textChannel.sendMessageEmbeds(getEmbedded())
@@ -135,11 +134,10 @@ public class DiscordBot {
                         .addActionRow(componentList1)
                         .addActionRow(componentList2)
                         .queue(message -> {
-                            message.delete().queueAfter(60, TimeUnit.SECONDS);
+                            message.delete().queueAfter(Config.getInstance().getUpdateTime(), TimeUnit.SECONDS);
                         });
             }
         });
-
     }
 
     public static DiscordBot getInstance() { return instance; }

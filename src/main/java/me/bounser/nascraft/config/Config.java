@@ -154,6 +154,11 @@ public class Config {
         return config.getBoolean("price-options.noise.enabled");
     }
 
+    public int getNoiseTime() {
+        if (!config.contains("price-options.noise.time")) return 60;
+        return config.getInt("price-options.noise.time");
+    }
+
     public float getTaxBuy(String identifier) {
 
         if (items.contains("items." + identifier + ".tax.buy")) {
@@ -347,6 +352,11 @@ public class Config {
 
     public boolean getDiscordMenuEnabled() {
         return config.getBoolean("discord-bot.main-menu.enabled");
+    }
+
+    public int getUpdateTime() {
+        if (!config.contains("discord-bot.main-menu.options.update-time")) return 60;
+        return config.getInt("discord-bot.main-menu.options.update-time");
     }
 
     public boolean getOptionWikiEnabled() {

@@ -23,6 +23,8 @@ price-options:
     default-intensity: 1
     # Global multiplier
     intensity-multiplier: 1
+    # Time in seconds to apply noise. By default, 60 seconds, so each 60 seconds prices will change randomly.
+    time: 60
   # The default elasticity applies to all items unless otherwise explicitly stated at items.yml.
   default-elasticity: 1
   # Global multiplier - Take into account that this variable will change the shape of all
@@ -121,6 +123,8 @@ discord-bot:
       buy: 0.04
       sell: 0.05
     options:
+      # Time in seconds between each update of the message.
+      update-time: 60
       # Button to access to the discord wiki.
       wiki:
         enabled: true

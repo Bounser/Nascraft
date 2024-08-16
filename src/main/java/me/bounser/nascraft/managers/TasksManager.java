@@ -32,27 +32,31 @@ public class TasksManager {
     public static TasksManager getInstance() { return instance == null ? instance = new TasksManager() : instance; }
 
     private TasksManager(){
-        saveDataTask();
-        shortTermPricesTask();
-        hourlyTask();
-        saveInstants();
-
-        DatabaseManager.get().getDatabase().purgeHistory();
-    }
-
-    private void shortTermPricesTask() {
 
         LocalTime timeNow = LocalTime.now();
 
         LocalTime nextMinute = timeNow.plusMinutes(1).withSecond(0);
         Duration timeRemaining = Duration.between(timeNow, nextMinute);
 
+        // Registering tasks:
+        saveDataTask();
+        noiseTask((int) timeRemaining.getSeconds());
+        discordTask((int) timeRemaining.getSeconds());
+        shortTermPricesTask((int) timeRemaining.getSeconds());
+        hourlyTask();
+        saveInstants();
+
+        DatabaseManager.get().getDatabase().purgeHistory();
+    }
+
+    private void shortTermPricesTask(int delay) {
+
         Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
 
             float allChanges = 0;
             for (Item item : MarketManager.getInstance().getAllParentItems()) {
                 if (Config.getInstance().getPriceNoise())
-                    allChanges += item.getPrice().applyNoise();
+                    allChanges += item.getPrice().getChange();
 
                 item.lowerOperations();
 
@@ -74,21 +78,37 @@ public class TasksManager {
 
                 }
 
-            // FundsManager.getInstance().operateBrokers();
+        }, (long) delay * ticksPerSecond, 60L * ticksPerSecond);
+    }
 
-            // LimitOrdersManager.getInstance().checkOrders();
+    private void discordTask(int delay) {
 
-            if (Config.getInstance().getDiscordEnabled()) {
+        if (Config.getInstance().getDiscordEnabled()) {
+
+            Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
+
                 if (Config.getInstance().getDiscordMenuEnabled()) {
                     DiscordBot.getInstance().update();
                     DiscordAlerts.getInstance().updateAlerts();
                 }
-                if (Config.getInstance().getLogChannelEnabled()) {
-                    DiscordLog.getInstance().flushBuffer();
-                }
-            }
 
-        }, timeRemaining.getSeconds()*ticksPerSecond, 60L * ticksPerSecond);
+                if (Config.getInstance().getLogChannelEnabled())
+                    DiscordLog.getInstance().flushBuffer();
+
+            }, (long) delay * ticksPerSecond, ((long) Config.getInstance().getUpdateTime() *  ticksPerSecond));
+        }
+    }
+
+    private void noiseTask(int delay) {
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(Nascraft.getInstance(), () -> {
+
+            for (Item item : MarketManager.getInstance().getAllParentItems()) {
+                if (Config.getInstance().getPriceNoise())
+                    item.getPrice().applyNoise();
+
+            }
+        }, (long) delay * ticksPerSecond, (long) Config.getInstance().getNoiseTime() *  ticksPerSecond);
     }
 
     private void saveDataTask() {
