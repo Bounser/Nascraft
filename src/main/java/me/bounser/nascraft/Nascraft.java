@@ -33,6 +33,7 @@ import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.sellwand.WandListener;
 import me.bounser.nascraft.sellwand.WandsManager;
 import me.bounser.nascraft.updatechecker.UpdateChecker;
+import me.bounser.nascraft.webserver.WebServer;
 import me.leoko.advancedgui.AdvancedGUI;
 import me.leoko.advancedgui.manager.GuiItemManager;
 import me.leoko.advancedgui.manager.GuiWallManager;

@@ -74,8 +74,9 @@
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
         <repository>
-            <id>leoko-dev</id>
-            <url>https://repo.leoko.dev/releases</url>
+            <id>respark-releases</id>
+            <name>Respark - Maven Repository</name>
+            <url>https://maven.respark.dev/releases</url>
         </repository>
         <repository>
             <id>placeholderapi</id>
@@ -115,7 +116,7 @@
         <dependency>
             <groupId>me.leoko.advancedgui</groupId>
             <artifactId>AdvancedGUI</artifactId>
-            <version>2.2.2</version>
+            <version>2.2.8</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -1,8 +1,8 @@
 package me.bounser.nascraft.database.mysql;
 
-import com.zaxxer.hikari.HikariDataSource;
 import me.bounser.nascraft.chart.cpi.CPIInstant;
 import me.bounser.nascraft.database.Database;
+import me.bounser.nascraft.database.commands.resources.DayInfo;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
@@ -19,8 +19,6 @@ public class MySQL implements Database {
     private final String USERNAME;
     private final String PASSWORD;
 
-    private HikariDataSource hikari;
-
     public MySQL(String host, int port, String database, String username, String password) {
         this.HOST = host;
         this.PORT = port;
@@ -30,6 +28,7 @@ public class MySQL implements Database {
     }
 
     public void connect() {
+        /*
         hikari = new HikariDataSource();
         hikari.setDataSourceClassName("com.mysql.jdbc.jdbc2.optional.MysqlDateSource");
 
@@ -48,7 +47,17 @@ public class MySQL implements Database {
         hikari.close();
     }
 
-    public boolean isConnected() { return hikari != null; }
+    public boolean isConnected() { return hikari != null;*/ }
+
+    @Override
+    public void disconnect() {
+
+    }
+
+    @Override
+    public boolean isConnected() {
+        return false;
+    }
 
     @Override
     public void createTables() {
@@ -147,12 +156,22 @@ public class MySQL implements Database {
     }
 
     @Override
-    public List<Trade> retrieveTrades(UUID uuid, int offset) {
+    public List<Trade> retrieveTrades(UUID uuid, int offset, int limit) {
         return null;
     }
 
     @Override
-    public List<Trade> retrieveTrades(int offset) {
+    public List<Trade> retrieveTrades(UUID uuid, Item item, int offset, int limit) {
+        return null;
+    }
+
+    @Override
+    public List<Trade> retrieveTrades(Item item, int offset, int limit) {
+        return null;
+    }
+
+    @Override
+    public List<Trade> retrieveTrades(int offset, int limit) {
         return null;
     }
 
@@ -198,6 +217,21 @@ public class MySQL implements Database {
 
     @Override
     public List<CPIInstant> getCPIHistory() {
+        return null;
+    }
+
+    @Override
+    public List<Instant> getPriceAgainstCPI(Item item) {
+        return null;
+    }
+
+    @Override
+    public void addTransaction(float newFlow, float effectiveTaxes) {
+
+    }
+
+    @Override
+    public List<DayInfo> getDayInfos() {
         return null;
     }
 

@@ -470,10 +470,12 @@ public class LayoutModifier implements LayoutExtension {
 
     public void changeMaterial(Player player, Item item, Interaction interaction) {
 
-        InteractionsManager.getInstance().setItemOfPlayer(player, item);
+        if (item != null) {
+            InteractionsManager.getInstance().setItemOfPlayer(player, item);
 
-        interaction.getComponentTree().locate("MainView", ViewComponent.class).setView("TradingScreen");
-        interaction.getComponentTree().locate("MainText", TextComponent.class).setText(item.getName());
-        interaction.getComponentTree().locate("MainImage", ImageComponent.class).setImage(Images.getProcessedImage(item, 60, 60, true));
-    }
+            interaction.getComponentTree().locate("MainView", ViewComponent.class).setView("TradingScreen");
+            interaction.getComponentTree().locate("MainText", TextComponent.class).setText(item.getName());
+            interaction.getComponentTree().locate("MainImage", ImageComponent.class).setImage(Images.getProcessedImage(item, 60, 60, true));
+        }
+   }
 }

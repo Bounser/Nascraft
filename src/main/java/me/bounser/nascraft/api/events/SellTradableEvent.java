@@ -44,7 +44,7 @@ public class SellTradableEvent extends Event implements Cancellable {
         return player;
     }
 
-    public Item getTradable() {
+    public Item getItem() {
         return item;
     }
 

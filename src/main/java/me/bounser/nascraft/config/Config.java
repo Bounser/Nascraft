@@ -3,8 +3,6 @@ package me.bounser.nascraft.config;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.DatabaseType;
-import me.bounser.nascraft.market.funds.FundsManager;
-import me.bounser.nascraft.market.funds.Strategy;
 import me.bounser.nascraft.sellwand.Wand;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
 import me.bounser.nascraft.market.resources.Category;
@@ -628,33 +626,6 @@ public class Config {
             }
         }
         return null;
-    }
-
-    public void setupFunds() {
-
-        for (String identifier : investments.getConfigurationSection("investments.funds.").getKeys(false)) {
-
-            HashMap<Strategy, Float> weightedStrategy = new HashMap<>();
-
-            for (String strategyString : investments.getConfigurationSection("investments.funds." + identifier + ".strategy.").getKeys(false)) {
-
-                Strategy strategy = null;
-
-                try {
-                    strategy = Strategy.valueOf(strategyString.toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    Nascraft.getInstance().getLogger().warning("Strategy " + strategyString + " is not a valid strategy!");
-                    Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
-                }
-
-                if (strategy != null)
-                    weightedStrategy.put(
-                            strategy,
-                            (float) investments.getDouble("investments.funds." + identifier + ".strategy." + strategyString + ".weight")
-                    );
-            }
-            FundsManager.getInstance().createFund(identifier, weightedStrategy);
-        }
     }
 
     public int getMainMenuSize() {
