@@ -13,7 +13,7 @@ import java.io.*;
 
 public class Lang {
 
-    private final YamlConfiguration lang;
+    private YamlConfiguration lang;
 
     private final MiniMessage miniMessage;
     private final BukkitAudiences audience;
@@ -27,23 +27,34 @@ public class Lang {
 
     private Lang() {
 
-        Nascraft main = Nascraft.getInstance();
-
         saveResourceIfNotExists("langs/en_US.yml");
         saveResourceIfNotExists("langs/es_ES.yml");
         saveResourceIfNotExists("langs/it_IT.yml");
 
-        File language = new File(main.getDataFolder().getPath() + "/langs/" + Config.getInstance().getSelectedLanguage() + ".yml");
+        File language = new File(Nascraft.getInstance().getDataFolder().getPath() + "/langs/" + Config.getInstance().getSelectedLanguage() + ".yml");
 
         if (!language.exists()) {
-            main.getLogger().severe("Lang file selected does not exist!");
-            main.getPluginLoader().disablePlugin(main);
+            Nascraft.getInstance().getLogger().severe("Lang file selected does not exist!");
+            Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
         }
 
         lang = YamlConfiguration.loadConfiguration(language);
 
         this.audience = Nascraft.getInstance().adventure();
         this.miniMessage = MiniMessage.miniMessage();
+        Formatter.setSeparator(Separator.valueOf(message(Message.SEPARATOR).toUpperCase()));
+    }
+
+    public void reload() {
+
+        File language = new File(Nascraft.getInstance().getDataFolder().getPath() + "/langs/" + Config.getInstance().getSelectedLanguage() + ".yml");
+
+        if (!language.exists()) {
+            Nascraft.getInstance().getLogger().severe("Lang file selected does not exist!");
+            Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
+        }
+
+        lang = YamlConfiguration.loadConfiguration(language);
         Formatter.setSeparator(Separator.valueOf(message(Message.SEPARATOR).toUpperCase()));
     }
 

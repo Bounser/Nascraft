@@ -123,10 +123,15 @@ public class NascraftCommand implements CommandExecutor {
 
                 Config.getInstance().reload();
 
+                Lang.get().reload();
+
+                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Lang reloaded. Using: " + Config.getInstance().getSelectedLanguage());
+
                 sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Reloaded! " +
-                        MarketManager.getInstance().getAllItems().size() + " (" +
+                        MarketManager.getInstance().getAllItems().size() + " items (" +
                         MarketManager.getInstance().getAllParentItems().size() + " parents and " + (MarketManager.getInstance().getAllItems().size() - MarketManager.getInstance().getAllParentItems().size()) +
-                        "items and " + Config.getInstance().getCategories().size() + " categories.");
+                        " childs) within " + Config.getInstance().getCategories().size() + " categories.");
+
                 break;
 
             case "editmarket":

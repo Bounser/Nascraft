@@ -20,7 +20,7 @@ import java.util.*;
 
 public class Config {
 
-    private final FileConfiguration config;
+    private FileConfiguration config;
     private FileConfiguration items;
     private FileConfiguration categories;
     private FileConfiguration inventorygui;
@@ -55,11 +55,12 @@ public class Config {
 
     public void reload() {
 
+        config = YamlConfiguration.loadConfiguration(new File(main.getDataFolder(), "config.yml"));
+
         DatabaseManager.get().getDatabase().saveEverything();
 
         items = setupFile("items.yml");
         categories = setupFile("categories.yml");
-        // investments = setupFile("investments.yml");
 
         MarketManager.getInstance().reload();
     }
