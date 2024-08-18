@@ -1,41 +1,52 @@
-package me.bounser.nascraft.discord.linking;
+package me.bounser.nascraft.commands.discord;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.commands.Command;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.DiscordBot;
+import me.bounser.nascraft.discord.linking.LinkManager;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
-public class LinkCommand implements CommandExecutor {
+import java.util.Arrays;
+import java.util.List;
+
+public class LinkCommand extends Command {
+
+    public LinkCommand() {
+        super(
+                "link",
+                new String[]{Config.getInstance().getCommandAlias("link")},
+                "Link a minecraft account with discord",
+                "nascraft.linkable"
+        );
+    }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
-
+    public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof Player)) {
             Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console.");
-            return false;
+            return;
         }
 
         Player player = (Player) sender;
 
         if (!player.hasPermission("nascraft.linkable")) {
             Lang.get().message(player, Message.NO_PERMISSION);
-            return false;
+            return;
         }
 
         if (LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null) {
             Lang.get().message(player, Message.LINK_ALREADY_LINKED);
-            return false;
+            return;
         }
 
         if (args.length != 1) {
             Lang.get().message(player, Message.LINK_WRONG_USE);
-            return false;
+            return;
         }
 
         int code;
@@ -44,12 +55,12 @@ public class LinkCommand implements CommandExecutor {
             code = Integer.parseInt(args[0]);
         } catch (NumberFormatException e) {
             Lang.get().message(player, Message.LINK_WRONG_FORMAT);
-            return false;
+            return;
         }
 
         if (!LinkManager.getInstance().codeExists(code)) {
             Lang.get().message(player, Message.LINK_NO_PROCESS_FOUND);
-            return false;
+            return;
         }
 
         DiscordBot.getInstance().getJDA().retrieveUserById(LinkManager.getInstance().getUserFromCode(code))
@@ -61,7 +72,10 @@ public class LinkCommand implements CommandExecutor {
                         privateChannel.sendMessage(Lang.get().message(Message.LINK_DIRECT_MESSAGE, "[USER]", player.getName())).queue();
                     });
                 });
+    }
 
-        return false;
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        return args.length == 1 ? Arrays.asList("code") : null;
     }
 }

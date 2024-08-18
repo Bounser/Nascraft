@@ -1,6 +1,8 @@
 package me.bounser.nascraft.commands.sellwand;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.commands.Command;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.sellwand.Wand;
@@ -8,43 +10,50 @@ import me.bounser.nascraft.sellwand.WandsManager;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.util.StringUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
+public class GiveSellWandCommand extends Command {
 
-public class GiveSellWandCommand implements CommandExecutor {
-
+    public GiveSellWandCommand() {
+        super(
+                "givesellwand",
+                new String[]{Config.getInstance().getCommandAlias("givesellwand")},
+                "Give a sellwand.",
+                "nascraft.admin"
+        );
+    }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public void execute(CommandSender sender, String[] args) {
 
         if (!(sender instanceof Player)) {
 
             if (args.length != 2) {
                 Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Invalid use of command. /givesellwand [sellwand] [player]");
-                return false;
+                return;
             } else {
 
                 Player player = Bukkit.getPlayer(args[1]);
 
                 if (player == null) {
                     Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Invalid player.");
-                    return false;
+                    return;
                 }
 
                 Wand wand = WandsManager.getInstance().getWands().get(args[0]);
 
                 if (wand == null) {
                     Nascraft.getInstance().getLogger().info(ChatColor.RED + "No wand recognized with that ID!");
-                    return false;
+                    return;
                 }
 
                 ItemStack wandItemStack = wand.getItemStackOfNewWand();
@@ -57,12 +66,12 @@ public class GiveSellWandCommand implements CommandExecutor {
                 player.getInventory().addItem(wandItemStack);
 
             }
-            return false;
+            return;
         }
 
         if (!sender.hasPermission("nascraft.admin")) {
             Lang.get().message((Player) sender, Message.NO_PERMISSION);
-            return false;
+            return;
         }
 
         if (args.length == 1) {
@@ -71,7 +80,7 @@ public class GiveSellWandCommand implements CommandExecutor {
 
             if (wand == null) {
                 sender.sendMessage(ChatColor.RED + "No wand recognized with that ID!");
-                return false;
+                return;
             }
 
             ItemStack wandItemStack = wand.getItemStackOfNewWand();
@@ -86,6 +95,10 @@ public class GiveSellWandCommand implements CommandExecutor {
         } else {
             sender.sendMessage(ChatColor.RED + "Invalid use of command. /givesellwand [Sell Wand ID]");
         }
-        return false;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        return StringUtil.copyPartialMatches(args[0], WandsManager.getInstance().getWands().keySet(), new ArrayList<>());
     }
 }

@@ -187,8 +187,12 @@ public class Config {
         return config.getBoolean("market-control.market-permission");
     }
 
-    public List<String> getCommands() {
-        return config.getStringList("commands.enabled");
+    public String getCommandAlias(String command) {
+        return config.getString("commands." + command + ".alias");
+    }
+
+    public boolean isCommandEnabled(String command) {
+        return config.getBoolean("commands." + command + ".enabled");
     }
 
     public int getGetSellMenuSize() {

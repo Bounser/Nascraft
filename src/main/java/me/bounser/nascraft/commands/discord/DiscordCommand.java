@@ -1,6 +1,8 @@
 package me.bounser.nascraft.commands.discord;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.commands.Command;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.DiscordBot;
@@ -10,40 +12,48 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.List;
 
-public class DiscordCommand implements CommandExecutor {
+public class DiscordCommand extends Command {
+
+    public DiscordCommand() {
+        super(
+                "discord",
+                new String[]{Config.getInstance().getCommandAlias("discord")},
+                "Discord options",
+                "nascraft.discord"
+        );
+    }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public void execute(CommandSender sender, String[] args) {
 
         if (!(sender instanceof Player)) {
-            Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console."); return false;
+            Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console."); return;
         }
 
         Player player = ((Player) sender).getPlayer();
 
         if (!player.hasPermission("nascraft.discord")) {
-            Lang.get().message((Player) sender, Message.NO_PERMISSION); return false;
+            Lang.get().message((Player) sender, Message.NO_PERMISSION); return;
         }
 
         if (LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) == null) {
             Lang.get().message(player, Message.DISCORDCMD_NOT_LINKED);
-            return false;
+            return;
         }
 
         if (args.length == 0) {
             DiscordBot.getInstance().getJDA().retrieveUserById(LinkManager.getInstance().getUserDiscordID(player.getUniqueId()))
                     .queue(user -> Lang.get().message(player, Message.DISCORDCMD_LINKED, "[USER]", user.getName()));
 
-            return false;
+            return;
         }
 
         switch (args[0].toLowerCase()) {
@@ -58,9 +68,12 @@ public class DiscordCommand implements CommandExecutor {
                 player.setMetadata("NascraftDiscordInventory", new FixedMetadataValue(Nascraft.getInstance(),true));
 
                 DiscordInventoryInGame.getInstance().updateDiscordInventory(player);
-                return false;
 
         }
-        return false;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        return args.length == 1 ? Arrays.asList("inventory") : null;
     }
 }

@@ -1,6 +1,7 @@
 package me.bounser.nascraft.commands.sell.sellinv;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.commands.Command;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
@@ -12,8 +13,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -23,39 +22,47 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.profile.PlayerTextures;
-import org.jetbrains.annotations.NotNull;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
-public class SellInvCommand implements CommandExecutor {
+public class SellInvCommand extends Command {
+
+    public SellInvCommand() {
+        super(
+                "sellmenu",
+                new String[]{Config.getInstance().getCommandAlias("sell-menu")},
+                "Sell items directly to the market",
+                "nascraft.sellmenu"
+        );
+    }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, @NotNull String[] args) {
+    public void execute(CommandSender sender, String[] args) {
 
         Player player;
 
         if(!(sender instanceof Player)) {
 
             if (args.length != 1) {
-                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Wrong usage of command. /nsell [playerName]");
-                return false;
+                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Wrong usage of command. /sell [playerName]");
+                return;
             }
 
             player = Bukkit.getPlayer(args[0]);
 
             if (player == null) {
                 Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Player not found");
-                return false;
+                return;
             }
 
         } else {
             player = (Player) sender;
 
-            if (!player.hasPermission("nascraft.sellinv")) {
+            if (!player.hasPermission("nascraft.sellmenu")) {
                 Lang.get().message(player, Message.NO_PERMISSION);
-                return false;
+                return;
             }
         }
 
@@ -71,7 +78,6 @@ public class SellInvCommand implements CommandExecutor {
         player.openInventory(inventory);
 
         player.setMetadata("NascraftSell", new FixedMetadataValue(Nascraft.getInstance(), true));
-        return false;
     }
 
     public void insertFillingPanes(Inventory inventory) {
@@ -165,5 +171,10 @@ public class SellInvCommand implements CommandExecutor {
         textures.setSkin(urlObject);
         profile.setTextures(textures);
         return profile;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        return null;
     }
 }

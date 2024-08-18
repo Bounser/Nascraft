@@ -1,6 +1,7 @@
 package me.bounser.nascraft.commands.admin.nascraft;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.commands.Command;
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorManager;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
@@ -10,30 +11,44 @@ import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.util.StringUtil;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-public class NascraftCommand implements CommandExecutor {
+public class NascraftCommand extends Command {
+
+    private final List<String> arguments = Arrays.asList("reload", "editmarket", "stop", "resume", "cpi", "save", "logs");
+
+    private final List<String> tradesArguments = Arrays.asList("<player nick or uuid>", "<item>", "global");
+
+    public NascraftCommand() {
+        super(
+                "nascraft",
+                new String[]{Config.getInstance().getCommandAlias("nascraft")},
+                "Admin command",
+                "nascraft.admin"
+                );
+    }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public void execute(CommandSender sender, String[] args) {
 
         if (sender instanceof Player && !sender.hasPermission("nascraft.admin")) {
             Lang.get().message((Player) sender, Message.NO_PERMISSION);
-            return false;
+            return;
         }
 
         String syntaxError = ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: \nreload | editmarket | save | cpi | stop | resume | logs";
 
         if (args.length == 0) {
             sender.sendMessage(syntaxError);
-            return false;
+            return;
         }
 
         switch(args[0].toLowerCase()){
@@ -46,12 +61,12 @@ public class NascraftCommand implements CommandExecutor {
 
                 if (args.length != 2) {
                     sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments for /nascraft logs: global, <item>, <player nick or uuid>");
-                    return false;
+                    return;
                 }
 
                 if (!(sender instanceof Player)) {
                     sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "That command can only be used in-game.");
-                    return false;
+                    return;
                 }
 
                 Player playerLog = (Player) sender;
@@ -84,7 +99,7 @@ public class NascraftCommand implements CommandExecutor {
                             }
 
                             sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Argument not identified.");
-                            return false;
+                            return;
                         } else {
 
                             playerLog.setMetadata("NascraftLogInventory", new FixedMetadataValue(Nascraft.getInstance(), "uuid-" + player.getUniqueId()));
@@ -139,7 +154,6 @@ public class NascraftCommand implements CommandExecutor {
                 if (sender instanceof Player) { MarketEditorManager.getInstance().startEditing((Player) sender); }
                 else Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console.");
         }
-        return false;
     }
 
     public static boolean isValidUUID(String uuidString) {
@@ -149,5 +163,16 @@ public class NascraftCommand implements CommandExecutor {
         } catch (IllegalArgumentException e) {
             return false;
         }
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        if (args.length > 1) {
+            if (args[0].equalsIgnoreCase("logs")) {
+                return StringUtil.copyPartialMatches(args[1], tradesArguments, new ArrayList<>());
+            }
+        }
+
+        return StringUtil.copyPartialMatches(args[0], arguments, new ArrayList<>());
     }
 }

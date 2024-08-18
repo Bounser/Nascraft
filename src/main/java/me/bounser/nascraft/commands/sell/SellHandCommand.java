@@ -1,6 +1,8 @@
 package me.bounser.nascraft.commands.sell;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.commands.Command;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.market.MarketManager;
@@ -13,32 +15,39 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.ChatColor;
 import me.bounser.nascraft.market.unit.Item;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 
-public class SellHandCommand implements CommandExecutor {
+public class SellHandCommand extends Command {
 
     private HashMap<Player, ItemStack> players = new HashMap();
 
+    public SellHandCommand() {
+        super(
+                "sellhand",
+                new String[]{Config.getInstance().getCommandAlias("sellhand")},
+                "Sell items directly to the market",
+                "nascraft.sellhand"
+        );
+    }
+
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public void execute(CommandSender sender, String[] args) {
 
         if (!(sender instanceof Player)) {
             Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console.");
-            return false;
+            return;
         }
 
         Player player = ((Player) sender).getPlayer();
 
         if (!player.hasPermission("nascraft.sellhand")) {
             Lang.get().message((Player) sender, Message.NO_PERMISSION);
-            return false;
+            return;
         }
 
         assert player != null;
@@ -49,11 +58,11 @@ public class SellHandCommand implements CommandExecutor {
             Item item = MarketManager.getInstance().getItem(handItem.getType().toString());
 
             if(item == null) {
-                Lang.get().message(player, Message.SELLHAND_INVALID); return false;
+                Lang.get().message(player, Message.SELLHAND_INVALID); return;
             }
 
             if(!MarketManager.getInstance().isAValidItem(handItem)) {
-                Lang.get().message(player, Message.SELLHAND_INVALID); return false;
+                Lang.get().message(player, Message.SELLHAND_INVALID); return;
             }
 
             TextComponent component = (TextComponent) MiniMessage.miniMessage().deserialize(
@@ -85,7 +94,10 @@ public class SellHandCommand implements CommandExecutor {
                 Lang.get().message(player, Message.SELLHAND_ERROR_HAND);
             }
         }
-        return false;
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+        return null;
+    }
 }

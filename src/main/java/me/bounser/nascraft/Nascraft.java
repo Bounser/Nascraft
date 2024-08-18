@@ -4,7 +4,6 @@ import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.api.NascraftAPI;
 import me.bounser.nascraft.commands.admin.nascraft.NascraftCommand;
 import me.bounser.nascraft.commands.admin.nascraft.NascraftLogListener;
-import me.bounser.nascraft.commands.admin.nascraft.NascraftTabCompleter;
 import me.bounser.nascraft.commands.admin.marketeditor.edit.item.EditItemMenuListener;
 import me.bounser.nascraft.commands.admin.marketeditor.edit.category.CategoryEditorListener;
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorInvListener;
@@ -13,17 +12,14 @@ import me.bounser.nascraft.commands.alert.SetAlertCommand;
 import me.bounser.nascraft.commands.discord.DiscordCommand;
 import me.bounser.nascraft.commands.discord.DiscordInventoryInGame;
 import me.bounser.nascraft.commands.market.MarketCommand;
-import me.bounser.nascraft.commands.market.MarketTabCompleter;
 import me.bounser.nascraft.commands.sell.SellHandCommand;
-import me.bounser.nascraft.commands.sell.sellall.SellAllCommand;
-import me.bounser.nascraft.commands.sell.sellall.SellAllTabCompleter;
+import me.bounser.nascraft.commands.sell.SellAllCommand;
 import me.bounser.nascraft.commands.sell.sellinv.SellInvListener;
 import me.bounser.nascraft.commands.sell.sellinv.SellInvCommand;
 import me.bounser.nascraft.commands.sellwand.GiveSellWandCommand;
-import me.bounser.nascraft.commands.sellwand.GiveSellWandTabCompleter;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.discord.DiscordBot;
-import me.bounser.nascraft.discord.linking.LinkCommand;
+import me.bounser.nascraft.commands.discord.LinkCommand;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
 import me.bounser.nascraft.inventorygui.InventoryListener;
@@ -56,7 +52,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -119,12 +114,13 @@ public final class Nascraft extends JavaPlugin {
         if (config.getDiscordEnabled()) {
             getLogger().info("Enabling discord extension...");
 
-            if (Config.getInstance().getLinkingMethod().equals(LinkingMethod.NATIVE)) getCommand("link").setExecutor(new LinkCommand());
+            if (Config.getInstance().getLinkingMethod().equals(LinkingMethod.NATIVE)
+            && config.isCommandEnabled("link")) new LinkCommand();
             if (Config.getInstance().getOptionAlertEnabled()) {
-                getCommand("alerts").setExecutor(new AlertsCommand());
-                getCommand("setalert").setExecutor(new SetAlertCommand());
+                if (config.isCommandEnabled("alerts")) new AlertsCommand();
+                if (config.isCommandEnabled("setalerts")) new SetAlertCommand();
             }
-            getCommand("discord").setExecutor(new DiscordCommand());
+            if (config.isCommandEnabled("discord")) new DiscordCommand();
 
             Bukkit.getPluginManager().registerEvents(new DiscordInventoryInGame(), this);
 
@@ -133,8 +129,7 @@ public final class Nascraft extends JavaPlugin {
         }
 
         if (config.getSellWandsEnabled()) {
-            getCommand("givesellwand").setExecutor(new GiveSellWandCommand());
-            getCommand("givesellwand").setTabCompleter(new GiveSellWandTabCompleter());
+            if (config.isCommandEnabled("givesellwand")) new GiveSellWandCommand();
             Bukkit.getPluginManager().registerEvents(new WandListener(), this);
             WandsManager.getInstance();
         }
@@ -142,34 +137,30 @@ public final class Nascraft extends JavaPlugin {
         createImagesFolder();
 
         MarketManager.getInstance();
-        //LimitOrdersManager.getInstance();
-        //FundsManager.getInstance();
 
-        getCommand("nascraft").setExecutor(new NascraftCommand());
-        getCommand("nascraft").setTabCompleter(new NascraftTabCompleter());
-        Bukkit.getPluginManager().registerEvents(new NascraftLogListener(), this);
+        if (config.isCommandEnabled("nascraft")) {
+            new NascraftCommand();
 
-        Bukkit.getPluginManager().registerEvents(new MarketEditorInvListener(), this);
-        Bukkit.getPluginManager().registerEvents(new EditItemMenuListener(), this);
-        Bukkit.getPluginManager().registerEvents(new CategoryEditorListener(), this);
+            Bukkit.getPluginManager().registerEvents(new NascraftLogListener(), this);
 
-        getCommand("market").setExecutor(new MarketCommand());
-        getCommand("market").setTabCompleter(new MarketTabCompleter());
+            Bukkit.getPluginManager().registerEvents(new MarketEditorInvListener(), this);
+            Bukkit.getPluginManager().registerEvents(new EditItemMenuListener(), this);
+            Bukkit.getPluginManager().registerEvents(new CategoryEditorListener(), this);
+        }
 
-        Bukkit.getPluginManager().registerEvents(new InventoryListener(), this);
+        if (config.isCommandEnabled("market")) {
+            new MarketCommand();
+            Bukkit.getPluginManager().registerEvents(new InventoryListener(), this);
+        }
 
-        List<String> commands = config.getCommands();
-        if (commands == null) return;
+        if (config.isCommandEnabled("sellhand")) new SellHandCommand();
 
-        if (commands.contains("sellhand")) getCommand("sellhand").setExecutor(new SellHandCommand());
-        if (commands.contains("sell")) {
-            getCommand("sellinv").setExecutor(new SellInvCommand());
+        if (config.isCommandEnabled("sell-menu")) {
+            new SellInvCommand();
             Bukkit.getPluginManager().registerEvents(new SellInvListener(), this);
         }
-        if (commands.contains("sellall")) {
-            getCommand("sellall").setExecutor(new SellAllCommand());
-            getCommand("sellall").setTabCompleter(new SellAllTabCompleter());
-        }
+
+        if (config.isCommandEnabled("sellall")) new SellAllCommand();
     }
 
     @Override

@@ -1,6 +1,7 @@
 package me.bounser.nascraft.commands.market;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.commands.Command;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.inventorygui.BuySellMenu;
@@ -12,16 +13,27 @@ import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.bukkit.util.StringUtil;
 
-public class MarketCommand implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
+public class MarketCommand extends Command {
+
+    public MarketCommand() {
+        super(
+                "market",
+                new String[]{Config.getInstance().getCommandAlias("market")},
+                "Direct access to the market",
+                "nascraft.market"
+        );
+    }
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public void execute(CommandSender sender, String[] args) {
 
         if(sender instanceof Player) {
 
@@ -29,12 +41,12 @@ public class MarketCommand implements CommandExecutor {
 
             if (!player.hasPermission("nascraft.market") && Config.getInstance().getMarketPermissionRequirement()) {
                 Lang.get().message(player, Message.NO_PERMISSION);
-                return false;
+                return;
             }
 
             if (args.length == 0 && player.hasPermission("nascraft.market.gui")) {
                 MarketMenuManager.getInstance().openMenu(player);
-                return false;
+                return;
             }
 
             if (args.length == 2 && args[0].equalsIgnoreCase("category") && player.hasPermission("nascraft.market.gui")) {
@@ -43,11 +55,11 @@ public class MarketCommand implements CommandExecutor {
 
                 if (category == null) {
                     Lang.get().message(player, Message.MARKET_CMD_INVALID_CATEGORY);
-                    return false;
+                    return;
                 }
 
                 MarketMenuManager.getInstance().setMenuOfPlayer(player, new CategoryMenu(player, category));
-                return false;
+                return;
             }
 
             if (args.length == 2 && args[0].equalsIgnoreCase("item") && player.hasPermission("nascraft.market.gui")) {
@@ -56,16 +68,16 @@ public class MarketCommand implements CommandExecutor {
 
                 if (item == null) {
                     Lang.get().message(player, Message.MARKET_CMD_INVALID_ITEM);
-                    return false;
+                    return;
                 }
 
                 MarketMenuManager.getInstance().setMenuOfPlayer(player, new BuySellMenu(player, item));
-                return false;
+                return;
             }
 
             if (args.length != 3) {
                 Lang.get().message(player, Message.MARKET_CMD_INVALID_USE);
-                return false;
+                return;
             }
 
             int quantity;
@@ -74,19 +86,19 @@ public class MarketCommand implements CommandExecutor {
                 quantity = Integer.parseInt(args[2]);
             } catch (NumberFormatException e) {
                 Lang.get().message(player, Message.MARKET_CMD_INVALID_QUANTITY);
-                return false;
+                return;
             }
 
             if (quantity > 64) {
                 Lang.get().message(player, Message.MARKET_CMD_MAX_QUANTITY_REACHED);
-                return false;
+                return;
             }
 
             Item item = MarketManager.getInstance().getItem(args[1]);
 
             if (item == null) {
                 Lang.get().message(player, Message.MARKET_CMD_INVALID_IDENTIFIER);
-                return false;
+                return;
             }
 
             switch (args[0].toLowerCase()){
@@ -103,14 +115,14 @@ public class MarketCommand implements CommandExecutor {
         } else {
             if (args.length != 4) {
                 Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Invalid use of command. (CONSOLE) /market <Buy/Sell> <Material> <Quantity> <Player>");
-                return false;
+                return;
             }
 
             Player player = Bukkit.getPlayer(args[3]);
 
             if (player == null) {
                 Nascraft.getInstance().getLogger().info(ChatColor.RED + "Invalid player");
-                return false;
+                return;
             }
             Item item = MarketManager.getInstance().getItem(args[1]);
             switch (args[0]){
@@ -124,7 +136,20 @@ public class MarketCommand implements CommandExecutor {
                     sender.sendMessage(ChatColor.RED + "Wrong option: buy / sell");
             }
         }
-        return false;
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender sender, String[] args) {
+
+        switch (args.length) {
+            case 1:
+                return StringUtil.copyPartialMatches(args[0], Arrays.asList("buy", "sell"), new ArrayList<>());
+            case 2:
+                return StringUtil.copyPartialMatches(args[1], MarketManager.getInstance().getAllItemsAndChildsIdentifiers(), new ArrayList<>());
+            case 3:
+                return Collections.singletonList("quantity");
+        }
+
+        return null;
+    }
 }
