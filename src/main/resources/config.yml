@@ -53,12 +53,36 @@ market-control:
   market-permission: true
 
 commands:
-  # Available commands: sell, sellall, sellhand
-  enabled:
-    - 'sell'
-    - 'sellall'
-    - 'sellhand'
+  nascraft:
+    enabled: true
+    alias: 'nas'
+  market:
+    enabled: true
+    alias: 'shop'
+  link:
+    enabled: true
+    alias: 'nlink'
+  discord:
+    enabled: true
+    alias: 'dis'
+  alerts:
+    enabled: true
+    alias: 'nalerts'
+  setalerts:
+    enabled: true
+    alias: 'nsetalert'
+  givesellwand:
+    enabled: true
+    alias: 'givesw'
+  sellall:
+    enabled: true
+    alias: 'nsellall'
+  sellhand:
+    enabled: true
+    alias: 'nsellhand'
   sell-menu:
+    enabled: true
+    alias: 'sell'
     size: 45
     help:
       enabled: true

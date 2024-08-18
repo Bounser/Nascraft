@@ -1,4 +1,5 @@
 # Nascraft en_US - ${project.version}
+# by @Bounser
 
 # Specify the currency to be used next to prices.
 currency: "$"
