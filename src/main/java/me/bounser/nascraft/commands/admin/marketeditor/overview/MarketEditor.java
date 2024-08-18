@@ -203,7 +203,7 @@ public class MarketEditor {
                     meta.setLore(Arrays.asList(
                             ChatColor.GRAY + "Initial price: " + ChatColor.GOLD + Formatter.format(item.getPrice().getInitialValue(), Style.ROUND_BASIC),
                             ChatColor.GRAY + "Elasticity: " + ChatColor.GOLD + item.getPrice().getElasticity(),
-                            ChatColor.GRAY + "Noise Sensibility: " + ChatColor.GOLD + item.getPrice().getNoiseIntensity(),
+                            ChatColor.GRAY + "Noise Intensity: " + ChatColor.GOLD + item.getPrice().getNoiseIntensity(),
                             ChatColor.GRAY + "Support: " + ChatColor.GOLD + item.getPrice().getSupport(),
                             ChatColor.GRAY + "Resistance: " + ChatColor.GOLD + item.getPrice().getResistance(),
                             " ",

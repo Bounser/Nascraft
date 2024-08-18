@@ -29,7 +29,7 @@ public class EditItemMenu {
     private float initialPrice;
     private String alias;
     private float elasticity;
-    private float noiseSensibility;
+    private float noiseIntensity;
     private float support;
     private float resistance;
 
@@ -52,7 +52,7 @@ public class EditItemMenu {
         initialPrice = 1;
         alias = (Character.toUpperCase(itemStack.getType().toString().toLowerCase().charAt(0)) + itemStack.getType().toString().toLowerCase().substring(1)).replace("_", " ");
         elasticity = 1;
-        noiseSensibility = 1;
+        noiseIntensity = 1;
         support = 0;
         resistance = 0;
 
@@ -70,7 +70,7 @@ public class EditItemMenu {
         initialPrice = item.getPrice().getInitialValue();
         alias = item.getName();
         elasticity = item.getPrice().getElasticity();
-        noiseSensibility = item.getPrice().getNoiseIntensity();
+        noiseIntensity = item.getPrice().getNoiseIntensity();
         support = item.getPrice().getSupport();
         resistance = item.getPrice().getResistance();
 
@@ -144,7 +144,7 @@ public class EditItemMenu {
         inventory.setItem(5, getItemStackOfOption("Alias", alias));
 
         inventory.setItem(13, getItemStackOfOption("Elasticity", String.valueOf(elasticity)));
-        inventory.setItem(14, getItemStackOfOption("Noise Sensibility", String.valueOf(noiseSensibility)));
+        inventory.setItem(14, getItemStackOfOption("Noise Intensity", String.valueOf(noiseIntensity)));
 
         inventory.setItem(22, getItemStackOfOption("Support", Formatter.format(support, Style.ROUND_BASIC)));
         inventory.setItem(23, getItemStackOfOption("Resistance", Formatter.format(resistance, Style.ROUND_BASIC)));
@@ -166,7 +166,7 @@ public class EditItemMenu {
     public void setInitialPrice(float initialPrice) { this.initialPrice = initialPrice; }
     public void setAlias(String alias) { this.alias = alias; }
     public void setElasticity(float elasticity) { this.elasticity = elasticity; }
-    public void setNoiseSensibility(float noiseSensibility) { this.noiseSensibility = noiseSensibility; }
+    public void setNoiseIntensity(float noiseIntensity) { this.noiseIntensity = noiseIntensity; }
     public void setSupport(float support) { this.support = support; }
     public void setResistance(float resistance) { this.resistance = resistance; }
     public void setCategory(Category category) { this.category = category; }
@@ -191,7 +191,7 @@ public class EditItemMenu {
         items.set("items." + identifier + ".alias", alias);
         items.set("items." + identifier + ".initial-price", initialPrice);
         items.set("items." + identifier + ".elasticity", elasticity);
-        items.set("items." + identifier + ".noise-sensibility", noiseSensibility);
+        items.set("items." + identifier + ".noise-intensity", noiseIntensity);
         if (support != 0)
             items.set("items." + identifier + ".support", support);
         if (resistance != 0)
@@ -224,7 +224,7 @@ public class EditItemMenu {
                     initialPrice,
                     alias,
                     elasticity,
-                    noiseSensibility,
+                    noiseIntensity,
                     support,
                     resistance
             );

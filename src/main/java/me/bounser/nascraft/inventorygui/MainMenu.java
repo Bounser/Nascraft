@@ -150,7 +150,7 @@ public class MainMenu implements MenuPage {
 
                 List<String> categoryList = new ArrayList<>();
 
-                if (config.getSetCategorySegments()) {
+                if (config.getSetCategorySegments() && category.getItems().size() < 20) {
 
                     for (Item item : category.getItems()) {
 

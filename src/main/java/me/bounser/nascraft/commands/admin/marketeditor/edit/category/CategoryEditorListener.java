@@ -2,7 +2,6 @@ package me.bounser.nascraft.commands.admin.marketeditor.edit.category;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditor;
-import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorManager;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -15,7 +14,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
 import java.util.Objects;
-
 
 public class CategoryEditorListener implements Listener {
 

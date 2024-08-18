@@ -97,10 +97,10 @@ public class EditItemMenuListener implements Listener {
 
                 openAnvil(
                         player,
-                        ChatColor.LIGHT_PURPLE + "Noise sensibility set correctly!",
-                        "Noise sensibility...",
-                        "Noise sensibility",
-                        "noisesensibility");
+                        ChatColor.LIGHT_PURPLE + "Noise intensity set correctly!",
+                        "Noise intensity...",
+                        "Noise intensity",
+                        "noiseintensity");
                 break;
 
             case 22:
@@ -183,8 +183,8 @@ public class EditItemMenuListener implements Listener {
                             case "elasticity":
                                 EditorManager.getInstance().getEditItemMenuFromPlayer(player).setElasticity(value);
                                 break;
-                            case "noisesensibility":
-                                EditorManager.getInstance().getEditItemMenuFromPlayer(player).setNoiseSensibility(value);
+                            case "noiseintensity":
+                                EditorManager.getInstance().getEditItemMenuFromPlayer(player).setNoiseIntensity(value);
                                 break;
                             case "support":
                                 EditorManager.getInstance().getEditItemMenuFromPlayer(player).setSupport(value);
