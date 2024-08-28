@@ -23,7 +23,7 @@ import java.util.UUID;
 
 public class NascraftCommand extends Command {
 
-    private final List<String> arguments = Arrays.asList("reload", "editmarket", "stop", "resume", "cpi", "save", "logs");
+    private final List<String> arguments = Arrays.asList("reload", "edit", "stop", "resume", "cpi", "save", "logs");
 
     private final List<String> tradesArguments = Arrays.asList("<player nick or uuid>", "<item>", "global");
 
@@ -44,7 +44,7 @@ public class NascraftCommand extends Command {
             return;
         }
 
-        String syntaxError = ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: \nreload | editmarket | save | cpi | stop | resume | logs";
+        String syntaxError = ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: \nreload | edit | save | cpi | stop | resume | logs";
 
         if (args.length == 0) {
             sender.sendMessage(syntaxError);
@@ -149,7 +149,7 @@ public class NascraftCommand extends Command {
 
                 break;
 
-            case "editmarket":
+            case "edit":
 
                 if (sender instanceof Player) { MarketEditorManager.getInstance().startEditing((Player) sender); }
                 else Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console.");

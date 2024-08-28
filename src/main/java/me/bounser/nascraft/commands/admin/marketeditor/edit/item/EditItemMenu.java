@@ -140,25 +140,99 @@ public class EditItemMenu {
 
     public void insertOptions(Inventory inventory) {
 
-        inventory.setItem(4, getItemStackOfOption("Initial Price (Required)", Formatter.format(initialPrice, Style.ROUND_BASIC)));
-        inventory.setItem(5, getItemStackOfOption("Alias", alias));
+        inventory.setItem(4,
+                getItemStackOfOption(Material.GOLD_NUGGET,
+                        "Initial Price " + ChatColor.UNDERLINE + "(REQUIRED)",
+                        Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GREEN + Formatter.format(initialPrice, Style.ROUND_BASIC),
+                                "",
+                                ChatColor.GRAY + "The initial price of the item gives a point",
+                                ChatColor.GRAY + "of initial stability at neutral internal stock (0)",
+                                "",
+                                ChatColor.RED + "⚠ CAUTION ⚠ Changing this value will alter the",
+                                ChatColor.RED + "shape of the price curve, changing the current price.",
+                                "",
+                                ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO EDIT")
+        ));
 
-        inventory.setItem(13, getItemStackOfOption("Elasticity", String.valueOf(elasticity)));
-        inventory.setItem(14, getItemStackOfOption("Noise Intensity", String.valueOf(noiseIntensity)));
+        inventory.setItem(5,
+                getItemStackOfOption(Material.NAME_TAG,
+                "Alias",
+                        Arrays.asList(ChatColor.GRAY + "Alias: " + ChatColor.GREEN + alias,
+                                "",
+                                ChatColor.GRAY + "This is the name that will be displayed to players.",
+                                "",
+                                ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO EDIT")
+        ));
 
-        inventory.setItem(22, getItemStackOfOption("Support", Formatter.format(support, Style.ROUND_BASIC)));
-        inventory.setItem(23, getItemStackOfOption("Resistance", Formatter.format(resistance, Style.ROUND_BASIC)));
+        inventory.setItem(13,
+                getItemStackOfOption(Material.SLIME_BALL,
+                "Elasticity",
+                        Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GREEN + elasticity,
+                                "",
+                                ChatColor.GRAY + "This value determines the magnitude of the",
+                                ChatColor.GRAY + "changes due to player transactions. Has decimal precision.",
+                                ChatColor.GRAY + "A bigger value means that when a player buys or sells",
+                                ChatColor.GRAY + "the price will react with a bigger change. Conversely",
+                                ChatColor.GRAY + "when the value is lower this changes will be smaller.",
+                                "",
+                                ChatColor.RED + "⚠ CAUTION ⚠ Changing this value will alter the",
+                                ChatColor.RED + "shape of the price curve, changing the current price.",
+                                "",
+                                ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO EDIT")
+        ));
 
-        inventory.setItem(15, getItemStackOfOption("Category", category.getIdentifier() + ChatColor.GRAY + " - " + ChatColor.GOLD + category.getDisplayName()));
+        inventory.setItem(14,
+                getItemStackOfOption(Material.COMPARATOR,
+                "Noise Intensity",
+                        Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GREEN + noiseIntensity,
+                                "",
+                                ChatColor.GRAY + "This value determines the sensibility of the",
+                                ChatColor.GRAY + "item to random changes. Has decimal precision.",
+                                ChatColor.GRAY + "A bigger value means that the price will fluctuate",
+                                ChatColor.GRAY + "in bigger quantities than when the value is lower.",
+                                "",
+                                ChatColor.RED + "⚠ CAUTION ⚠ High values can make the item",
+                                ChatColor.RED + "extremely volatile.",
+                                "",
+                                ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO EDIT")
+        ));
+
+        inventory.setItem(22,
+                getItemStackOfOption(Material.BEDROCK,
+                "Support",
+                        Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GREEN + Formatter.format(support, Style.ROUND_BASIC),
+                                "",
+                                ChatColor.GRAY + "If the noise is enabled, then the price of the",
+                                ChatColor.GRAY + "item will slowly tend to stay " + ChatColor.UNDERLINE + "ABOVE this value.",
+                                "",
+                                ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO EDIT")
+        ));
+
+        inventory.setItem(23,
+                getItemStackOfOption(Material.WHITE_WOOL,
+                        "Resistance",
+                        Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GREEN + Formatter.format(resistance, Style.ROUND_BASIC),
+                                "",
+                                ChatColor.GRAY + "If the noise is enabled, then the price of the",
+                                ChatColor.GRAY + "item will slowly tend to stay " + ChatColor.UNDERLINE + "BELOW this value.",
+                                "",
+                                ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO EDIT")
+        ));
+
+        inventory.setItem(15,
+                getItemStackOfOption(Material.CHEST,
+                        "Category",
+                        Arrays.asList(ChatColor.GRAY + "Category: " + ChatColor.GREEN + category.getIdentifier() + ChatColor.GRAY + " - " + ChatColor.GOLD + category.getDisplayName(),
+                                "",
+                                ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO CHANGE")
+        ));
     }
 
-    public ItemStack getItemStackOfOption(String displayName, String value) {
-        ItemStack paper = new ItemStack(Material.PAPER);
+    public ItemStack getItemStackOfOption(Material material, String displayName, List<String> value) {
+        ItemStack paper = new ItemStack(material);
         ItemMeta meta = paper.getItemMeta();
-        meta.setLore(Arrays.asList(
-                ChatColor.GOLD + value
-        ));
-        meta.setDisplayName(ChatColor.GRAY + displayName);
+        meta.setLore(value);
+        meta.setDisplayName(ChatColor.GOLD + displayName);
         paper.setItemMeta(meta);
         return paper;
     }
