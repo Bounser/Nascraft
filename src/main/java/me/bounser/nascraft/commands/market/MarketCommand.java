@@ -32,6 +32,7 @@ public class MarketCommand extends Command {
                 "nascraft.market"
         );
     }
+
     @Override
     public void execute(CommandSender sender, String[] args) {
 
@@ -113,8 +114,29 @@ public class MarketCommand extends Command {
             }
 
         } else {
+
+            if (args.length == 3 && args[0].toLowerCase().equals("category")) {
+
+                Player player = Bukkit.getPlayer(args[2]);
+
+                if (player == null) {
+                    Nascraft.getInstance().getLogger().info(ChatColor.RED + "Invalid player");
+                    return;
+                }
+
+                Category category = MarketManager.getInstance().getCategoryFromIdentifier(args[1]);
+
+                if (category == null) {
+                    Nascraft.getInstance().getLogger().info(ChatColor.RED + "Invalid category");
+                    return;
+                }
+
+                MarketMenuManager.getInstance().setMenuOfPlayer(player, new CategoryMenu(player, category));
+                return;
+            }
+
             if (args.length != 4) {
-                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Invalid use of command. (CONSOLE) /market <Buy/Sell> <Material> <Quantity> <Player>");
+                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Invalid use of command. \n(CONSOLE) /market <Buy/Sell> <Material> <Quantity> <Player>\n(CONSOLE) /market category <category-identifier> <Player>");
                 return;
             }
 
@@ -124,6 +146,7 @@ public class MarketCommand extends Command {
                 Nascraft.getInstance().getLogger().info(ChatColor.RED + "Invalid player");
                 return;
             }
+
             Item item = MarketManager.getInstance().getItem(args[1]);
             switch (args[0]){
                 case "buy":
