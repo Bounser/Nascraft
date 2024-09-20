@@ -142,6 +142,13 @@ public class InventoryListener implements Listener {
                 return;
             }
 
+            if (config.getInfoBuySellEnabled() && config.getInfoBuySellSlot() == slot) {
+
+                // MarketMenuManager.getInstance().setMenuOfPlayer(player, new InfoMenu(player));
+
+                return;
+            }
+
             if (config.getAlertsBuySellSlot() == slot) {
 
                 String userId = LinkManager.getInstance().getUserDiscordID(player.getUniqueId());

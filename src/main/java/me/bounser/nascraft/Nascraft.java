@@ -87,10 +87,8 @@ public final class Nascraft extends JavaPlugin {
 
         this.adventure = BukkitAudiences.create(this);
 
-        if (!setupEconomy()) {
-            getLogger().severe("Nascraft failed to load! Vault and an economy plugin are required.");
-            return;
-        }
+        if (!setupEconomy())
+            getLogger().warning("Vault is not installed! You'll have to provide another supplier.");
 
         setupPermissions();
 

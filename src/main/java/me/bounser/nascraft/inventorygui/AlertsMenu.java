@@ -116,7 +116,7 @@ public class AlertsMenu implements MenuPage {
             if (itemLore == null) itemLore = new ArrayList<>();
 
             String buyLore = Lang.get().message(Message.GUI_ALERTS_LORE)
-                    .replace("[PRICE]", Formatter.format(Math.abs(alerts.get(item)), Style.ROUND_BASIC));
+                    .replace("[PRICE]", Formatter.format(item.getCurrency(), Math.abs(alerts.get(item)), Style.ROUND_BASIC));
 
             for (String line : buyLore.split("\\n")) {
                 Component loreComponent = MiniMessage.miniMessage().deserialize(line);

@@ -1,7 +1,6 @@
 package me.bounser.nascraft.placeholderapi;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.MarketManager;
@@ -66,7 +65,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
                 if (item == null) return "0";
 
-                return String.valueOf(RoundUtils.roundTo(item.getPrice().getValue(), Config.getInstance().getPlaceholderPrecission()));
+                return String.valueOf(RoundUtils.roundTo(item.getPrice().getValue(), item.getCurrency().getDecimalPrecission()));
 
             case "stock":
 
@@ -76,7 +75,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
                 if (item == null) return "0";
 
-                return String.valueOf(RoundUtils.roundTo(item.getPrice().getStock(), Config.getInstance().getPlaceholderPrecission()));
+                return String.valueOf(RoundUtils.roundTo(item.getPrice().getStock(), 0));
 
             case "change":
 
@@ -111,8 +110,8 @@ public class PAPIExpansion extends PlaceholderExpansion {
         if (item == null) return "0";
 
         switch (threeDividedParams[0]) {
-            case "buyprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getProjectedCost(-quantity, item.getPrice().getBuyTaxMultiplier()), Config.getInstance().getPlaceholderPrecission()));
-            case "sellprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getProjectedCost(quantity, item.getPrice().getSellTaxMultiplier()), Config.getInstance().getPlaceholderPrecission()));
+            case "buyprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getProjectedCost(-quantity, item.getPrice().getBuyTaxMultiplier()), item.getCurrency().getDecimalPrecission()));
+            case "sellprice": return String.valueOf(RoundUtils.roundTo(item.getPrice().getProjectedCost(quantity, item.getPrice().getSellTaxMultiplier()), item.getCurrency().getDecimalPrecission()));
         }
 
         return "0";

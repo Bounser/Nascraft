@@ -1,12 +1,12 @@
 package me.bounser.nascraft.market.unit.plot;
 
 import me.bounser.nascraft.formatter.RoundUtils;
-import me.bounser.nascraft.market.resources.TimeSpan;
 import me.bounser.nascraft.market.unit.Item;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 public class PlotData {
@@ -23,7 +23,11 @@ public class PlotData {
         List<Float> values = item.getPrice().getValuesPastHour();
 
         if (!precise) {
-            values.replaceAll(RoundUtils::round);
+            try {
+                values.replaceAll(RoundUtils::round);
+            } catch (ConcurrentModificationException e) {
+                return new int[]{1};
+            }
         }
 
         // Y points

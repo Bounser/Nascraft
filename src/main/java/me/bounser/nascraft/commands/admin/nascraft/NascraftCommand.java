@@ -153,6 +153,10 @@ public class NascraftCommand extends Command {
 
                 if (sender instanceof Player) { MarketEditorManager.getInstance().startEditing((Player) sender); }
                 else Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console.");
+                break;
+
+            default:
+                sender.sendMessage(syntaxError);
         }
     }
 

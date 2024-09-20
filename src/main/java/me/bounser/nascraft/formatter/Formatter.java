@@ -1,7 +1,10 @@
 package me.bounser.nascraft.formatter;
 
-import me.bounser.nascraft.config.lang.Lang;
-import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.managers.currencies.Currency;
+import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.text.DecimalFormat;
 
@@ -9,11 +12,11 @@ public class Formatter {
 
     private static Separator separator;
 
-    private static final boolean after = Lang.get().after();
-
-    public static String format(float number, Style style) {
+    public static String format(Currency currency, float number, Style style) {
 
         String formattedText = null;
+
+        number = roundToDecimals(number, currency.getDecimalPrecission());
 
         switch (style) {
 
@@ -50,30 +53,92 @@ public class Formatter {
                 break;
         }
 
-        if (after)
-            formattedText = formattedText + Lang.get().message(Message.CURRENCY);
-        else
-            formattedText = Lang.get().message(Message.CURRENCY) + formattedText;
+        assert formattedText != null;
+        String result = currency.getFormat().replace("[AMOUNT]", formattedText);
 
         switch (separator) {
 
             case COMMA:
-                return formattedText.replace(".", "a").replace(",", ".").replace("a", ",");
+                return result.replace(".", "a").replace(",", ".").replace("a", ",");
 
-            default:
-            case POINT: return formattedText;
+            case POINT:
+                return result;
+
         }
+        return formattedText;
     }
 
-    public static String formatDouble(double number) {
+    public static String plainFormat(Currency currency, float number, Style style) {
+
+        String formattedText = null;
+
+        number = roundToDecimals(number, currency.getDecimalPrecission());
+
+        switch (style) {
+
+            case ROUND_TO_ONE:
+
+                formattedText = String.format("%.1f", number);
+
+                break;
+
+            case ROUND_BASIC:
+                DecimalFormat decimalFormat;
+                if (number >= 0.1) decimalFormat = new DecimalFormat("#,###.##");
+                else decimalFormat = new DecimalFormat("#.###");
+                formattedText = decimalFormat.format(number);
+
+                break;
+
+            case REDUCED_LENGTH:
+
+                DecimalFormat numFormat = new DecimalFormat("0.#");
+
+                if (currency.getDecimalPrecission() == 0) {
+                    if (number < 1000) {
+                        formattedText = numFormat.format(number);
+                    } else if (number < 1_000_000) {
+                        formattedText = numFormat.format(number / 1000) + "k";
+                    } else {
+                        formattedText = numFormat.format(number / 1_000_000) + "m";
+                    }
+                    break;
+                }
+
+                if (number <= 0.1) {
+                    formattedText = String.format("%.3f", number);
+                } else if (number < 100) {
+                    formattedText = String.format("%.2f", number);
+                } else if (number < 1000) {
+                    formattedText = numFormat.format(number);
+                } else if (number < 1_000_000) {
+                    formattedText = numFormat.format(number / 1000) + "k";
+                } else {
+                    formattedText = numFormat.format(number / 1_000_000) + "m";
+                }
+
+                break;
+        }
+
+        assert formattedText != null;
+        String result = currency.getPlainFormat().replace("[AMOUNT]", formattedText);
+
+        switch (separator) {
+
+            case COMMA:
+                return result.replace(".", "a").replace(",", ".").replace("a", ",");
+
+            case POINT:
+                return result;
+
+        }
+        return formattedText;
+    }
+
+    public static String formatDouble(double number, Currency currency) {
 
         DecimalFormat decimalFormat = new DecimalFormat("#,###.000");
-        String formattedText = decimalFormat.format(number);
-
-        if (after)
-            formattedText = formattedText + Lang.get().message(Message.CURRENCY);
-        else
-            formattedText = Lang.get().message(Message.CURRENCY) + formattedText;
+        String formattedText = currency.getFormat().replace("[AMOUNT]", decimalFormat.format(number));
 
         switch (separator) {
 
@@ -87,4 +152,22 @@ public class Formatter {
 
     public static void setSeparator(Separator separator) { Formatter.separator = separator; }
 
+    public static float roundToDecimals(float number, int decimalPlaces) {
+        float scale = (float) Math.pow(10, decimalPlaces);
+        return Math.round(number * scale) / scale;
+    }
+
+    public static String extractPlainText(Component component) {
+        StringBuilder plainText = new StringBuilder();
+
+        if (component instanceof TextComponent) {
+            plainText.append(((TextComponent) component).content());
+        }
+
+        for (Component child : component.children()) {
+            plainText.append(extractPlainText(child));
+        }
+
+        return plainText.toString();
+    }
 }

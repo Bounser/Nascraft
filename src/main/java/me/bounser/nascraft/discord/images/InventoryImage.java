@@ -6,6 +6,7 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.unit.Item;
 
 import javax.imageio.ImageIO;
@@ -39,7 +40,7 @@ public class InventoryImage {
         graphics.setFont(new Font("Helvetica", Font.BOLD, 32));
         graphics.setColor(new Color(64,65,65));
 
-        graphics.drawString(lang.message(Message.DISCORD_INVENTORY_VALUE) + Formatter.format(discordInventory.getInventoryValue(), Style.ROUND_BASIC), 30, 53);
+        graphics.drawString(lang.message(Message.DISCORD_INVENTORY_VALUE) + Formatter.plainFormat(CurrenciesManager.getInstance().getVaultCurrency(), discordInventory.getInventoryValue(), Style.ROUND_BASIC), 30, 53);
 
         List<Item> items = new ArrayList<>(inventory.keySet());
 
