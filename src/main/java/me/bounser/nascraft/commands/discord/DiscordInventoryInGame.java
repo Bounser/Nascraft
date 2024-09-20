@@ -8,8 +8,10 @@ import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.discord.inventories.DiscordInventories;
 import me.bounser.nascraft.discord.inventories.DiscordInventory;
 import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.managers.MoneyManager;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
@@ -54,7 +56,7 @@ public class DiscordInventoryInGame implements Listener {
 
         // EXPANSION
         if (event.getClickedInventory().getSize() == 45 && event.getCurrentItem() != null && event.getRawSlot() > 8 + discordInventory.getCapacity() && event.getRawSlot() < 40) {
-            if (MoneyManager.getInstance().hasEnoughMoney((OfflinePlayer) event.getWhoClicked(), discordInventory.getNextSlotPrice())) {
+            if (MoneyManager.getInstance().hasEnoughMoney((OfflinePlayer) event.getWhoClicked(), CurrenciesManager.getInstance().getVaultCurrency(), discordInventory.getNextSlotPrice())) {
                 Nascraft.getEconomy().withdrawPlayer((OfflinePlayer) event.getView().getPlayer(), discordInventory.getNextSlotPrice());
                 discordInventory.increaseCapacity();
             } else {
@@ -157,8 +159,15 @@ public class DiscordInventoryInGame implements Listener {
         Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.DISINV_INFO_TITLE));
         meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(title));
 
+        String worth = "\n";
+
+        HashMap<Currency, Float> value = DiscordInventories.getInstance().getInventory(uuid).getInventoryValuePerCurrency();
+
+        for (Currency currency : value.keySet())
+            worth += Formatter.format(currency, DiscordInventories.getInstance().getInventory(uuid).getInventoryValue(), Style.ROUND_BASIC) + "\n";
+
         List<String> lore = new ArrayList<>();
-        for (String line : Lang.get().message(Message.DISINV_INFO_LORE, "0", Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getInventoryValue(), Style.ROUND_BASIC), "0").split("\\n")) {
+        for (String line : Lang.get().message(Message.DISINV_INFO_LORE, "[WORTH]", worth).split("\\n")) {
             Component loreComponent = MiniMessage.miniMessage().deserialize(line);
             lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
         }
@@ -179,7 +188,7 @@ public class DiscordInventoryInGame implements Listener {
         meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(lockName));
 
         List<String> lore = new ArrayList<>();
-        for (String line : Lang.get().message(Message.DISINV_LOCKED_LORE, "0", Formatter.format(DiscordInventories.getInstance().getInventory(uuid).getNextSlotPrice(), Style.ROUND_BASIC), "0").split("\\n")) {
+        for (String line : Lang.get().message(Message.DISINV_LOCKED_LORE, "0", Formatter.format(CurrenciesManager.getInstance().getVaultCurrency(), DiscordInventories.getInstance().getInventory(uuid).getNextSlotPrice(), Style.ROUND_BASIC), "0").split("\\n")) {
             Component loreComponent = MiniMessage.miniMessage().deserialize(line);
             lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
         }

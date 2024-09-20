@@ -6,9 +6,14 @@ import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.managers.ImagesManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
+import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
+import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -140,10 +145,14 @@ public class EditItemMenu {
 
     public void insertOptions(Inventory inventory) {
 
+        Currency currency = item == null ? CurrenciesManager.getInstance().getDefaultCurrency() : item.getCurrency();
+
+        Component priceComponent = MiniMessage.miniMessage().deserialize(Formatter.format(currency, initialPrice, Style.ROUND_BASIC));
+
         inventory.setItem(4,
                 getItemStackOfOption(Material.GOLD_NUGGET,
                         "Initial Price " + ChatColor.UNDERLINE + "(REQUIRED)",
-                        Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GREEN + Formatter.format(initialPrice, Style.ROUND_BASIC),
+                        Arrays.asList(ChatColor.GRAY + "Value: " + BukkitComponentSerializer.legacy().serialize(priceComponent),
                                 "",
                                 ChatColor.GRAY + "The initial price of the item gives a point",
                                 ChatColor.GRAY + "of initial stability at neutral internal stock (0)",
@@ -197,10 +206,12 @@ public class EditItemMenu {
                                 ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO EDIT")
         ));
 
+        Component supportComponent = MiniMessage.miniMessage().deserialize(Formatter.format(currency, support, Style.ROUND_BASIC));
+
         inventory.setItem(22,
                 getItemStackOfOption(Material.BEDROCK,
                 "Support",
-                        Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GREEN + Formatter.format(support, Style.ROUND_BASIC),
+                        Arrays.asList(ChatColor.GRAY + "Value: " + (support == 0 ? ChatColor.RED + "DISABLED" : BukkitComponentSerializer.legacy().serialize(supportComponent)),
                                 "",
                                 ChatColor.GRAY + "If the noise is enabled, then the price of the",
                                 ChatColor.GRAY + "item will slowly tend to stay " + ChatColor.UNDERLINE + "ABOVE this value.",
@@ -208,10 +219,12 @@ public class EditItemMenu {
                                 ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO EDIT")
         ));
 
+        Component resistanceComponent = MiniMessage.miniMessage().deserialize(Formatter.format(currency, resistance, Style.ROUND_BASIC));
+
         inventory.setItem(23,
                 getItemStackOfOption(Material.WHITE_WOOL,
                         "Resistance",
-                        Arrays.asList(ChatColor.GRAY + "Value: " + ChatColor.GREEN + Formatter.format(resistance, Style.ROUND_BASIC),
+                        Arrays.asList(ChatColor.GRAY + "Value: " + (resistance == 0 ? ChatColor.RED + "DISABLED" : BukkitComponentSerializer.legacy().serialize(resistanceComponent)),
                                 "",
                                 ChatColor.GRAY + "If the noise is enabled, then the price of the",
                                 ChatColor.GRAY + "item will slowly tend to stay " + ChatColor.UNDERLINE + "BELOW this value.",

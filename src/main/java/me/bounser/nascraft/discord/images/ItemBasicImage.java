@@ -88,8 +88,8 @@ public class ItemBasicImage {
             float[] high = pd.getHighestValue(8*128, 60);
             float[] low = pd.getLowestValue(8*128, 60);
 
-            drawCenteredString(graphics, Formatter.format(high[0], Style.ROUND_BASIC), Math.round(high[1]), 135, 8*128);
-            drawCenteredString(graphics, Formatter.format(low[0], Style.ROUND_BASIC), Math.round(low[1]), 475, 8*128);
+            drawCenteredString(graphics, Formatter.plainFormat(item.getCurrency(), high[0], Style.ROUND_BASIC), Math.round(high[1]), 135, 8*128);
+            drawCenteredString(graphics, Formatter.plainFormat(item.getCurrency(), low[0], Style.ROUND_BASIC), Math.round(low[1]), 475, 8*128);
         }
         graphics.setColor(new Color(120, 120, 125));
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -112,24 +112,24 @@ public class ItemBasicImage {
         graphics.setFont(new Font("Arial", Font.BOLD, 26));
         graphics.setColor(new Color(150, 255, 150));
 
-        graphics.drawString(lang.message(Message.DISCORD_BUY) + " " + Formatter.format(item.getPrice().getBuyPrice(), Style.ROUND_BASIC), 20, 440+128);
+        graphics.drawString(lang.message(Message.DISCORD_BUY) + " " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getBuyPrice(), Style.ROUND_BASIC), 20, 440+128);
 
         graphics.setColor(new Color(255, 150, 150));
 
-        graphics.drawString(lang.message(Message.DISCORD_SELL) + " " + Formatter.format(item.getPrice().getSellPrice(), Style.ROUND_BASIC), 20, 480+128);
+        graphics.drawString(lang.message(Message.DISCORD_SELL) + " " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getSellPrice(), Style.ROUND_BASIC), 20, 480+128);
 
 
         graphics.setFont(new Font("Arial", Font.BOLD, 47));
 
         graphics.setColor(new Color(255, 255, 255));
-        graphics.drawString(item.getName() + " | " + Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC), 67*2, 34*2);
+        graphics.drawString(item.getName() + " | " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC), 67*2, 34*2);
 
         graphics.setFont(new Font("Arial", Font.BOLD, 21));
 
-        graphics.drawString(lang.message(Message.DISCORD_DAY_HIGH) + Formatter.format(item.getPrice().getDayHigh(), Style.ROUND_BASIC), 290, 420+128);
-        graphics.drawString(lang.message(Message.DISCORD_DAY_LOW) + Formatter.format(item.getPrice().getDayLow(), Style.ROUND_BASIC), 290, 460+128);
-        graphics.drawString(lang.message(Message.DISCORD_HISTORICAL_HIGH) + Formatter.format(item.getPrice().getHistoricalHigh(), Style.ROUND_BASIC), 290, 500+128);
-        graphics.drawString(lang.message(Message.DISCORD_DAILY_VOLUME) + Formatter.format(item.getVolume(), Style.REDUCED_LENGTH), 670, 420+128);
+        graphics.drawString(lang.message(Message.DISCORD_DAY_HIGH) + Formatter.plainFormat(item.getCurrency(), item.getPrice().getDayHigh(), Style.ROUND_BASIC), 290, 420+128);
+        graphics.drawString(lang.message(Message.DISCORD_DAY_LOW) + Formatter.plainFormat(item.getCurrency(), item.getPrice().getDayLow(), Style.ROUND_BASIC), 290, 460+128);
+        graphics.drawString(lang.message(Message.DISCORD_HISTORICAL_HIGH) + Formatter.plainFormat(item.getCurrency(), item.getPrice().getHistoricalHigh(), Style.ROUND_BASIC), 290, 500+128);
+        graphics.drawString(lang.message(Message.DISCORD_DAILY_VOLUME) + Formatter.plainFormat(item.getCurrency(), item.getVolume(), Style.REDUCED_LENGTH), 670, 420+128);
         graphics.drawString(lang.message(Message.DISCORD_POSITION) + MarketManager.getInstance().getPositionByVolume(item), 670, 460+128);
         NumberFormat formatter = new DecimalFormat("#0.0");
         graphics.drawString(lang.message(Message.DISCORD_TREND) + formatter.format((-100 + item.getPrice().getValue()*100/item.getPrice().getValueAnHourAgo())) + "%" , 670, 500+128);

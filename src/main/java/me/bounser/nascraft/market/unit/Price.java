@@ -2,6 +2,8 @@ package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.config.Config;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -11,6 +13,10 @@ public class Price {
     private Item item;
 
     private float value;
+
+    private int precission;
+    private float topLimit;
+    private float lowLimit;
 
     private float previousValue;
 
@@ -43,6 +49,10 @@ public class Price {
 
         updateValue();
         previousValue = value;
+
+        precission = item.getCurrency().getDecimalPrecission();
+        topLimit = item.getCurrency().getTopLimit();
+        lowLimit = (float) Math.max(item.getCurrency().getLowLimit(), (float) 1.0/(Math.pow(10f, precission)));
 
         this.initialValue = initialValue;
 
@@ -92,8 +102,8 @@ public class Price {
     }
 
     public void enforceLimits() {
-        value = Math.min(value, Config.getInstance().getLimits()[1]);
-        value = Math.max(value, Config.getInstance().getLimits()[0]);
+        value = Math.min(value, topLimit);
+        value = Math.max(value, lowLimit);
     }
 
     public void applyNoise() {
@@ -230,7 +240,7 @@ public class Price {
             cost += fictitiousValue * excess;
         }
 
-        return cost*tax;
+        return roundToDecimals(cost*tax, precission);
     }
 
     public float getBuyTaxMultiplier() { return taxBuy; }
@@ -250,4 +260,9 @@ public class Price {
     public Price setSupport(float support) { this.support = support; return this; }
     public Price setResistance(float resistance) { this.resistance = resistance; return this; }
 
+    public static float roundToDecimals(double value, int decimals) {
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(decimals, RoundingMode.HALF_UP); // Rounds up if the digit is >= 5
+        return (float) bd.doubleValue();
+    }
 }

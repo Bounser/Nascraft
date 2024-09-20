@@ -122,7 +122,7 @@ public class MainImage {
 
         graphics.drawString(item.getName(), 55 + offset[0],  20 + offset[1]);
 
-        graphics.drawString(Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC), 55 + offset[0], 50 + offset[1]);
+        graphics.drawString(Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC), 55 + offset[0], 50 + offset[1]);
 
         graphics.drawLine(52 + offset[0], 30 + offset[1], 150 + offset[0], 30 + offset[1]);
         graphics.drawLine(52 + offset[0], 29 + offset[1], 150 + offset[0], 29 + offset[1]);

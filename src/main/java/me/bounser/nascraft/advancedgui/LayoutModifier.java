@@ -19,7 +19,6 @@ import me.leoko.advancedgui.utils.events.GuiInteractionExitEvent;
 import me.leoko.advancedgui.utils.events.LayoutLoadEvent;
 
 import me.leoko.advancedgui.utils.interactions.Interaction;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 
@@ -282,8 +281,8 @@ public class LayoutModifier implements LayoutExtension {
 
                 Item item = category.getItemOfIndex(j-1+offset);
 
-                componentTree.locate("t" + position + j + "1", TextComponent.class).setText(Formatter.format(item.getPrice().getValue(), Style.REDUCED_LENGTH));
-                componentTree.locate("t" + position + j + "2", TextComponent.class).setText(Formatter.format(item.getPrice().getValue(), Style.REDUCED_LENGTH));
+                componentTree.locate("t" + position + j + "1", TextComponent.class).setText(Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.REDUCED_LENGTH));
+                componentTree.locate("t" + position + j + "2", TextComponent.class).setText(Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.REDUCED_LENGTH));
 
                 ImageComponent ic = componentTree.locate("asdi" + position + "" + j, ImageComponent.class);
                 ic.setImage(Images.getProcessedImage(item, 32, 32, false));
@@ -406,8 +405,8 @@ public class LayoutModifier implements LayoutExtension {
         if (item != null) {
 
             for (int i : Arrays.asList(1, 16, 64)) {
-                ct.locate("buyprice" + i, TextComponent.class).setText(Formatter.format(item.getPrice().getProjectedCost(-i*item.getMultiplier(), item.getPrice().getBuyTaxMultiplier()), Style.ROUND_BASIC));
-                ct.locate("sellprice" + i, TextComponent.class).setText(Formatter.format(item.getPrice().getProjectedCost(i*item.getMultiplier(), item.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC));
+                ct.locate("buyprice" + i, TextComponent.class).setText(Formatter.plainFormat(item.getCurrency(), item.getPrice().getProjectedCost(-i*item.getMultiplier(), item.getPrice().getBuyTaxMultiplier()), Style.ROUND_BASIC));
+                ct.locate("sellprice" + i, TextComponent.class).setText(Formatter.plainFormat(item.getCurrency(), item.getPrice().getProjectedCost(i*item.getMultiplier(), item.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC));
             }
         }
     }

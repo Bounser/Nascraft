@@ -3,6 +3,8 @@ package me.bounser.nascraft.sellwand;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
+import me.bounser.nascraft.managers.currencies.Currency;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -35,10 +37,11 @@ public class Wand {
     private final String permission;
     private final Action sell;
     private final Action estimate;
+    private final List<Currency> currencies;
 
     private final ItemStack itemStack;
 
-    public Wand (String name, Material material, String displayName, List<String> lore, int uses, float multiplier, float maxProfit, int cooldown, boolean glim, String permission, Action sell, Action estimate) {
+    public Wand (String name, Material material, String displayName, List<String> lore, int uses, float multiplier, float maxProfit, int cooldown, boolean glim, String permission, Action sell, Action estimate, List<Currency> currencies) {
 
         this.name = name;
         this.material = material;
@@ -56,6 +59,7 @@ public class Wand {
         this.permission = permission;
         this.sell = sell;
         this.estimate = estimate;
+        this.currencies = currencies;
 
         this.itemStack = generateItemStackOfNewWand();
     }
@@ -70,7 +74,7 @@ public class Wand {
             Component loreComponent = MiniMessage.miniMessage().deserialize(
                     line
                     .replace("[USES]", String.valueOf(uses))
-                    .replace("[PROFIT-LEFT]", Formatter.format(profitLeft, Style.ROUND_BASIC)));
+                    .replace("[PROFIT-LEFT]", Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), profitLeft, Style.ROUND_BASIC)));
             newLore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
         }
 
@@ -122,5 +126,7 @@ public class Wand {
 
     public Action getSellAction() { return sell; }
     public Action getEstimateAction() { return estimate; }
+
+    public List<Currency> getCurrencies() { return currencies; }
 
 }

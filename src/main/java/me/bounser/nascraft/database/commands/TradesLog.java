@@ -39,6 +39,9 @@ public class TradesLog {
     }
 
     public static List<Trade> retrieveTrades(Connection connection, UUID uuid, int offset, int limit) {
+
+        if (uuid == null) return null;
+
         try {
             List<Trade> trades = new ArrayList<>();
             String sql = "SELECT * FROM trade_log WHERE uuid = ? ORDER BY id DESC LIMIT " + limit + " OFFSET ?;";
@@ -70,6 +73,9 @@ public class TradesLog {
     }
 
     public static List<Trade> retrieveTrades(Connection connection, UUID uuid, Item item, int offset, int limit) {
+
+        if (uuid == null) return null;
+
         try {
             List<Trade> trades = new ArrayList<>();
             String sql = "SELECT * FROM trade_log WHERE uuid = ? AND identifier = ? ORDER BY id DESC LIMIT " + limit + " OFFSET ?;";

@@ -34,6 +34,9 @@ items:
     # OPTIONAL: Exclude the price of this item from the calculation of the CPI.
     # exclude-from-cpi: true
 
+    # OPTIONAL: Set a currency different from the default one.
+    # currency: 'player-points'
+
     # OPTIONAL: Child items. The price of these items will be determined by their parent item.
     child:
       cobblestone_slab:

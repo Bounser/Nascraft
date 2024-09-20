@@ -82,9 +82,9 @@ public class MarketMenuManager {
         float change = RoundUtils.roundToOne(-100 + item.getPrice().getValue() *100/item.getPrice().getValueAnHourAgo());
 
         String itemLore = lore
-                .replace("[PRICE]", Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC))
-                .replace("[SELL-PRICE]", Formatter.format(item.getPrice().getSellPrice(), Style.ROUND_BASIC))
-                .replace("[BUY-PRICE]", Formatter.format(item.getPrice().getBuyPrice(), Style.ROUND_BASIC));
+                .replace("[PRICE]", Formatter.format(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC))
+                .replace("[SELL-PRICE]", Formatter.format(item.getCurrency(), item.getPrice().getSellPrice(), Style.ROUND_BASIC))
+                .replace("[BUY-PRICE]", Formatter.format(item.getCurrency(), item.getPrice().getBuyPrice(), Style.ROUND_BASIC));
 
         String changeFormatted = Lang.get().message(Message.GUI_POSITIVE_CHANGE);
 

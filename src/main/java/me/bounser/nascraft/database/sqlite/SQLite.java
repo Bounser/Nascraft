@@ -73,6 +73,16 @@ public class SQLite implements Database {
         createTables();
     }
 
+    void restoreConnection() {
+        try {
+            if (connection.isClosed() || connection == null) {
+                connect();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void disconnect() {
         saveEverything();
@@ -224,16 +234,10 @@ public class SQLite implements Database {
         if (connection != null) {
             try {
                 connection.close();
+                connection = DriverManager.getConnection("jdbc:sqlite:" + PATH);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
-        }
-
-        try {
-            if (connection == null || connection.isClosed())
-                connection = DriverManager.getConnection("jdbc:sqlite:" + PATH);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -259,6 +263,7 @@ public class SQLite implements Database {
 
     @Override
     public String getUserId(UUID uuid) {
+        restoreConnection();
         return DiscordLink.getUserId(connection, uuid);
     }
 
@@ -299,6 +304,7 @@ public class SQLite implements Database {
 
     @Override
     public void saveItem(Item item) {
+        restoreConnection();
         ItemProperties.saveItem(connection, item);
     }
 

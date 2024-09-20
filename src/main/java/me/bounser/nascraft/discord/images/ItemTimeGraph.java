@@ -24,7 +24,7 @@ public class ItemTimeGraph {
         graphics.setFont(new Font("Arial", Font.BOLD, 23));
 
         graphics.setColor(new Color(255, 255, 255));
-        graphics.drawString(item.getName() + " | " + Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC), 95, 38);
+        graphics.drawString(item.getName() + " | " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC), 95, 38);
 
         graphics.dispose();
 

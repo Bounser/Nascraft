@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.List;
@@ -89,13 +90,28 @@ public class CategoryMenu implements MenuPage {
 
                 Item item = items.get(j + page * categorySlots.size());
 
-                gui.setItem(i,
-                        MarketMenuManager.getInstance().generateItemStack(
-                                item.getItemStack().getType(),
-                                item.getFormattedName(),
-                                MarketMenuManager.getInstance().getLoreFromItem(item, Lang.get().message(Message.GUI_CATEGORY_ITEM_LORE))
-                        )
-                );
+                ItemStack itemStack = item.getItemStack();
+
+                ItemMeta meta = itemStack.getItemMeta();
+
+                meta.setDisplayName(item.getFormattedName());
+
+                List<String> prevLore = meta.getLore();
+
+                List<String> itemLore = MarketMenuManager.getInstance().getLoreFromItem(item, Lang.get().message(Message.GUI_CATEGORY_ITEM_LORE));
+
+                if (meta.hasLore() && prevLore != null) {
+                    itemLore.add("");
+                    itemLore.addAll(prevLore);
+                    meta.setLore(itemLore);
+                } else {
+                    meta.setLore(itemLore);
+                }
+
+                itemStack.setItemMeta(meta);
+
+                gui.setItem(i, itemStack);
+
             } else {
                 gui.setItem(i, new ItemStack(Material.AIR));
             }

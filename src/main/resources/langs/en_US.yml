@@ -33,13 +33,13 @@ sellall_everything_error: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ You don't have 
 sellall: "<gradient:#FF00CD:#DA58FF>You just sold <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[MATERIAL]</light_purple></bold> worth <green>[WORTH]</green></gradient>"
 sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ You don't have any [MATERIAL] to sell!</gradient>"
 sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ Material not recognized. Usage: /sellall [material]</gradient>"
-sellall_estimated_value: "<gray>Estimated value:</gray> <green>[WORTH]</green>"
+sellall_estimated_value: "<gray>Estimated value:</gray> <green>\n[WORTH]</green>"
 
 # nsell
 sell_title: "           <b><gradient:#12438c:#91196f>Selling menu</gradient></b>"
 sell_close: "<b><gradient:#ff0000:#ff3b05>CLOSE</gradient></b>"
 sell_button_name: "<b><gradient:#ffd857:#ff6f00>SELL CONTENT</gradient></b>"
-sell_button_lore: "<color:#85784d>Sell for approximately:</color> <b><gradient:#ffe869:#ffc745>[WORTH]</gradient></b>"
+sell_button_lore: "<color:#85784d>Sell for approximately:</color> \n[WORTH-LIST]"
 sell_remove_item: "<u><color:#ff2424>⏵ Click to remove from sell list</color></u>"
 sell_help_title: "<b><gradient:#7f60ab:#ab3f7a>How does this work?</gradient></b>"
 sell_help_lore: "<color:#ab898d>Select all items you want to sell.</color>\n<color:#ab898d>Estimated value isn't guaranteed and will</color>\n<color:#ab898d>change once the operation is finished.</color>"
@@ -66,9 +66,10 @@ alerts_list_segment: "\n&6> &l[MATERIAL] &r&eat price &l[WORTH]"
 
 # SELLWAND
 
-sellwand_estimated_value: "<gradient:#FF00CD:#DA58FF>Estimated value:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
-sellwand_sold: "<gradient:#FF00CD:#DA58FF>Sold content for:</gradient> <bold><light_purple>[WORTH]</light_purple></bold>"
-sellwand_sold_with_multiplier: "<gradient:#FF00CD:#DA58FF>Sold content for:</gradient> <light_purple>[INITIAL-WORTH] x [MULTIPLIER] = <bold>[WORTH]</bold></light_purple>"
+sellwand_estimated_value: "<gradient:#FF00CD:#DA58FF>Estimated value:</gradient> <bold>\n[WORTH]</bold>"
+sellwand_sold: "<gradient:#FF00CD:#DA58FF>Sold content for:</gradient> <bold>[WORTH]</bold>"
+sellwand_sold_with_multiplier: "<gradient:#FF00CD:#DA58FF>Sold content for:</gradient>"
+sellwand_sold_with_multiplier_segment: "<light_purple>[INITIAL-WORTH] x [MULTIPLIER] = <bold>[WORTH]</bold></light_purple>"
 sellwand_ran_out: "<gradient:#FB6363:#C4B3FD>✘ That sell wand doesn't have any more uses left.</gradient>"
 sellwand_nothing_to_sell: "<gradient:#FB6363:#C4B3FD>✘ There is nothing to sell!</gradient>"
 sellwand_cooldown: "<gradient:#FB6363:#C4B3FD>On cooldown, [TIME] left!</gradient>"
@@ -98,7 +99,7 @@ disinv_cant_afford_expansion: "<gradient:#FB6363:#C4B3FD>✘ You don't have enou
 disinv_locked_title: "<b><gradient:#ff5e4f:#ff2e4a>LOCKED</gradient></b>"
 disinv_locked_lore: "<gradient:#6c65b5:#7aad63>Click to buy next slot for:</gradient>\n<b><gradient:#ffbb29:#efff78>[AMOUNT]</gradient></b>"
 disinv_info_title: "<b><gradient:#8c2eff:#cd75ff>Discord Inventory</gradient></b>"
-disinv_info_lore: "<gradient:#6c65b5:#7aad63>Inventory Value: </gradient><b><gradient:#ffbb29:#efff78>[AMOUNT]</gradient></b>"
+disinv_info_lore: "<gradient:#6c65b5:#7aad63>Inventory Value: </gradient> \n[WORTH]"
 disinv_amount: "<gradient:#6c65b5:#7aad63>Amount: </gradient><color:#66ff40>[AMOUNT]</color>"
 disinv_no_space: "<gradient:#FB6363:#C4B3FD>✘ You don't have space in your inventory to move that item!</gradient>"
 disinv_invalid: "<gradient:#FB6363:#C4B3FD>✘ Invalid item!</gradient>"
@@ -156,6 +157,8 @@ gui_buysell_buy_buttons_lore: " \n<gradient:#6c65b5:#7aad63>⏵ Click to buy [AM
 
 gui_buysell_sell_buttons_name: "<b><gradient:#eb3926:#eb8063>SELL [AMOUNT]</gradient></b>"
 gui_buysell_sell_buttons_lore: " \n<gradient:#6c65b5:#e3326a>⏵ Click to sell [AMOUNT] for </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
+
+gui_info_title: "<gradient:#ffe712:#c7a987>Statistics</gradient>"
 
 gui_alerts_title: "<b><gradient:#ff9305:#ffeb38>Alerts</gradient></b>"
 gui_alerts_lore: "\n<gradient:#6c65b5:#7aad63>Price to reach: </gradient><gradient:#ff9305:#ffeb38>[PRICE]</gradient>\n\n<gradient:#6c65b5:#7aad63>⏵ Click to remove this alert.</gradient>"

@@ -16,6 +16,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.util.ArrayList;
@@ -46,13 +47,29 @@ public class BuySellMenu implements MenuPage{
 
         // Item
 
+        ItemStack itemStack = item.getItemStack();
+
+        ItemMeta meta = itemStack.getItemMeta();
+
+        meta.setDisplayName(item.getFormattedName());
+
+        List<String> prevLore = meta.getLore();
+
+        List<String> itemLore = MarketMenuManager.getInstance().getLoreFromItem(item, Lang.get().message(Message.GUI_BUYSELL_ITEM_LORE));
+
+        if (meta.hasLore() && prevLore != null) {
+            itemLore.add("");
+            itemLore.addAll(prevLore);
+            meta.setLore(itemLore);
+        } else {
+            meta.setLore(itemLore);
+        }
+
+        itemStack.setItemMeta(meta);
+
         gui.setItem(
                 config.getBuySellMenuItemSlot(),
-                MarketMenuManager.getInstance().generateItemStack(
-                        item.getItemStack().getType(),
-                        item.getFormattedName(),
-                        MarketMenuManager.getInstance().getLoreFromItem(item, Lang.get().message(Message.GUI_BUYSELL_ITEM_LORE))
-                )
+                itemStack
         );
 
         // Back button
@@ -83,7 +100,7 @@ public class BuySellMenu implements MenuPage{
                 Component alert = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_BUYSELL_ALERTS_NAME_SETUP));
 
                 for (String line : Lang.get().message(Message.GUI_BUYSELL_ALERTS_LORE_SETUP)
-                        .replace("[PRICE]", Formatter.format(Math.abs(alerts.get(item)), Style.ROUND_BASIC)).split("\\n")) {
+                        .replace("[PRICE]", Formatter.format(item.getCurrency(), Math.abs(alerts.get(item)), Style.ROUND_BASIC)).split("\\n")) {
                     Component loreComponent = MiniMessage.miniMessage().deserialize(line);
                     lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
                 }
@@ -160,7 +177,7 @@ public class BuySellMenu implements MenuPage{
             lore.clear();
             String buyLore = Lang.get().message(Message.GUI_BUYSELL_BUY_BUTTONS_LORE)
                     .replace("[AMOUNT]", String.valueOf(amount))
-                    .replace("[WORTH]", String.valueOf(Formatter.format(item.getPrice().getProjectedCost(-amount, item.getPrice().getBuyTaxMultiplier()), Style.ROUND_BASIC)));
+                    .replace("[WORTH]", String.valueOf(Formatter.format(item.getCurrency(), item.getPrice().getProjectedCost(-amount, item.getPrice().getBuyTaxMultiplier()), Style.ROUND_BASIC)));
 
             for (String line : buyLore.split("\\n")) {
                 Component loreComponent = MiniMessage.miniMessage().deserialize(line);
@@ -191,7 +208,7 @@ public class BuySellMenu implements MenuPage{
             lore.clear();
             String sellLore = Lang.get().message(Message.GUI_BUYSELL_SELL_BUTTONS_LORE)
                     .replace("[AMOUNT]", String.valueOf(amount))
-                    .replace("[WORTH]", String.valueOf(Formatter.format(item.getPrice().getProjectedCost(amount, item.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC)));
+                    .replace("[WORTH]", String.valueOf(Formatter.format(item.getCurrency(), item.getPrice().getProjectedCost(amount, item.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC)));
 
             for (String line : sellLore.split("\\n")) {
                 Component loreComponent = MiniMessage.miniMessage().deserialize(line);
@@ -250,7 +267,7 @@ public class BuySellMenu implements MenuPage{
                 Component alert = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_BUYSELL_ALERTS_NAME_SETUP));
 
                 for (String line : Lang.get().message(Message.GUI_BUYSELL_ALERTS_LORE_SETUP)
-                        .replace("[PRICE]", Formatter.format(Math.abs(alerts.get(item)), Style.ROUND_BASIC)).split("\\n")) {
+                        .replace("[PRICE]", Formatter.format(item.getCurrency(), Math.abs(alerts.get(item)), Style.ROUND_BASIC)).split("\\n")) {
                     Component loreComponent = MiniMessage.miniMessage().deserialize(line);
                     lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
                 }
@@ -293,7 +310,7 @@ public class BuySellMenu implements MenuPage{
             lore.clear();
             String buyLore = Lang.get().message(Message.GUI_BUYSELL_BUY_BUTTONS_LORE)
                     .replace("[AMOUNT]", String.valueOf(amount))
-                    .replace("[WORTH]", String.valueOf(Formatter.format(item.getPrice().getProjectedCost(-amount, item.getPrice().getBuyTaxMultiplier()), Style.ROUND_BASIC)));
+                    .replace("[WORTH]", String.valueOf(Formatter.format(item.getCurrency(), item.getPrice().getProjectedCost(-amount, item.getPrice().getBuyTaxMultiplier()), Style.ROUND_BASIC)));
 
             for (String line : buyLore.split("\\n")) {
                 Component loreComponent = MiniMessage.miniMessage().deserialize(line);
@@ -324,7 +341,7 @@ public class BuySellMenu implements MenuPage{
             lore.clear();
             String sellLore = Lang.get().message(Message.GUI_BUYSELL_SELL_BUTTONS_LORE)
                     .replace("[AMOUNT]", String.valueOf(amount))
-                    .replace("[WORTH]", String.valueOf(Formatter.format(item.getPrice().getProjectedCost(amount, item.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC)));
+                    .replace("[WORTH]", String.valueOf(Formatter.format(item.getCurrency(), item.getPrice().getProjectedCost(amount, item.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC)));
 
             for (String line : sellLore.split("\\n")) {
                 Component loreComponent = MiniMessage.miniMessage().deserialize(line);

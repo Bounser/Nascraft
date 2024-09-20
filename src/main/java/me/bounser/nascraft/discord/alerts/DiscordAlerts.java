@@ -115,8 +115,8 @@ public class DiscordAlerts implements Listener {
                                 .sendMessage(Lang.get().message(Message.DISCORD_ALERT_REACHED_SEGMENT)
                                         .replace("[EMOJI]", emoji)
                                         .replace("[MATERIAL]", item.getName())
-                                        .replace("[PRICE1]", Formatter.format(price, Style.ROUND_BASIC))
-                                        .replace("[PRICE2]", Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC)))
+                                        .replace("[PRICE1]", Formatter.plainFormat(item.getCurrency(), price, Style.ROUND_BASIC))
+                                        .replace("[PRICE2]", Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC)))
                                 .queue()));
 
     }

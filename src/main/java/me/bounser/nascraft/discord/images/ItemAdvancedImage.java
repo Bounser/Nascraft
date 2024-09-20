@@ -70,7 +70,7 @@ public class ItemAdvancedImage {
         graphics.drawImage(item.getIcon(), 18, 3*128+15, 90, 90, null);
         graphics.setFont(new Font("Arial", Font.BOLD, 41));
         graphics.setColor(new Color(250, 250, 250));
-        graphics.drawString(item.getName() + " | " + Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC), 135, 3*128+75);
+        graphics.drawString(item.getName() + " | " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC), 135, 3*128+75);
 
         graphics.dispose();
 

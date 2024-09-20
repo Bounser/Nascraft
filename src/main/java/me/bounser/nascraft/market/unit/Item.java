@@ -2,15 +2,19 @@ package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.Images;
+import me.bounser.nascraft.api.events.Action;
+import me.bounser.nascraft.api.events.TransactionCompletedEvent;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
-import me.bounser.nascraft.api.events.BuyTradableEvent;
-import me.bounser.nascraft.api.events.SellTradableEvent;
+import me.bounser.nascraft.api.events.BuyItemEvent;
+import me.bounser.nascraft.api.events.SellItemEvent;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.discord.DiscordLog;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
+import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.resources.Category;
@@ -42,6 +46,7 @@ public class Item {
     private Category category;
 
     private final Price price;
+    private final Currency currency;
 
     private int operations;
 
@@ -66,6 +71,13 @@ public class Item {
 
         setupAlias(alias);
 
+        this.currency = CurrenciesManager.getInstance().getCurrency(
+                Config.getInstance().getCurrency(identifier)
+        );
+
+        if (currency == null)
+            Nascraft.getInstance().getLogger().severe("Item: " + identifier + " doesn't have a valid currency.");
+
         this.price = new Price(
                 this,
                 Config.getInstance().getInitialPrice(identifier),
@@ -86,7 +98,9 @@ public class Item {
         itemStats = new ItemStats(this);
     }
 
-    public Item(Item parent, float multiplier, ItemStack itemStack, String identifier, String alias){
+    public Item(Item parent, float multiplier, ItemStack itemStack, String identifier, String alias, Currency currency){
+
+        this.currency = parent.getCurrency();
 
         itemStack.setAmount(1);
 
@@ -163,7 +177,7 @@ public class Item {
         Player player = Bukkit.getPlayer(uuid);
         Player offlinePlayer = Bukkit.getPlayer(uuid);
 
-        BuyTradableEvent event = new BuyTradableEvent(player, this, amount);
+        BuyItemEvent event = new BuyItemEvent(player, this, amount);
         Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) return;
@@ -190,9 +204,9 @@ public class Item {
             player.getInventory().addItem(operationItemStack);
         }
 
-        MoneyManager.getInstance().withdraw(offlinePlayer, worth, price.getBuyTaxMultiplier());
+        MoneyManager.getInstance().withdraw(offlinePlayer, currency, worth, price.getBuyTaxMultiplier());
 
-        if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(worth, Style.ROUND_BASIC), String.valueOf(amount), taggedAlias);
+        if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(currency, worth, Style.ROUND_BASIC), String.valueOf(amount), taggedAlias);
 
         if (parent != null)
             parent.updateInternalValues(amount,
@@ -213,11 +227,14 @@ public class Item {
             DiscordLog.getInstance().sendTradeLog(trade);
 
         MarketManager.getInstance().addOperation();
+
+        TransactionCompletedEvent transactionEvent = new TransactionCompletedEvent(player, this, amount, Action.BUY, worth);
+        Bukkit.getPluginManager().callEvent(transactionEvent);
     }
 
     public boolean checkBalance(Player player, boolean feedback, float money) {
-        if (!MoneyManager.getInstance().hasEnoughMoney(player, money)) {
-            if (player != null && feedback) Lang.get().message(player, Message.NOT_ENOUGH_MONEY);
+        if (!MoneyManager.getInstance().hasEnoughMoney(player, currency, money)) {
+            if (player != null && feedback) Lang.get().message(player, currency.getNotEnoughMessage());
             return false;
         }
         return true;
@@ -261,7 +278,7 @@ public class Item {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
         Player player = Bukkit.getPlayer(uuid);
 
-        SellTradableEvent event = new SellTradableEvent(player, this, amount);
+        SellItemEvent event = new SellItemEvent(player, this, amount);
         Bukkit.getPluginManager().callEvent(event);
 
         if (event.isCancelled()) return -1;
@@ -299,11 +316,11 @@ public class Item {
                     price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
 
 
-        MoneyManager.getInstance().deposit(offlinePlayer, worth, price.getSellTaxMultiplier());
+        MoneyManager.getInstance().deposit(offlinePlayer, currency, worth, price.getSellTaxMultiplier());
 
         worth = RoundUtils.round(worth);
 
-        if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(worth, Style.ROUND_BASIC), String.valueOf(amount), taggedAlias);
+        if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(currency, worth, Style.ROUND_BASIC), String.valueOf(amount), taggedAlias);
 
         Trade trade = new Trade(this, LocalDateTime.now(), worth, amount, false, false, uuid);
 
@@ -311,6 +328,9 @@ public class Item {
         if (Config.getInstance().getDiscordEnabled() && Config.getInstance().getLogChannelEnabled())
             DiscordLog.getInstance().sendTradeLog(trade);
         MarketManager.getInstance().addOperation();
+
+        TransactionCompletedEvent transactionEvent = new TransactionCompletedEvent(player, this, amount, Action.SELL, worth);
+        Bukkit.getPluginManager().callEvent(transactionEvent);
 
         return worth;
     }
@@ -356,6 +376,8 @@ public class Item {
     public float getMultiplier() { return multiplier; }
 
     public Price getPrice() { return price; }
+
+    public Currency getCurrency() { return currency; }
 
 
     public int getOperations() { return operations; }

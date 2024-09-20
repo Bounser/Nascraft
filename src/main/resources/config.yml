@@ -1,21 +1,53 @@
 # Nascraft config.yml - ${project.version}
 
-# Language file to use. Available: en_US es_ES
+# Language file to use. Available: en_US es_ES it_IT de_DE
 language: 'en_US'
 
 database:
   # Available types: SQLite
   type: 'SQLite'
+
   # How many days should logs of trades last in the database?
   # With the option 60, all trades older than 60 days will be automatically removed.
   # Use -1 to disable (Keep all trades logged).
   days-until-history-removed: 60
 
+currencies:
+  # Currency to be used by default by all items.
+  # It will also be the default price for things like discord inventory expansions etc.
+  default-currency: 'vault'
+
+  suppliers:
+
+    # Vault has to be installed!
+    vault:
+      format: "<gradient:#f09947:#feed81>[AMOUNT]$</gradient>"
+      not-enough: "<gradient:#FB6363:#C4B3FD>✘ You don't have enough money to buy that!</gradient>"
+      decimal-positions: 3
+      top-limit: 9999999
+      low-limit: 0.005
+
+    #################################################################
+    #  TO ADD OTHER CURRENCIES PLACEHOLDEDRAPI HAS TO BE INSTALLED  #
+    #################################################################
+
+    # !!! Keep in mind that both commands and placeholder have to work even if the player
+    # !!! is offline if you plan to use the discord extension!
+
+    # Example of another kind of currency:
+    player-points:
+      deposit-cmd: 'playerpoints:p give [USER-NAME] [AMOUNT]'
+      withdraw-cmd: 'playerpoints:p take [USER-NAME] [AMOUNT]'
+      balance-placeholder: '%playerpoints_points%'
+      not-enough: "<gradient:#FB6363:#C4B3FD>✘ You don't have enough points to buy that!</gradient>"
+      format: "<gradient:#ba24ff:#e8d1ff>[AMOUNT]p</gradient>"
+      decimal-positions: 0
+      top-limit: 9999
+      low-limit: 10
+
+    # Add your own supplier! Create as many as you want.
+
 price-options:
-  # Set (hard) limits on the minimum and maximum prices.
-  limits:
-    low: 0.001
-    high: 9999999
   # With noise enabled, prices will vary over time in a pseudo-random manner.
   noise:
     enabled: true
@@ -98,14 +130,6 @@ commands:
       slot: 8
       material: 'red_stained_glass_pane'
 
-placeholders:
-  # Number of decimals to display in prices.
-  # For instance, with a price of 2.2732:
-  # 1 -> 2.3$
-  # 2 -> 2.27$
-  # 3 -> 2.273$
-  decimal-precision: 2
-
 # FEATURE IN BETA AS OF ${project.version}
 # Use with caution.
 discord-bot:
@@ -122,7 +146,7 @@ discord-bot:
   # Menu to let users sell/buy items
   main-menu:
     enabled: false
-    # Available methods: NATIVE, DISCORDSRV
+    # Available methods: NATIVE, DISCORDSRV (DISCORDSRV IS NOT WORKING CURRENTLY)
     link-method: 'NATIVE'
     # This channel should be only used by the bot. Every message in it will be removed.
     channel: 'MAINMENU-TEXTCHANNEL-ID'
@@ -208,6 +232,9 @@ sell-wands:
         - ' '
         - '<b><gradient:#f51d41:#e74cf5>UNLIMITED USES</gradient><b>'
       multiplier: 0.5
+      # Limit the currencies with which this wand works.
+      currencies:
+        - 'vault'
       # Set a minimum cooldown between uses in seconds.
       cooldown: 300 # 300/60 = 5 min of cooldown.
       permission: 'nascraft.wand.advanced'
@@ -215,15 +242,17 @@ sell-wands:
     millionaire:
       material: 'blaze_rod'
       enchanted: true
-      display-name: '<b><gradient:#f57e00:#eff551>MILLIONARIE WAND</gradient></b>'
+      display-name: '<b><gradient:#F57E00:#EFF551>MILLIONARIE WAND</gradient></b>'
       lore:
-        - '<b><gradient:#ff383b:#ff2403>⏵ LEFT CLICK</gradient></b> <color:#85784d>to estimate value.</color>'
-        - '<b><gradient:#00eeff:#2e69ff>⏵ RIGHT CLICK</gradient></b> <color:#85784d>a container to</color>'
+        - '<b><gradient:#ff383b:#ff2403>⏵ LEFT CLICK</gradient></b> <color:#85784D>to estimate value.</color>'
+        - '<b><gradient:#00eeff:#2e69ff>⏵ RIGHT CLICK</gradient></b> <color:#85784D>a container to</color>'
         - '<color:#85784d>sell all its content to the market</color>'
-        - '<color:#85784d>for <color:#eff551>150%</color> its value.</color>'
+        - '<color:#85784d>for <color:#EFF551>150%</color> its value.</color>'
         - ' '
-        - '<color:#85784d>Left to sell:</color> <b><gradient:#eff551:#f57e00>[PROFIT-LEFT]</gradient></b>'
+        - '<color:#85784d>Left to sell:</color> <b>[PROFIT-LEFT]</b>'
       # With this wand you can sell a maximum of 1.000.000$ (Including the multiplier) worth of items.
+      currencies:
+        - 'vault'
       max-profit: 1000000
       multiplier: 1.5
       permission: 'nascraft.wand.millonaire'
@@ -235,5 +264,5 @@ sell-wands:
 # Verify whether the AdvancedGUI's layout is present, and if it is not, place it in the layout folder of AdvancedGUI.
 auto-resources-injection: true
 
-# Cooldown between button uses, in seconds.
+# Cooldown between button uses of the AdvancedGUI layout, in seconds.
 layout-cooldown: 1

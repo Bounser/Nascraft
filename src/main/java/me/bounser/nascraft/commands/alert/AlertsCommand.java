@@ -54,7 +54,7 @@ public class AlertsCommand extends Command {
         String alerts = Lang.get().message(Message.ALERTS_HEADER);
 
         for (Item item : DiscordAlerts.getInstance().getAlerts().get(userID).keySet())
-            alerts = alerts + Lang.get().message(Message.ALERTS_LIST_SEGMENT, Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(userID).get(item)), Style.ROUND_BASIC), "0", item.getName());
+            alerts = alerts + Lang.get().message(Message.ALERTS_LIST_SEGMENT, Formatter.format(item.getCurrency(), Math.abs(DiscordAlerts.getInstance().getAlerts().get(userID).get(item)), Style.ROUND_BASIC), "0", item.getName());
 
         Lang.get().message(player, alerts);
     }

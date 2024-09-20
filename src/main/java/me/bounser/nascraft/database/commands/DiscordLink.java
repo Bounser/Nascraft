@@ -35,7 +35,7 @@ public class DiscordLink {
 
     public static UUID getUUID(Connection connection, String userId) {
         try {
-            String sql = "SELECT uuid FROM discord_links WHERE userid=?";
+            String sql = "SELECT uuid FROM discord_links WHERE userid=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, userId);
             ResultSet resultSet = prep.executeQuery();
@@ -50,7 +50,7 @@ public class DiscordLink {
 
     public static String getNickname(Connection connection, String userId) {
         try {
-            String sql = "SELECT nickname FROM discord_links WHERE userid=?";
+            String sql = "SELECT nickname FROM discord_links WHERE userid=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, userId);
             ResultSet resultSet = prep.executeQuery();
@@ -65,7 +65,7 @@ public class DiscordLink {
 
     public static String getUserId(Connection connection, UUID uuid) {
         try {
-            String sql = "SELECT userid FROM discord_links WHERE uuid=?";
+            String sql = "SELECT userid FROM discord_links WHERE uuid=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, uuid.toString());
             ResultSet resultSet = prep.executeQuery();

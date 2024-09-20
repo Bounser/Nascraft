@@ -7,6 +7,8 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
+import me.bounser.nascraft.managers.currencies.Currency;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -105,14 +107,7 @@ public class SellInvCommand extends Command {
         Component name = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.SELL_BUTTON_NAME));
         meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(name));
 
-        List<String> lore = new ArrayList<>();
-
-        for (String line : Lang.get().message(Message.SELL_BUTTON_LORE, Formatter.format(0, Style.ROUND_BASIC), "", "").split("\\n")) {
-            Component loreLine = MiniMessage.miniMessage().deserialize(line);
-            lore.add(BukkitComponentSerializer.legacy().serialize(loreLine));
-        }
-
-        meta.setLore(lore);
+        meta.setLore(Arrays.asList(Lang.get().message(Message.SELL_BUTTON_LORE, "[WORTH-LIST]", "").split("\\n")));
         sellButton.setItemMeta(meta);
 
         inventory.setItem(40, sellButton);

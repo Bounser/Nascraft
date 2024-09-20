@@ -64,7 +64,7 @@ public class DiscordLog {
                 .replace("[ACTION]", action)
                 .replace("[QUANTITY]", String.valueOf(trade.getAmount()))
                 .replace("[ALIAS]", trade.getItem().getName())
-                .replace("[WORTH]", Formatter.format(trade.getValue(), Style.ROUND_BASIC));
+                .replace("[WORTH]", Formatter.format(trade.getItem().getCurrency(), trade.getValue(), Style.ROUND_BASIC));
 
         if (userId != null) {
             CompletableFuture<String> futureMessage = new CompletableFuture<>();

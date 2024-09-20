@@ -4,7 +4,8 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
-import me.bounser.nascraft.formatter.RoundUtils;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
+import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.Item;
@@ -22,6 +23,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.text.Format;
 import java.util.*;
 
 
@@ -38,7 +40,7 @@ public class SellInvListener implements Listener {
 
         event.setCancelled(true);
 
-        if (event.getClickedInventory().getType() == InventoryType.PLAYER) {
+        if (event.getClickedInventory() != null && event.getClickedInventory().getType() == InventoryType.PLAYER) {
 
             ItemStack itemClicked = event.getCurrentItem();
 
@@ -98,17 +100,38 @@ public class SellInvListener implements Listener {
 
                     float realValue = 0;
 
+                    HashMap<Currency, Float> result = new HashMap<>();
+
                     for (ItemStack itemStack : playerItems.get(player)) {
 
                         Item item = MarketManager.getInstance().getItem(itemStack);
 
-                        realValue += item.sell(itemStack.getAmount(), player.getUniqueId(), false);
+                        float value = item.sell(itemStack.getAmount(), player.getUniqueId(), false);
+
+                        if (result.containsKey(item.getCurrency())) {
+                            float tempValue = result.get(item.getCurrency());
+                            tempValue += value;
+                            result.put(item.getCurrency(), tempValue);
+                        } else {
+                            result.put(item.getCurrency(), value);
+                        }
+
                     }
 
                     playerItems.remove(player);
                     renderInv(event.getClickedInventory(), player);
 
-                    Lang.get().message(player, Message.SELL_ACTION_MESSAGE, Formatter.format(realValue, Style.ROUND_BASIC), "", "");
+                    String report = "";
+
+                    int i = 0;
+
+                    for (Currency currency : CurrenciesManager.getInstance().getCurrencies()) {
+                        i++;
+                        report += Formatter.format(currency, result.get(currency), Style.ROUND_BASIC) + (i == result.size() ? "" : ",");
+
+                    }
+
+                    Lang.get().message(player, Message.SELL_ACTION_MESSAGE, report, "", "");
                     
                     break;
 
@@ -230,8 +253,17 @@ public class SellInvListener implements Listener {
 
         ItemMeta meta = sellButton.getItemMeta();
 
+        String result = "";
+
+        HashMap<Currency, Float> invResult = getSellInventoryValue(player);
+
+        for (Currency currency : invResult.keySet()) {
+            if (invResult.get(currency) > 0)
+                result += Formatter.format(currency, invResult.get(currency), Style.ROUND_BASIC) + "\n";
+        }
+
         List<String> lore = new ArrayList<>();
-        for (String line : Lang.get().message(Message.SELL_BUTTON_LORE, Formatter.format(getSellInventoryValue(player), Style.ROUND_BASIC), "", "").split("\\n")) {
+        for (String line : Lang.get().message(Message.SELL_BUTTON_LORE, "[WORTH-LIST]", result).split("\\n")) {
             Component loreLine = MiniMessage.miniMessage().deserialize(line);
             lore.add(BukkitComponentSerializer.legacy().serialize(loreLine));
         }
@@ -243,9 +275,14 @@ public class SellInvListener implements Listener {
         inventory.setItem(40, sellButton);
     }
 
-    public float getSellInventoryValue(Player player) {
+    public HashMap<Currency, Float> getSellInventoryValue(Player player) {
 
-        if (playerItems.get(player) == null) return 0;
+        HashMap<Currency, Float> valuePerCurrency = new HashMap<>();
+
+        for (Currency currency : CurrenciesManager.getInstance().getCurrencies())
+            valuePerCurrency.put(currency, 0f);
+
+        if (playerItems.get(player) == null) return valuePerCurrency;
 
         HashMap<Item, Integer> content = new HashMap<>();
 
@@ -256,11 +293,12 @@ public class SellInvListener implements Listener {
             content.compute(item, (key, value) -> (value == null) ? itemStack.getAmount() : value + itemStack.getAmount());
         }
 
-        float totalValue = 0;
+        for (Item item : content.keySet()) {
+            Float internalValue = valuePerCurrency.get(item.getCurrency());
+            internalValue += item.sellPrice(content.get(item));
+            valuePerCurrency.put(item.getCurrency(), internalValue);
+        }
 
-        for (Item item : content.keySet())
-            totalValue += item.sellPrice(content.get(item));
-
-        return  RoundUtils.round(totalValue);
+        return valuePerCurrency;
     }
 }

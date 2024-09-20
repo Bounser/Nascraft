@@ -1,11 +1,13 @@
 package me.bounser.nascraft.commands.sell;
 
+import com.sun.tools.javac.jvm.Items;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.commands.Command;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.Item;
@@ -14,6 +16,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -102,7 +105,7 @@ public class SellAllCommand extends Command {
                     return;
                 }
 
-                String formattedValue =  Formatter.format(item.getPrice().getProjectedCost(items.get(item)*item.getMultiplier(), item.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC);
+                String formattedValue =  Formatter.format(item.getCurrency(), item.getPrice().getProjectedCost(items.get(item)*item.getMultiplier(), item.getPrice().getSellTaxMultiplier()), Style.ROUND_BASIC);
 
                 TextComponent component = (TextComponent) MiniMessage.miniMessage().deserialize(
                         Lang.get().message(Message.CLICK_TO_CONFIRM)
@@ -181,10 +184,46 @@ public class SellAllCommand extends Command {
 
             String text = "";
 
+            List<String> currencies = new ArrayList<>();
+
+            for (Item item : content.keySet()) {
+                if (!currencies.contains(item.getCurrency().getCurrencyIdentifier())) currencies.add(item.getCurrency().getCurrencyIdentifier());
+            }
+
+            HashMap<String, List<Item>> itemsPerCurrency = new HashMap<>();
+
+            for (Item item : content.keySet())  {
+
+                String currencyIdentifier = item.getCurrency().getCurrencyIdentifier();
+
+                if (itemsPerCurrency.containsKey(currencyIdentifier)) {
+                    List<Item> itemsOfCertainCurrency = itemsPerCurrency.get(currencyIdentifier);
+                    itemsOfCertainCurrency.add(item);
+                    itemsPerCurrency.put(currencyIdentifier, itemsOfCertainCurrency);
+                } else {
+                    List<Item> list = new ArrayList<>();
+                    list.add(item);
+                    itemsPerCurrency.put(currencyIdentifier, list);
+                }
+            }
+
+            HashMap<String, Float> totalValuePerCurrency = new HashMap<>();
+
+            for (String string : itemsPerCurrency.keySet()) {
+
+                float value = 0;
+
+                for (Item item : itemsPerCurrency.get(string)) {
+                    value += item.getPrice().getProjectedCost(content.get(item) * item.getMultiplier(), item.getPrice().getSellTaxMultiplier());
+                }
+
+                totalValuePerCurrency.put(string, value);
+            }
+
             for (Item item : content.keySet()) {
                 float value = item.getPrice().getProjectedCost(content.get(item) * item.getMultiplier(), item.getPrice().getSellTaxMultiplier());
                 totalValue += value;
-                text = text + Lang.get().message(Message.LIST_SEGMENT, Formatter.format(value, Style.ROUND_BASIC), String.valueOf(content.get(item)), item.getName());
+                text = text + Lang.get().message(Message.LIST_SEGMENT, Formatter.format(item.getCurrency(), value, Style.ROUND_BASIC), String.valueOf(content.get(item)), item.getName());
             }
 
             text = text + "\n";
@@ -193,10 +232,15 @@ public class SellAllCommand extends Command {
                     Lang.get().message(Message.CLICK_TO_CONFIRM)
             );
 
-            Component hoverText = MiniMessage.miniMessage().deserialize(
-                    Lang.get().message(Message.SELLALL_ESTIMATED_VALUE, Formatter.format(totalValue, Style.ROUND_BASIC), "0", "0") +
-                            text
-            );
+            String perCurrencyText = "";
+
+            for (String currency : totalValuePerCurrency.keySet()) {
+                perCurrencyText += Formatter.format(CurrenciesManager.getInstance().getCurrency(currency), totalValuePerCurrency.get(currency), Style.ROUND_BASIC) + "\n";
+            }
+
+            String finalText = Lang.get().message(Message.SELLALL_ESTIMATED_VALUE).replace("[WORTH]", perCurrencyText) + text;
+
+            Component hoverText = MiniMessage.miniMessage().deserialize(finalText);
 
             component = component.hoverEvent(HoverEvent.showText(hoverText))
                     .clickEvent(ClickEvent.runCommand("/nsellall everything confirm"));

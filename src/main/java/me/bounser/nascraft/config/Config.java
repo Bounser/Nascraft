@@ -3,7 +3,10 @@ package me.bounser.nascraft.config;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.DatabaseType;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
+import me.bounser.nascraft.managers.currencies.CurrencyType;
 import me.bounser.nascraft.sellwand.Wand;
+import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.MarketManager;
@@ -142,6 +145,56 @@ public class Config {
 
     public String getSelectedLanguage() {
         return config.getString("language");
+    }
+
+    public List<Currency> getCurrencies() {
+
+        List<Currency> currencies = new ArrayList<>();
+
+        for (String supplier : config.getConfigurationSection("currencies.suppliers").getKeys(false)) {
+
+            if (supplier.equals("vault")) {
+                currencies.add(
+                        new Currency(
+                                "vault",
+                                CurrencyType.VAULT,
+                                null,
+                                null,
+                                config.getString("currencies.suppliers.vault.not-enough"),
+                                config.getString("currencies.suppliers.vault.format"),
+                                null,
+                                config.getInt("currencies.suppliers.vault.decimal-positions"),
+                                (float) config.getDouble("currencies.suppliers.vault.top-limit"),
+                                (float) config.getDouble("currencies.suppliers.vault.low-limit")));
+            } else {
+                currencies.add(
+                        new Currency(
+                                supplier,
+                                CurrencyType.CUSTOM,
+                                config.getString("currencies.suppliers." + supplier + ".deposit-cmd"),
+                                config.getString("currencies.suppliers." + supplier + ".withdraw-cmd"),
+                                config.getString("currencies.suppliers." + supplier + ".not-enough"),
+                                config.getString("currencies.suppliers." + supplier + ".format"),
+                                config.getString("currencies.suppliers." + supplier + ".balance-placeholder"),
+                                config.getInt("currencies.suppliers." + supplier + ".decimal-positions"),
+                                (float) config.getDouble("currencies.suppliers." + supplier + ".top-limit"),
+                                (float) config.getDouble("currencies.suppliers." + supplier + ".low-limit")));
+            }
+        }
+
+        return currencies;
+    }
+
+    public String getDefaultCurrencyIdentifier() {
+        return config.getString("currencies.default-currency");
+    }
+
+    public String getCurrency(String identifier) {
+
+        if (items.contains("items." + identifier + ".currency")) {
+            return items.getString("items." + identifier + ".currency");
+        }
+        return config.getString("currencies.default-currency");
     }
 
     public float[] getLimits() {
@@ -313,6 +366,16 @@ public class Config {
                 }
             }
 
+            List<Currency> currencies = new ArrayList<>();
+
+            if (config.contains("sell-wands.wands." + name + ".currencies")) {
+                for (String currencyIdentifier : config.getStringList("sell-wands.wands." + name + ".currencies")) {
+                    currencies.add(CurrenciesManager.getInstance().getCurrency(currencyIdentifier.toLowerCase()));
+                }
+            } else {
+                currencies.addAll(CurrenciesManager.getInstance().getCurrencies());
+            }
+
             wands.add(new Wand(name,
                     Material.getMaterial(config.getString("sell-wands.wands." + name + ".material").toUpperCase()),
                     config.getString("sell-wands.wands." + name + ".display-name"),
@@ -324,15 +387,12 @@ public class Config {
                     enchanted,
                     permission,
                     sell,
-                    estimate
+                    estimate,
+                    currencies
             ));
         }
 
         return wands;
-    }
-
-    public int getPlaceholderPrecission() {
-        return config.getInt("placeholders.decimal-precision");
     }
 
     public boolean getDiscordEnabled() {
@@ -506,7 +566,7 @@ public class Config {
                 alias = (Character.toUpperCase(alias.charAt(0)) + alias.substring(1)).replace("_", " ");
             }
 
-            childs.add(new Item(parent, multiplier, itemStack, childIdentifier, alias));
+            childs.add(new Item(parent, multiplier, itemStack, childIdentifier, alias, parent.getCurrency()));
         }
 
         return childs;

@@ -6,6 +6,7 @@ import me.bounser.nascraft.managers.ImagesManager;
 import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.managers.GraphManager;
 import me.bounser.nascraft.managers.TasksManager;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
@@ -340,6 +341,8 @@ public class MarketManager {
         int numOfItems = 0;
 
         for (Item item : getAllParentItems()) {
+            if (item.getCategory().equals(CurrenciesManager.getInstance().getDefaultCurrency())) continue;
+
             if (Config.getInstance().includeInCPI(item)) {
                 index += item.getPrice().getValue()/item.getPrice().getInitialValue();
                 numOfItems++;

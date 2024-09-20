@@ -2,7 +2,6 @@ name: Nascraft
 version: '${project.version}'
 main: me.bounser.nascraft.Nascraft
 api-version: 1.13
-depend: [ Vault ]
-softdepend: [ PlaceholderAPI, AdvancedGUI, DiscordSRV ]
+softdepend: [ Vault, PlaceholderAPI, AdvancedGUI, DiscordSRV ]
 authors: [ bounser ]
 description: Market valuations in minecraft

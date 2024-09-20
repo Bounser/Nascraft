@@ -103,7 +103,7 @@ public class DiscordBot {
             TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
 
             if (textChannel == null) {
-                Nascraft.getInstance().getLogger().info("textChannel is null #1");
+                Nascraft.getInstance().getLogger().info("textChannel is null. Check that the ID of the discord menu channel is correct. In case it is correct, check whether the bot is in more than one discord server (It should be in just one)");
                 return;
             }
 
@@ -194,7 +194,7 @@ public class DiscordBot {
         }
 
         for (Item item : items)
-            builder.addOption(item.getName(), item.getIdentifier(), Formatter.format(item.getPrice().getValue(), Style.ROUND_BASIC) + " - " + Lang.get().message(Message.DISCORD_BUY) + ": " + Formatter.format(item.getPrice().getBuyPrice(), Style.ROUND_BASIC)+ " " + Lang.get().message(Message.DISCORD_SELL) + ": " + Formatter.format(item.getPrice().getSellPrice(), Style.ROUND_BASIC));
+            builder.addOption(item.getName(), item.getIdentifier(), Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC) + " - " + Lang.get().message(Message.DISCORD_BUY) + ": " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getBuyPrice(), Style.ROUND_BASIC)+ " " + Lang.get().message(Message.DISCORD_SELL) + ": " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getSellPrice(), Style.ROUND_BASIC));
 
         return builder.build();
     }
@@ -207,7 +207,7 @@ public class DiscordBot {
             jda.awaitReady().getGuilds().forEach(guild -> {
                 TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
                 if (textChannel == null) {
-                    Nascraft.getInstance().getLogger().info("textChannel is null #2");
+                    Nascraft.getInstance().getLogger().info("textChannel is null #1");
                     return;
                 }
 
@@ -228,11 +228,10 @@ public class DiscordBot {
         jda.getGuilds().forEach(guild -> {
             TextChannel textChannel = guild.getTextChannelById(Config.getInstance().getChannel());
             if (textChannel == null) {
-                Nascraft.getInstance().getLogger().info("textChannel is null #3"); return;
+                Nascraft.getInstance().getLogger().info("textChannel is null #2"); return;
             }
             textChannel.sendMessage(Lang.get().message(Message.DISCORD_MARKET_PAUSED)).queue();
         });
-
     }
 
     public void sendBasicScreen(Item item, User user, ModalInteractionEvent mEvent, StringSelectInteractionEvent sEvent, SlashCommandInteractionEvent cEvent) {
@@ -252,16 +251,16 @@ public class DiscordBot {
         List<ItemComponent> componentList = new ArrayList<>();
 
         if (LinkManager.getInstance().getUUID(user.getId()) == null) {
-            componentList.add(Button.success("b01" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 1 x " + Formatter.format(item.getPrice().getBuyPrice(), Style.REDUCED_LENGTH)).asDisabled());
-            componentList.add(Button.success("b32" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(-32, discordBuyTax), Style.REDUCED_LENGTH)).asDisabled());
-            componentList.add(Button.danger("s32" + item.getIdentifier(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(32, discordSellTax), Style.REDUCED_LENGTH)).asDisabled());
-            componentList.add(Button.danger("s01" + item.getIdentifier(), lang.message(Message.DISCORD_SELL) + " 1 x " + Formatter.format(item.getPrice().getSellPrice(), Style.REDUCED_LENGTH)).asDisabled());
+            componentList.add(Button.success("b01" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 1 x " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getBuyPrice(), Style.REDUCED_LENGTH)).asDisabled());
+            componentList.add(Button.success("b32" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getProjectedCost(-32, discordBuyTax), Style.REDUCED_LENGTH)).asDisabled());
+            componentList.add(Button.danger("s32" + item.getIdentifier(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getProjectedCost(32, discordSellTax), Style.REDUCED_LENGTH)).asDisabled());
+            componentList.add(Button.danger("s01" + item.getIdentifier(), lang.message(Message.DISCORD_SELL) + " 1 x " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getSellPrice(), Style.REDUCED_LENGTH)).asDisabled());
             componentList.add(Button.secondary("info" + item.getIdentifier(), Lang.get().message(Message.DISCORD_NOT_LINKED_SHORT)).withEmoji(Emoji.fromFormatted("U+1F517")));
         } else {
-            componentList.add(Button.success("b01" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 1 x " + Formatter.format(item.getPrice().getBuyPrice(), Style.REDUCED_LENGTH)));
-            componentList.add(Button.success("b32" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(-32, discordBuyTax), Style.REDUCED_LENGTH)));
-            componentList.add(Button.danger("s32" + item.getIdentifier(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.format(item.getPrice().getProjectedCost(32, discordSellTax), Style.REDUCED_LENGTH)));
-            componentList.add(Button.danger("s01" + item.getIdentifier(), lang.message(Message.DISCORD_SELL) + " 1 x " + Formatter.format(item.getPrice().getSellPrice(), Style.REDUCED_LENGTH)));
+            componentList.add(Button.success("b01" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 1 x " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getBuyPrice(), Style.REDUCED_LENGTH)));
+            componentList.add(Button.success("b32" + item.getIdentifier(), lang.message(Message.DISCORD_BUY) + " 32 x " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getProjectedCost(-32, discordBuyTax), Style.REDUCED_LENGTH)));
+            componentList.add(Button.danger("s32" + item.getIdentifier(), lang.message(Message.DISCORD_SELL) + " 32 x " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getProjectedCost(32, discordSellTax), Style.REDUCED_LENGTH)));
+            componentList.add(Button.danger("s01" + item.getIdentifier(), lang.message(Message.DISCORD_SELL) + " 1 x " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getSellPrice(), Style.REDUCED_LENGTH)));
         }
 
         EmbedBuilder embedBuilder = new EmbedBuilder();

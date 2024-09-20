@@ -15,7 +15,6 @@ import me.bounser.nascraft.market.unit.stats.Instant;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.annotations.XYPointerAnnotation;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.labels.StandardXYToolTipGenerator;
@@ -29,7 +28,6 @@ import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.ui.TextAnchor;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -156,6 +154,10 @@ public class ItemChart {
 
         boolean hasBuyData = false;
         boolean hasSellData = false;
+
+        List<Trade> trades = DatabaseManager.get().getDatabase().retrieveTrades(LinkManager.getInstance().getUUID(userid), item, 0, 999);
+
+        if (trades == null) return;
 
         for (Trade trade : DatabaseManager.get().getDatabase().retrieveTrades(LinkManager.getInstance().getUUID(userid), item, 0, 999)) {
 

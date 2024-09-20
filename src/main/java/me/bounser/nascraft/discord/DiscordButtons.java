@@ -21,6 +21,7 @@ import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.managers.ImagesManager;
 import me.bounser.nascraft.managers.MoneyManager;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -87,7 +88,7 @@ public class DiscordButtons extends ListenerAdapter {
                 for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet()) {
                     alertsMessage = alertsMessage + Lang.get().message(Message.DISCORD_ALERT_SEGMENT)
                             .replace("[MATERIAL]", item.getName())
-                            .replace("[PRICE]", Formatter.format(Math.abs(alerts.get(item)), Style.ROUND_BASIC)) + "\n";
+                            .replace("[PRICE]", Formatter.plainFormat(item.getCurrency(), Math.abs(alerts.get(item)), Style.ROUND_BASIC)) + "\n";
                 }
 
                 event.reply(alertsMessage)
@@ -134,7 +135,7 @@ public class DiscordButtons extends ListenerAdapter {
                 for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
                     builder.addOption(item.getName(), "alert-" + item.getIdentifier(),
                             Lang.get().message(Message.DISCORD_ALERT_AT_PRICE)
-                                    .replace("[PRICE]", Formatter.format(Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC)));
+                                    .replace("[PRICE]", Formatter.plainFormat(item.getCurrency(), Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC)));
 
                 event.reply(Lang.get().message(Message.DISCORD_ALERT_REMOVE_SELECT))
                         .setEphemeral(true)
@@ -427,7 +428,8 @@ public class DiscordButtons extends ListenerAdapter {
                 }
 
                 DiscordInventories.getInstance().getInventory(uuid).sellAll(
-                        value -> event.reply( Lang.get().message(Message.DISCORD_SOLD_EVERYTHING, "[VALUE]", Formatter.format(value, Style.ROUND_BASIC)))
+                        value -> event.reply( Lang.get().message(Message.DISCORD_SOLD_EVERYTHING, "[VALUE]", Formatter.plainFormat
+                                        (CurrenciesManager.getInstance().getVaultCurrency(), value, Style.ROUND_BASIC)))
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(25, TimeUnit.SECONDS))
                 );
@@ -442,9 +444,9 @@ public class DiscordButtons extends ListenerAdapter {
                 double total = purse + inventory + brokerValue;
 
                 String report = Lang.get().message(Message.DISCORD_BALANCE_REPORT)
-                        .replace("[PURSE]", Formatter.formatDouble(purse))
-                        .replace("[INVENTORY-VALUE]", Formatter.format(inventory, Style.ROUND_BASIC))
-                        .replace("[TOTAL]", Formatter.formatDouble(total));
+                        .replace("[PURSE]", Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), (float) purse, Style.ROUND_BASIC))
+                        .replace("[INVENTORY-VALUE]", Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), inventory, Style.ROUND_BASIC))
+                        .replace("[TOTAL]", Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), (float) total, Style.ROUND_BASIC));
 
                 /*
                 String text =
@@ -500,9 +502,9 @@ public class DiscordButtons extends ListenerAdapter {
 
                     if (trade.getItem() != null) {
                         if (trade.isBuy())
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **" + Lang.get().message(Message.DISCORD_BUY) + " " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **-" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :inbox_tray: **" + Lang.get().message(Message.DISCORD_BUY) + " " + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **-" + Formatter.plainFormat(trade.getItem().getCurrency(), trade.getValue(), Style.ROUND_BASIC) + "**";
                         else
-                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **" + Lang.get().message(Message.DISCORD_SELL) + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **+" + Formatter.format(trade.getValue(), Style.ROUND_BASIC) + "**";
+                            history = history + "\n> ``" + getFormatedDate(trade.getDate()) + "`` :outbox_tray: **" + Lang.get().message(Message.DISCORD_SELL) + trade.getAmount() + "** x **" + trade.getItem().getName() + "** :arrow_right: **+" + Formatter.plainFormat(trade.getItem().getCurrency(), trade.getValue(), Style.ROUND_BASIC) + "**";
 
                         if (trade.throughDiscord()) {
                             history = history + " (Discord)";
@@ -581,7 +583,6 @@ public class DiscordButtons extends ListenerAdapter {
         float value;
 
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-        double balance = Nascraft.getEconomy().getBalance(player);
 
         DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(uuid);
 
@@ -591,11 +592,11 @@ public class DiscordButtons extends ListenerAdapter {
 
                 value = item.getPrice().getProjectedCost(-quantity, DiscordBot.getInstance().getDiscordBuyTax());
 
-                if (balance < value) {
+                if (!MoneyManager.getInstance().hasEnoughMoney(player, item.getCurrency(), value)) {
 
                     event.reply(lang.message(Message.DISCORD_INSUFFICIENT_BALANCE)
-                                    .replace("[VALUE1]", Formatter.format((float) balance, Style.ROUND_BASIC))
-                                    .replace("[VALUE2]", Formatter.format(value, Style.ROUND_BASIC)))
+                                    .replace("[VALUE1]", Formatter.plainFormat(item.getCurrency(), MoneyManager.getInstance().getBalance(player, item.getCurrency()), Style.ROUND_BASIC))
+                                    .replace("[VALUE2]", Formatter.plainFormat(item.getCurrency(), value, Style.ROUND_BASIC)))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
 
@@ -611,22 +612,22 @@ public class DiscordButtons extends ListenerAdapter {
                     return;
                 }
 
-                MoneyManager.getInstance().withdraw(player, value, Config.getInstance().getDiscordBuyTax());
+                MoneyManager.getInstance().withdraw(player, item.getCurrency(), value, Config.getInstance().getDiscordBuyTax());
 
                 String buyText;
                 if (quantity == 1) {
                     buyText = Lang.get().message(Message.DISCORD_BUY_FEEDBACK)
                             .replace("[QUANTITY]", String.valueOf(quantity))
                             .replace("[ALIAS]", item.getName())
-                            .replace("[WORTH]", Formatter.format(value, Style.ROUND_BASIC))
-                            .replace("[BALANCE]", Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC));
+                            .replace("[WORTH]", Formatter.plainFormat(item.getCurrency(), value, Style.ROUND_BASIC))
+                            .replace("[BALANCE]", Formatter.plainFormat(item.getCurrency(), MoneyManager.getInstance().getBalance(player, item.getCurrency()), Style.ROUND_BASIC));
                 } else {
                     buyText = Lang.get().message(Message.DISCORD_BUY_FEEDBACK)
                             .replace("[QUANTITY]", String.valueOf(quantity))
                             .replace("[ALIAS]", item.getName())
-                            .replace("[WORTH]", Formatter.format(value, Style.ROUND_BASIC))
-                            .replace("[BALANCE]", Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC))
-                            .replace("[WORTH-EACH]", Formatter.format(value/quantity, Style.ROUND_BASIC));
+                            .replace("[WORTH]", Formatter.plainFormat(item.getCurrency(), value, Style.ROUND_BASIC))
+                            .replace("[BALANCE]", Formatter.plainFormat(item.getCurrency(), MoneyManager.getInstance().getBalance(player, item.getCurrency()), Style.ROUND_BASIC))
+                            .replace("[WORTH-EACH]", Formatter.plainFormat(item.getCurrency(), value/quantity, Style.ROUND_BASIC));
                 }
 
                 Trade buyTrade = new Trade(item, LocalDateTime.now(), value, quantity, true, true, uuid);
@@ -655,22 +656,22 @@ public class DiscordButtons extends ListenerAdapter {
 
                 value = item.getPrice().getProjectedCost(quantity, DiscordBot.getInstance().getDiscordSellTax());
 
-                MoneyManager.getInstance().deposit(player, value, Config.getInstance().getDiscordSellTax());
+                MoneyManager.getInstance().deposit(player, item.getCurrency(), value, Config.getInstance().getDiscordSellTax());
 
                 String sellText;
                 if(quantity == 1) {
                     sellText = Lang.get().message(Message.DISCORD_SELL_FEEDBACK)
                             .replace("[QUANTITY]", String.valueOf(quantity))
                             .replace("[ALIAS]", item.getName())
-                            .replace("[WORTH]", Formatter.format(value, Style.ROUND_BASIC))
-                            .replace("[BALANCE]", Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC));
+                            .replace("[WORTH]", Formatter.plainFormat(item.getCurrency(), value, Style.ROUND_BASIC))
+                            .replace("[BALANCE]", Formatter.plainFormat(item.getCurrency(), (float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC));
                 } else {
                     sellText = Lang.get().message(Message.DISCORD_SELL_MORE_FEEDBACK)
                             .replace("[QUANTITY]", String.valueOf(quantity))
                             .replace("[ALIAS]", item.getName())
-                            .replace("[WORTH]", Formatter.format(value, Style.ROUND_BASIC))
-                            .replace("[BALANCE]", Formatter.format((float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC))
-                            .replace("[WORTH-EACH]", Formatter.format(value/quantity, Style.ROUND_BASIC));
+                            .replace("[WORTH]", Formatter.plainFormat(item.getCurrency(), value, Style.ROUND_BASIC))
+                            .replace("[BALANCE]", Formatter.plainFormat(item.getCurrency(), (float) Nascraft.getEconomy().getBalance(player), Style.ROUND_BASIC))
+                            .replace("[WORTH-EACH]", Formatter.plainFormat(item.getCurrency(), value/quantity, Style.ROUND_BASIC));
                 }
 
                 Trade sellTrade = new Trade(item, LocalDateTime.now(), value, quantity, false, true, uuid);
@@ -692,9 +693,9 @@ public class DiscordButtons extends ListenerAdapter {
 
                 float price = discordInventory.getNextSlotPrice();
 
-                if (balance < price) {
+                if (!MoneyManager.getInstance().hasEnoughMoney(player, CurrenciesManager.getInstance().getDefaultCurrency(), price)) {
 
-                    event.reply(Lang.get().message(Message.DISCORD_NOT_ENOUGH_SLOT, "[PRICE]", Formatter.format(price, Style.ROUND_BASIC)))
+                    event.reply(Lang.get().message(Message.DISCORD_NOT_ENOUGH_SLOT, "[PRICE]", Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), price, Style.ROUND_BASIC)))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
                     return;
@@ -707,7 +708,7 @@ public class DiscordButtons extends ListenerAdapter {
                     return;
                 }
 
-                Nascraft.getEconomy().withdrawPlayer(player, price);
+                MoneyManager.getInstance().simpleWithdraw(player, CurrenciesManager.getInstance().getDefaultCurrency(), price);
 
                 discordInventory.increaseCapacity();
 
