@@ -44,6 +44,7 @@ public class EditItemMenu {
     private Item item;
     private Player player;
 
+    private Currency currency;
 
     public EditItemMenu(Player player, ItemStack itemStack) {
 
@@ -52,14 +53,13 @@ public class EditItemMenu {
         this.itemStack = itemStack.clone();
         this.itemStack.setAmount(1);
 
-        itemStack.setAmount(1);
-
         initialPrice = 1;
         alias = (Character.toUpperCase(itemStack.getType().toString().toLowerCase().charAt(0)) + itemStack.getType().toString().toLowerCase().substring(1)).replace("_", " ");
         elasticity = 1;
         noiseIntensity = 1;
         support = 0;
         resistance = 0;
+        currency = CurrenciesManager.getInstance().getDefaultCurrency();
 
         prevCategory = MarketManager.getInstance().getCategories().get(0);
         category = MarketManager.getInstance().getCategories().get(0);
@@ -72,17 +72,20 @@ public class EditItemMenu {
         this.player = player;
         this.item = item;
 
+        itemStack = item.getItemStack().clone();
         initialPrice = item.getPrice().getInitialValue();
         alias = item.getName();
         elasticity = item.getPrice().getElasticity();
         noiseIntensity = item.getPrice().getNoiseIntensity();
         support = item.getPrice().getSupport();
         resistance = item.getPrice().getResistance();
+        currency = item.getCurrency();
 
         prevCategory = item.getCategory();
         category = item.getCategory();
 
         open();
+
     }
 
     public void open() {
@@ -91,15 +94,48 @@ public class EditItemMenu {
 
         insertPanes(inventory);
         insertOptions(inventory);
-
-        if (item == null) insertItem(itemStack, inventory);
-        else insertItem(item.getItemStack().clone(), inventory);
-
+        insertItem(itemStack.clone(), inventory);
+        this.itemStack = itemStack.clone();
         player.openInventory(inventory);
-
     }
 
-    public void insertItem(ItemStack itemStack, Inventory inventory) { inventory.setItem(10, itemStack); }
+    public Currency getCurrency() {
+        return currency;
+    }
+
+    public float getInitialPrice() {
+        return initialPrice;
+    }
+
+    public float getSupport() {
+        return support;
+    }
+
+    public float getResistance() {
+        return resistance;
+    }
+
+    public void insertItem(ItemStack itemStack, Inventory inventory) {
+
+        ItemStack displayItemStack = itemStack.clone();
+
+        ItemMeta meta = displayItemStack.getItemMeta();
+
+        if (meta.hasLore()) {
+            List<String> lore = meta.getLore();
+
+            lore.add("");
+            lore.add(ChatColor.GREEN + "§lCLICK TO CHANGE");
+
+            meta.setLore(lore);
+        } else {
+            meta.setLore(Arrays.asList("", ChatColor.GREEN + "§lCLICK TO CHANGE"));
+        }
+
+        displayItemStack.setItemMeta(meta);
+
+        inventory.setItem(10, displayItemStack);
+    }
 
     public void insertPanes(Inventory inventory) {
 
@@ -145,12 +181,10 @@ public class EditItemMenu {
 
     public void insertOptions(Inventory inventory) {
 
-        Currency currency = item == null ? CurrenciesManager.getInstance().getDefaultCurrency() : item.getCurrency();
-
         Component priceComponent = MiniMessage.miniMessage().deserialize(Formatter.format(currency, initialPrice, Style.ROUND_BASIC));
 
         inventory.setItem(4,
-                getItemStackOfOption(Material.GOLD_NUGGET,
+                getItemStackOfOption(Material.GOLD_INGOT,
                         "Initial Price " + ChatColor.UNDERLINE + "(REQUIRED)",
                         Arrays.asList(ChatColor.GRAY + "Value: " + BukkitComponentSerializer.legacy().serialize(priceComponent),
                                 "",
@@ -172,6 +206,14 @@ public class EditItemMenu {
                                 "",
                                 ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO EDIT")
         ));
+
+        inventory.setItem(6,
+                getItemStackOfOption(Material.GOLD_NUGGET,
+                        "Currency",
+                        Arrays.asList(ChatColor.GRAY + "Currency: " + ChatColor.GREEN + currency.getCurrencyIdentifier(),
+                                "",
+                                ChatColor.GREEN + "" + ChatColor.BOLD + "CLICK TO SWITCH BETWEEN CURRENCIES")
+                ));
 
         inventory.setItem(13,
                 getItemStackOfOption(Material.SLIME_BALL,
@@ -241,7 +283,7 @@ public class EditItemMenu {
         ));
     }
 
-    public ItemStack getItemStackOfOption(Material material, String displayName, List<String> value) {
+    public static ItemStack getItemStackOfOption(Material material, String displayName, List<String> value) {
         ItemStack paper = new ItemStack(material);
         ItemMeta meta = paper.getItemMeta();
         meta.setLore(value);
@@ -250,6 +292,7 @@ public class EditItemMenu {
         return paper;
     }
 
+    public void setItemStack(ItemStack itemStack) { this.itemStack = itemStack; }
     public void setInitialPrice(float initialPrice) { this.initialPrice = initialPrice; }
     public void setAlias(String alias) { this.alias = alias; }
     public void setElasticity(float elasticity) { this.elasticity = elasticity; }
@@ -257,6 +300,7 @@ public class EditItemMenu {
     public void setSupport(float support) { this.support = support; }
     public void setResistance(float resistance) { this.resistance = resistance; }
     public void setCategory(Category category) { this.category = category; }
+    public void setCurrency(Currency currency) { this.currency = currency; }
 
     public void save() {
 
@@ -279,13 +323,20 @@ public class EditItemMenu {
         items.set("items." + identifier + ".initial-price", initialPrice);
         items.set("items." + identifier + ".elasticity", elasticity);
         items.set("items." + identifier + ".noise-intensity", noiseIntensity);
+
         if (support != 0)
             items.set("items." + identifier + ".support", support);
+
         if (resistance != 0)
             items.set("items." + identifier + ".resistance", resistance);
 
-        if (itemStack != null) {
+        if (itemStack != null && itemStack.getType() != Material.AIR) {
+            if (item != null) item.setItemStack(itemStack);
             items.set("items." + identifier + ".item-stack", itemStack);
+        }
+
+        if (!currency.equals(CurrenciesManager.getInstance().getDefaultCurrency())) {
+            items.set("items." + identifier + ".currency", currency.getCurrencyIdentifier());
         }
 
         FileConfiguration categories = Config.getInstance().getCategoriesFileConfiguration();
@@ -307,6 +358,7 @@ public class EditItemMenu {
 
         if (item != null) {
             item.setCategory(category);
+            item.setCurrency(currency);
             item.changeProperties(
                     initialPrice,
                     alias,
@@ -324,6 +376,7 @@ public class EditItemMenu {
             player.sendMessage(ChatColor.LIGHT_PURPLE + "Property changes saved!");
         } else {
             Item item = new Item(itemStack, identifier, alias, category, ImagesManager.getInstance().getImage(identifier));
+            item.setCurrency(currency);
             category.addItem(item);
             MarketManager.getInstance().addItem(item);
             player.sendMessage(ChatColor.LIGHT_PURPLE + "New item saved!");

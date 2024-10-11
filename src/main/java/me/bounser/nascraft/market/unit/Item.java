@@ -46,7 +46,7 @@ public class Item {
     private Category category;
 
     private final Price price;
-    private final Currency currency;
+    private Currency currency;
 
     private int operations;
 
@@ -379,6 +379,7 @@ public class Item {
 
     public Currency getCurrency() { return currency; }
 
+    public void setCurrency(Currency currency) { this.currency = currency; }
 
     public int getOperations() { return operations; }
 

@@ -2,10 +2,13 @@ package me.bounser.nascraft.commands.admin.marketeditor.edit.item;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorManager;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
+import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.Category;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,6 +18,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public class EditItemMenuListener implements Listener {
@@ -39,6 +43,23 @@ public class EditItemMenuListener implements Listener {
 
             case 9:
                 EditorManager.getInstance().getEditItemMenuFromPlayer(player).save();
+                break;
+
+            case 10:
+
+                ItemStack newItem = event.getCursor();
+
+                assert newItem != null;
+                if (newItem.getType() == Material.AIR || newItem.getAmount() == 0) {
+                    player.sendMessage(ChatColor.RED + "Invalid item!");
+                    return;
+                }
+
+                newItem.setAmount(1);
+
+                EditorManager.getInstance().getEditItemMenuFromPlayer(player).setItemStack(newItem);
+                EditorManager.getInstance().getEditItemMenuFromPlayer(player).open();
+
                 break;
 
             case 17:
@@ -81,6 +102,20 @@ public class EditItemMenuListener implements Listener {
                         .title("Item Alias")
                         .plugin(Nascraft.getInstance())
                         .open(player);
+                break;
+
+            case 6:
+
+                List<Currency> currencies = CurrenciesManager.getInstance().getCurrencies();
+
+                int index = currencies.indexOf(EditorManager.getInstance().getEditItemMenuFromPlayer(player).getCurrency());
+
+                Currency currency = currencies.get((index + 1 == (currencies.size())) ? 0 : index + 1);
+
+                EditorManager.getInstance().getEditItemMenuFromPlayer(player).setCurrency(currency);
+
+                EditorManager.getInstance().getEditItemMenuFromPlayer(player).insertOptions(event.getInventory());
+
                 break;
 
             case 13:
