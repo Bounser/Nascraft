@@ -30,6 +30,8 @@ public class Lang {
         saveResourceIfNotExists("langs/en_US.yml");
         saveResourceIfNotExists("langs/es_ES.yml");
         saveResourceIfNotExists("langs/it_IT.yml");
+        saveResourceIfNotExists("langs/de_DE.yml");
+        saveResourceIfNotExists("langs/pt_BR.yml");
 
         File language = new File(Nascraft.getInstance().getDataFolder().getPath() + "/langs/" + Config.getInstance().getSelectedLanguage() + ".yml");
 

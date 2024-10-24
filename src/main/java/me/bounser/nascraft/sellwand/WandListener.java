@@ -253,6 +253,7 @@ public class WandListener implements Listener {
                         if (totalWorth.get(currency) == 0) continue;
                         Lang.get().message(event.getPlayer(), Message.SELLWAND_SOLD_WITH_MULTIPLIER_SEGMENT, "[INITIAL-WORTH]", Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), totalWorth.get(currency), Style.ROUND_BASIC), "[MULTIPLIER]", String.valueOf(wand.getMultiplier()), "[WORTH]", Formatter.format(CurrenciesManager.getInstance().getVaultCurrency(), totalWorth.get(currency) * wand.getMultiplier(), Style.ROUND_BASIC));
                     }
+
                 } else {
 
                     String result = "";

@@ -1,16 +1,14 @@
 package me.bounser.nascraft.formatter;
 
 import me.bounser.nascraft.managers.currencies.Currency;
-import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.text.DecimalFormat;
 
 public class Formatter {
 
-    private static Separator separator;
+    private static Separator separator = Separator.POINT;
 
     public static String format(Currency currency, float number, Style style) {
 
@@ -56,16 +54,9 @@ public class Formatter {
         assert formattedText != null;
         String result = currency.getFormat().replace("[AMOUNT]", formattedText);
 
-        switch (separator) {
+        if (separator == null || separator == Separator.POINT) return result;
 
-            case COMMA:
-                return result.replace(".", "a").replace(",", ".").replace("a", ",");
-
-            case POINT:
-                return result;
-
-        }
-        return formattedText;
+        return result.replace(".", "_").replace(",", ".").replace("_", ",");
     }
 
     public static String plainFormat(Currency currency, float number, Style style) {
@@ -123,16 +114,10 @@ public class Formatter {
         assert formattedText != null;
         String result = currency.getPlainFormat().replace("[AMOUNT]", formattedText);
 
-        switch (separator) {
+        if (separator == null || separator == Separator.POINT) return result;
 
-            case COMMA:
-                return result.replace(".", "a").replace(",", ".").replace("a", ",");
+        return result.replace(".", "_").replace(",", ".").replace("_", ",");
 
-            case POINT:
-                return result;
-
-        }
-        return formattedText;
     }
 
     public static String formatDouble(double number, Currency currency) {
@@ -143,7 +128,7 @@ public class Formatter {
         switch (separator) {
 
             case COMMA:
-                return formattedText.replace(".", "a").replace(",", ".").replace("a", ",");
+                return formattedText.replace(".", "_").replace(",", ".").replace("_", ",");
 
             default:
             case POINT: return formattedText;

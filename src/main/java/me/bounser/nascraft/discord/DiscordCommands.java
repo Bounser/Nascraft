@@ -82,7 +82,7 @@ public class DiscordCommands extends ListenerAdapter {
                 for (Item item : DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).keySet())
                     alerts = alerts + "\n" + Lang.get().message(Message.DISCORD_ALERT_SEGMENT)
                             .replace("[MATERIAL]", item.getName())
-                            .replace("[PRICE1]", Formatter.format(item.getCurrency(), Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC))
+                            .replace("[PRICE1]", Formatter.plainFormat(item.getCurrency(), Math.abs(DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).get(item)), Style.ROUND_BASIC))
                             .replace("[PRICE2]", String.valueOf(item.getPrice().getValue()));
 
                 event.reply(alerts)
@@ -178,9 +178,9 @@ public class DiscordCommands extends ListenerAdapter {
                     double total = purse + inventory + brokerValue;
 
                     String report = Lang.get().message(Message.DISCORD_BALANCE_REPORT)
-                            .replace("[PURSE]", Formatter.formatDouble(purse, CurrenciesManager.getInstance().getVaultCurrency()))
-                            .replace("[INVENTORY-VALUE]", Formatter.format(CurrenciesManager.getInstance().getVaultCurrency(), inventory, Style.ROUND_BASIC))
-                            .replace("[TOTAL]", Formatter.formatDouble(total, CurrenciesManager.getInstance().getVaultCurrency()));
+                            .replace("[PURSE]", Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), (float) purse, Style.ROUND_BASIC))
+                            .replace("[INVENTORY-VALUE]", Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), inventory, Style.ROUND_BASIC))
+                            .replace("[TOTAL]", Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), (float) total, Style.ROUND_BASIC));
 
                     EmbedBuilder eb = new EmbedBuilder();
 
@@ -348,11 +348,11 @@ public class DiscordCommands extends ListenerAdapter {
                                         double total = purse + inventory + brokerValue;
 
                                         String text =
-                                                "\n> :green_circle: :dollar: **Purse** (Minecraft): ``" + Formatter.formatDouble(purse, CurrenciesManager.getInstance().getVaultCurrency()) +
-                                                        "``\n> :yellow_circle: :school_satchel: **Discord Inventory**: ``" + Formatter.format(CurrenciesManager.getInstance().getVaultCurrency(), inventory, Style.ROUND_BASIC) +
-                                                        "``\n> :red_circle: :man_office_worker: **Broker-Managed**: ``" + Formatter.format(CurrenciesManager.getInstance().getVaultCurrency(), brokerValue, Style.ROUND_BASIC) +
+                                                "\n> :green_circle: :dollar: **Purse** (Minecraft): ``" + Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), (float) purse, Style.ROUND_BASIC) +
+                                                        "``\n> :yellow_circle: :school_satchel: **Discord Inventory**: ``" + Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), inventory, Style.ROUND_BASIC) +
+                                                        "``\n> :red_circle: :man_office_worker: **Broker-Managed**: ``" + Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), brokerValue, Style.ROUND_BASIC) +
                                                         "``\n> \n" +
-                                                        ">  :abacus: **Total**: ``" + Formatter.formatDouble(total, CurrenciesManager.getInstance().getVaultCurrency()) + "``\n";
+                                                        ">  :abacus: **Total**: ``" + Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), (float) total, Style.ROUND_BASIC) + "``\n";
 
 
                                         EmbedBuilder eb = new EmbedBuilder();

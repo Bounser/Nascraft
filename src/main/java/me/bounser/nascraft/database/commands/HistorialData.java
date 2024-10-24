@@ -358,8 +358,7 @@ public class HistorialData {
                     }
                 }
 
-                prices.add(0, new Instant(LocalDateTime.now().minusDays(365), 0, 0));
-
+                prices.add(new Instant(LocalDateTime.now().minusDays(365), 0, 0));
                 prices.add(new Instant(LocalDateTime.now(), item.getPrice().getValue(), item.getVolume()));
             }
 

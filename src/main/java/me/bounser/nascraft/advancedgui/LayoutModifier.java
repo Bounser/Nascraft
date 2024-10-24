@@ -2,7 +2,6 @@ package me.bounser.nascraft.advancedgui;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.components.GraphComponent;
-import me.bounser.nascraft.advancedgui.components.SlideComponent;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
@@ -19,6 +18,7 @@ import me.leoko.advancedgui.utils.events.GuiInteractionExitEvent;
 import me.leoko.advancedgui.utils.events.LayoutLoadEvent;
 
 import me.leoko.advancedgui.utils.interactions.Interaction;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 
@@ -26,10 +26,10 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.random;
 
 public class LayoutModifier implements LayoutExtension {
 
-    private SlideComponent slideComponent = null;
     private GraphComponent graphComponent = null;
 
     private static LayoutModifier instance;
@@ -53,10 +53,6 @@ public class LayoutModifier implements LayoutExtension {
 
         //
 
-        ViewComponent backgroundView = tradeScreen.locate("BackgroundView", ViewComponent.class);
-
-        tradeScreen.getComponents().remove(backgroundView);
-
         if (graphComponent == null)
             graphComponent = new GraphComponent(
                     "Graph",
@@ -66,13 +62,13 @@ public class LayoutModifier implements LayoutExtension {
                     11,
                     54,
                     362,
-                    139,
-                    backgroundView);
+                    139);
 
         tradeScreen.locate("GraphDummy", DummyComponent.class).setComponent(graphComponent);
 
         //
 
+        /*
         GroupComponent slideComponents = tradeScreen.locate("SliderComponents", GroupComponent.class);
 
         tradeScreen.getComponents().remove(slideComponents);
@@ -100,6 +96,7 @@ public class LayoutModifier implements LayoutExtension {
         }
 
         tradeScreen.locate("SliderDummy", DummyComponent.class).setComponent(slideComponent);
+         */
 
         // Arrows
         componentTree.locate("ArrowUP").setClickAction((interaction, player, primaryTrigger) -> {
@@ -129,6 +126,7 @@ public class LayoutModifier implements LayoutExtension {
 
         // Back button
         componentTree.locate("back").setClickAction((interaction, player, primaryTrigger) -> {
+            interaction.getComponentTree().locate("1tprP7QZ").setHidden(false);
             interaction.getComponentTree().locate("MainView", ViewComponent.class).setView("I4ztUi1d");
             updateMainPage(interaction.getComponentTree(), true, player);
         });
@@ -293,6 +291,14 @@ public class LayoutModifier implements LayoutExtension {
                     updateButtonPrice(player, interaction);
                     updateChilds(player, interaction.getComponentTree());
 
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), new Runnable() {
+                        @Override
+                        public void run() {
+                            interaction.getComponentTree().locate("1tprP7QZ").setHidden(true);
+                            interaction.getComponentTree().locate("J4axQDKl", GifComponent.class).setFrame(0);
+                        }
+                    }, Math.round(25 + random()*60));
+
                 });
             }
             componentTree.locate("asdi" + position + j, ImageComponent.class).setHidden(!(j <= numberOfItems));
@@ -337,6 +343,14 @@ public class LayoutModifier implements LayoutExtension {
                 changeMaterial(player, finalTrendingItem, interaction);
                 updateButtonPrice(player, interaction);
                 updateChilds(player, interaction.getComponentTree());
+
+                Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), new Runnable() {
+                    @Override
+                    public void run() {
+                        interaction.getComponentTree().locate("1tprP7QZ").setHidden(true);
+                        interaction.getComponentTree().locate("J4axQDKl", GifComponent.class).setFrame(0);
+                    }
+                }, Math.round(25 + random()*60));
             });
         } else {
             icTree.locate("trend1", GroupComponent.class).setHidden(true);
@@ -375,6 +389,14 @@ public class LayoutModifier implements LayoutExtension {
                 changeMaterial(player, finalImax, interaction);
                 updateButtonPrice(player, interaction);
                 updateChilds(player, interaction.getComponentTree());
+
+                Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), new Runnable() {
+                    @Override
+                    public void run() {
+                        interaction.getComponentTree().locate("1tprP7QZ").setHidden(true);
+                        interaction.getComponentTree().locate("J4axQDKl", GifComponent.class).setFrame(0);
+                    }
+                }, Math.round(25 + random()*60));
             });
 
             float fvar = RoundUtils.roundToOne(-100 + 100*(imax.getPrice().getValue()/imax.getPrice().getValueAnHourAgo()));

@@ -1,6 +1,6 @@
 # Nascraft config.yml - ${project.version}
 
-# Language file to use. Available: en_US es_ES it_IT de_DE
+# Language file to use. Available: en_US es_ES it_IT de_DE pt_BR
 language: 'en_US'
 
 database:
@@ -250,9 +250,9 @@ sell-wands:
         - '<color:#85784d>for <color:#EFF551>150%</color> its value.</color>'
         - ' '
         - '<color:#85784d>Left to sell:</color> <b>[PROFIT-LEFT]</b>'
-      # With this wand you can sell a maximum of 1.000.000$ (Including the multiplier) worth of items.
       currencies:
         - 'vault'
+      # With this wand you can sell a maximum of 1.000.000$ (Including the multiplier) worth of items.
       max-profit: 1000000
       multiplier: 1.5
       permission: 'nascraft.wand.millonaire'

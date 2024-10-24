@@ -1,8 +1,6 @@
 # Nascraft es_ES - ${project.version}
 # by @Bounser
 
-# ¿Qué simbolo debería usarse junto a los precios?
-currency: "€"
 # El precio debe ir después (true -> 50€) o antes (false -> €50)
 after: true
 # Separador decimal. Disponibles: point (.), comma (,)

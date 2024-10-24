@@ -112,9 +112,13 @@ public class MainImage {
             graphics.setColor(new Color(250, 10, 10));
         }
 
-        graphics.drawPolyline(pd.getXPositions(295, offset[0] + 2, false) , pd.getYPositions(90, 30+ offset[1], false, false), pd.getNPoints(false));
-        graphics.drawPolyline(pd.getXPositions(295, offset[0] + 3, false) , pd.getYPositions(90, 30+ offset[1], false, false), pd.getNPoints(false));
-        graphics.drawPolyline(pd.getXPositions(295, offset[0] + 2, false) , pd.getYPositions(90, 31+ offset[1], false, false), pd.getNPoints(false));
+        try {
+            graphics.drawPolyline(pd.getXPositions(295, offset[0] + 2, false), pd.getYPositions(90, 30 + offset[1], false, false), pd.getNPoints(false));
+            graphics.drawPolyline(pd.getXPositions(295, offset[0] + 3, false), pd.getYPositions(90, 30 + offset[1], false, false), pd.getNPoints(false));
+            graphics.drawPolyline(pd.getXPositions(295, offset[0] + 2, false), pd.getYPositions(90, 31 + offset[1], false, false), pd.getNPoints(false));
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return;
+        }
 
         graphics.setColor(new Color(255, 255, 255));
 
@@ -157,6 +161,4 @@ public class MainImage {
 
         graphics.drawString(pd.getChange(), 15 - Math.round(pd.getChange().getBytes().length) + offset[0] + intraOffset, offset[1]+60);
     }
-
-
 }

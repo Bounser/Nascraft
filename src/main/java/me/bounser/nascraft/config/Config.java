@@ -335,7 +335,7 @@ public class Config {
 
             String permission = null;
             if (config.contains("sell-wands.wands." + name + ".permission")) {
-                cooldown = config.getInt("sell-wands.wands." + name + ".permission");
+                permission = config.getString("sell-wands.wands." + name + ".permission");
             }
 
             Action sell = Action.LEFT_CLICK_BLOCK;

@@ -398,7 +398,7 @@ public class DiscordButtons extends ListenerAdapter {
 
                     List<Button> actionRow = new ArrayList<>();
 
-                    actionRow.add(Button.success("i_buy", Lang.get().message(Message.DISCORD_BUY_SLOT) + discordInventory.getNextSlotPrice() + Lang.get().message(Message.CURRENCY)));
+                    actionRow.add(Button.success("i_buy", Lang.get().message(Message.DISCORD_BUY_SLOT) + Formatter.plainFormat(CurrenciesManager.getInstance().getDefaultCurrency(), discordInventory.getNextSlotPrice(), Style.REDUCED_LENGTH)));
                     actionRow.add(Button.danger("all", Lang.get().message(Message.DISCORD_SELL_ALL)));
 
                     event.replyFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(InventoryImage.getImage(discordInventory)) , "image.png"))

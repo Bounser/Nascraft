@@ -1,16 +1,21 @@
 package me.bounser.nascraft.advancedgui.components;
 
 import me.bounser.nascraft.advancedgui.InteractionsManager;
+import me.bounser.nascraft.chart.price.AdvancedGUIChart;
+import me.bounser.nascraft.chart.price.ChartType;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.plot.GraphData;
+import me.leoko.advancedgui.manager.ResourceManager;
 import me.leoko.advancedgui.utils.GuiPoint;
 import me.leoko.advancedgui.utils.actions.Action;
 import me.leoko.advancedgui.utils.components.*;
 import me.leoko.advancedgui.utils.components.Component;
+import me.leoko.advancedgui.utils.components.TextComponent;
 import me.leoko.advancedgui.utils.interactions.Interaction;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class GraphComponent extends RectangularComponent {
 
@@ -18,10 +23,13 @@ public class GraphComponent extends RectangularComponent {
 
     public int width, height, yc, xc;
 
-    private final ViewComponent background;
+    private TextComponent textslide;
 
+    private TextComponent perslide;
+    private ImageComponent up;
+    private ImageComponent down;
 
-    public GraphComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height, ViewComponent backgroundView) {
+    public GraphComponent(String id, Action clickAction, boolean hidden, Interaction interaction, int x, int y, int width, int height) {
         super(id, clickAction, hidden, interaction, x, y, width, height);
 
         this.width = width-1;
@@ -29,25 +37,24 @@ public class GraphComponent extends RectangularComponent {
         this.xc = x;
         this.yc = y;
 
-        background = backgroundView;
+        if (interaction.getComponentTree() == null) return;
+
+        this.textslide = interaction.getComponentTree().locate("textslide1", TextComponent.class);
+        this.perslide = interaction.getComponentTree().locate("perslide1", TextComponent.class);
+        this.up = interaction.getComponentTree().locate("upgreen", ImageComponent.class);
+        this.down = interaction.getComponentTree().locate("downred", ImageComponent.class);
     }
 
     @Override
     public void apply(Graphics graphic, Player player, GuiPoint cursor) {
 
-        graphData = new GraphData(InteractionsManager.getInstance().getItemFromPlayer(player));
+        Item item = InteractionsManager.getInstance().getItemFromPlayer(player);
 
-        Color bgcolor = setupBackGround();
+        BufferedImage graphImage = AdvancedGUIChart.getImage(item, ChartType.DAY, player.getUniqueId());
 
-        background.apply(graphic, player, cursor);
+        BufferedImage result = mergeImages(graphImage, ResourceManager.getInstance().processImage(extractGraphImage(graphImage), 390, 140, true));
 
-        graphic.setColor(new Color(0, 0, 0));
-
-        graphic.fillPolygon(graphData.getPXPositions(), graphData.getPYPositions(), graphData.getPLength());
-
-        graphic.setColor(bgcolor);
-
-        graphic.drawPolyline(graphData.getXPositions(), graphData.getYPositions(), graphData.getLength());
+        graphic.drawImage(result, 0, 53, null);
     }
 
     @Override
@@ -57,36 +64,60 @@ public class GraphComponent extends RectangularComponent {
 
         if (item == null) return "0";
 
-        return item.getValuesPastHour() == null ? "0" : item.getValuesPastHour().toString();
+        return String.valueOf(item.getPrice().getValue());
     }
 
     @Override
     public Component clone(Interaction interaction) {
-        return new GraphComponent(id, clickAction, hidden, interaction, x, y, width, height, background.clone(interaction));
-    }
-
-    public Color setupBackGround() {
-
-        if (graphData.getValues().size() > 1) {
-            float first = graphData.getValues().get(0);
-            float last = graphData.getValues().get(graphData.getValues().size() - 1);
-
-            if (Float.compare(first, last) < 0) {
-                background.setView("bull123");
-                return new Color(0,200,20);
-
-            } else if (Float.compare(first, last) > 0){
-                background.setView("bear123");
-                return new Color(200,10,20);
-
-            } else {
-                background.setView("flat123");
-                return new Color(250,250,250);
-            }
-        }
-        return new Color(250,250,250);
+        return new GraphComponent(id, clickAction, hidden, interaction, x, y, width, height);
     }
 
     public GraphData getGraphData() { return graphData; }
+
+    public static BufferedImage extractGraphImage(BufferedImage sourceImage) {
+        int width = sourceImage.getWidth();
+        int height = sourceImage.getHeight();
+
+        BufferedImage maskedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int rgb = sourceImage.getRGB(x, y);
+                Color color = new Color(rgb, true);
+
+                int red = color.getRed();
+                int green = color.getGreen();
+                int blue = color.getBlue();
+
+                if (isGraphShade(red, green, blue)) {
+                    maskedImage.setRGB(x, y, rgb);
+                } else {
+                    maskedImage.setRGB(x, y, 0);
+                }
+            }
+        }
+        return maskedImage;
+    }
+
+    private static boolean isGraphShade(int red, int green, int blue) {
+        return red > 30 && green < 40 && blue < 40 || green > 30 && red < 80 && blue < 80;
+    }
+
+    public static BufferedImage mergeImages(BufferedImage img1, BufferedImage img2) {
+        int width = img1.getWidth();
+        int height = img1.getHeight();
+
+        BufferedImage mergedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics2D g2d = mergedImage.createGraphics();
+
+        g2d.drawImage(img1, 0, 0, null);
+        g2d.drawImage(img2, 0, 0, null);
+
+        g2d.dispose();
+
+        return mergedImage;
+    }
+
 
 }

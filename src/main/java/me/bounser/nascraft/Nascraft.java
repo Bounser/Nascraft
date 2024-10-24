@@ -159,6 +159,7 @@ public final class Nascraft extends JavaPlugin {
         }
 
         if (config.isCommandEnabled("sellall")) new SellAllCommand();
+
     }
 
     @Override

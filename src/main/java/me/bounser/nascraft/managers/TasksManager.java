@@ -3,7 +3,6 @@ package me.bounser.nascraft.managers;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.database.DatabaseManager;
-import me.bounser.nascraft.database.sqlite.SQLite;
 import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.DiscordLog;
@@ -153,10 +152,6 @@ public class TasksManager {
             }
 
             MarketManager.getInstance().setOperationsLastHour(0);
-
-            if (DatabaseManager.get().getDatabase() instanceof SQLite) {
-                ((SQLite) DatabaseManager.get().getDatabase()).flush();
-            }
 
             if (Config.getInstance().getAlertsMenuEnabled()) DatabaseManager.get().getDatabase().purgeAlerts();
 

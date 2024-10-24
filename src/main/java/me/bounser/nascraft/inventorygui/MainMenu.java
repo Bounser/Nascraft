@@ -172,7 +172,6 @@ public class MainMenu implements MenuPage {
 
                 meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
                 meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                meta.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP);
                 meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
 
                 categoryItemStack.setItemMeta(meta);

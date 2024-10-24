@@ -21,6 +21,8 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.exceptions.ContextException;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -107,6 +109,15 @@ public class DiscordBot {
                 return;
             }
 
+            textChannel.getHistoryFromBeginning(10).queue(
+                    result -> {
+
+                        if (result.size() > 2) {
+                            removeAllMessages();
+                        }
+                    }
+            );
+
             List<ItemComponent> componentList1 = new ArrayList<>();
             List<ItemComponent> componentList2 = new ArrayList<>();
 
@@ -126,7 +137,9 @@ public class DiscordBot {
                         .addActionRow(componentList1)
                         .addActionRow(componentList2)
                         .queue(message -> {
-                            message.delete().queueAfter(Config.getInstance().getUpdateTime(), TimeUnit.SECONDS);
+                            try {
+                                message.delete().queueAfter(Config.getInstance().getUpdateTime(), TimeUnit.SECONDS);
+                            } catch (ErrorResponseException ignored) { }
                         });
             } else {
                 textChannel.sendMessageEmbeds(getEmbedded())
@@ -134,7 +147,9 @@ public class DiscordBot {
                         .addActionRow(componentList1)
                         .addActionRow(componentList2)
                         .queue(message -> {
-                            message.delete().queueAfter(Config.getInstance().getUpdateTime(), TimeUnit.SECONDS);
+                            try {
+                                message.delete().queueAfter(Config.getInstance().getUpdateTime(), TimeUnit.SECONDS);
+                            } catch (ErrorResponseException ignored) { }
                         });
             }
         });

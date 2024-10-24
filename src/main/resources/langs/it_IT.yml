@@ -1,8 +1,6 @@
 # Nascraft it_IT - ${project.version}
 # by @Try__
 
-# Specifica la valuta da utilizzare accanto ai prezzi.
-currency: "€"
 # Il simbolo della valuta dovrebbe essere dopo (o prima) del prezzo? ($50 o 50$)
 after: false
 # Separatore decimale. Disponibile: point (.), comma (,)

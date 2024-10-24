@@ -23,7 +23,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.text.Format;
 import java.util.*;
 
 
@@ -126,9 +125,9 @@ public class SellInvListener implements Listener {
                     int i = 0;
 
                     for (Currency currency : CurrenciesManager.getInstance().getCurrencies()) {
+                        if (result.get(currency) == null) continue;
                         i++;
                         report += Formatter.format(currency, result.get(currency), Style.ROUND_BASIC) + (i == result.size() ? "" : ",");
-
                     }
 
                     Lang.get().message(player, Message.SELL_ACTION_MESSAGE, report, "", "");
@@ -142,6 +141,8 @@ public class SellInvListener implements Listener {
                     List<ItemStack> items = playerItems.get(player);
 
                     ItemStack item = event.getCurrentItem();
+
+                    if (item == null) return;
 
                     ItemMeta meta = item.getItemMeta();
 

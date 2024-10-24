@@ -1,8 +1,6 @@
 # Nascraft de_DE - ${project.version}
 # by @BiigToastie
 
-# Specify the currency to be used next to prices.
-currency: "€"
 # Should the symbol of the currency be after (or before) the price? ($50 or 50$)
 after: true
 # Decimal separator. Available: point (.), comma (,)
