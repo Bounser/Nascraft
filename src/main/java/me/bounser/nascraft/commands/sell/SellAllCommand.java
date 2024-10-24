@@ -1,6 +1,5 @@
 package me.bounser.nascraft.commands.sell;
 
-import com.sun.tools.javac.jvm.Items;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.commands.Command;
 import me.bounser.nascraft.config.Config;
@@ -16,7 +15,6 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -26,13 +24,12 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 
 public class SellAllCommand extends Command {
-
-    private final List<String> options = new ArrayList<>();
 
     public SellAllCommand() {
         super(
@@ -41,9 +38,6 @@ public class SellAllCommand extends Command {
                 "Sell items directly to the market",
                 "nascraft.sellall"
         );
-
-        MarketManager.getInstance().getAllItems().forEach(item -> options.add(item.getIdentifier()));
-        options.add("everything");
     }
 
     @Override
@@ -60,13 +54,16 @@ public class SellAllCommand extends Command {
             Lang.get().message(player, Message.NO_PERMISSION); return;
         }
 
-        if (args.length < 1) {
-            Lang.get().message(player, Message.SELLALL_ERROR_WRONG_MATERIAL);
+        if (args.length == 0) {
+            sellEverything(player, args.length == 1 && args[0].equalsIgnoreCase("confirm"));
+            // Lang.get().message(player, Message.SELLALL_ERROR_WRONG_MATERIAL);
             return;
+
+            /*
         } else if (args[0].equalsIgnoreCase("everything")) {
 
             sellEverything(player, args.length == 2 && args[1].equalsIgnoreCase("confirm"));
-
+*/
         } else {
 
             if (MarketManager.getInstance().getItem(args[0]) == null) {
@@ -172,8 +169,6 @@ public class SellAllCommand extends Command {
             }
         }
 
-        float totalValue = 0;
-
         if (confirmed) {
 
             for (Item item : content.keySet()) {
@@ -222,7 +217,6 @@ public class SellAllCommand extends Command {
 
             for (Item item : content.keySet()) {
                 float value = item.getPrice().getProjectedCost(content.get(item) * item.getMultiplier(), item.getPrice().getSellTaxMultiplier());
-                totalValue += value;
                 text = text + Lang.get().message(Message.LIST_SEGMENT, Formatter.format(item.getCurrency(), value, Style.ROUND_BASIC), String.valueOf(content.get(item)), item.getName());
             }
 
@@ -243,7 +237,7 @@ public class SellAllCommand extends Command {
             Component hoverText = MiniMessage.miniMessage().deserialize(finalText);
 
             component = component.hoverEvent(HoverEvent.showText(hoverText))
-                    .clickEvent(ClickEvent.runCommand("/nsellall everything confirm"));
+                    .clickEvent(ClickEvent.runCommand("/nsellall confirm"));
 
             Lang.get().getAudience().player(player).sendMessage(component);
         }
@@ -251,6 +245,28 @@ public class SellAllCommand extends Command {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
+
+        if (!(sender instanceof Player)) return Arrays.asList("");
+
+        Player player = ((Player) sender);
+
+        List<Item> items = new ArrayList<>();
+
+        for (ItemStack itemStack : player.getInventory().getContents()) {
+
+            if (itemStack == null || itemStack.getType().equals(Material.AIR)) continue;
+
+            Item item = MarketManager.getInstance().getItem(itemStack);
+
+            if (item != null && !items.contains(item))
+                items.add(item);
+
+        }
+
+        List<String> options = new ArrayList<>();
+
+        items.forEach(item -> options.add(item.getIdentifier()));
+
         return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
     }
 }
