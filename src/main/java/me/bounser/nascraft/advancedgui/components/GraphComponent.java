@@ -119,5 +119,4 @@ public class GraphComponent extends RectangularComponent {
         return mergedImage;
     }
 
-
 }

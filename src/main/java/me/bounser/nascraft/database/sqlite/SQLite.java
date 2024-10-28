@@ -161,12 +161,6 @@ public class SQLite implements Database {
                         "operations INT NOT NULL," +
                         "UNIQUE(day)");
 
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
         /*
 
         createTable(connection, "broker_shares",
@@ -217,8 +211,12 @@ public class SQLite implements Database {
 
     @Override
     public void saveEverything() {
-        for (Item item : MarketManager.getInstance().getAllParentItems())
-            saveItem(item);
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            for (Item item : MarketManager.getInstance().getAllParentItems())
+                ItemProperties.saveItem(connection, item);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
     }
 
     @Override
@@ -537,10 +535,20 @@ public class SQLite implements Database {
 
     @Override
     public void addAlert(String userid, Item item, float price) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
-            Alerts.addAlert(connection, userid, item, price);
+
+        try {
+            if (connection != null && !connection.isClosed()) {
+                Alerts.addAlert(connection, userid, item, price);
+            } else {
+                try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+                    Alerts.addAlert(connection, userid, item, price);
+                } catch (SQLException e) {
+                    Nascraft.getInstance().getLogger().warning(e.getMessage());
+                }
+            }
+
         } catch (SQLException e) {
-            Nascraft.getInstance().getLogger().warning(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -555,10 +563,13 @@ public class SQLite implements Database {
 
     @Override
     public void retrieveAlerts() {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
-            Alerts.retrieveAlerts(connection);
+
+        Alerts.retrieveAlerts(connection);
+
+        try {
+            connection.close();
         } catch (SQLException e) {
-            Nascraft.getInstance().getLogger().warning(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 

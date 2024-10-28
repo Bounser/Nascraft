@@ -107,7 +107,14 @@ public class SellInvCommand extends Command {
         Component name = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.SELL_BUTTON_NAME));
         meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(name));
 
-        meta.setLore(Arrays.asList(Lang.get().message(Message.SELL_BUTTON_LORE, "[WORTH-LIST]", "").split("\\n")));
+        List<String> lore = new ArrayList<>();
+
+        for (String line : Lang.get().message(Message.SELL_BUTTON_LORE, "[WORTH-LIST]", "").split("\\n")) {
+            Component loreLine = MiniMessage.miniMessage().deserialize(line);
+            lore.add(BukkitComponentSerializer.legacy().serialize(loreLine));
+        }
+
+        meta.setLore(lore);
         sellButton.setItemMeta(meta);
 
         inventory.setItem(40, sellButton);

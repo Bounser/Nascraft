@@ -164,7 +164,7 @@ public class DiscordInventoryInGame implements Listener {
         HashMap<Currency, Float> value = DiscordInventories.getInstance().getInventory(uuid).getInventoryValuePerCurrency();
 
         for (Currency currency : value.keySet())
-            worth += Formatter.format(currency, DiscordInventories.getInstance().getInventory(uuid).getInventoryValue(), Style.ROUND_BASIC) + "\n";
+            worth += Formatter.format(currency, value.get(currency), Style.ROUND_BASIC) + "\n";
 
         List<String> lore = new ArrayList<>();
         for (String line : Lang.get().message(Message.DISINV_INFO_LORE, "[WORTH]", worth).split("\\n")) {

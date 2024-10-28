@@ -1,6 +1,5 @@
 package me.bounser.nascraft.database.commands;
 
-import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
