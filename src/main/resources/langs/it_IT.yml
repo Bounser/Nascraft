@@ -144,8 +144,8 @@ gui_buysell_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Imposta avviso
 gui_buysell_alerts_lore_linked: "<gradient:#cc801d:#4a5082>Clicca per selezionare un prezzo. Riceverai una notifica</gradient>\n<gradient:#cc801d:#4a5082>tramite Discord una volta raggiunto il prezzo.</gradient>"
 gui_buysell_alerts_lore_setup: "<gradient:#cc801d:#4a5082>Hai un avviso per questo oggetto a questo prezzo:</gradient>\n\n<gradient:#ffa930:#ffca85>> [PRICE]</gradient>\n\n<gradient:#cc801d:#4a5082>Clicca per rimuoverlo.</gradient>"
 gui_buysell_alerts_lore_not_linked: "<gradient:#cc801d:#4a5082>Clicca per selezionare un prezzo. Riceverai una notifica</gradient>\n<gradient:#cc801d:#4a5082>una volta raggiunto il prezzo.</gradient>\n\n<gradient:#ff3650:#ff1100>✘ Non puoi impostare avvisi perché</gradient>\n<gradient:#ff3650:#ff1100>il tuo account non è collegato.</gradient>"
-gui_buysell_info_name: "<b><gradient:#ffc457:#ffb5d0>Tieni presente!</gradient></b>"
-gui_buysell_info_lore: "<gradient:#ffe712:#c7a987>⚠ I prezzi non sono garantiti ⚠</gradient>"
+gui_buysell_info_name: "<b><gradient:#ffc457:#ffb5d0>Visualizza grafici</gradient></b>"
+gui_buysell_info_lore: "<gradient:#ffe712:#c7a987>Consulta l'evoluzione del prezzo</gradient>"
 gui_buysell_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Indietro</gradient></b>"
 
 gui_buysell_buy_buttons_name: "<b><gradient:#44ff3d:#94ff42>COMPRA [AMOUNT]</gradient></b>"
@@ -153,6 +153,21 @@ gui_buysell_buy_buttons_lore: " \n<gradient:#6c65b5:#7aad63>⏵ Clicca per compr
 
 gui_buysell_sell_buttons_name: "<b><gradient:#eb3926:#eb8063>VENDI [AMOUNT]</gradient></b>"
 gui_buysell_sell_buttons_lore: " \n<gradient:#6c65b5:#e3326a>⏵ Clicca per vendere [AMOUNT] per </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
+
+gui_info_title: "                  <gradient:#8c00ff:#1c3eff>Grafico</gradient>"
+gui_info_timeframe_name: "<u><gradient:#ffe712:#c7a987>Intervallo di tempo</gradient></u>"
+gui_info_timeframe_lore_before: " "
+gui_info_timeframe_lore_unselected_segment: "<gradient:#ffe712:#ffd83d>[OPTION]</gradient>\n"
+gui_info_timeframe_lore_selected_segment: "<gradient:#ffe712:#ffd83d>[OPTION]</gradient> <color:#2eff8c>☜</color>\n"
+gui_info_timeframe_option_1: "Giorno"
+gui_info_timeframe_option_2: "Mese"
+gui_info_timeframe_option_3: "Anno"
+gui_info_timeframe_option_4: "Tutto"
+gui_info_timeframe_lore_after: " \n<gradient:#2eff8c:#5bff2e>Clicca per cambiare opzioni</gradient>"
+gui_info_statistics_name: "[ITEM-NAME] <gradient:#ffe712:#c7a987>- Statistiche</gradient>"
+gui_info_statistics_lore: "\n<gradient:#ff9778:#ffff55>Prezzo attuale:</gradient> [PRICE]\n \n<b><gradient:#ffe712:#ffd83d>[OPTION]</gradient></b>\n <gradient:#ffe712:#ffd83d>╠═</gradient> <gradient:#ff9778:#ffff55>Cambiamento:</gradient> [CHANGE] \n <gradient:#ffe712:#ffd83d>╠═</gradient> <gradient:#ff9778:#ffff55>Massimo:</gradient> [HIGH] \n <gradient:#ffe712:#ffd83d>╚═</gradient> <gradient:#ff9778:#ffff55>Minimo:</gradient> [LOW]"
+gui_info_positive_change: "<gradient:#55ff55:#39ff08>▲ [CHANGE]%</gradient>"
+gui_info_negative_change: "<gradient:#ff3b4e:#ff1900>▼ [CHANGE]%</gradient>"
 
 gui_alerts_title: "<b><gradient:#ff9305:#ffeb38>Avvisi</gradient></b>"
 gui_alerts_lore: "\n<gradient:#6c65b5:#7aad63>Prezzo da raggiungere: </gradient><gradient:#ff9305:#ffeb38>[PRICE]</gradient>\n\n<gradient:#6c65b5:#7aad63>⏵ Clicca per rimuovere questo avviso.</gradient>"

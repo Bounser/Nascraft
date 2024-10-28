@@ -7,6 +7,7 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.linking.LinkManager;
+import me.bounser.nascraft.inventorygui.MiniChart.InfoMenu;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
@@ -144,7 +145,9 @@ public class InventoryListener implements Listener {
 
             if (config.getInfoBuySellEnabled() && config.getInfoBuySellSlot() == slot) {
 
-                MarketMenuManager.getInstance().setMenuOfPlayer(player, new InfoMenu(player));
+                Item itemToPlot = MarketManager.getInstance().getItem(metadata.substring(10));
+
+                MarketMenuManager.getInstance().setMenuOfPlayer(player, new InfoMenu(player, itemToPlot));
 
                 return;
             }

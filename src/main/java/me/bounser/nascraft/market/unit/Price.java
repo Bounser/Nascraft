@@ -43,6 +43,21 @@ public class Price {
     private final float taxBuy;
     private final float taxSell;
 
+    private float chartDayHigh;
+    private float monthHigh;
+    private float yearHigh;
+    private float allHigh;
+
+    private float chartDayLow;
+    private float monthLow;
+    private float yearLow;
+    private float allLow;
+
+    private float dayChange;
+    private float monthChange;
+    private float yearChange;
+    private float allChange;
+
     public Price(Item item, float initialValue, float elasticity, float support, float resistance, float noiseIntensity) {
 
         this.item = item;
@@ -79,6 +94,94 @@ public class Price {
         this.stock = stock;
         updateValue();
     }
+
+    public void setDayHigh(float dayHigh) {
+        this.chartDayHigh = dayHigh;
+    }
+
+    public float getChartDayHigh() {
+        return chartDayHigh;
+    }
+
+    public void setMonthHigh(float monthHigh) {
+        this.monthHigh = monthHigh;
+    }
+
+    public float getMonthHigh() {
+        return monthHigh;
+    }
+
+    public void setYearHigh(float yearHigh) {
+        this.yearHigh = yearHigh;
+    }
+
+    public float getYearHigh() {
+        return yearHigh;
+    }
+
+    public void setAllHigh(float allHigh) {
+        this.allHigh = allHigh;
+    }
+
+    public float getAllHigh() {
+        return allHigh;
+    }
+
+    public void setDayLow(float dayLow) {
+        this.chartDayLow = dayLow;
+    }
+
+    public float getChartDayLow() {
+        return chartDayLow;
+    }
+
+    public void setMonthLow(float monthLow) {
+        this.monthLow = monthLow;
+    }
+
+    public float getMonthLow() {
+        return monthLow;
+    }
+
+    public void setYearLow(float yearLow) {
+        this.yearLow = yearLow;
+    }
+
+    public float getYearLow() {
+        return yearLow;
+    }
+
+    public void setAllLow(float allLow) {
+        this.allLow = allLow;
+    }
+
+    public float getAllLow() {
+        return allLow;
+    }
+
+    public void setDayChange(float dayChange) {
+        this.dayChange = dayChange;
+    }
+
+    public float getDayChange() { return dayChange; }
+
+    public void setMonthChange(float monthChange) {
+        this.monthChange = monthChange;
+    }
+
+    public float getMonthChange() { return monthChange; }
+
+    public void setYearChange(float yearChange) {
+        this.yearChange = yearChange;
+    }
+
+    public float getYearChange() { return yearChange; }
+
+    public void setAllChange(float allChange) {
+        this.allChange = allChange;
+    }
+
+    public float getAllChange() { return allChange; }
 
     public float getStock() { return stock; }
 

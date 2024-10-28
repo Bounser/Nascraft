@@ -126,7 +126,7 @@ buy-sell:
   info:
     enabled: true
     slot: 4
-    material: 'paper'
+    material: 'filled_map'
 
   item:
     slot: 13
