@@ -1,5 +1,6 @@
 package me.bounser.nascraft.chart.price;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
@@ -15,12 +16,35 @@ import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
 import org.jfree.ui.RectangleInsets;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class ItemChartReduced {
+
+    private static BufferedImage ditheredUp;
+    private static BufferedImage ditheredDown;
+
+    public static void load() {
+        ditheredUp = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+        ditheredDown = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
+
+        Graphics graphicsUp = ditheredUp.getGraphics();
+        Graphics graphicsDown = ditheredDown.getGraphics();
+
+        try {
+            graphicsUp.drawImage(ImageIO.read(Nascraft.getInstance().getResource("images/gradient-dithered-up.png")), 0, 0, null);
+            graphicsDown.drawImage(ImageIO.read(Nascraft.getInstance().getResource("images/gradient-dithered-down.png")), 0, 0, null);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        graphicsUp.dispose();
+        graphicsDown.dispose();
+    }
 
     public static BufferedImage getImage(Item item, ChartType chartType) {
 
@@ -28,18 +52,38 @@ public class ItemChartReduced {
 
         BufferedImage image = createChart(finalItem, chartType).createBufferedImage(128, 128);
 
-        Graphics2D graphics = image.createGraphics();
+        boolean up = false;
 
-        graphics.setColor(Color.BLACK);
-        graphics.drawRect(0, 0, 127, 127);
+        switch (chartType) {
+            case DAY:
+                up = item.getPrice().getDayChange() > 0; break;
+            case MONTH:
+                up = item.getPrice().getMonthChange() > 0; break;
+            case YEAR:
+                up = item.getPrice().getYearChange() > 0; break;
+            case ALL:
+                up = item.getPrice().getAllChange() > 0; break;
 
-        drawDottedLine(graphics, 2, 31, 125, 31, Color.GRAY, 1, 2);
-        drawDottedLine(graphics, 2, 62, 125, 62, Color.GRAY, 1, 2);
-        drawDottedLine(graphics, 2, 93, 125, 93, Color.GRAY, 1, 2);
+            default: up = false;
+        }
 
-        graphics.dispose();
+        BufferedImage background;
 
-        return image;
+        if (up) {
+            background = mergeImages(image, ditheredUp);
+        } else {
+            background = mergeImages(image, ditheredDown);
+        }
+
+        Graphics2D imageGraphics = background.createGraphics();
+
+        drawDottedLine(imageGraphics, 2, 31, 125, 31, Color.GRAY, 1, 2);
+        drawDottedLine(imageGraphics, 2, 62, 125, 62, Color.GRAY, 1, 2);
+        drawDottedLine(imageGraphics, 2, 93, 125, 93, Color.GRAY, 1, 2);
+
+        imageGraphics.dispose();
+
+        return background;
     }
 
     public static void drawDottedLine(Graphics2D g, int x1, int y1, int x2, int y2, Color color, float dotLength, float spaceLength) {
@@ -50,9 +94,53 @@ public class ItemChartReduced {
         g.drawLine(x1, y1, x2, y2);
     }
 
+    public static BufferedImage mergeImages(BufferedImage img1, BufferedImage img2) {
+        int width = Math.max(img1.getWidth(), img2.getWidth());
+        int height = Math.max(img1.getHeight(), img2.getHeight());
+        BufferedImage mergedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int pixel1 = (x < img1.getWidth() && y < img1.getHeight()) ? img1.getRGB(x, y) : 0;
+                int pixel2 = (x < img2.getWidth() && y < img2.getHeight()) ? img2.getRGB(x, y) : 0;
+
+                Color color1 = new Color(pixel1, true);
+                Color color2 = new Color(pixel2, true);
+
+                if (color1.getAlpha() == 0) {
+                    mergedImage.setRGB(x, y, new Color(0, 0, 0, 0).getRGB());
+                } else if (areColorsSimilar(pixel1, (new Color(0, 155, 0).getRGB()), 15) ||  areColorsSimilar(pixel1, (new Color(155, 0, 0).getRGB()), 15)) {
+                    mergedImage.setRGB(x, y, pixel1);
+                } else {
+                    mergedImage.setRGB(x, y, pixel2);
+                }
+            }
+        }
+
+        return mergedImage;
+    }
+
+    public static boolean areColorsSimilar(int color1, int color2, int tolerance) {
+        int red1 = (color1 >> 16) & 0xFF;
+        int green1 = (color1 >> 8) & 0xFF;
+        int blue1 = color1 & 0xFF;
+
+        int red2 = (color2 >> 16) & 0xFF;
+        int green2 = (color2 >> 8) & 0xFF;
+        int blue2 = color2 & 0xFF;
+
+        int redDiff = Math.abs(red1 - red2);
+        int greenDiff = Math.abs(green1 - green2);
+        int blueDiff = Math.abs(blue1 - blue2);
+
+        return redDiff <= tolerance && greenDiff <= tolerance && blueDiff <= tolerance;
+    }
+
     private static JFreeChart createChart(Item item, ChartType chartType) {
 
         List<Instant> data;
+
+        boolean up;
 
         switch (chartType) {
             case DAY:
@@ -74,6 +162,23 @@ public class ItemChartReduced {
         TimeSeries series = createPriceDataset(data, item, chartType);
         TimeSeriesCollection dataset = new TimeSeriesCollection(series);
 
+        switch (chartType) {
+            case DAY:
+                up = (item.getPrice().getDayChange() > 0);
+                break;
+            case MONTH:
+                up = (item.getPrice().getMonthChange() > 0);
+                break;
+            case YEAR:
+                up = (item.getPrice().getYearChange() > 0);
+                break;
+            case ALL:
+                up = (item.getPrice().getAllChange() > 0);
+                break;
+            default:
+                up = (item.getPrice().getDayChange() > 0);
+        }
+
         JFreeChart chart = ChartFactory.createTimeSeriesChart(
                 null,
                 null,
@@ -89,58 +194,48 @@ public class ItemChartReduced {
         DateAxis dateAxis = (DateAxis) plot.getDomainAxis();
         NumberAxis rangeAxis = (NumberAxis) plot.getRangeAxis();
 
-        plot.setBackgroundPaint(new Color(0, 0, 0, 0));
-        chart.setBackgroundPaint(new Color(0, 0, 0, 0));
-
         plot.setDomainGridlinesVisible(false);
         plot.setRangeGridlinesVisible(false);
 
         dateAxis.setVisible(false);
         rangeAxis.setVisible(false);
 
-        plot.setInsets(new RectangleInsets(0, 0, 0, 0));
+        plot.setDomainGridlinesVisible(false);
+        plot.setRangeGridlinesVisible(false);
 
-        double minY = Double.MAX_VALUE;
-        double maxY = Double.MIN_VALUE;
-
-        for (int i = 0; i < series.getItemCount(); i++) {
-            double value = series.getDataItem(i).getValue().doubleValue();
-            if (value < minY) {
-                minY = value;
-            }
-            if (value > maxY) {
-                maxY = value;
-            }
-        }
-
-        if (series.getItemCount() > 0) {
-            dateAxis.setRange(series.getTimePeriod(0).getStart().getTime(), series.getTimePeriod(series.getItemCount() - 1).getEnd().getTime());
-            rangeAxis.setRange(minY, maxY);
-        }
-
+        plot.setBackgroundPaint(new Color(0,0 ,0,0));
 
         XYAreaRenderer areaRenderer = new XYAreaRenderer();
 
-        double initialPrice = series.getDataItem(0).getValue().doubleValue();
-        double finalPrice = series.getDataItem(series.getItemCount() - 1).getValue().doubleValue();
-
         XYLineAndShapeRenderer lineRenderer = new XYLineAndShapeRenderer();
         lineRenderer.setSeriesShapesVisible(0, false);
-        lineRenderer.setSeriesStroke(0, new BasicStroke(1f));
+        lineRenderer.setSeriesStroke(0, new BasicStroke(1.5f));
 
         Color areaColor;
-        if (finalPrice >= initialPrice) {
-            areaColor = new Color(137,172,76, 150);
-            lineRenderer.setSeriesPaint(0, new Color(10, 150, 10));
+        if (up) {
+            chart.setBackgroundPaint(new Color(0, 0, 0, 0));
+            areaColor = new Color(255, 255, 255);
+            lineRenderer.setSeriesPaint(0, new Color(0, 155, 0));
         } else {
-            areaColor = new Color(225,133,163, 150);
-            lineRenderer.setSeriesPaint(0, new Color(150, 10, 10));
+            chart.setBackgroundPaint(new Color(0, 0, 0, 0));
+            areaColor = new Color(255, 255, 255);
+            lineRenderer.setSeriesPaint(0, new Color(155, 0, 0));
         }
+
+        plot.setInsets(new RectangleInsets(5, 5, 0, 0), true);
+
         areaRenderer.setSeriesPaint(0, areaColor);
+        areaRenderer.setOutline(false);
+
+        dateAxis.setLowerMargin(0);
+        dateAxis.setUpperMargin(0);
 
         plot.setDataset(1, dataset);
         plot.setRenderer(0, lineRenderer);
         plot.setRenderer(1, areaRenderer);
+
+        plot.setOutlineVisible(false);
+        chart.setPadding(new RectangleInsets(0, 0, 0, 0));
 
         plot.mapDatasetToRangeAxis(1, 0);
         lineRenderer.setSeriesVisibleInLegend(0, false);

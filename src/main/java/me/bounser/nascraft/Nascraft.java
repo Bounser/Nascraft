@@ -2,6 +2,8 @@ package me.bounser.nascraft;
 
 import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.api.NascraftAPI;
+import me.bounser.nascraft.chart.price.ItemChart;
+import me.bounser.nascraft.chart.price.ItemChartReduced;
 import me.bounser.nascraft.commands.admin.nascraft.NascraftCommand;
 import me.bounser.nascraft.commands.admin.nascraft.NascraftLogListener;
 import me.bounser.nascraft.commands.admin.marketeditor.edit.item.EditItemMenuListener;
@@ -160,6 +162,7 @@ public final class Nascraft extends JavaPlugin {
 
         if (config.isCommandEnabled("sellall")) new SellAllCommand();
 
+        ItemChartReduced.load();
     }
 
     @Override
