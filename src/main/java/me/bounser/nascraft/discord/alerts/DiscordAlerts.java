@@ -9,6 +9,8 @@ import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 import java.util.HashMap;
@@ -81,13 +83,13 @@ public class DiscordAlerts implements Listener {
 
                     if (!(item.getPrice().getValue() < Math.abs(alerts.get(userID).get(item)))) continue;
 
-                    reachedMessage(userID, item, Math.abs(alerts.get(userID).get(item)), ":chart_with_downwards_trend:" );
+                    reachedMessage(userID, item, Math.abs(alerts.get(userID).get(item)), ":chart_with_downwards_trend:", false);
 
                 } else {
 
                     if (!(item.getPrice().getValue() > alerts.get(userID).get(item))) continue;
 
-                    reachedMessage(userID, item, Math.abs(alerts.get(userID).get(item)), ":chart_with_upwards_trend:" );
+                    reachedMessage(userID, item, Math.abs(alerts.get(userID).get(item)), ":chart_with_upwards_trend:", true);
                 }
                 alertsToRemove.put(userID, item);
             }
@@ -107,14 +109,25 @@ public class DiscordAlerts implements Listener {
         return alerts.get(userid);
     }
 
-    public void reachedMessage(String userId, Item item, float price, String emoji) {
+    public void reachedMessage(String userId, Item item, float price, String emoji, boolean up) {
+
+        Player player = Bukkit.getPlayer(LinkManager.getInstance().getUUID(userId));
+
+        if (player != null) {
+            Message message = up ? Message.ALERT_REACHED_UP : Message.ALERT_REACHED_DOWN;
+
+            Lang.get().message(player, Lang.get().message(message)
+                    .replace("[NAME]", item.getTaggedName())
+                    .replace("[PRICE1]", Formatter.format(item.getCurrency(), price, Style.ROUND_BASIC))
+                    .replace("[PRICE2]", Formatter.format(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC)));
+        }
 
         DiscordBot.getInstance().getJDA().retrieveUserById(userId).queue(user ->
                 user.openPrivateChannel()
                         .queue(privateChannel -> privateChannel
                                 .sendMessage(Lang.get().message(Message.DISCORD_ALERT_REACHED_SEGMENT)
                                         .replace("[EMOJI]", emoji)
-                                        .replace("[MATERIAL]", item.getName())
+                                        .replace("[NAME]", item.getName())
                                         .replace("[PRICE1]", Formatter.plainFormat(item.getCurrency(), price, Style.ROUND_BASIC))
                                         .replace("[PRICE2]", Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC)))
                                 .queue()));
