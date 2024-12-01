@@ -13,6 +13,7 @@ import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.discord.DiscordLog;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
+import me.bounser.nascraft.managers.InventoryManager;
 import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.market.MarketManager;
@@ -164,53 +165,47 @@ public class Item {
     public String getFormattedName() { return formattedAlias; }
 
 
-    public float buyPrice(int amount) {
+    public double buyPrice(int amount) {
         return price.getProjectedCost(-amount*multiplier, price.getBuyTaxMultiplier());
     }
 
-    public float sellPrice(int amount) {
+    public double sellPrice(int amount) {
         return price.getProjectedCost(amount*multiplier, price.getSellTaxMultiplier());
     }
 
-    public void buy(int amount, UUID uuid, boolean feedback) {
+    public double buy(int amount, UUID uuid, boolean feedback) {
 
         Player player = Bukkit.getPlayer(uuid);
         Player offlinePlayer = Bukkit.getPlayer(uuid);
 
+        if (!price.canStockChange(amount, true)) {
+            if (player != null && feedback) Lang.get().message(player, Message.TOP_LIMIT_REACHED);
+            return 0;
+        }
+
         BuyItemEvent event = new BuyItemEvent(player, this, amount);
         Bukkit.getPluginManager().callEvent(event);
 
-        if (event.isCancelled()) return;
+        if (event.isCancelled()) return 0;
 
-        if(!MarketManager.getInstance().getActive()) { Lang.get().message(player, Message.SHOP_CLOSED); return; }
+        if(!MarketManager.getInstance().getActive()) { Lang.get().message(player, Message.SHOP_CLOSED); return 0; }
 
         float worth = price.getProjectedCost(-amount*multiplier, price.getBuyTaxMultiplier());
 
-        if (!checkBalance(player, feedback, worth)) return;
-        if (!checkInventory(player, feedback, amount)) return;
+        if (!checkBalance(player, feedback, worth)) return 0;
+        if (!InventoryManager.checkInventory(player, feedback, itemStack, amount)) return 0;
 
         if (player != null && feedback) {
-            ItemStack operationItemStack = itemStack.clone();
-
-            int stacks = amount / itemStack.getMaxStackSize();
-
-            operationItemStack.setAmount(itemStack.getMaxStackSize());
-
-            for (int i = 0; i < stacks; i++)
-                player.getInventory().addItem(operationItemStack);
-
-            operationItemStack.setAmount(amount - stacks * itemStack.getMaxStackSize());
-
-            player.getInventory().addItem(operationItemStack);
+            InventoryManager.addItemsToInventory(player, itemStack, amount);
         }
 
-        MoneyManager.getInstance().withdraw(offlinePlayer, currency, worth, price.getBuyTaxMultiplier());
+        MoneyManager.getInstance().withdraw(offlinePlayer, currency, worth, (1-price.getBuyTaxMultiplier()));
 
         if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(currency, worth, Style.ROUND_BASIC), String.valueOf(amount), taggedAlias);
 
         if (parent != null)
             parent.updateInternalValues(amount,
-                amount*price.getValue(),
+                    amount*price.getValue(),
                 -amount*multiplier,
                 price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
         else
@@ -230,6 +225,8 @@ public class Item {
 
         TransactionCompletedEvent transactionEvent = new TransactionCompletedEvent(player, this, amount, Action.BUY, worth);
         Bukkit.getPluginManager().callEvent(transactionEvent);
+
+        return worth;
     }
 
     public boolean checkBalance(Player player, boolean feedback, float money) {
@@ -240,43 +237,15 @@ public class Item {
         return true;
     }
 
-    public boolean checkInventory(Player player, boolean feedback, int amount) {
-
-        if (player == null) return true;
-
-        if (player.getInventory().firstEmpty() == -1) {
-
-            int untilFull = 0;
-
-            for (ItemStack is : player.getInventory()) {
-                if(is != null && is.isSimilar(itemStack)) {
-                    untilFull += itemStack.getType().getMaxStackSize() - is.getAmount();
-                }
-            }
-            if (untilFull < amount) {
-                if (feedback) Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
-                return false;
-            }
-
-        } else {
-            int slotsUsed = 0;
-
-            for (ItemStack content : player.getInventory().getStorageContents())
-                if (content != null && !content.getType().equals(Material.AIR)) slotsUsed++;
-
-            if ((36 - slotsUsed) < (amount/itemStack.getType().getMaxStackSize())) {
-                if (feedback) Lang.get().message(player, Message.NOT_ENOUGH_SPACE);
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public float sell(int amount, UUID uuid, boolean feedback) {
+    public double sell(int amount, UUID uuid, boolean feedback) {
 
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
         Player player = Bukkit.getPlayer(uuid);
+
+        if (!price.canStockChange(amount, false)) {
+            if (player != null && feedback) Lang.get().message(player, Message.BOTTOM_LIMIT_REACHED);
+            return -1;
+        }
 
         SellItemEvent event = new SellItemEvent(player, this, amount);
         Bukkit.getPluginManager().callEvent(event);
@@ -335,7 +304,7 @@ public class Item {
         return worth;
     }
 
-    public List<Float> getValuesPastHour() {
+    public List<Double> getValuesPastHour() {
         return price.getValuesPastHour();
     }
 
@@ -349,7 +318,7 @@ public class Item {
         MarketManager.getInstance().addOperation();
     }
 
-    private void updateInternalValues(int operations, float volume, float stockChange, float taxes) {
+    private void updateInternalValues(int operations, double volume, float stockChange, double taxes) {
         this.operations += operations;
         this.volume += volume;
         this.price.changeStock(stockChange);
@@ -408,7 +377,7 @@ public class Item {
 
     public void setCategory(Category category) { this.category = category; }
 
-    public void changeProperties(float initialPrice, String alias, float elasticity, float noiseSensibility, float support, float resistance) {
+    public void changeProperties(double initialPrice, String alias, float elasticity, float noiseSensibility, double support, double resistance) {
 
         price.setInitialValue(initialPrice)
                 .setElasticity(elasticity)
