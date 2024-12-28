@@ -11,25 +11,25 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.UUID;
 
-public class VirtualInventory {
+public class Portfolios {
 
     public static void updateItem(Connection connection, UUID uuid, Item item, int quantity) {
         try {
-            String sql1 = "SELECT amount FROM inventories WHERE uuid=? AND identifier=?;";
+            String sql1 = "SELECT amount FROM portfolios WHERE uuid=? AND identifier=?;";
             PreparedStatement prep1 =  connection.prepareStatement(sql1);
             prep1.setString(1, uuid.toString());
             prep1.setString(2, item.getIdentifier());
             ResultSet resultSet = prep1.executeQuery();
 
             if(resultSet.next()) {
-                String sql2 = "UPDATE inventories SET amount=? WHERE uuid=? AND identifier=?;";
+                String sql2 = "UPDATE portfolios SET amount=? WHERE uuid=? AND identifier=?;";
                 PreparedStatement prep2 =  connection.prepareStatement(sql2);
                 prep2.setInt(1, quantity);
                 prep2.setString(2, uuid.toString());
                 prep2.setString(3, item.getIdentifier());
                 prep2.executeUpdate();
             } else {
-                String sql2 = "INSERT INTO inventories (uuid, identifier, amount) VALUES (?,?,?);";
+                String sql2 = "INSERT INTO portfolios (uuid, identifier, amount) VALUES (?,?,?);";
                 PreparedStatement prep2 =  connection.prepareStatement(sql2);
                 prep2.setString(1, uuid.toString());
                 prep2.setString(2, item.getIdentifier());
@@ -43,7 +43,7 @@ public class VirtualInventory {
 
     public static void removeItem(Connection connection, UUID uuid, Item item) {
         try {
-            String sql = "DELETE FROM inventories WHERE uuid=? AND identifier=?;";
+            String sql = "DELETE FROM portfolios WHERE uuid=? AND identifier=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, uuid.toString());
             prep.setString(2, item.getIdentifier());
@@ -55,7 +55,7 @@ public class VirtualInventory {
 
     public static void clearInventory(Connection connection, UUID uuid) {
         try {
-            String sql = "DELETE FROM inventories WHERE uuid=?;";
+            String sql = "DELETE FROM portfolios WHERE uuid=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, uuid.toString());
             prep.executeUpdate();
@@ -76,12 +76,12 @@ public class VirtualInventory {
         }
     }
 
-    public static LinkedHashMap<Item, Integer> retrieveInventory(Connection connection, UUID uuid) {
+    public static LinkedHashMap<Item, Integer> retrievePortfolio(Connection connection, UUID uuid) {
 
         LinkedHashMap<Item, Integer> content = new LinkedHashMap<>();
 
         try {
-            String sql = "SELECT identifier, amount FROM inventories WHERE uuid=?";
+            String sql = "SELECT identifier, amount FROM portfolios WHERE uuid=?";
             PreparedStatement prep = connection.prepareStatement(sql);
             prep.setString(1, uuid.toString());
             ResultSet resultSet = prep.executeQuery();
@@ -92,11 +92,6 @@ public class VirtualInventory {
                 if (item != null)
                     content.put(item, resultSet.getInt("amount"));
 
-                String sqlDelete = "DELETE FROM inventories WHERE identifier=? AND uuid=?;";
-                PreparedStatement prepDelete = connection.prepareStatement(sqlDelete);
-                prepDelete.setString(1, resultSet.getString("identifier"));
-                prepDelete.setString(2, uuid.toString());
-                prepDelete.executeUpdate();
             }
 
         } catch (SQLException e) {

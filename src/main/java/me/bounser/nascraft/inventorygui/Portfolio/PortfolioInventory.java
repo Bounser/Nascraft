@@ -1,19 +1,20 @@
-package me.bounser.nascraft.commands.discord;
+package me.bounser.nascraft.inventorygui.Portfolio;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
-import me.bounser.nascraft.discord.inventories.DiscordInventories;
-import me.bounser.nascraft.discord.inventories.DiscordInventory;
 import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.inventorygui.MarketMenuManager;
 import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
+import me.bounser.nascraft.portfolio.Portfolio;
+import me.bounser.nascraft.portfolio.PortfoliosManager;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -30,37 +31,46 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.profile.PlayerProfile;
-import org.bukkit.profile.PlayerTextures;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.*;
 
-public class DiscordInventoryInGame implements Listener {
+public class PortfolioInventory implements Listener {
 
-    private static DiscordInventoryInGame instance = null;
+    private static PortfolioInventory instance = null;
 
-    public static DiscordInventoryInGame getInstance() { return instance == null ? new DiscordInventoryInGame() : instance; }
+    public static PortfolioInventory getInstance() { return instance == null ? new PortfolioInventory() : instance; }
 
     @EventHandler
     public void onClickInventory(InventoryClickEvent event) {
 
-        if (!event.getWhoClicked().hasMetadata("NascraftDiscordInventory")) return;
+        if (!event.getWhoClicked().hasMetadata("NascraftPortfolio")) return;
 
         event.setCancelled(true);
 
-        if (event.getClickedInventory() == null || event.getView().getTopInventory().getSize() != 45) { return; }
+        if (event.getView().getTopInventory().getSize() != 45) { return; }
+        if (event.getClickedInventory() == null) { return; }
 
-        DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(event.getWhoClicked().getUniqueId());
+        Portfolio portfolio = PortfoliosManager.getInstance().getPortfolio(event.getWhoClicked().getUniqueId());
+
+        Player player = (Player) event.getWhoClicked();
+
+        if (event.getClickedInventory().getSize() == 45 && Config.getInstance().getPortfolioMenuBackEnabled() && event.getSlot() == Config.getInstance().getPortfolioMenuBackSlot()) {
+            MarketMenuManager.getInstance().openMenu(player);
+            return;
+        }
+
+        if (event.getClickedInventory().getSize() == 45 && Config.getInstance().getPortfolioInfoEnabled() && event.getSlot() == Config.getInstance().getPortfolioInfoSlot()) {
+            MarketMenuManager.getInstance().setMenuOfPlayer(player, new InfoPortfolio(PortfoliosManager.getInstance().getPortfolio(event.getWhoClicked().getUniqueId()), player));
+            return;
+        }
 
         // EXPANSION
-        if (event.getClickedInventory().getSize() == 45 && event.getCurrentItem() != null && event.getRawSlot() > 8 + discordInventory.getCapacity() && event.getRawSlot() < 40) {
-            if (MoneyManager.getInstance().hasEnoughMoney((OfflinePlayer) event.getWhoClicked(), CurrenciesManager.getInstance().getVaultCurrency(), discordInventory.getNextSlotPrice())) {
-                Nascraft.getEconomy().withdrawPlayer((OfflinePlayer) event.getView().getPlayer(), discordInventory.getNextSlotPrice());
-                discordInventory.increaseCapacity();
+        if (event.getClickedInventory().getSize() == 45 && event.getCurrentItem() != null && event.getRawSlot() > 8 + portfolio.getCapacity() && event.getRawSlot() <= 35) {
+            if (MoneyManager.getInstance().hasEnoughMoney((OfflinePlayer) event.getWhoClicked(), CurrenciesManager.getInstance().getVaultCurrency(), portfolio.getNextSlotPrice())) {
+                Nascraft.getEconomy().withdrawPlayer((OfflinePlayer) event.getView().getPlayer(), portfolio.getNextSlotPrice());
+                portfolio.increaseCapacity();
             } else {
-                Lang.get().message((Player) event.getWhoClicked(), Message.DISINV_CANT_AFFORD_EXPANSION);
+                Lang.get().message((Player) event.getWhoClicked(), Message.PORTFOLIO_CANT_AFFORD_EXPANSION);
             }
             return;
         }
@@ -68,9 +78,9 @@ public class DiscordInventoryInGame implements Listener {
         // RETRIEVE ITEM
         if (event.getClickedInventory().getSize() == 45 &&
                 event.getRawSlot() > 8 &&
-                event.getRawSlot() < 40) {
+                event.getRawSlot() <= 35) {
 
-            List<Item> items = new ArrayList<>(discordInventory.getContent().keySet());
+            List<Item> items = new ArrayList<>(portfolio.getContent().keySet());
 
             if (event.getRawSlot() - 9 > items.size()-1) return;
 
@@ -78,13 +88,13 @@ public class DiscordInventoryInGame implements Listener {
 
             if (item == null) return;
 
-            int quantity = discordInventory.getContent().get(item);
+            int quantity = portfolio.getContent().get(item);
 
             quantity = Math.min(quantity, item.getItemStack().getMaxStackSize());
 
             if (!checkInventory((Player) event.getWhoClicked(), item, quantity)) { return; }
 
-            discordInventory.removeItem(item, quantity);
+            portfolio.removeItem(item, quantity);
             event.getWhoClicked().getInventory().addItem(item.getItemStack(quantity));
 
             return;
@@ -94,7 +104,7 @@ public class DiscordInventoryInGame implements Listener {
         if (event.getClickedInventory().getSize() != 45 && event.getCurrentItem() != null) {
 
             if (!MarketManager.getInstance().isAValidParentItem(event.getCurrentItem())) {
-                Lang.get().message((Player) event.getWhoClicked(), Message.DISINV_INVALID);
+                Lang.get().message((Player) event.getWhoClicked(), Message.PORTFOLIO_INVALID);
                 return;
             }
 
@@ -104,91 +114,103 @@ public class DiscordInventoryInGame implements Listener {
 
             int amount = event.getCurrentItem().getAmount();
 
+            if (!portfolio.hasSpace(item, amount)) {
+                Lang.get().message((Player) event.getWhoClicked(), Message.PORTFOLIO_NO_STORAGE);
+                return;
+            }
+
             event.getCurrentItem().setAmount(0);
 
-            discordInventory.addItem(item, amount);
+            portfolio.addItem(item, amount);
+
         }
     }
 
     @EventHandler
     public void onInventoryDrag(InventoryDragEvent event) {
-        if (event.getWhoClicked().hasMetadata("NascraftDiscordInventory")) {  event.setCancelled(true); }
+        if (event.getWhoClicked().hasMetadata("NascraftPortfolio")) {  event.setCancelled(true); }
     }
 
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent event) {
-        if (event.getPlayer().hasMetadata("NascraftDiscordInventory")) {
-            event.getPlayer().removeMetadata("NascraftDiscordInventory", Nascraft.getInstance());
+        if (event.getPlayer().hasMetadata("NascraftPortfolio")) {
+            event.getPlayer().removeMetadata("NascraftPortfolio", Nascraft.getInstance());
         }
     }
 
-    public void updateDiscordInventory(Player player) {
+    public void updatePortfolioInventory(Player player) {
 
-        if (!player.hasMetadata("NascraftDiscordInventory")) return;
+        if (!player.hasMetadata("NascraftPortfolio")) return;
 
         Inventory inventory = player.getOpenInventory().getTopInventory();
 
         inventory.clear();
 
         insertFillers(inventory);
-        insertDiscordHead(inventory, player.getUniqueId());
         insertLockedSpaces(inventory, player.getUniqueId());
         insertDiscordInventoryContent(inventory, player.getUniqueId());
+
+        if (Config.getInstance().getPortfolioMenuBackEnabled() && !player.getMetadata("NascraftPortfolio").get(0).asBoolean()) {
+            insetBackButton(inventory);
+        }
+
+        if (Config.getInstance().getPortfolioInfoEnabled()) {
+            insertInfoButton(inventory, player.getUniqueId());
+        }
     }
 
     public void insertFillers(Inventory inventory) {
 
-        ItemStack filler = new ItemStack(Config.getInstance().getDiscordInvFillersMaterial());
+        ItemStack filler = new ItemStack(Config.getInstance().getPortfolioFillerMaterial());
         ItemMeta meta = filler.getItemMeta();
         meta.setDisplayName(" ");
         filler.setItemMeta(meta);
 
-        for(int i : new int[]{0, 1, 2, 3, 5, 6, 7, 8, 40, 41, 42, 43, 44}) {
+        for(int i : new int[]{0, 1, 2, 3, 5, 6, 7, 8, 36, 37, 38, 39, 40, 41, 42, 43, 44}) {
             inventory.setItem(i, filler);
         }
     }
 
-    public void insertDiscordHead(Inventory inventory, UUID uuid) {
+    public void insertInfoButton(Inventory inventory, UUID uuid) {
 
-        String TEXTURE = Config.getInstance().getDiscordInvInfoTexture();
+        ItemStack item = new ItemStack(Material.PLAYER_HEAD);
 
-        PlayerProfile profile = getProfile(TEXTURE);
-        ItemStack head = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta meta = (SkullMeta) head.getItemMeta();
-
-        Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.DISINV_INFO_TITLE));
+        SkullMeta meta = (SkullMeta) item.getItemMeta();
+        meta.setOwningPlayer(Bukkit.getPlayer(uuid));
+        
+        Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_INFO_TITLE));
         meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(title));
 
-        String worth = "\n";
+        String worth = "";
 
-        HashMap<Currency, Float> value = DiscordInventories.getInstance().getInventory(uuid).getInventoryValuePerCurrency();
+        HashMap<Currency, Double> value = PortfoliosManager.getInstance().getPortfolio(uuid).getInventoryValuePerCurrency();
 
         for (Currency currency : value.keySet())
-            worth += Formatter.format(currency, value.get(currency), Style.ROUND_BASIC) + "\n";
+            worth += "\n" + Formatter.format(currency, value.get(currency), Style.ROUND_BASIC);
 
         List<String> lore = new ArrayList<>();
-        for (String line : Lang.get().message(Message.DISINV_INFO_LORE, "[WORTH]", worth).split("\\n")) {
+        for (String line : Lang.get().message(Message.PORTFOLIO_INFO_LORE, "[WORTH]", worth).split("\\n")) {
             Component loreComponent = MiniMessage.miniMessage().deserialize(line);
             lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
         }
 
         meta.setLore(lore);
-        meta.setOwnerProfile(profile);
-        head.setItemMeta(meta);
 
-        inventory.setItem(Config.getInstance().getDiscordInvInfoSlot(), head);
+        item.setItemMeta(meta);
+
+        inventory.setItem(Config.getInstance().getPortfolioInfoSlot(), item);
     }
 
     public void insertLockedSpaces(Inventory inventory, UUID uuid) {
 
-        ItemStack filler = new ItemStack(Config.getInstance().getDiscordInvLockedMaterial());
+        ItemStack filler = new ItemStack(Config.getInstance().getPortfolioLockedMaterial());
         ItemMeta meta = filler.getItemMeta();
 
-        Component lockName = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.DISINV_LOCKED_TITLE));
+        Component lockName = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_LOCKED_TITLE));
         meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(lockName));
 
         List<String> lore = new ArrayList<>();
-        for (String line : Lang.get().message(Message.DISINV_LOCKED_LORE, "0", Formatter.format(CurrenciesManager.getInstance().getVaultCurrency(), DiscordInventories.getInstance().getInventory(uuid).getNextSlotPrice(), Style.ROUND_BASIC), "0").split("\\n")) {
+        for (String line : Lang.get().message(Message.PORTFOLIO_LOCKED_LORE, "0", Formatter.format(CurrenciesManager.getInstance().getVaultCurrency(), PortfoliosManager.getInstance().getPortfolio(uuid).getNextSlotPrice(), Style.ROUND_BASIC), "0").split("\\n")) {
             Component loreComponent = MiniMessage.miniMessage().deserialize(line);
             lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
         }
@@ -196,14 +218,14 @@ public class DiscordInventoryInGame implements Listener {
         meta.setLore(lore);
         filler.setItemMeta(meta);
 
-        for(int i = 9 + DatabaseManager.get().getDatabase().retrieveCapacity(uuid); i < 40 ; i++) {
+        for(int i = 9 + DatabaseManager.get().getDatabase().retrieveCapacity(uuid); i <= 35 ; i++) {
             inventory.setItem(i, filler);
         }
     }
 
     public void insertDiscordInventoryContent(Inventory inventory, UUID uuid) {
 
-        HashMap<Item, Integer> content = DiscordInventories.getInstance().getInventory(uuid).getContent();
+        HashMap<Item, Integer> content = PortfoliosManager.getInstance().getPortfolio(uuid).getContent();
 
         int i = 9;
         for (Item item : content.keySet()) {
@@ -220,14 +242,14 @@ public class DiscordInventoryInGame implements Listener {
                 List<String> lore = meta.getLore();
 
                 lore.add("");
-                Component loreComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.DISINV_AMOUNT, "0", String.valueOf(content.get(item)), "0"));
+                Component loreComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_AMOUNT, "0", String.valueOf(content.get(item)), "0"));
                 lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
 
                 finalLore = lore;
 
             } else {
 
-                for (String line : Lang.get().message(Message.DISINV_AMOUNT, "0", String.valueOf(content.get(item)), "0").split("\\n")) {
+                for (String line : Lang.get().message(Message.PORTFOLIO_AMOUNT, "0", String.valueOf(content.get(item)), "0").split("\\n")) {
                     Component loreComponent = MiniMessage.miniMessage().deserialize(line);
                     finalLore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
                 }
@@ -241,18 +263,14 @@ public class DiscordInventoryInGame implements Listener {
         }
     }
 
-    private static PlayerProfile getProfile(String texture) {
-        PlayerProfile profile = Bukkit.createPlayerProfile(UUID.randomUUID());
-        PlayerTextures textures = profile.getTextures();
-        URL urlObject;
-        try {
-            urlObject = new URL("https://textures.minecraft.net/texture/" + texture);
-        } catch (MalformedURLException exception) {
-            throw new RuntimeException("Invalid URL", exception);
-        }
-        textures.setSkin(urlObject);
-        profile.setTextures(textures);
-        return profile;
+    public void insetBackButton(Inventory inventory) {
+        ItemStack filler = new ItemStack(Config.getInstance().getPortfolioMenuBackMaterial());
+        ItemMeta meta = filler.getItemMeta();
+        Component backName = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_BACK_NAME));
+        meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(backName));
+        filler.setItemMeta(meta);
+
+        inventory.setItem(Config.getInstance().getPortfolioMenuBackSlot(), filler);
     }
 
     public boolean checkInventory(Player player, Item item, int amount) {
@@ -271,7 +289,7 @@ public class DiscordInventoryInGame implements Listener {
                 }
             }
             if (untilFull < amount) {
-                Lang.get().message(player, Message.DISINV_NO_SPACE);
+                Lang.get().message(player, Message.PORTFOLIO_NO_SPACE);
                 return false;
             }
 
@@ -282,7 +300,7 @@ public class DiscordInventoryInGame implements Listener {
                 if (content != null && !content.getType().equals(Material.AIR)) slotsUsed++;
 
             if ((36 - slotsUsed) < (amount/itemStack.getType().getMaxStackSize())) {
-                Lang.get().message(player, Message.DISINV_NO_SPACE);
+                Lang.get().message(player, Message.PORTFOLIO_NO_SPACE);
                 return false;
             }
         }
