@@ -1,8 +1,6 @@
 # Nascraft it_IT - ${project.version}
 # by @Try__
 
-# Il simbolo della valuta dovrebbe essere dopo (o prima) del prezzo? ($50 o 50$)
-after: false
 # Separatore decimale. Disponibile: point (.), comma (,)
 separator: "comma"
 
@@ -16,9 +14,11 @@ default_category_format: "<gradient:#6b86ff:#3d67ff>[NAME]</gradient>"
 buy_message: "<gradient:#00E3FB:#F9ABFD>Hai appena comprato <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> del valore di </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
 sell_message: "<gradient:#00E3FB:#F9ABFD>Hai appena venduto <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> del valore di </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
 
-not_enough_money: "<gradient:#FB6363:#C4B3FD>Non hai abbastanza soldi per pagare questo!</gradient>"
-not_enough_items: "<gradient:#FB6363:#C4B3FD>Non hai abbastanza oggetti da vendere!</gradient>"
-not_enough_space: "<gradient:#FB6363:#C4B3FD>Non c'è abbastanza spazio nell'inventario!</gradient>"
+not_enough_money: "<gradient:#FB6363:#C4B3FD>✘ Non hai abbastanza soldi per pagare questo!</gradient>"
+not_enough_items: "<gradient:#FB6363:#C4B3FD>✘ Non hai abbastanza oggetti da vendere!</gradient>"
+not_enough_space: "<gradient:#FB6363:#C4B3FD>✘ Non c'è abbastanza spazio nell'inventario!</gradient>"
+top_limit_reached: "<gradient:#FB6363:#C4B3FD>✘ Nessuno vuole comprare quello!</gradient> <color:#a84b34>(Prezzo minimo raggiunto)</color>"
+bottom_limit_reached: "<gradient:#FB6363:#C4B3FD>✘ Nessuno vuole venderti quello!</gradient> <color:#a84b34>(Prezzo massimo raggiunto)</color>"
 shop_closed: "<gradient:#FB6363:#C4B3FD>Errore durante l'acquisto: Negozio chiuso</gradient>"
 
 # Comandi
@@ -59,6 +59,9 @@ alert_setup: "<gradient:#00E3FB:#F9ABFD>Allerta impostata correttamente! Ricever
 alerts_empty: "<gradient:#FB6363:#C4B3FD>Non hai impostato nessun avviso.</gradient>"
 alerts_header: "&eAvvisi attivi:\n"
 alerts_list_segment: "\n&6> &l[MATERIAL] &r&ea prezzo &l[WORTH]"
+
+alert_reached_up: "<color:#ffd269>✉</color> <gradient:#FB6363:#C4B3FD>Allerta raggiunta per l'oggetto: </gradient>[NAME] <color:#ffae2b>- </color>[PRICE1] <gradient:#FB6363:#C4B3FD>Il prezzo è salito a: [PRICE2]!</gradient>"
+alert_reached_down: "<color:#ffd269>✉</color> <gradient:#FB6363:#C4B3FD>Allerta raggiunta per l'oggetto: </gradient>[NAME] <color:#ffae2b>- </color>[PRICE1] <gradient:#FB6363:#C4B3FD>Il prezzo è sceso a: [PRICE2]!</gradient>"
 
 # SELLWAND
 
@@ -138,7 +141,7 @@ gui_category_next_name: "<b><gradient:#ff816b:#ff2e38>→</gradient></b>"
 gui_category_item_lore: " \n<gradient:#497882:#4a5082>Prezzo: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Cambiamento nell'ultima ora: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● ACQUISTA:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● VENDI:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>\n \n<u><gradient:#747cc2:#ebffc4>⏵ Clicca per operare con questo oggetto</gradient></u>"
 
 gui_buysell_item_lore: " \n<gradient:#497882:#4a5082>Prezzo: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Cambiamento nell'ultima ora: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● ACQUISTA:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● VENDI:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>"
-gui_buysell_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Imposta avviso per oggetto</gradient></b>"
+gui_buysell_alerts_name_linked: "<color:#59ff40>✎</color> <b><gradient:#ffbf00:#ff4800>Imposta avviso per oggetto</gradient></b>"
 gui_buysell_alerts_name_setup: "<b><gradient:#ffbf00:#ff4800>Avviso</gradient></b>"
 gui_buysell_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Imposta avviso per oggetto</gradient></b>"
 gui_buysell_alerts_lore_linked: "<gradient:#cc801d:#4a5082>Clicca per selezionare un prezzo. Riceverai una notifica</gradient>\n<gradient:#cc801d:#4a5082>tramite Discord una volta raggiunto il prezzo.</gradient>"
@@ -263,18 +266,6 @@ discord_wiki_6: "Broker"
 discord_wiki_inventory: "## :school_satchel: Inventario\n> Una volta collegato il tuo account, **il tuo denaro in-game verrà condiviso con il tuo account Discord** e viceversa, e **riceverai un inventario virtuale**, nel quale potrai conservare gli oggetti che acquisti tramite Discord. Ogni slot può contenere **fino a 999 unità di un tipo di oggetto**. Due slot non possono contenere lo stesso tipo di materiale. Puoi acquistare più slot e controllare i contenuti e il valore premendo il pulsante :school_satchel: **Inventario**."
 discord_wiki_balance: "## :coin: Bilancio\n> Se sei collegato, il pulsante :coin: **Bilancio** ti mostrerà alcune statistiche sul tuo stato finanziario. Visualizzerà la **borsa condivisa tra il tuo account Discord e Minecraft**, e altre informazioni come il **valore attuale del tuo inventario Discord** e il denaro **sotto gestione dei broker**."
 discord_wiki_alerts: "## :bell: Avvisi\n> Se sei interessato a un determinato oggetto, puoi impostare un **avviso** per ricevere un **messaggio privato quando il prezzo di un oggetto raggiunge una soglia** che hai registrato in precedenza. Per impostare i tuoi avvisi personalizzati usa :bell:**Avvisi**."
-discord_wiki_dynamic: "## :dart: Ordini Dinamici\n> Imposta ordini che possono reagire al prezzo dell'attivo. Puoi piazzare ordini Limit, per acquistare/vendere un attivo quando raggiunge un certo prezzo, o take profit/stoploss, con il quale venderai la tua posizione una volta che il prezzo viene raggiunto. Per accedere a questa funzionalità, premi :bar_chart: **Opzioni Avanzate** e poi :dart: **Ordini Dinamici**."
-discord_wiki_sessions: "## :desktop:  **Sessioni**: \n
-                         > Selezionando un oggetto si apre una sessione, nella quale avrai accesso a operazioni più avanzate:
-                         \n\n> :chart_with_upwards_trend: **Prezzo al rialzo**: Scommetti sul rialzo del prezzo. Prenderai un prestito contro il tuo Inventario, fino al 50% del suo valore (Durante l'operazione tutti gli asset saranno bloccati, quindi non potrai venderli), e moltiplicherai i movimenti del prezzo per un fattore di 3. Ciò significa che un guadagno del 33% si tradurrà in un guadagno del 100%, e una perdita del -33% in una perdita totale (-100%).
-                         \n\n> :chart_with_downwards_trend: **Prezzo al ribasso**: Scommetti sul ribasso del prezzo. È l'inverso del long. Lo stesso principio, con un fattore di 2. Guadagnerai un 10% se il prezzo scende del 5%, e perderai tutto se il prezzo sale del 50%.
-                         \n\n> :bookmark_tabs: **Futures**: Sono contratti in cui puoi definire un'operazione futura con i prezzi attuali, pagando una commissione. Se non hai soldi subito e vuoi comprare o vendere, ad esempio diamanti, se pensi che il prezzo di oggi sia buono, puoi firmare un contratto futuro, pagando il 10% in anticipo, e avrai il diritto di comprare l'oggetto tra una settimana (commissione del 10%) o un mese (commissione del 20%) al prezzo di oggi.
-                         \n\n> :date: **Azioni Programmate**: Con questa opzione potrai vendere/comprare oggetti regolarmente in un intervallo di tempo fisso. Ad esempio, puoi comprare 64 diamanti ogni settimana o vendere 200 lingotti di ferro al giorno."
-discord_wiki_brokers: "## :man_office_worker: Broker:\n
-                        Puoi assumere un broker per automatizzare il processo di investimento, anche se a un costo sotto forma di una commissione. I broker disponibili sono:
-                        \n\n> :man_office_worker: **Broker Aggressivo**: Assegnagli una quantità di denaro e cercherà automaticamente di guadagnare di più in qualsiasi modo, inclusi derivati complessi. Applica una commissione del **8% al giorno**. Nessun profitto è garantito e puoi perdere tutti i soldi investiti.
-                        \n\n> :man_teacher:  **Broker Regolare**: Assegnagli una quantità di denaro e cercherà automaticamente di guadagnare in modo più conservativo. Applica una commissione del **4% al giorno**. Nessun profitto è garantito e puoi perdere tutti i soldi investiti.
-                        \n\n> :man_technologist:**Broker Pigro**: Assegnagli una quantità di denaro e lui garantirà i rendimenti del mercato (Medi) meno una commissione giornaliera del **1%**."
 
 discord_not_linked_short: "Non collegato!"
 discord_not_linked: ":exclamation: Il tuo account non è collegato! Esegui `/link in-game` per avviare il processo di collegamento degli account."

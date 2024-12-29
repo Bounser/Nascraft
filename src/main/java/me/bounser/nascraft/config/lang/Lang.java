@@ -73,15 +73,19 @@ public class Lang {
         audience.player(player).sendMessage(miniMessage.deserialize(msg));
     }
 
+    public String message(Message lang) {
+        if (!this.lang.contains(lang.name().toLowerCase())) {
+            Nascraft.getInstance().getLogger().warning("Lang section not found: " + lang.name().toLowerCase());
+            return "Lang section not found: " + lang.name().toLowerCase();
+        }
+        return this.lang.getString(lang.name().toLowerCase()).replace("&", "§"); }
 
-    public String message(Message lang) { return this.lang.getString(lang.name().toLowerCase()).replace("&", "§"); }
-
-    public void message(Player player, Message lang, String worth, String amount, String material) {
+    public void message(Player player, Message lang, String worth, String amount, String name) {
 
         audience.player(player).sendMessage(miniMessage.deserialize(this.lang.getString(lang.name().toLowerCase())
                 .replace("[WORTH]", worth)
                 .replace("[AMOUNT]", amount)
-                .replace("[MATERIAL]", material)));
+                .replace("[NAME]", name)));
     }
 
     public void message(Player player, Message lang, String placeholder, String replacement) {
@@ -98,12 +102,12 @@ public class Lang {
                 .replace(placeholder3, replacement3)));
     }
 
-    public String message(Message lang, String worth, String amount, String material) {
+    public String message(Message lang, String worth, String amount, String name) {
         return this.lang.getString(lang.name().toLowerCase())
                 .replace("&", "§")
                 .replace("[WORTH]", worth)
                 .replace("[AMOUNT]", amount)
-                .replace("[MATERIAL]", material);
+                .replace("[NAME]", name);
     }
 
     public String message(Message lang, String placeholder, String replacement) {
@@ -119,7 +123,4 @@ public class Lang {
                 .replace(placeholder2, replacement2)
                 .replace(placeholder3, replacement3);
     }
-
-    public boolean after() { return lang.getBoolean("after"); }
-
 }

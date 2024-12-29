@@ -2,8 +2,10 @@ package me.bounser.nascraft.database.commands.resources;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 public class NormalisedDate {
 
@@ -26,4 +28,13 @@ public class NormalisedDate {
 
         return daysDifferenceInt;
     }
+
+    public static Date getDateFromDay(int day) {
+
+        LocalDate startDate = LocalDate.of(2023, 1, 1);
+        startDate.plusDays(day);
+
+        return Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+    }
+
 }

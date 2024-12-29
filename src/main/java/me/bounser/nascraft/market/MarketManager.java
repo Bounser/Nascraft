@@ -1,5 +1,6 @@
 package me.bounser.nascraft.market;
 
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.managers.ImagesManager;
@@ -10,7 +11,9 @@ import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 
 import java.awt.image.BufferedImage;
 import java.util.*;
@@ -18,6 +21,7 @@ import java.util.*;
 public class MarketManager {
 
     private final List<Item> items = new ArrayList<>();
+    private final HashMap<String, Item> identifiers = new HashMap<>();
     private List<Category> categories = new ArrayList<>();
 
     private boolean active = true;
@@ -29,6 +33,8 @@ public class MarketManager {
 
     private int operationsLastHour = 0;
 
+    private List<String> ignoredKeys = new ArrayList<>();
+
     private static MarketManager instance = null;
 
     public static MarketManager getInstance() { return instance == null ? new MarketManager() : instance; }
@@ -36,6 +42,7 @@ public class MarketManager {
     private MarketManager() {
         instance = this;
         setupItems();
+        ignoredKeys = Config.getInstance().getIgnoredKeys();
     }
 
     public void setupItems() {
@@ -82,6 +89,7 @@ public class MarketManager {
             DatabaseManager.get().getDatabase().retrieveItem(item);
 
             items.add(item);
+            identifiers.put(identifier, item);
             category.addItem(item);
 
             for (Item child : config.getChilds(identifier)) {
@@ -90,7 +98,8 @@ public class MarketManager {
             }
         }
 
-        if (categories.size() < 4) {
+        Plugin AGUI = Bukkit.getPluginManager().getPlugin("AdvancedGUI");
+        if (categories.size() < 4 && (AGUI == null || !AGUI.isEnabled())) {
             Nascraft.getInstance().getLogger().severe("You need to have at least 4 categories! Disabling plugin...");
             Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
         }
@@ -118,7 +127,7 @@ public class MarketManager {
     }
 
     public Item getItem(String identifier) {
-        for (Item item : items) if (item.getIdentifier().equalsIgnoreCase(identifier)) return item;
+        if (identifiers.containsKey(identifier)) return identifiers.get(identifier);
         return null;
     }
 
@@ -165,7 +174,7 @@ public class MarketManager {
     public boolean isAValidItem(ItemStack itemStack) {
 
         for (Item item : items)
-            if (item.getItemStack().isSimilar(itemStack)) return true;
+            if (isSimilarEnough(item.getItemStack(), itemStack)) return true;
 
         return false;
     }
@@ -173,9 +182,30 @@ public class MarketManager {
     public boolean isAValidParentItem(ItemStack itemStack) {
 
         for (Item item : getAllParentItems())
-            if (item.getItemStack().isSimilar(itemStack)) return true;
+            if (isSimilarEnough(item.getItemStack(), itemStack)) return true;
 
         return false;
+    }
+
+    public boolean isSimilarEnough(ItemStack itemStack1, ItemStack itemStack2) {
+
+        if (itemStack1 == null || itemStack2 == null) return false;
+
+        if (!itemStack1.getType().equals(itemStack2.getType())) return false;
+
+        ItemStack itemStackWithoutFlags1 = itemStack1.clone();
+        ItemStack itemStackWithoutFlags2 = itemStack2.clone();
+
+        for (String ignoredKey : ignoredKeys) {
+            NBT.modify(itemStackWithoutFlags1, nbt -> {
+                nbt.removeKey(ignoredKey);
+            });
+            NBT.modify(itemStackWithoutFlags1, nbt -> {
+                nbt.removeKey(ignoredKey);
+            });
+        }
+
+        return itemStackWithoutFlags1.isSimilar(itemStackWithoutFlags2);
     }
 
     public List<Item> getTopGainers(int quantity) {
@@ -189,10 +219,10 @@ public class MarketManager {
             Item imax = items.get(0);
             for (Item item : items) {
 
-                float variation = -100 + 100 * (item.getPrice().getValue() / item.getPrice().getValueAnHourAgo());
+                float variation = item.getPrice().getValueChangeLastHour();
 
                 if (variation != 0) {
-                    if (variation > -100 + 100 * (imax.getPrice().getValue() / imax.getPrice().getValueAnHourAgo())) {
+                    if (variation > imax.getPrice().getValueChangeLastHour()) {
                         imax = item;
                     }
                 }
@@ -215,10 +245,10 @@ public class MarketManager {
             Item imax = items.get(0);
             for (Item item : items) {
 
-                float variation = RoundUtils.round(-100 + 100 * (item.getPrice().getValue() / item.getPrice().getValueAnHourAgo()));
+                float variation = item.getPrice().getValueChangeLastHour();
 
                 if (variation != 0) {
-                    if (variation < -100 + 100 * (imax.getPrice().getValue() / imax.getPrice().getValueAnHourAgo())) {
+                    if (variation < imax.getPrice().getValueChangeLastHour()) {
                         imax = item;
                     }
                 }
@@ -228,6 +258,32 @@ public class MarketManager {
             topDippers.add(imax);
         }
         return topDippers;
+    }
+
+    public List<Item> getMostMoved(int quantity) {
+
+        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
+
+        List<Item> mostMoved = new ArrayList<>();
+
+        for (int i = 1; i <= quantity ; i++) {
+
+            Item imax = items.get(0);
+            for (Item item : items) {
+
+                float variation = item.getPrice().getValueChangeLastHour();
+
+                if (variation != 0) {
+                    if (Math.abs(variation) > Math.abs(imax.getPrice().getValueChangeLastHour())) {
+                        imax = item;
+                    }
+                }
+            }
+            items.remove(imax);
+
+            mostMoved.add(imax);
+        }
+        return mostMoved;
     }
 
     public List<Item> getMostTraded(int quantity) {

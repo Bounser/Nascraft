@@ -14,21 +14,24 @@ public class MoneyManager {
     public static MoneyManager instance;
 
     private Economy economy;
-    private FileConfiguration config;
     public static MoneyManager getInstance() { return instance == null ? instance = new MoneyManager() : instance; }
 
     private MoneyManager() {
         economy = Nascraft.getEconomy();
-        config = Nascraft.getInstance().getConfig();
     }
 
-    public void withdraw(OfflinePlayer player, Currency currency, float amount, float taxRate) {
+    public void withdraw(OfflinePlayer player, Currency currency, double amount, double taxRate) {
 
         switch (currency.getCurrencyType()) {
 
             case VAULT:
                 economy.withdrawPlayer(player, amount);
-                DatabaseManager.get().getDatabase().addTransaction(amount, Math.abs(amount - amount / taxRate));
+
+                if (taxRate == 0)
+                    DatabaseManager.get().getDatabase().addTransaction(amount, 0);
+                else
+                    DatabaseManager.get().getDatabase().addTransaction(amount, amount * taxRate);
+
                 break;
 
             case CUSTOM:
@@ -48,7 +51,7 @@ public class MoneyManager {
         }
     }
 
-    public void simpleWithdraw(OfflinePlayer player, Currency currency, float amount) {
+    public void simpleWithdraw(OfflinePlayer player, Currency currency, double amount) {
 
         switch (currency.getCurrencyType()) {
 
@@ -73,13 +76,18 @@ public class MoneyManager {
         }
     }
 
-    public void deposit(OfflinePlayer player, Currency currency, float amount, float taxRate) {
+    public void deposit(OfflinePlayer player, Currency currency, double amount, double taxRate) {
 
         switch (currency.getCurrencyType()) {
 
             case VAULT:
                 economy.depositPlayer(player, amount);
-                DatabaseManager.get().getDatabase().addTransaction(-amount, Math.abs(amount - amount / taxRate));
+
+                if (taxRate == 0)
+                    DatabaseManager.get().getDatabase().addTransaction(-amount, Math.abs(amount - amount / taxRate));
+                else
+                    DatabaseManager.get().getDatabase().addTransaction(-amount, 0);
+
                 break;
 
             case CUSTOM:
@@ -98,7 +106,7 @@ public class MoneyManager {
         }
     }
 
-    public boolean hasEnoughMoney(OfflinePlayer player, Currency currency, float quantity) {
+    public boolean hasEnoughMoney(OfflinePlayer player, Currency currency, double quantity) {
 
         switch (currency.getCurrencyType()) {
 
@@ -106,7 +114,7 @@ public class MoneyManager {
                 return economy.getBalance(player) >= quantity;
 
             case CUSTOM:
-                float balance = Float.parseFloat(PlaceholderAPI.setPlaceholders(player, currency.getBalancePlaceholder()));
+                double balance = Double.parseDouble(PlaceholderAPI.setPlaceholders(player, currency.getBalancePlaceholder()));
                 return (balance >= quantity);
 
             default:
@@ -114,15 +122,15 @@ public class MoneyManager {
         }
     }
 
-    public float getBalance(OfflinePlayer player, Currency currency) {
+    public double getBalance(OfflinePlayer player, Currency currency) {
 
         switch (currency.getCurrencyType()) {
 
             case VAULT:
-                return (float) economy.getBalance(player);
+                return economy.getBalance(player);
 
             case CUSTOM:
-                return Float.parseFloat(PlaceholderAPI.setPlaceholders(player, currency.getBalancePlaceholder()));
+                return Double.parseDouble(PlaceholderAPI.setPlaceholders(player, currency.getBalancePlaceholder()));
 
             default:
                 return 0;

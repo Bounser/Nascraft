@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 public class Alerts {
 
-    public static void addAlert(Connection connection, String userid, Item item, float price) {
+    public static void addAlert(Connection connection, String userid, Item item, double price) {
 
         try {
             String sql = "INSERT INTO alerts (day, userid, identifier, price) VALUES (?, ?, ?, ?);";
@@ -52,7 +52,7 @@ public class Alerts {
             ResultSet resultSet = prep.executeQuery();
 
             while (resultSet.next())
-                DiscordAlerts.getInstance().setAlert(resultSet.getString("userid"), resultSet.getString("identifier"), resultSet.getFloat("price"));
+                DiscordAlerts.getInstance().setAlert(resultSet.getString("userid"), resultSet.getString("identifier"), resultSet.getDouble("price"));
 
         } catch (SQLException e) {
             throw new RuntimeException(e);

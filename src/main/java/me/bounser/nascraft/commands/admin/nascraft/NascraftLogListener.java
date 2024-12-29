@@ -181,6 +181,8 @@ public class NascraftLogListener implements Listener {
 
                 ItemMeta meta = itemStack.getItemMeta();
 
+                if (meta == null) continue;
+
                 if (trade.isBuy()) {
                     meta.setDisplayName(ChatColor.GREEN + "BUY: " + trade.getItem().getFormattedName());
                 } else {

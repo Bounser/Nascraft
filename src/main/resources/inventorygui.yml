@@ -5,34 +5,53 @@ main-menu:
 
   alerts:
     enabled: true
-    slot: 3
+    slot: 8
     linked:
       material: 'bell'
     not-linked:
       material: 'bell'
+
+  limit-orders:
+    enabled: true
+    slot: 7
+    material: 'target'
 
   information:
     enabled: true
     slot: 4
     material: 'book'
 
-  discord:
+  portfolio:
     enabled: true
     slot: 5
     linked:
       material: 'chest'
     not-linked:
-      material: 'chain'
+      material: 'chest'
+
+  trends:
+    enabled: true
+    slot: 3
+    material: 'paper'
 
   fillers:
-    material: 'black_stained_glass_pane'
-    slots:
+    black_stained_glass_pane:
       - 0
       - 1
       - 2
       - 6
-      - 7
-      - 8
+    gray_stained_glass_pane:
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+      - 18
+      - 26
       - 27
       - 28
       - 29
@@ -46,16 +65,6 @@ main-menu:
   categories:
     item-list: true
     slots:
-      - 9
-      - 10
-      - 11
-      - 12
-      - 13
-      - 14
-      - 15
-      - 16
-      - 17
-      - 18
       - 19
       - 20
       - 21
@@ -63,11 +72,9 @@ main-menu:
       - 23
       - 24
       - 25
-      - 26
-      - 27
 
 category-section:
-  size: 27 # = 9 * 3
+  size: 36 # = 9 * 3
 
   category-item:
     slot: 4
@@ -91,20 +98,22 @@ category-section:
       - 5
       - 6
       - 7
-      - 8
+      - 9
+      - 17
       - 18
-      - 19
-      - 20
-      - 21
-      - 22
-      - 23
-      - 24
-      - 25
       - 26
+      - 27
+      - 28
+      - 29
+      - 30
+      - 31
+      - 32
+      - 33
+      - 34
+      - 35
 
   items:
     slots:
-      - 9
       - 10
       - 11
       - 12
@@ -112,19 +121,27 @@ category-section:
       - 14
       - 15
       - 16
-      - 17
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
 
 buy-sell:
 
   size: 27 # = 9 * 3
 
   alerts:
-    enabled: true
     slot: 22
     material: 'bell'
 
+  limit-orders:
+    slot: 8
+    material: 'target'
+
   info:
-    enabled: true
     slot: 4
     material: 'filled_map'
 
@@ -132,7 +149,6 @@ buy-sell:
     slot: 13
 
   back-button:
-    enabled: true
     slot: 0
     material: 'arrow'
 
@@ -145,7 +161,6 @@ buy-sell:
       - 5
       - 6
       - 7
-      - 8
       - 18
       - 19
       - 20
@@ -220,3 +235,107 @@ alerts:
       - 15
       - 16
       - 17
+
+limit-orders:
+
+  size: 27
+
+  back-button:
+    enabled: true
+    slot: 0
+    material: 'arrow'
+
+  fillers:
+    material: 'black_stained_glass_pane'
+    slots:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+
+  orders:
+    slots:
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 14
+      - 15
+      - 16
+      - 17
+
+set-limit-orders:
+
+  size: 27
+
+  back-button:
+    material: 'arrow'
+    slot: 0
+
+  item:
+    slot: 4
+
+  time:
+    material: 'clock'
+    slot: 12
+
+  price:
+    material: 'name_tag'
+    slot: 13
+
+  quantity:
+    material: 'writable_book'
+    slot: 14
+
+  confirm-sell:
+    material: 'red_candle'
+    slot: 10
+
+  confirm-buy:
+    material: 'lime_candle'
+    slot: 16
+
+  fillers:
+    material: 'black_stained_glass_pane'
+    slots:
+      - 1
+      - 2
+      - 3
+      - 5
+      - 6
+      - 7
+      - 8
+      - 18
+      - 19
+      - 20
+      - 21
+      - 22
+      - 23
+      - 24
+      - 25
+      - 26
+
+portfolio:
+
+  back-button:
+    enabled: true
+    slot: 0
+    material: 'arrow'
+
+  info:
+    enabled: true
+    slot: 4

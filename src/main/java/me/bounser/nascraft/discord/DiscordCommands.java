@@ -10,8 +10,8 @@ import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.images.BalanceImage;
 import me.bounser.nascraft.managers.ImagesManager;
 import me.bounser.nascraft.discord.images.InventoryImage;
-import me.bounser.nascraft.discord.inventories.DiscordInventories;
-import me.bounser.nascraft.discord.inventories.DiscordInventory;
+import me.bounser.nascraft.portfolio.PortfoliosManager;
+import me.bounser.nascraft.portfolio.Portfolio;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
@@ -173,7 +173,7 @@ public class DiscordCommands extends ListenerAdapter {
                     OfflinePlayer player2 = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(event.getUser().getId()));
 
                     double purse = Nascraft.getEconomy().getBalance(player2);
-                    float inventory = DiscordInventories.getInstance().getInventory(event.getUser().getId()).getInventoryValue();
+                    float inventory = PortfoliosManager.getInstance().getPortfolio(event.getUser().getId()).getInventoryValue();
                     float brokerValue = 0;
                     double total = purse + inventory + brokerValue;
 
@@ -218,7 +218,7 @@ public class DiscordCommands extends ListenerAdapter {
                     return;
                 }
 
-                DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(LinkManager.getInstance().getUUID(event.getUser().getId()));
+                Portfolio discordInventory = PortfoliosManager.getInstance().getPortfolio(LinkManager.getInstance().getUUID(event.getUser().getId()));
 
                 if (discordInventory.getCapacity() < 40) {
 
@@ -329,7 +329,7 @@ public class DiscordCommands extends ListenerAdapter {
                                 switch (event.getName()) {
 
                                     case "seeinv":
-                                        DiscordInventory discordInventory1 = DiscordInventories.getInstance().getInventory(event.getOption("userid").getAsString());
+                                        Portfolio discordInventory1 = PortfoliosManager.getInstance().getPortfolio(event.getOption("userid").getAsString());
 
                                         event.reply("## Displaying inventory of user: ``" + user.getName() + "``")
                                                 .setFiles(FileUpload.fromData(ImagesManager.getBytesOfImage(InventoryImage.getImage(discordInventory1)), "image.png"))
@@ -343,7 +343,7 @@ public class DiscordCommands extends ListenerAdapter {
                                         OfflinePlayer player2 = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(user.getId()));
 
                                         double purse = Nascraft.getEconomy().getBalance(player2);
-                                        float inventory = DiscordInventories.getInstance().getInventory(event.getUser().getId()).getInventoryValue();
+                                        float inventory = PortfoliosManager.getInstance().getPortfolio(event.getUser().getId()).getInventoryValue();
                                         float brokerValue = 0;
                                         double total = purse + inventory + brokerValue;
 

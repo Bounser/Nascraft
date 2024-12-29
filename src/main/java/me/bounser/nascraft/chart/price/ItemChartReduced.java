@@ -222,7 +222,7 @@ public class ItemChartReduced {
             lineRenderer.setSeriesPaint(0, new Color(155, 0, 0));
         }
 
-        plot.setInsets(new RectangleInsets(5, 5, 0, 0), true);
+        plot.setInsets(new RectangleInsets(7, 0, 0, 0), true);
 
         areaRenderer.setSeriesPaint(0, areaColor);
         areaRenderer.setOutline(false);
@@ -247,13 +247,13 @@ public class ItemChartReduced {
 
         TimeSeries series1 = new TimeSeries("Price");
 
-        float firstValue = 0;
+        double firstValue = 0;
         LocalDateTime timeOld = LocalDateTime.now();
 
-        float lastValue = 0;
+        double lastValue = 0;
         LocalDateTime timeRecent = LocalDateTime.of(2023, 1, 1, 1, 1);
 
-        float high = 0, low = -1;
+        double high = 0, low = -1;
 
         for (Instant instant : instants) {
 
@@ -287,22 +287,22 @@ public class ItemChartReduced {
             case DAY:
                 item.getPrice().setDayHigh(high);
                 item.getPrice().setDayLow(low);
-                item.getPrice().setDayChange(-1 + lastValue / firstValue);
+                item.getPrice().setDayChange((float) (-1 + lastValue / firstValue));
                 break;
             case MONTH:
                 item.getPrice().setMonthHigh(high);
                 item.getPrice().setMonthLow(low);
-                item.getPrice().setMonthChange(-1 + lastValue / firstValue);
+                item.getPrice().setMonthChange((float) (-1 + lastValue / firstValue));
                 break;
             case YEAR:
                 item.getPrice().setYearHigh(high);
                 item.getPrice().setYearLow(low);
-                item.getPrice().setYearChange(-1 + lastValue / firstValue);
+                item.getPrice().setYearChange((float) (-1 + lastValue / firstValue));
                 break;
             case ALL:
                 item.getPrice().setAllHigh(high);
                 item.getPrice().setAllLow(low);
-                item.getPrice().setAllChange(-1 + lastValue / firstValue);
+                item.getPrice().setAllChange((float) (-1 + lastValue / firstValue));
                 break;
         }
 

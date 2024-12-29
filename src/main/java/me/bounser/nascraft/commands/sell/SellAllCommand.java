@@ -55,15 +55,13 @@ public class SellAllCommand extends Command {
         }
 
         if (args.length == 0) {
-            sellEverything(player, args.length == 1 && args[0].equalsIgnoreCase("confirm"));
-            // Lang.get().message(player, Message.SELLALL_ERROR_WRONG_MATERIAL);
-            return;
 
-            /*
-        } else if (args[0].equalsIgnoreCase("everything")) {
+            sellEverything(player, false);
 
-            sellEverything(player, args.length == 2 && args[1].equalsIgnoreCase("confirm"));
-*/
+        } else if (args.length == 1 && args[0].equalsIgnoreCase("confirm")) {
+
+            sellEverything(player, true);
+
         } else {
 
             if (MarketManager.getInstance().getItem(args[0]) == null) {
@@ -114,7 +112,7 @@ public class SellAllCommand extends Command {
                 );
 
                 component = component.hoverEvent(HoverEvent.showText(hoverText))
-                        .clickEvent(ClickEvent.runCommand("/nsellall " + item.getIdentifier() + " confirm"));
+                        .clickEvent(ClickEvent.runCommand("/" + Config.getInstance().getCommandAlias("sellall") + " " + item.getIdentifier() + " confirm"));
 
                 Lang.get().getAudience().player(player).sendMessage(component);
 
@@ -237,7 +235,7 @@ public class SellAllCommand extends Command {
             Component hoverText = MiniMessage.miniMessage().deserialize(finalText);
 
             component = component.hoverEvent(HoverEvent.showText(hoverText))
-                    .clickEvent(ClickEvent.runCommand("/nsellall confirm"));
+                    .clickEvent(ClickEvent.runCommand("/" + Config.getInstance().getCommandAlias("sellall") + " confirm"));
 
             Lang.get().getAudience().player(player).sendMessage(component);
         }

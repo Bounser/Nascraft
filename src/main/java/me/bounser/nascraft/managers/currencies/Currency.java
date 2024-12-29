@@ -24,10 +24,10 @@ public class Currency {
 
     final int decimalPrecision;
 
-    final float topLimit;
-    final float lowLimit;
+    final double topLimit;
+    final double lowLimit;
 
-    public Currency(String currencyIdentifier, CurrencyType currencyType, String depositCommand, String withdrawCommand, String notEnoughMessage, String format, String balancePlaceholder, int decimalPrecision, float topLimit, float lowLimit) {
+    public Currency(String currencyIdentifier, CurrencyType currencyType, String depositCommand, String withdrawCommand, String notEnoughMessage, String format, String balancePlaceholder, int decimalPrecision, double topLimit, double lowLimit) {
             this.currencyIdentifier = currencyIdentifier;
             this.currencyType = currencyType;
             this.depositCommand = depositCommand;
@@ -57,8 +57,8 @@ public class Currency {
 
     public int getDecimalPrecission() { return decimalPrecision; }
 
-    public float getTopLimit() { return topLimit; }
+    public double getTopLimit() { return topLimit; }
 
-    public float getLowLimit() { return lowLimit; }
+    public double getLowLimit() { return lowLimit; }
 
 }

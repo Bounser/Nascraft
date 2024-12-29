@@ -1,7 +1,7 @@
 package me.bounser.nascraft.discord.images;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.discord.inventories.DiscordInventories;
+import me.bounser.nascraft.portfolio.PortfoliosManager;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Bukkit;
@@ -18,7 +18,7 @@ public class BalanceImage {
 
         OfflinePlayer player = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(user.getId()));
         double purse = Nascraft.getEconomy().getBalance(player);
-        float inventory = DiscordInventories.getInstance().getInventory(user.getId()).getInventoryValue();
+        float inventory = PortfoliosManager.getInstance().getPortfolio(user.getId()).getInventoryValue();
         float brokerValue = 0;
 
         float total = (float) (purse + inventory + brokerValue);

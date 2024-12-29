@@ -5,16 +5,16 @@ import java.time.LocalDateTime;
 public class Instant {
 
     private LocalDateTime localDateTime;
-    private float price;
+    private double price;
     private int volume;
 
-    public Instant(LocalDateTime localDateTime, float price, int volume) {
+    public Instant(LocalDateTime localDateTime, double price, int volume) {
         this.localDateTime = localDateTime;
         this.price = price;
         this.volume = volume;
     }
 
-    public float getPrice() { return price; }
+    public double getPrice() { return price; }
 
     public int getVolume() { return volume; }
 

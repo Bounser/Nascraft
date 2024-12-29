@@ -253,7 +253,8 @@ public class LayoutModifier implements LayoutExtension {
             }
         }
 
-        cTree.locate("description", TextComponent.class).setText(categories.get(0).getDisplayName());
+        if (categories.get(0) != null)
+            cTree.locate("description", TextComponent.class).setText(categories.get(0).getDisplayName());
 
         for (int i = 1; i <= 3; i++) {
 
@@ -367,7 +368,7 @@ public class LayoutModifier implements LayoutExtension {
             Item imax = items.get(0);
             for (Item item : items) {
 
-                float variation = RoundUtils.roundToOne(-100 + 100*(item.getPrice().getValue()/item.getPrice().getValueAnHourAgo()));
+                float variation = RoundUtils.roundToOne((float) (-100 + 100*(item.getPrice().getValue()/item.getPrice().getValueAnHourAgo())));
 
                 if (variation != 0) {
                     if (abs(variation) > abs(-100 + 100*(imax.getPrice().getValue()/imax.getPrice().getValueAnHourAgo()))){
@@ -399,7 +400,7 @@ public class LayoutModifier implements LayoutExtension {
                 }, Math.round(25 + random()*60));
             });
 
-            float fvar = RoundUtils.roundToOne(-100 + 100*(imax.getPrice().getValue()/imax.getPrice().getValueAnHourAgo()));
+            float fvar = RoundUtils.roundToOne((float) (-100 + 100*(imax.getPrice().getValue()/imax.getPrice().getValueAnHourAgo())));
 
             if (fvar != 0){
                 if (fvar > 0) {

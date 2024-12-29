@@ -39,7 +39,7 @@ public class SellInvListener implements Listener {
 
         event.setCancelled(true);
 
-        if (event.getClickedInventory() != null && event.getClickedInventory().getType() == InventoryType.PLAYER) {
+        if (event.getClickedInventory() != null && event.getClickedInventory().getType().equals(InventoryType.PLAYER)) {
 
             ItemStack itemClicked = event.getCurrentItem();
 
@@ -50,11 +50,42 @@ public class SellInvListener implements Listener {
                 return;
             }
 
-            if (MarketManager.getInstance().isAValidItem(itemClicked)) {
+            Item item = MarketManager.getInstance().getItem(itemClicked);
+
+            if (item != null) {
+
+                int totalChange = itemClicked.getAmount();
+
+                ItemStack itemItemStack = item.getItemStack();
+
+                if (playerItems.containsKey(player) && !playerItems.get(player).isEmpty())
+                    for (ItemStack itemStack : playerItems.get(player))
+                        if (MarketManager.getInstance().isSimilarEnough(itemItemStack, itemStack))
+                            totalChange += itemStack.getAmount();
+
+
+                if (!item.getPrice().canStockChange(totalChange, false)) {
+                    Lang.get().message(player, Message.BOTTOM_LIMIT_REACHED);
+                    return;
+                }
 
                 List<ItemStack> items = playerItems.get(player);
 
                 if (items == null) items = new ArrayList<>();
+
+                float totalAmount = itemClicked.getAmount();
+
+                if (items.contains(item.getItemStack())) {
+
+                    for (ItemStack itemStack : items)
+                        if (itemStack.isSimilar(item.getItemStack()))
+                            totalAmount += itemStack.getAmount();
+
+                    if (!item.getPrice().canStockChange(totalAmount, false)) {
+                        Lang.get().message(player, Message.BOTTOM_LIMIT_REACHED);
+                        return;
+                    }
+                }
 
                 if (event.isShiftClick()) {
 
@@ -99,25 +130,33 @@ public class SellInvListener implements Listener {
 
                     float realValue = 0;
 
-                    HashMap<Currency, Float> result = new HashMap<>();
+                    HashMap<Currency, Double> result = new HashMap<>();
+
+                    List<ItemStack> newPlayerItems = new ArrayList<>();
 
                     for (ItemStack itemStack : playerItems.get(player)) {
 
                         Item item = MarketManager.getInstance().getItem(itemStack);
 
-                        float value = item.sell(itemStack.getAmount(), player.getUniqueId(), false);
+                        if (item.getPrice().canStockChange(itemStack.getAmount(), false)) {
+                            double value = item.sell(itemStack.getAmount(), player.getUniqueId(), false);
 
-                        if (result.containsKey(item.getCurrency())) {
-                            float tempValue = result.get(item.getCurrency());
-                            tempValue += value;
-                            result.put(item.getCurrency(), tempValue);
+                            if (result.containsKey(item.getCurrency())) {
+                                double tempValue = result.get(item.getCurrency());
+                                tempValue += value;
+                                result.put(item.getCurrency(), tempValue);
+                            } else {
+                                result.put(item.getCurrency(), value);
+                            }
+
                         } else {
-                            result.put(item.getCurrency(), value);
+                            newPlayerItems.add(itemStack);
                         }
-
                     }
 
-                    playerItems.remove(player);
+                    if (newPlayerItems.isEmpty()) playerItems.remove(player);
+                    else playerItems.put(player, newPlayerItems);
+
                     renderInv(event.getClickedInventory(), player);
 
                     String report = "";
@@ -131,7 +170,7 @@ public class SellInvListener implements Listener {
                     }
 
                     Lang.get().message(player, Message.SELL_ACTION_MESSAGE, report, "", "");
-                    
+
                     break;
 
                 default:
@@ -256,7 +295,7 @@ public class SellInvListener implements Listener {
 
         String result = "";
 
-        HashMap<Currency, Float> invResult = getSellInventoryValue(player);
+        HashMap<Currency, Double> invResult = getSellInventoryValue(player);
 
         for (Currency currency : invResult.keySet()) {
             if (invResult.get(currency) > 0)
@@ -276,12 +315,12 @@ public class SellInvListener implements Listener {
         inventory.setItem(40, sellButton);
     }
 
-    public HashMap<Currency, Float> getSellInventoryValue(Player player) {
+    public HashMap<Currency, Double> getSellInventoryValue(Player player) {
 
-        HashMap<Currency, Float> valuePerCurrency = new HashMap<>();
+        HashMap<Currency, Double> valuePerCurrency = new HashMap<>();
 
         for (Currency currency : CurrenciesManager.getInstance().getCurrencies())
-            valuePerCurrency.put(currency, 0f);
+            valuePerCurrency.put(currency, 0d);
 
         if (playerItems.get(player) == null) return valuePerCurrency;
 
@@ -295,7 +334,7 @@ public class SellInvListener implements Listener {
         }
 
         for (Item item : content.keySet()) {
-            Float internalValue = valuePerCurrency.get(item.getCurrency());
+            double internalValue = valuePerCurrency.get(item.getCurrency());
             internalValue += item.sellPrice(content.get(item));
             valuePerCurrency.put(item.getCurrency(), internalValue);
         }

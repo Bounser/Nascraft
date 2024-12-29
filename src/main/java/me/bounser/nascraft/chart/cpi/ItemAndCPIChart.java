@@ -133,7 +133,7 @@ public class ItemAndCPIChart {
         if (firstInstant == null)
             return new TimeSeriesCollection(series1);
 
-        float initial = firstInstant.getPrice();
+        double initial = firstInstant.getPrice();
 
         for (Instant instant : itemInstants) {
 

@@ -92,7 +92,7 @@ public class HistorialData {
 
                 } else {
 
-                    float averagePrice = 0;
+                    double averagePrice = 0;
                     int totalVolume = 0;
 
                     int i = 0;
@@ -100,7 +100,7 @@ public class HistorialData {
                     while (resultSetDay.next()) {
                         if (LocalDateTime.parse(resultSetDay.getString("date")).isAfter(LocalDateTime.now().minusHours(4))) {
                             i++;
-                            averagePrice += resultSetDay.getFloat("price");
+                            averagePrice += resultSetDay.getDouble("price");
                             totalVolume += resultSetDay.getInt("volume");
                         }
                     }
@@ -136,11 +136,13 @@ public class HistorialData {
     public static void saveHistoryPrices(Connection connection, Item item, Instant instant) {
 
         try {
-            String select = "SELECT date FROM prices_history WHERE day=?;";
+            String select = "SELECT date FROM prices_history WHERE day=? AND identifier=?;";
 
             PreparedStatement preparedStatement = connection.prepareStatement(select);
 
-            preparedStatement.setString(1, item.getIdentifier());
+            preparedStatement.setInt(1, NormalisedDate.getDays());
+
+            preparedStatement.setString(2, item.getIdentifier());
 
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -169,7 +171,7 @@ public class HistorialData {
                     insertStatement.executeUpdate();
 
                 } else {
-                    float averagePrice = 0;
+                    double averagePrice = 0;
                     int totalVolume = 0;
 
                     int i = 0;
@@ -177,7 +179,7 @@ public class HistorialData {
                     while (resultSetMonth.next()) {
                         if (LocalDateTime.parse(resultSetMonth.getString("date")).isAfter(LocalDateTime.now().minusHours(24))) {
                             i++;
-                            averagePrice += resultSetMonth.getFloat("price");
+                            averagePrice += resultSetMonth.getDouble("price");
                             totalVolume += resultSetMonth.getInt("volume");
                         }
                     }
@@ -239,7 +241,7 @@ public class HistorialData {
                     if (time.isAfter(LocalDateTime.now().minusHours(24))) {
                         prices.add(new Instant(
                                 time,
-                                resultSet1.getFloat("price"),
+                                resultSet1.getDouble("price"),
                                 resultSet1.getInt("volume")
                         ));
 
@@ -295,7 +297,7 @@ public class HistorialData {
                     if (time.isAfter(LocalDateTime.now().minusDays(30))) {
                         prices.add(new Instant(
                                 time,
-                                resultSet1.getFloat("price"),
+                                resultSet1.getDouble("price"),
                                 resultSet1.getInt("volume")
                         ));
 
@@ -351,7 +353,7 @@ public class HistorialData {
                     if (time.isAfter(LocalDateTime.now().minusDays(365))) {
                         prices.add(new Instant(
                                 time,
-                                resultSet1.getFloat("price"),
+                                resultSet1.getDouble("price"),
                                 resultSet1.getInt("volume")
                         ));
 
@@ -405,7 +407,7 @@ public class HistorialData {
 
                     prices.add(new Instant(
                             time.plusDays(resultSet1.getInt("day")),
-                            resultSet1.getFloat("price"),
+                            resultSet1.getDouble("price"),
                             resultSet1.getInt("volume")
                     ));
                 }
@@ -420,6 +422,27 @@ public class HistorialData {
         }
 
         return prices;
+    }
+
+    public static Double getPriceOfDay(Connection connection, String identifier, int day) {
+
+        try {
+            String select = "SELECT price FROM prices_history WHERE identifier=? AND day=?;";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(select);
+
+            preparedStatement.setString(1, identifier);
+            preparedStatement.setInt(2, day);
+
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if (!resultSet.next()) return 0.0;
+
+            return resultSet.getDouble("price");
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

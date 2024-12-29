@@ -185,10 +185,10 @@ public class WandListener implements Listener {
                     return;
                 }
 
-                HashMap<Currency, Float> totalWorth = new HashMap<>();
+                HashMap<Currency, Double> totalWorth = new HashMap<>();
 
                 for (Currency currency : wand.getCurrencies())
-                    totalWorth.put(currency, 0f);
+                    totalWorth.put(currency, 0d);
 
                 for (ItemStack itemStack : inventory.getContents()) {
 
@@ -238,7 +238,7 @@ public class WandListener implements Listener {
 
                         if (totalWorth.get(currency) == 0) continue;
 
-                        float result = totalWorth.get(currency) * wand.getMultiplier() - totalWorth.get(currency);
+                        double result = totalWorth.get(currency) * wand.getMultiplier() - totalWorth.get(currency);
 
                         if (result > 0) {
                             MoneyManager.getInstance().deposit(event.getPlayer(), currency, result, 0);

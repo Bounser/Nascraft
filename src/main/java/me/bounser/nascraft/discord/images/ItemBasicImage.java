@@ -85,11 +85,11 @@ public class ItemBasicImage {
 
             graphics.setFont(new Font("Arial", Font.BOLD, 22));
 
-            float[] high = pd.getHighestValue(8*128, 60);
-            float[] low = pd.getLowestValue(8*128, 60);
+            double[] high = pd.getHighestValue(8*128, 60);
+            double[] low = pd.getLowestValue(8*128, 60);
 
-            drawCenteredString(graphics, Formatter.plainFormat(item.getCurrency(), high[0], Style.ROUND_BASIC), Math.round(high[1]), 135, 8*128);
-            drawCenteredString(graphics, Formatter.plainFormat(item.getCurrency(), low[0], Style.ROUND_BASIC), Math.round(low[1]), 475, 8*128);
+            drawCenteredString(graphics, Formatter.plainFormat(item.getCurrency(), high[0], Style.ROUND_BASIC), (int) Math.round(high[1]), 135, 8*128);
+            drawCenteredString(graphics, Formatter.plainFormat(item.getCurrency(), low[0], Style.ROUND_BASIC), (int) Math.round(low[1]), 475, 8*128);
         }
         graphics.setColor(new Color(120, 120, 125));
         LocalDateTime localDateTime = LocalDateTime.now();

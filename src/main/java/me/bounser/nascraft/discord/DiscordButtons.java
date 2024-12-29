@@ -13,8 +13,8 @@ import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.images.*;
-import me.bounser.nascraft.discord.inventories.DiscordInventories;
-import me.bounser.nascraft.discord.inventories.DiscordInventory;
+import me.bounser.nascraft.portfolio.PortfoliosManager;
+import me.bounser.nascraft.portfolio.Portfolio;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.RoundUtils;
@@ -70,7 +70,7 @@ public class DiscordButtons extends ListenerAdapter {
         switch (event.getComponentId()) {
 
             case "alerts":
-                HashMap<Item, Float> alerts = DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId());
+                HashMap<Item, Double> alerts = DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId());
 
                 if (alerts == null || alerts.size() == 0) {
                     event.reply(Lang.get().message(Message.DISCORD_NO_ALERTS_SETUP))
@@ -392,7 +392,7 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "inventory":
 
-                DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(uuid);
+                Portfolio discordInventory = PortfoliosManager.getInstance().getPortfolio(uuid);
 
                 if (discordInventory.getCapacity() < 40) {
 
@@ -427,7 +427,7 @@ public class DiscordButtons extends ListenerAdapter {
                     return;
                 }
 
-                DiscordInventories.getInstance().getInventory(uuid).sellAll(
+                PortfoliosManager.getInstance().getPortfolio(uuid).sellAll(
                         value -> event.reply( Lang.get().message(Message.DISCORD_SOLD_EVERYTHING, "[VALUE]", Formatter.plainFormat
                                         (CurrenciesManager.getInstance().getVaultCurrency(), value, Style.ROUND_BASIC)))
                                 .setEphemeral(true)
@@ -439,7 +439,7 @@ public class DiscordButtons extends ListenerAdapter {
                 OfflinePlayer player2 = Bukkit.getOfflinePlayer(uuid);
 
                 double purse = Nascraft.getEconomy().getBalance(player2);
-                float inventory = DiscordInventories.getInstance().getInventory(event.getUser().getId()).getInventoryValue();
+                float inventory = PortfoliosManager.getInstance().getPortfolio(event.getUser().getId()).getInventoryValue();
                 float brokerValue = 0;
                 double total = purse + inventory + brokerValue;
 
@@ -584,11 +584,18 @@ public class DiscordButtons extends ListenerAdapter {
 
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 
-        DiscordInventory discordInventory = DiscordInventories.getInstance().getInventory(uuid);
+        Portfolio discordInventory = PortfoliosManager.getInstance().getPortfolio(uuid);
 
         switch (String.valueOf(event.getComponentId().charAt(0))) {
 
             case "b":
+
+                if (!item.getPrice().canStockChange(quantity, true)) {
+                    event.reply(lang.message(Message.DISCORD_BUY_LIMIT_FEEDBACK))
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
+                    return;
+                }
 
                 value = item.getPrice().getProjectedCost(-quantity, DiscordBot.getInstance().getDiscordBuyTax());
 
@@ -612,7 +619,7 @@ public class DiscordButtons extends ListenerAdapter {
                     return;
                 }
 
-                MoneyManager.getInstance().withdraw(player, item.getCurrency(), value, Config.getInstance().getDiscordBuyTax());
+                MoneyManager.getInstance().withdraw(player, item.getCurrency(), value, (1 - Config.getInstance().getDiscordBuyTax()));
 
                 String buyText;
                 if (quantity == 1) {
@@ -645,6 +652,13 @@ public class DiscordButtons extends ListenerAdapter {
                 break;
 
             case "s":
+
+                if (!item.getPrice().canStockChange(quantity, false)) {
+                    event.reply(lang.message(Message.DISCORD_SELL_LIMIT_FEEDBACK))
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
+                    return;
+                }
 
                 if (!discordInventory.hasItem(item, quantity)) {
                     event.reply(Lang.get().message(Message.DISCORD_NOT_ENOUGH_ITEMS))
@@ -701,7 +715,7 @@ public class DiscordButtons extends ListenerAdapter {
                     return;
                 }
 
-                if (discordInventory.getCapacity() >= 40) {
+                if (discordInventory.getCapacity() >= 27) {
                     event.reply(Lang.get().message(Message.DISCORD_ALREADY_MAX_SLOTS))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));

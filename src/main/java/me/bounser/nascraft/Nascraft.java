@@ -2,7 +2,6 @@ package me.bounser.nascraft;
 
 import me.bounser.nascraft.advancedgui.LayoutModifier;
 import me.bounser.nascraft.api.NascraftAPI;
-import me.bounser.nascraft.chart.price.ItemChart;
 import me.bounser.nascraft.chart.price.ItemChartReduced;
 import me.bounser.nascraft.commands.admin.nascraft.NascraftCommand;
 import me.bounser.nascraft.commands.admin.nascraft.NascraftLogListener;
@@ -12,7 +11,8 @@ import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorInvL
 import me.bounser.nascraft.commands.alert.AlertsCommand;
 import me.bounser.nascraft.commands.alert.SetAlertCommand;
 import me.bounser.nascraft.commands.discord.DiscordCommand;
-import me.bounser.nascraft.commands.discord.DiscordInventoryInGame;
+import me.bounser.nascraft.commands.portfolio.PortfolioCommand;
+import me.bounser.nascraft.inventorygui.Portfolio.PortfolioInventory;
 import me.bounser.nascraft.commands.market.MarketCommand;
 import me.bounser.nascraft.commands.sell.SellHandCommand;
 import me.bounser.nascraft.commands.sell.SellAllCommand;
@@ -122,8 +122,6 @@ public final class Nascraft extends JavaPlugin {
             }
             if (config.isCommandEnabled("discord")) new DiscordCommand();
 
-            Bukkit.getPluginManager().registerEvents(new DiscordInventoryInGame(), this);
-
             new DiscordBot();
             getLogger().info("Discord extension loaded!");
         }
@@ -161,6 +159,11 @@ public final class Nascraft extends JavaPlugin {
         }
 
         if (config.isCommandEnabled("sellall")) new SellAllCommand();
+
+        if (config.isCommandEnabled("portfolio")) {
+            new PortfolioCommand();
+            Bukkit.getPluginManager().registerEvents(new PortfolioInventory(), this);
+        }
 
         ItemChartReduced.load();
     }

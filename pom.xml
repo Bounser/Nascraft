@@ -6,7 +6,7 @@
 
     <groupId>me.bounser</groupId>
     <artifactId>Nascraft</artifactId>
-    <version>1.7.3</version>
+    <version>1.8</version>
     <packaging>jar</packaging>
 
     <name>Nascraft</name>
@@ -27,11 +27,15 @@
                     <relocations>
                         <relocation>
                             <pattern>org.bstats</pattern>
-                            <shadedPattern>me.bounser</shadedPattern>
+                            <shadedPattern>me.bounser.bstats</shadedPattern>
                         </relocation>
                         <relocation>
                             <pattern>net.wesjd.anvilgui</pattern>
                             <shadedPattern>me.bounser.anvilgui</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>de.tr7zw.changeme.nbtapi</pattern>
+                            <shadedPattern>me.bounser.nbtapi</shadedPattern>
                         </relocation>
                     </relocations>
                     <filters>
@@ -111,19 +115,24 @@
             <id>xenondevs</id>
             <url>https://repo.xenondevs.xyz/releases</url>
         </repository>
+        <repository>
+            <id>codemc-repo</id>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
+            <layout>default</layout>
+        </repository>
     </repositories>
 
     <dependencies>
         <dependency>
             <groupId>xyz.xenondevs.invui</groupId>
             <artifactId>invui</artifactId>
-            <version>1.38</version>
+            <version>1.41</version>
             <type>pom</type>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.21.1-R0.1-SNAPSHOT</version>
+            <version>1.21.3-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -164,7 +173,7 @@
         <dependency>
             <groupId>com.discordsrv</groupId>
             <artifactId>discordsrv</artifactId>
-            <version>1.26.0</version>
+            <version>1.28.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -194,7 +203,7 @@
         <dependency>
             <groupId>net.wesjd</groupId>
             <artifactId>anvilgui</artifactId>
-            <version>1.10.2-SNAPSHOT</version>
+            <version>1.10.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
@@ -202,9 +211,9 @@
             <version>5.1.2</version>
         </dependency>
         <dependency>
-            <groupId>org.nanohttpd</groupId>
-            <artifactId>nanohttpd</artifactId>
-            <version>2.3.1</version>
+            <groupId>de.tr7zw</groupId>
+            <artifactId>item-nbt-api</artifactId>
+            <version>2.13.1</version>
         </dependency>
     </dependencies>
 </project>

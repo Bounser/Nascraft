@@ -39,7 +39,7 @@ public class StatsItem extends AbstractItem {
 
         loreBase = loreBase.replace("[OPTION]", Lang.get().message(Message.valueOf("GUI_INFO_TIMEFRAME_OPTION_" + (type.ordinal() + 1))));
 
-        float high, low, change;
+        double high, low, change;
 
         switch (type) {
 

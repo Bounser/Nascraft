@@ -10,7 +10,9 @@ public class Formatter {
 
     private static Separator separator = Separator.POINT;
 
-    public static String format(Currency currency, float number, Style style) {
+    public static String format(Currency currency, Number toFormat, Style style) {
+
+        double number = toFormat.doubleValue();
 
         String formattedText = null;
 
@@ -59,7 +61,9 @@ public class Formatter {
         return result.replace(".", "_").replace(",", ".").replace("_", ",");
     }
 
-    public static String plainFormat(Currency currency, float number, Style style) {
+    public static String plainFormat(Currency currency, Number toFormat, Style style) {
+
+        double number = toFormat.doubleValue();
 
         String formattedText = null;
 
@@ -137,7 +141,8 @@ public class Formatter {
 
     public static void setSeparator(Separator separator) { Formatter.separator = separator; }
 
-    public static float roundToDecimals(float number, int decimalPlaces) {
+    public static float roundToDecimals(Number toFormat, int decimalPlaces) {
+        double number = toFormat.doubleValue();
         float scale = (float) Math.pow(10, decimalPlaces);
         return Math.round(number * scale) / scale;
     }

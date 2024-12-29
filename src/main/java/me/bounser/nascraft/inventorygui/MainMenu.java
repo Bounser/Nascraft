@@ -7,12 +7,15 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.market.MarketManager;
+import me.bounser.nascraft.market.limitorders.LimitOrder;
+import me.bounser.nascraft.market.limitorders.LimitOrdersManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -45,11 +48,11 @@ public class MainMenu implements MenuPage {
 
         gui = Bukkit.createInventory(null, config.getMainMenuSize(), BukkitComponentSerializer.legacy().serialize(title));
 
-        // Alerts
-
         List<String> lore = new ArrayList<>();
 
         boolean linked = LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null;
+
+        // Alerts
 
         if (config.getAlertsMenuEnabled()) {
 
@@ -59,7 +62,7 @@ public class MainMenu implements MenuPage {
 
             if (linked) {
 
-                HashMap<Item, Float> alerts = DiscordAlerts.getInstance().getAlertsOfUUID(player.getUniqueId());
+                HashMap<Item, Double> alerts = DiscordAlerts.getInstance().getAlertsOfUUID(player.getUniqueId());
 
                 if (alerts == null || alerts.isEmpty()) {
                     alertLore = alertLore.replace("[ALERTS]", "0");
@@ -78,6 +81,54 @@ public class MainMenu implements MenuPage {
                     MarketMenuManager.getInstance().generateItemStack(
                             config.getAlertsMaterial(linked),
                             BukkitComponentSerializer.legacy().serialize(alert),
+                            lore
+                    ));
+        }
+
+        // Limit orders
+
+        if (config.getLimitOrdersMenuEnabled()) {
+
+            Component limit = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_LIMIT_ORDERS_NAME));
+
+            String limitLore = Lang.get().message(Message.GUI_LIMIT_ORDERS_LORE);
+
+            List<LimitOrder> limitOrders = LimitOrdersManager.getInstance().getPlayerLimitOrders(player.getUniqueId());
+
+            if (limitOrders == null || limitOrders.isEmpty()) {
+                limitLore = limitLore
+                        .replace("[TOTAL]", "0")
+                        .replace("[TO-FILL]", "0")
+                        .replace("[FILLED]", "0")
+                        .replace("[EXPIRED]", "0");
+            } else {
+
+                int tofill = 0, expired = 0;
+
+                for (LimitOrder limitOrder : limitOrders) {
+                    if (!limitOrder.isCompleted()) tofill++;
+                    if (limitOrder.isExpired()) expired++;
+                }
+
+                limitLore = limitLore
+                        .replace("[TOTAL]", String.valueOf(limitOrders.size()))
+                        .replace("[TO-FILL]", String.valueOf(tofill))
+                        .replace("[FILLED]", String.valueOf(limitOrders.size()-tofill))
+                        .replace("[EXPIRED]", String.valueOf(expired));
+            }
+
+            lore.clear();
+
+            for (String line : limitLore.split("\\n")) {
+                Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+                lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
+            }
+
+            gui.setItem(
+                    config.getLimitOrdersSlot(),
+                    MarketMenuManager.getInstance().generateItemStack(
+                            config.getLimitOrdersMaterial(),
+                            BukkitComponentSerializer.legacy().serialize(limit),
                             lore
                     ));
         }
@@ -102,24 +153,61 @@ public class MainMenu implements MenuPage {
                     ));
         }
 
-        // Discord
+        // Portfolio
 
-        if (config.getDiscordMarketMenuEnabled()) {
+        if (config.getPortfolioMarketMenuEnabled()) {
 
-            Component discord = MiniMessage.miniMessage().deserialize(Lang.get().message(
-                    linked ? Message.GUI_DISCORD_NAME_LINKED : Message.GUI_DISCORD_NAME_NOT_LINKED));
+            Component portfolio = MiniMessage.miniMessage().deserialize(Lang.get().message(
+                    linked ? Message.GUI_PORTFOLIO_NAME_LINKED : Message.GUI_PORTFOLIO_NAME_NOT_LINKED));
 
             lore.clear();
-            for (String line : Lang.get().message(linked ? Message.GUI_DISCORD_LORE_LINKED : Message.GUI_DISCORD_LORE_NOT_LINKED).split("\\n")) {
+            for (String line : Lang.get().message(linked ? Message.GUI_PORTFOLIO_LORE_LINKED : Message.GUI_PORTFOLIO_LORE_NOT_LINKED).split("\\n")) {
                 Component loreComponent = MiniMessage.miniMessage().deserialize(line);
                 lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
             }
 
             gui.setItem(
-                    config.getDiscordSlot(),
+                    config.getPortfolioSlot(),
                     MarketMenuManager.getInstance().generateItemStack(
-                            config.getDiscordMaterial(linked),
-                            BukkitComponentSerializer.legacy().serialize(discord),
+                            config.getPortfolioMaterial(linked),
+                            BukkitComponentSerializer.legacy().serialize(portfolio),
+                            lore
+                    ));
+        }
+
+        // Trends
+
+        if (config.getTrendsEnabled()) {
+
+            Component trends = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_TRENDS_NAME));
+
+            List<Item> moreMoved = MarketManager.getInstance().getMostTraded(3);
+
+            String trendsLore = Lang.get().message(Message.GUI_TRENDS_LORE)
+                            .replace("[POPULAR]", MarketManager.getInstance().getMostTraded(1).get(0).getTaggedName());
+
+            int i = 1;
+
+            for (Item item : moreMoved) {
+                float lastChange = item.getPrice().getValueChangeLastHour();
+                String movement = Lang.get().message(lastChange > 0 ? Message.GUI_TRENDS_POSITIVE : Message.GUI_TRENDS_NEGATIVE);
+                trendsLore = trendsLore.replace("[" + i + "]", movement
+                        .replace("[CHANGE]", String.valueOf(lastChange))
+                        .replace("[NAME]", item.getTaggedName()));
+                i++;
+            }
+
+            lore.clear();
+            for (String line : trendsLore.split("\\n")) {
+                Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+                lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
+            }
+
+            gui.setItem(
+                    config.getTrendsSlot(),
+                    MarketMenuManager.getInstance().generateItemStack(
+                            config.getTrendsMaterial(),
+                            BukkitComponentSerializer.legacy().serialize(trends),
                             lore
                     ));
         }
@@ -128,13 +216,19 @@ public class MainMenu implements MenuPage {
 
         Component fillerComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_FILLERS_NAME));
 
-        ItemStack filler = MarketMenuManager.getInstance().generateItemStack(
-                config.getFillersMaterial(),
-                BukkitComponentSerializer.legacy().serialize(fillerComponent)
-        );
+        HashMap<Material, List<Integer>> fillers = config.getMainMenuFillers();
 
-        for (int i : config.getFillersSlots())
-            gui.setItem(i, filler);
+        for (Material material : fillers.keySet()) {
+
+            ItemStack filler = MarketMenuManager.getInstance().generateItemStack(
+                    material,
+                    BukkitComponentSerializer.legacy().serialize(fillerComponent)
+            );
+
+            for (int i : fillers.get(material))
+                gui.setItem(i, filler);
+
+        }
 
         // Categories
 
@@ -150,7 +244,7 @@ public class MainMenu implements MenuPage {
 
                 List<String> categoryList = new ArrayList<>();
 
-                if (config.getSetCategorySegments() && category.getItems().size() < 20) {
+                if (config.getSetCategorySegments() && category.getItems().size() < 25) {
 
                     for (Item item : category.getItems()) {
 

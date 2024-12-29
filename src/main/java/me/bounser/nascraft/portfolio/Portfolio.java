@@ -1,9 +1,9 @@
-package me.bounser.nascraft.discord.inventories;
+package me.bounser.nascraft.portfolio;
 
 import me.bounser.nascraft.Nascraft;
-import me.bounser.nascraft.commands.discord.DiscordInventoryInGame;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.database.DatabaseManager;
+import me.bounser.nascraft.inventorygui.Portfolio.PortfolioInventory;
 import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
@@ -15,7 +15,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 
-public class DiscordInventory {
+public class Portfolio {
 
     private int capacity;
 
@@ -23,13 +23,13 @@ public class DiscordInventory {
 
     private LinkedHashMap<Item, Integer> inventory = new LinkedHashMap<>();
 
-    public DiscordInventory(UUID uuid) {
+    public Portfolio(UUID uuid) {
         this.uuid = uuid;
-        retrieveInventory();
+        retrievePortfolio();
         retrieveCapacity();
     }
 
-    public void retrieveInventory() { inventory = DatabaseManager.get().getDatabase().retrieveInventory(uuid); }
+    public void retrievePortfolio() { inventory = DatabaseManager.get().getDatabase().retrievePortfolio(uuid); }
 
     public void retrieveCapacity() { capacity = DatabaseManager.get().getDatabase().retrieveCapacity(uuid); }
 
@@ -43,12 +43,13 @@ public class DiscordInventory {
 
     public boolean hasSpace(Item item, int amount) {
         return (capacity > inventory.keySet().size() && !inventory.containsKey(item)) ||
-                (inventory.containsKey(item) && inventory.get(item)+amount <= 999);
+                (inventory.containsKey(item) && inventory.get(item)+amount <= Config.getInstance().getPortfolioMaxStorage());
     }
 
     public void addItem(Item item, int amount) {
         inventory.merge(item, amount, Integer::sum);
         DatabaseManager.get().getDatabase().updateItem(uuid, item, inventory.get(item));
+        DatabaseManager.get().getDatabase().logContribution(uuid, item, amount);
         updateInventoryInGame();
     }
 
@@ -66,6 +67,8 @@ public class DiscordInventory {
                 DatabaseManager.get().getDatabase().removeItem(uuid, item);
             }
 
+            DatabaseManager.get().getDatabase().logWithdraw(uuid, item, amount);
+
             updateInventoryInGame();
         }
     }
@@ -82,9 +85,9 @@ public class DiscordInventory {
         return value;
     }
 
-    public HashMap<Currency, Float> getInventoryValuePerCurrency() {
+    public HashMap<Currency, Double> getInventoryValuePerCurrency() {
 
-        HashMap<Currency, Float> worth = new HashMap<>();
+        HashMap<Currency, Double> worth = new HashMap<>();
 
         for (Item item : inventory.keySet()) {
 
@@ -107,12 +110,16 @@ public class DiscordInventory {
 
     public HashMap<Item, Integer> getContent() { return inventory; }
 
+    public UUID getOwnerUUID() {
+        return uuid;
+    }
+
     private void updateInventoryInGame() {
 
         Player player = Bukkit.getPlayer(uuid);
 
         if (player != null) {
-            DiscordInventoryInGame.getInstance().updateDiscordInventory(player);
+            PortfolioInventory.getInstance().updatePortfolioInventory(player);
         }
 
     }
@@ -122,13 +129,23 @@ public class DiscordInventory {
         Bukkit.getScheduler().runTask(Nascraft.getInstance(), () -> {
             
             float value = 0;
+
+            LinkedHashMap<Item, Integer> newInventory = new LinkedHashMap();
             
             for (Item item : inventory.keySet())
-                if (item != null) value += item.sell(inventory.get(item), uuid, false);
+                if (item != null)
+                    if (item.getPrice().canStockChange(inventory.get(item), false))
+                        value += item.sell(inventory.get(item), uuid, false);
+                    else
+                        newInventory.put(item, inventory.get(item));
 
-            inventory.clear();
+            inventory = newInventory;
             updateInventoryInGame();
+
             DatabaseManager.get().getDatabase().clearInventory(uuid);
+
+            for (Item item : inventory.keySet())
+                DatabaseManager.get().getDatabase().updateItem(uuid, item, inventory.get(item));
 
             callback.accept(value);
         });

@@ -99,7 +99,7 @@ public class Statistics {
         }
     }
 
-    public static void addTransaction(Connection connection, float newFlow, float effectiveTaxes) {
+    public static void addTransaction(Connection connection, double newFlow, double effectiveTaxes) {
 
         try {
 
@@ -110,8 +110,8 @@ public class Statistics {
             ResultSet rs = prep.executeQuery();
 
             if (rs.next()) {
-                float flow = rs.getFloat("flow");
-                float taxes = rs.getFloat("taxes");
+                double flow = rs.getFloat("flow");
+                double taxes = rs.getFloat("taxes");
                 int operations = rs.getInt("operations");
 
                 flow += newFlow;
@@ -122,8 +122,8 @@ public class Statistics {
 
                 PreparedStatement replacePrep = connection.prepareStatement(sqlreplace);
                 replacePrep.setInt(1, NormalisedDate.getDays());
-                replacePrep.setFloat(2, flow);
-                replacePrep.setFloat(3, taxes);
+                replacePrep.setDouble(2, flow);
+                replacePrep.setDouble(3, taxes);
                 replacePrep.setInt(4, operations);
 
                 replacePrep.executeUpdate();
@@ -134,8 +134,8 @@ public class Statistics {
 
                 PreparedStatement insertPrep = connection.prepareStatement(sqlinsert);
                 insertPrep.setInt(1, NormalisedDate.getDays());
-                insertPrep.setFloat(2, newFlow);
-                insertPrep.setFloat(3, effectiveTaxes);
+                insertPrep.setDouble(2, newFlow);
+                insertPrep.setDouble(3, effectiveTaxes);
                 insertPrep.setInt(4, 1);
 
                 insertPrep.executeUpdate();
@@ -160,8 +160,8 @@ public class Statistics {
                 dayInfos.add(
                         new DayInfo(
                                 rs.getInt("day"),
-                                rs.getFloat("flow"),
-                                rs.getFloat("taxes")
+                                rs.getDouble("flow"),
+                                rs.getDouble("taxes")
                         )
                 );
             }

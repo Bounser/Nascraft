@@ -24,11 +24,11 @@ public class ItemProperties {
                 String sqlReplace = "REPLACE INTO items (lastprice, lowest, highest, stock, taxes, identifier) VALUES (?, ?, ?, ?, ?, ?);";
                 PreparedStatement prepReplace = connection.prepareStatement(sqlReplace);
 
-                prepReplace.setFloat(1, item.getPrice().getValue());
-                prepReplace.setFloat(2, item.getPrice().getHistoricalLow());
-                prepReplace.setFloat(3, item.getPrice().getHistoricalHigh());
-                prepReplace.setFloat(4, item.getPrice().getStock());
-                prepReplace.setFloat(5, item.getCollectedTaxes());
+                prepReplace.setDouble(1, item.getPrice().getValue());
+                prepReplace.setDouble(2, item.getPrice().getHistoricalLow());
+                prepReplace.setDouble(3, item.getPrice().getHistoricalHigh());
+                prepReplace.setDouble(4, item.getPrice().getStock());
+                prepReplace.setDouble(5, item.getCollectedTaxes());
 
                 prepReplace.setString(6, item.getIdentifier());
 
@@ -37,11 +37,11 @@ public class ItemProperties {
                 String sqlInsert = "INSERT INTO items (lastprice, lowest, highest, stock, taxes, identifier) VALUES (?, ?, ?, ?, ?, ?);";
                 PreparedStatement prepInsert = connection.prepareStatement(sqlInsert);
 
-                prepInsert.setFloat(1, item.getPrice().getValue());
-                prepInsert.setFloat(2, item.getPrice().getHistoricalLow());
-                prepInsert.setFloat(3, item.getPrice().getHistoricalHigh());
-                prepInsert.setFloat(4, item.getPrice().getStock());
-                prepInsert.setFloat(5, item.getCollectedTaxes());
+                prepInsert.setDouble(1, item.getPrice().getValue());
+                prepInsert.setDouble(2, item.getPrice().getHistoricalLow());
+                prepInsert.setDouble(3, item.getPrice().getHistoricalHigh());
+                prepInsert.setDouble(4, item.getPrice().getStock());
+                prepInsert.setDouble(5, item.getCollectedTaxes());
 
                 prepInsert.setString(6, item.getIdentifier());
 

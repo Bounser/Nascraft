@@ -19,7 +19,7 @@ import java.util.UUID;
 public class DiscordAlerts implements Listener {
 
     // UserId -> (Item, Price)
-    private final HashMap<String, HashMap<Item, Float>> alerts = new HashMap<>();
+    private final HashMap<String, HashMap<Item, Double>> alerts = new HashMap<>();
 
     private static DiscordAlerts instance;
 
@@ -33,7 +33,7 @@ public class DiscordAlerts implements Listener {
         return instance;
     }
 
-    public OperationResult setAlert(String userID, String identifier, Float price) {
+    public OperationResult setAlert(String userID, String identifier, double price) {
 
         Item item = MarketManager.getInstance().getItem(identifier);
 
@@ -43,7 +43,7 @@ public class DiscordAlerts implements Listener {
 
         if (alerts.containsKey(userID) && alerts.get(userID).containsKey(item)) return OperationResult.REPEATED;
 
-        HashMap<Item, Float> content;
+        HashMap<Item, Double> content;
         if (alerts.get(userID) == null) content = new HashMap<>();
         else content = alerts.get(userID);
 
@@ -58,7 +58,7 @@ public class DiscordAlerts implements Listener {
 
     public OperationResult removeAlert(String userID, Item item) {
 
-        HashMap<Item, Float> content = alerts.get(userID);
+        HashMap<Item, Double> content = alerts.get(userID);
 
         if (content == null || !content.containsKey(item)) {
             return OperationResult.NOT_FOUND;
@@ -100,16 +100,16 @@ public class DiscordAlerts implements Listener {
         }
     }
 
-    public HashMap<String, HashMap<Item, Float>> getAlerts() { return alerts; }
+    public HashMap<String, HashMap<Item, Double>> getAlerts() { return alerts; }
 
-    public HashMap<Item, Float> getAlertsOfUUID(UUID uuid) {
+    public HashMap<Item, Double> getAlertsOfUUID(UUID uuid) {
 
         String userid = LinkManager.getInstance().getUserDiscordID(uuid);
 
         return alerts.get(userid);
     }
 
-    public void reachedMessage(String userId, Item item, float price, String emoji, boolean up) {
+    public void reachedMessage(String userId, Item item, double price, String emoji, boolean up) {
 
         Player player = Bukkit.getPlayer(LinkManager.getInstance().getUUID(userId));
 

@@ -20,11 +20,11 @@ public class PlotData {
 
     public int[] getYPositions(int size, int offset, boolean polygon, boolean precise) {
 
-        List<Float> values = item.getPrice().getValuesPastHour();
+        List<Double> values = item.getPrice().getValuesPastHour();
 
         if (!precise) {
             try {
-                values.replaceAll(RoundUtils::round);
+                //values.replaceAll(RoundUtils::round);
             } catch (ConcurrentModificationException e) {
                 return new int[]{1};
             }
@@ -37,11 +37,11 @@ public class PlotData {
             y = new int[values.size()];
         }
 
-        float maxValue = Collections.max(values);
-        float minValue = Collections.min(values);
+        double maxValue = Collections.max(values);
+        double minValue = Collections.min(values);
 
         int i = 0;
-        for (float value : values) {
+        for (double value : values) {
             int maxh = (int) Math.round(size * 0.8);
             y[i] = (int) ((Math.round((maxh - maxh * (value - minValue) / (maxValue - minValue))) + offset) + Math.round(size * 0.05));
             i++;
@@ -57,7 +57,7 @@ public class PlotData {
 
     public int[] getXPositions(int size, int offset, boolean polygon) {
 
-        List<Float> values = item.getPrice().getValuesPastHour();
+        List<Double> values = item.getPrice().getValuesPastHour();
 
         float z = (float) size /(values.size()-1);
 
@@ -84,35 +84,35 @@ public class PlotData {
 
     public boolean isGoingUp() {
 
-        List<Float> values = item.getPrice().getValuesPastHour();
+        List<Double> values = item.getPrice().getValuesPastHour();
 
         return values.get(0) < values.get(values.size()-1);
     }
 
     public String getChange() {
 
-        List<Float> values = item.getPrice().getValuesPastHour();
+        List<Double> values = item.getPrice().getValuesPastHour();
         NumberFormat formatter = new DecimalFormat("#0.0");
 
         return formatter.format((-100 + values.get(values.size()-1)*100/values.get(0))) + "%";
     }
 
-    public float[] getLowestValue(int size, int points) {
+    public double[] getLowestValue(int size, int points) {
 
         float z = (float) size /(points-1);
 
-        float min = Collections.min(item.getPrice().getValuesPastHour());
+        Double min = Collections.min(item.getPrice().getValuesPastHour());
 
-        return new float[]{min, z*item.getPrice().getValuesPastHour().lastIndexOf(min)};
+        return new double[]{min, z*item.getPrice().getValuesPastHour().lastIndexOf(min)};
     }
 
-    public float[] getHighestValue(int size, int points) {
+    public double[] getHighestValue(int size, int points) {
 
         float z = (float) size /(points-1);
 
-        float max = Collections.max(item.getPrice().getValuesPastHour());
+        double max = Collections.max(item.getPrice().getValuesPastHour());
 
-        return new float[]{max, z*item.getPrice().getValuesPastHour().lastIndexOf(max)};
+        return new double[]{max, z*item.getPrice().getValuesPastHour().lastIndexOf(max)};
     }
 
     public int[] getExtremePositions(int offset, int size) {

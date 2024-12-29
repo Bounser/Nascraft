@@ -141,12 +141,13 @@ public class LinkManager {
 
                 DatabaseManager.get().getDatabase().removeAllAlerts(userId);
 
-                DiscordSRV.getPlugin().getAccountLinkManager().unlink(userId); return true;
+                DiscordSRV.getPlugin().getAccountLinkManager().unlink(userId);
+
+                return true;
 
             case NATIVE:
-                if (!userToUUID.containsKey(userId)) {
-                    return false;
-                }
+
+                if (!userToUUID.containsKey(userId)) return false;
 
                 UUID uuid = userToUUID.get(userId);
                 userToUUID.remove(userId);
@@ -166,7 +167,7 @@ public class LinkManager {
 
                 });
 
-                if (player.getOpenInventory().getTitle().equals(Lang.get().message(Message.DISINV_TITLE)))
+                if (player.getOpenInventory().getTitle().equals(Lang.get().message(Message.PORTFOLIO_TITLE)))
                     Bukkit.getScheduler().runTask(Nascraft.getInstance(), player::closeInventory);
         }
 

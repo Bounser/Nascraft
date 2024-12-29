@@ -7,6 +7,9 @@ import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
 
+import java.sql.Connection;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
@@ -130,6 +133,11 @@ public class MySQL implements Database {
     }
 
     @Override
+    public Double getPriceOfDay(String identifier, int day) {
+        return 0.0;
+    }
+
+    @Override
     public void saveItem(Item item) {
 
     }
@@ -201,12 +209,37 @@ public class MySQL implements Database {
     }
 
     @Override
-    public LinkedHashMap<Item, Integer> retrieveInventory(UUID uuid) {
+    public LinkedHashMap<Item, Integer> retrievePortfolio(UUID uuid) {
         return null;
     }
 
     @Override
     public int retrieveCapacity(UUID uuid) {
+        return 0;
+    }
+
+    @Override
+    public void logContribution(UUID uuid, Item item, int amount) {
+
+    }
+
+    @Override
+    public void logWithdraw(UUID uuid, Item item, int amount) {
+
+    }
+
+    @Override
+    public HashMap<Integer, Double> getContributionChangeEachDay(UUID uuid) {
+        return null;
+    }
+
+    @Override
+    public HashMap<Integer, HashMap<String, Integer>> getCompositionEachDay(UUID uuid) {
+        return null;
+    }
+
+    @Override
+    public int getFirstDay(UUID uuid) {
         return 0;
     }
 
@@ -226,7 +259,7 @@ public class MySQL implements Database {
     }
 
     @Override
-    public void addTransaction(float newFlow, float effectiveTaxes) {
+    public void addTransaction(double newFlow, double effectiveTaxes) {
 
     }
 
@@ -236,7 +269,7 @@ public class MySQL implements Database {
     }
 
     @Override
-    public void addAlert(String userid, Item item, float price) {
+    public void addAlert(String userid, Item item, double price) {
 
     }
 
@@ -257,6 +290,26 @@ public class MySQL implements Database {
 
     @Override
     public void purgeAlerts() {
+
+    }
+
+    @Override
+    public void addLimitOrder(UUID uuid, LocalDateTime expiration, Item item, int type, double price, int amount) {
+
+    }
+
+    @Override
+    public void updateLimitOrder(UUID uuid, Item item, int completed, double cost) {
+
+    }
+
+    @Override
+    public void removeLimitOrder(String uuid, String identifier) {
+
+    }
+
+    @Override
+    public void retrieveLimitOrders() {
 
     }
 

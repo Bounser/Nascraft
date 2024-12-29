@@ -91,6 +91,9 @@ commands:
   market:
     enabled: true
     alias: 'shop'
+  portfolio:
+    enabled: true
+    alias: 'p'
   link:
     enabled: true
     alias: 'nlink'
@@ -130,7 +133,48 @@ commands:
       slot: 8
       material: 'red_stained_glass_pane'
 
-# FEATURE IN BETA AS OF ${project.version}
+portfolio:
+  # Default size of portfolios.
+  default-size: 5
+
+  storage-limit: 999
+  # Formula to calculate the price of then next slot. slot_price_factor * #slot + slot_price_base = price
+  # For example, to buy the slot nº6 the price will be (1000 * 6) + 10000 = 16000$
+  slot-price-factor: 1000
+  slot-price-base: 10000
+  in-game-gui:
+    fillers:
+      material: 'black_stained_glass_pane'
+    locked:
+      material: 'gray_stained_glass_pane'
+
+limit-orders:
+  enabled: true
+  # Maximum number of limit orders a player can have active simultaneously.
+  max-per-player: 9
+  # Maximum size of an order
+  order-max-size: 999
+  # In seconds
+  checking-period: 10
+
+  durations:
+    1:
+      # In days
+      duration: 3
+      display: "3 days"
+      fee: 0.01
+      min-fee: 1
+    2:
+      duration: 30
+      display: "30 days"
+      fee: 0.03
+      min-fee: 3
+    3:
+      duration: 90
+      display: "90 days"
+      fee: 0.06
+      min-fee: 6
+
 # Use with caution.
 discord-bot:
   enabled: false
@@ -143,27 +187,15 @@ discord-bot:
   log-trades:
     enabled: false
     channel: 'LOGS-TEXTHANNEL-ID'
+
   # Menu to let users sell/buy items
+  # !! FEATURE IN BETA !!
   main-menu:
     enabled: false
     # Available methods: NATIVE, DISCORDSRV (DISCORDSRV IS NOT WORKING CURRENTLY)
     link-method: 'NATIVE'
     # This channel should be only used by the bot. Every message in it will be removed.
     channel: 'MAINMENU-TEXTCHANNEL-ID'
-    # Default size of discord's virtual inventories.
-    default-inventory: 5
-    # Formula to calculate the price of then next slot. slot_price_factor * #slot + slot_price_base = price
-    # For example, to buy the slot nº6 the price will be (1000 * 6) + 10000 = 16000$
-    slot-price-factor: 1000
-    slot-price-base: 10000
-    in-game-gui:
-      fillers:
-        material: 'black_stained_glass_pane'
-      locked:
-        material: 'gray_stained_glass_pane'
-      info:
-        slot: 4
-        texture: 'b722098ae79c7abf002fe9684c773ea71db8919bb2ef2053ea0c0684c5a1ce4f'
     # Discord taxes:
     taxation:
       override: true
@@ -263,6 +295,10 @@ sell-wands:
 
 # Verify whether the AdvancedGUI's layout is present, and if it is not, place it in the layout folder of AdvancedGUI.
 auto-resources-injection: true
+
+# Experimental feature. USE WITH CAUTION
+ignored-keys:
+  #- "Day"
 
 # Cooldown between button uses of the AdvancedGUI layout, in seconds.
 layout-cooldown: 1

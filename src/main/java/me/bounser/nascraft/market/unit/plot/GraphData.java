@@ -14,7 +14,7 @@ public class GraphData {
     private int[] px;
     private int[] py;
 
-    private List<Float> values;
+    private List<Double> values;
     private Item item;
     private String state;
     private final int[] size = GraphManager.getInstance().getSize();
@@ -53,11 +53,11 @@ public class GraphData {
         y = new int[values.size()];
         py = new int[values.size() + 2];
 
-        float maxValue = Collections.max(values);
-        float minValue = Collections.min(values);
+        double maxValue = Collections.max(values);
+        double minValue = Collections.min(values);
 
         int i = 0;
-        for (float value : values) {
+        for (double value : values) {
             int maxh = (int) Math.round(size[1]*0.8);
             y[i] = (int) ((Math.round((maxh - maxh * (value - minValue) / (maxValue - minValue))) + offset[1]) + Math.round(size[1]*0.05));
             py[i] = y[i];
@@ -88,8 +88,8 @@ public class GraphData {
 
     public void changeState() { state = String.valueOf((float) Math.random()); }
 
-    public void setValues(List<Float> values) { this.values = values; }
+    public void setValues(List<Double> values) { this.values = values; }
 
-    public List<Float> getValues() { return values; }
+    public List<Double> getValues() { return values; }
 
 }

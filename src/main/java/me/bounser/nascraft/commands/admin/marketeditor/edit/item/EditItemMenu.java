@@ -31,12 +31,12 @@ public class EditItemMenu {
 
     private ItemStack itemStack;
 
-    private float initialPrice;
+    private double initialPrice;
     private String alias;
     private float elasticity;
     private float noiseIntensity;
-    private float support;
-    private float resistance;
+    private double support;
+    private double resistance;
 
     private Category prevCategory;
     private Category category;
@@ -103,15 +103,15 @@ public class EditItemMenu {
         return currency;
     }
 
-    public float getInitialPrice() {
+    public double getInitialPrice() {
         return initialPrice;
     }
 
-    public float getSupport() {
+    public double getSupport() {
         return support;
     }
 
-    public float getResistance() {
+    public double getResistance() {
         return resistance;
     }
 

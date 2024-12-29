@@ -7,7 +7,11 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.RoundUtils;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.market.limitorders.LimitOrder;
+import me.bounser.nascraft.market.limitorders.LimitOrdersManager;
+import me.bounser.nascraft.market.limitorders.OrderType;
 import me.bounser.nascraft.market.unit.Item;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
@@ -22,6 +26,8 @@ import org.bukkit.metadata.FixedMetadataValue;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static me.bounser.nascraft.inventorygui.LimitOrdersMenu.getFormattedTime;
 
 public class BuySellMenu implements MenuPage{
 
@@ -93,7 +99,7 @@ public class BuySellMenu implements MenuPage{
 
         if (config.getAlertsBuySellEnabled()) {
 
-            HashMap<Item, Float> alerts = DiscordAlerts.getInstance().getAlertsOfUUID(player.getUniqueId());
+            HashMap<Item, Double> alerts = DiscordAlerts.getInstance().getAlertsOfUUID(player.getUniqueId());
 
             if (alerts != null && alerts.containsKey(item)) {
 
@@ -129,6 +135,91 @@ public class BuySellMenu implements MenuPage{
                                 lore
                         ));
             }
+        }
+
+        // Limit Orders
+
+        lore.clear();
+
+        if (config.getLimitOrdersBuySellEnabled()) {
+
+            List<LimitOrder> orders = LimitOrdersManager.getInstance().getPlayerLimitOrders(player.getUniqueId());
+
+            LimitOrder order = null;
+
+            for (LimitOrder limitOrder : orders)
+                if (limitOrder.getItem().equals(item)) order = limitOrder;
+
+            Component limitComponent;
+
+            if (order != null) {
+
+                String limitLore;
+
+                if (order.isCompleted()) {
+                    limitLore = Lang.get().message(order.getOrderType().equals(OrderType.LIMIT_BUY) ? Message.GUI_LIMIT_ORDERS_LORE_FILLED_BUY : Message.GUI_LIMIT_ORDERS_LORE_FILLED_SELL)
+                            .replace("[PRICE-ITEM]", Formatter.format(order.getItem().getCurrency(), order.getCost()/order.getCompleted(), Style.ROUND_BASIC));
+                } else if (order.isExpired()) {
+                    limitLore = Lang.get().message(order.getOrderType().equals(OrderType.LIMIT_BUY) ? Message.GUI_LIMIT_ORDERS_LORE_EXPIRED_BUY : Message.GUI_LIMIT_ORDERS_LORE_EXPIRED_SELL)
+                            .replace("[PRICE-ITEM]", Formatter.format(order.getItem().getCurrency(), order.getCost()/order.getCompleted(), Style.ROUND_BASIC));
+                } else {
+                    limitLore = Lang.get().message(order.getOrderType().equals(OrderType.LIMIT_BUY) ? Message.GUI_LIMIT_ORDERS_LORE_UNFILLED_BUY : Message.GUI_LIMIT_ORDERS_LORE_UNFILLED_SELL);
+                }
+
+                limitLore = limitLore
+                        .replace("[NAME]", order.getItem().getTaggedName())
+                        .replace("[FILLED]", String.valueOf(order.getCompleted()))
+                        .replace("[TO-FILL]", String.valueOf(order.getToComplete()))
+                        .replace("[PRICE]", Formatter.format(order.getItem().getCurrency(), order.getPrice(), Style.ROUND_BASIC));
+
+                float change = 0;
+
+                if (order.getOrderType().equals(OrderType.LIMIT_BUY)) {
+                    change = RoundUtils.roundToTwo(-100 + (float) (order.getPrice() * 100 / order.getItem().getPrice().getBuyPrice()));
+                    limitLore = limitLore
+                            .replace("[CURRENT-PRICE]", Formatter.format(order.getItem().getCurrency(), order.getItem().getPrice().getBuyPrice(), Style.ROUND_BASIC))
+                            .replace("[QUANTITY]", String.valueOf(order.getCompleted()))
+                            .replace("[COMPENSATION]", Formatter.format(order.getItem().getCurrency(), ((order.getToComplete()) * order.getPrice()) - order.getCost(), Style.ROUND_BASIC));
+                } else {
+                    change = RoundUtils.roundToTwo(-100 + (float) (order.getPrice() * 100 / order.getItem().getPrice().getSellPrice()));
+                    limitLore = limitLore
+                            .replace("[CURRENT-PRICE]", Formatter.format(order.getItem().getCurrency(), order.getItem().getPrice().getSellPrice(), Style.ROUND_BASIC))
+                            .replace("[QUANTITY]", String.valueOf(order.getToComplete() - order.getCompleted()))
+                            .replace("[COMPENSATION]", Formatter.format(order.getItem().getCurrency(), order.getCost(), Style.ROUND_BASIC));
+                }
+
+                if (!order.isExpired() && !order.isCompleted()) {
+                    limitLore = limitLore
+                            .replace("[CHANGE]", (change > 0 ? Lang.get().message(Message.GUI_LIMIT_ORDERS_CHANGE_POSITIVE) : Lang.get().message(Message.GUI_LIMIT_ORDERS_CHANGE_NEGATIVE)).replace("[CHANGE]", String.valueOf(change)))
+                            .replace("[EXPIRATION]", getFormattedTime(order.getExpiration()));
+                }
+
+                lore.clear();
+
+                for (String line : limitLore.split("\\n")) {
+                    Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+                    lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
+                }
+
+                limitComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_BUYSELL_LIMIT_NAME_UNSET));
+
+            } else {
+
+                limitComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_BUYSELL_LIMIT_NAME_SET));
+
+                for (String line : Lang.get().message(Message.GUI_BUYSELL_LIMIT_LORE_SET).split("\\n")) {
+                    Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+                    lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
+                }
+            }
+
+            gui.setItem(
+                    config.getLimitOrdersBuySellSlot(),
+                    MarketMenuManager.getInstance().generateItemStack(
+                            config.getLimitOrdersBuySellMaterial(),
+                            BukkitComponentSerializer.legacy().serialize(limitComponent),
+                            lore
+                    ));
         }
 
         // Information
@@ -260,7 +351,7 @@ public class BuySellMenu implements MenuPage{
 
         if (config.getAlertsBuySellEnabled()) {
 
-            HashMap<Item, Float> alerts = DiscordAlerts.getInstance().getAlertsOfUUID(player.getUniqueId());
+            HashMap<Item, Double> alerts = DiscordAlerts.getInstance().getAlertsOfUUID(player.getUniqueId());
 
             if (alerts != null && alerts.containsKey(item)) {
 

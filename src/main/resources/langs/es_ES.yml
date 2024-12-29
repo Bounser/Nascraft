@@ -1,8 +1,6 @@
 # Nascraft es_ES - ${project.version}
 # by @Bounser
 
-# El precio debe ir después (true -> 50€) o antes (false -> €50)
-after: true
 # Separador decimal. Disponibles: point (.), comma (,)
 separator: "comma"
 
@@ -13,23 +11,31 @@ default_item_format: "<gradient:#8ae6ff:#ebffc4>[ALIAS]</gradient>"
 default_category_format: "<gradient:#6b86ff:#3d67ff>[NAME]</gradient>"
 
 # Placeholders disponibles: [AMOUNT], [MATERIAL], [WORTH]
-buy_message: "<gradient:#00E3FB:#F9ABFD>Has comprado <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> por </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
-sell_message: "<gradient:#00E3FB:#F9ABFD>Has vendido <bold>[AMOUNT]</bold> x <bold>[MATERIAL]</bold> por </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+buy_message: "<gradient:#00E3FB:#F9ABFD>Has comprado <bold>[AMOUNT]</bold> x <bold>[NAME]</bold> por </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+sell_message: "<gradient:#00E3FB:#F9ABFD>Has vendido <bold>[AMOUNT]</bold> x <bold>[NAME]</bold> por </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
 
-not_enough_money: "<gradient:#FB6363:#C4B3FD>¡No tienes suficiente dinero!</gradient>"
-not_enough_items: "<gradient:#FB6363:#C4B3FD>¡No tienes suficientes items!</gradient>"
-not_enough_space: "<gradient:#FB6363:#C4B3FD>¡No tienes suficiente espacio en el inventario!</gradient>"
+limit_buy_message: "<gradient:#00E3FB:#F9ABFD>Orden límite establecida para comprar <bold>[AMOUNT]</bold> x <bold>[NAME]</bold> a precio </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+limit_sell_message: "<gradient:#00E3FB:#F9ABFD>Orden límite establecida para vender <bold>[AMOUNT]</bold> x <bold>[NAME]</bold> a precio </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+limit_buy_completed: "<gradient:#00E3FB:#F9ABFD>Orden límite COMPLETADA: Has comprado <bold>[AMOUNT]</bold> x <bold>[NAME]</bold> por </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+limit_sell_completed: "<gradient:#00E3FB:#F9ABFD>Orden límite COMPLETADA: Has vendido <bold>[AMOUNT]</bold> x <bold>[NAME]</bold> por </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+limit_max_orders_reached: "<gradient:#FB6363:#C4B3FD>✘ ¡No puedes tener más ordenes límite simultáneamente!</gradient>"
+
+not_enough_money: "<gradient:#FB6363:#C4B3FD>✘ ¡No tienes suficiente dinero!</gradient>"
+not_enough_items: "<gradient:#FB6363:#C4B3FD>✘ ¡No tienes suficientes items!</gradient>"
+not_enough_space: "<gradient:#FB6363:#C4B3FD>✘ ¡No tienes suficiente espacio en el inventario!</gradient>"
+top_limit_reached: "<gradient:#FB6363:#C4B3FD>✘ ¡Nadie quiere comprar eso!</gradient> <color:#a84b34>(Precio mínimo alcanzado)</color>"
+bottom_limit_reached: "<gradient:#FB6363:#C4B3FD>✘ ¡Nadie quiere venderte eso!</gradient> <color:#a84b34>(Precio máximo alcanzado)</color>"
 shop_closed: "<gradient:#FB6363:#C4B3FD>Error al comprar: La tienda esta cerrada</gradient>"
 
 # Comandos
 no_permission: "<gradient:#FB6363:#C4B3FD>Permiso requerido.</gradient>"
 click_to_confirm: "\n<gold>[ <gradient:#F5FFD5:#FFA200:#F5FFD5>Clic aquí para confirmar</gradient> ]</gold>\n"
-list_segment: "\n<gray>> <gradient:#FF00CD:#DA58FF>[MATERIAL] x [AMOUNT] = [WORTH]</gradient>"
+list_segment: "\n<gray>> <gradient:#FF00CD:#DA58FF>[NAME] x [AMOUNT] = [WORTH]</gradient>"
 
 # nsellall
 sellall_everything_error: "<gradient:#FF0000:#FF7E7E:#FF0000>No tienes nada que vender!</gradient>"
-sellall: "<gradient:#FF00CD:#DA58FF>Has vendido <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[MATERIAL]</light_purple></bold> por <green>[WORTH]</green></gradient>"
-sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>¡No tienes nada de [MATERIAL] para vender!</gradient>"
+sellall: "<gradient:#FF00CD:#DA58FF>Has vendido <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[NAME]</light_purple></bold> por <green>[WORTH]</green></gradient>"
+sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>¡No tienes nada de [NAME] para vender!</gradient>"
 sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>Material no reconocido. Usa: /sellall [material]</gradient>"
 sellall_estimated_value: "<gray>Valor estimado:</gray> <green>[WORTH]</green>"
 
@@ -62,6 +68,9 @@ alerts_empty: "&cNo tienes ninguna alerta activa."
 alerts_header: "&3Alertas activas:\n"
 alerts_list_segment: "\n&5> [MATERIAL] a precio [WORTH]"
 
+alert_reached_up: "<color:#ffd269>✉</color> <gradient:#FB6363:#C4B3FD>Alerta alcanzada para objeto: </gradient>[NAME] <color:#ffae2b>- </color>[PRICE1] <gradient:#FB6363:#C4B3FD>El precio ha subido a: [PRICE2]!</gradient>"
+alert_reached_down: "<color:#ffd269>✉</color> <gradient:#FB6363:#C4B3FD>Alerta alcanzada para objeto: </gradient>[NAME] <color:#ffae2b>- </color>[PRICE1] <gradient:#FB6363:#C4B3FD>El precio ha bajado a: [PRICE2]!</gradient>"
+
 # SELLWAND
 
 sellwand_estimated_value: "<gradient:#FF00CD:#DA58FF>Valor estimado:</gradient> <bold>[WORTH]</bold>"
@@ -90,17 +99,25 @@ link_direct_message: ":link: Tu cuenta ha sido enlazada con el usuario de minecr
 discordcmd_not_linked: "<gradient:#FB6363:#C4B3FD>¡No estás enlazado!</gradient>"
 discordcmd_linked: "<gradient:#FF00CD:#DA58FF>Estás enlazado con:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
 
-# INVENTARIO DE DISCORD
+# PORTFOLIO
 
-disinv_title: "<b><gradient:#8c2eff:#cd75ff>Inventario de Discord</gradient></b>"
-disinv_cant_afford_expansion: "<gradient:#FB6363:#C4B3FD>✘ ¡No tienes suficiente dinero!</gradient>"
-disinv_locked_title: "<b><gradient:#ff5e4f:#ff2e4a>BLOUEADO</gradient></b>"
-disinv_locked_lore: "<gradient:#6c65b5:#7aad63>Clic para comprar la siguiente ranura por:</gradient>\n<b><gradient:#ffbb29:#efff78>[AMOUNT]</gradient></b>"
-disinv_info_title: "<b><gradient:#8c2eff:#cd75ff>Inventario de Discord</gradient></b>"
-disinv_info_lore: "<gradient:#6c65b5:#7aad63>Valor del inventario: </gradient> [WORTH]"
-disinv_amount: "<gradient:#6c65b5:#7aad63>Cantidad: </gradient><color:#66ff40>[AMOUNT]</color>"
-disinv_no_space: "<gradient:#FB6363:#C4B3FD>✘ ¡No tienes espacio suficiente para mover ese objeto!</gradient>"
-disinv_invalid: "<gradient:#FB6363:#C4B3FD>✘ ¡Objeto inválido!</gradient>"
+portfolio_title: "<b><gradient:#8c2eff:#cd75ff>Cartera</gradient></b>"
+portfolio_cant_afford_expansion: "<gradient:#FB6363:#C4B3FD>✘ ¡No tienes suficiente dinero!</gradient>"
+portfolio_locked_title: "<b><gradient:#ff5e4f:#ff2e4a>BLOQUEADO</gradient></b>"
+portfolio_locked_lore: "<gradient:#6c65b5:#7aad63>Clic para comprar ranura por:</gradient>\n<b><gradient:#ffbb29:#efff78>[AMOUNT]</gradient></b>"
+portfolio_info_title: "<b><gradient:#8c2eff:#cd75ff>Tu cartera</gradient></b>"
+portfolio_info_lore: "<gradient:#6c65b5:#7aad63>Valor de la cartera: </gradient>\n[WORTH]\n \n<gradient:#00e007:#2b92ff>Clic para ver la composición de tu cartera.</gradient>"
+portfolio_amount: "<gradient:#6c65b5:#7aad63>Cantidad: </gradient><color:#66ff40>[AMOUNT]</color>"
+portfolio_no_space: "<gradient:#FB6363:#C4B3FD>✘ ¡No hay hueco para mover eso!</gradient>"
+portfolio_no_storage: "<gradient:#FB6363:#C4B3FD>✘ ¡Has alcanzado el límite, tu cartera no puede almacenar más!</gradient>"
+portfolio_invalid: "<gradient:#FB6363:#C4B3FD>✘ ¡Objeto inválido!</gradient>"
+portfolio_back_name: "<gradient:#ff816b:#ff2e38>⏪ Atrás</gradient>"
+
+portfolio_composition_title: "       <gradient:#8c00ff:#1c3eff>Composición de la cartera</gradient>"
+portfolio_composition_stats_name: "<gradient:#00E3FB:#F9ABFD>Composición:</gradient>"
+portfolio_composition_stats_lore: "\n [COMPOSITION]"
+portfolio_composition_stats_segment: "[COLOR]■ <gradient:#96a9e0:#2b92ff>[PERCENTAGE]</gradient> [NAME] <color:#e09f7e>-</color> [WORTH]\n "
+portfolio_composition_empty: " <gradient:#96a9e0:#2b92ff>Tu cartera está vacía.</gradient>\n "
 
 # Mercado
 
@@ -126,12 +143,22 @@ gui_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Alertas</gradient></b>"
 gui_alerts_lore_linked: "<color:#cc801d>Recibe una notificación (MD) por <color:#4931e8>Discord</color></color>\n<color:#cc801d>cuando un item alcance cierto precio.</color>\n\n<color:#cc801d>Actualmente tienes [ALERTS] alertas configuradas</color>\n\n<gradient:#ffa930:#ffca85>Clic para gestionarlas.</gradient>"
 gui_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Alertas</gradient>"
 gui_alerts_lore_not_linked: "<color:#cc801d>Recibe una notificación (MD) por <color:#4931e8>Discord</color></color>\n<color:#cc801d>cuando un item alcance cierto precio.</color>\n \n<gradient:#ff3650:#ff1100>✘ Tu cuenta no esta enlazada con Discord</gradient>"
+
+gui_limit_orders_name: "<b><gradient:#3eff29:#8ca9ff>Ordenes Límite</gradient></b>"
+gui_limit_orders_lore: " \n<gradient:#c68aff:#8ca9ff>Compra y vende a precios específicos.</gradient>\n\n<gradient:#c68aff:#8ca9ff>Actualmente tienes <color:#6b81ff>[TOTAL]</color> orden(es) límite activas.</gradient>\n  <color:#6b81ff>╠═</color> <color:#bdc1ff>Por completarse: [TO-FILL]</color>\n  <color:#6b81ff>╠═</color> <color:#bdc1ff>Completadas: [FILLED]</color>\n  <color:#6b81ff>╚═</color> <color:#bdc1ff>Caducadas: [EXPIRED]</color>\n\n<gradient:#38ff5d:#8ca9ff>Clic para consular cada una.</gradient>"
+
 gui_information_name: "<b><gradient:#622eff:#ff21c8>Menu del Mercado</gradient></b>"
 gui_information_lore: "<color:#5446b0>Compra y vende con el mercado.</color>\n<color:#5446b0>Explora las categorías de abajo para negociar</color>\n<color:#5446b0>con una gran variedad de items.</color>"
-gui_discord_name_linked: "<b><gradient:#8c2eff:#cd75ff>Inventario de Discord</gradient></b>"
-gui_discord_name_not_linked: "<b><gradient:#8c2eff:#cd75ff>Inventario de Discord</gradient></b>"
-gui_discord_lore_linked: "<gradient:#6c65b5:#7aad63>Clic para acceder a tu inventario de Discord</gradient>"
-gui_discord_lore_not_linked: " \n<gradient:#6c65b5:#7aad63>Clic para acceder a tu inventario de Discord</gradient>\n \n<gradient:#ff5e4f:#ff2e4a>✘ Tu cuenta no esta enlazada con Discord</gradient> "
+
+gui_portfolio_name_linked: "<b><gradient:#8c2eff:#cd75ff>Cartera</gradient></b>"
+gui_portfolio_name_not_linked: "<b><gradient:#8c2eff:#cd75ff>Cartera</gradient></b>"
+gui_portfolio_lore_linked: "<gradient:#6c65b5:#7aad63>Clic para acceder a tu cartera</gradient>"
+gui_portfolio_lore_not_linked: " \n<gradient:#6c65b5:#7aad63>Clic para acceder a tu cartera</gradient>\n \n<gradient:#ff5e4f:#ff2e4a>✘ Tu cuenta no esta enlazada con Discord</gradient> "
+
+gui_trends_name: "<b><gradient:#622eff:#ff21c8>Tendencias del mercado</gradient></b> <color:#05b379>(Última hora)</color>"
+gui_trends_lore: " \n<gradient:#00ccff:#58ff4d> Más popular:</gradient> <color:#ff743d>🔥</color> [POPULAR] <color:#ff743d>🔥</color>\n \n<gradient:#00ccff:#58ff4d> Mayores cambios:</gradient>\n<color:#eda600> 1.</color> [1]\n<color:#aab5ae> 2.</color> [2]\n<color:#c27029> 3.</color> [3]"
+gui_trends_positive: "<gradient:#55ff55:#39ff08>▲ [CHANGE]%</gradient> [NAME]"
+gui_trends_negative: "<gradient:#ff3b4e:#ff1900>▼ [CHANGE]%</gradient> [NAME]"
 
 gui_categories_lore_segment: "<color:#7b8dba>●</color> <color:#81889c>[ALIAS]</color>"
 gui_category_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Volver</gradient></b>"
@@ -140,7 +167,7 @@ gui_category_next_name: "<b><gradient:#ff816b:#ff2e38>→</gradient></b>"
 gui_category_item_lore: " \n<gradient:#497882:#4a5082>Precio: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Cambio última hora: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● COMPRAR: </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● VENDER:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>\n \n<u><gradient:#747cc2:#ebffc4>⏵ Clic para operar con este objeto</gradient></u>"
 
 gui_buysell_item_lore: " \n<gradient:#497882:#4a5082>Precio: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Cambio última hora: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● COMPRAR: </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● VENDER:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>"
-gui_buysell_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Establecer Alerta</gradient></b>"
+gui_buysell_alerts_name_linked: "<color:#59ff40>✎</color> <b><gradient:#ffbf00:#ff4800>Establecer Alerta</gradient></b>"
 gui_buysell_alerts_name_setup: "<b><gradient:#ffbf00:#ff4800>Alerta</gradient></b>"
 gui_buysell_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Establecer Alerta</gradient></b>"
 gui_buysell_alerts_lore_linked: "<gradient:#cc801d:#4a5082>Clic para establecer un precio. Recibirás un DM</gradient>\n<gradient:#cc801d:#4a5082>por Discord cuando se alcance dicho precio.</gradient>"
@@ -149,6 +176,9 @@ gui_buysell_alerts_lore_not_linked: "<gradient:#cc801d:#4a5082>Clic para estable
 gui_buysell_info_name: "<b><gradient:#ffc457:#ffb5d0>Ver gráfica</gradient></b>"
 gui_buysell_info_lore: "<gradient:#ffe712:#c7a987>Consulta la evolución del precio</gradient>"
 gui_buysell_back_name: "<b><gradient:#ff816b:#ff2e38>⏪ Volver</gradient></b>"
+gui_buysell_limit_name_unset: "<b><gradient:#ffe712:#cca278>CANCELAR ORDEN LÍMITE</gradient><b>"
+gui_buysell_limit_name_set: "<b><gradient:#ffe712:#cca278>ESTABLECER ORDEN LÍMITE</gradient></b>"
+gui_buysell_limit_lore_set: "\n <gradient:#976bff:#e28aff>En una orden límite eliges el precio</gradient>\n <gradient:#976bff:#e28aff>que pagarás/recibiras en la transacción.</gradient>\n <gradient:#976bff:#e28aff>Cuando el precio llega al establecido,</gradient>\n <gradient:#976bff:#e28aff>la orden se ejecuta automáticamente. </gradient>\n\n <gradient:#976bff:#e28aff>Pueden caducar si nunca se llega al precio</gradient>\n <gradient:#976bff:#e28aff>y puedes cancelarlas en cualquier momento.</gradient>\n\n<b><gradient:#2fe30b:#6effa3>⏵ Clic para establecer</gradient></b>"
 
 gui_buysell_buy_buttons_name: "<b><gradient:#44ff3d:#94ff42>COMPRAR [AMOUNT]</gradient></b>"
 gui_buysell_buy_buttons_lore: " \n<gradient:#6c65b5:#7aad63>⏵ Clic para comprar [AMOUNT] por </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
@@ -165,7 +195,7 @@ gui_info_timeframe_option_1: "Día"
 gui_info_timeframe_option_2: "Mes"
 gui_info_timeframe_option_3: "Año"
 gui_info_timeframe_option_4: "Todo"
-gui_info_timeframe_lore_after: " \n<gradient:#2eff8c:#5bff2e>Click para cambiar de marco temporal</gradient>"
+gui_info_timeframe_lore_after: " \n<gradient:#2eff8c:#5bff2e>Clic para cambiar de marco temporal</gradient>"
 gui_info_statistics_name: "[ITEM-NAME] <gradient:#ffe712:#c7a987>- Datos</gradient>"
 gui_info_statistics_lore: "\n<gradient:#ff9778:#ffff55>Precio actual:</gradient> [PRICE]\n \n<b><gradient:#ffe712:#ffd83d>[OPTION]</gradient></b>\n <gradient:#ffe712:#ffd83d>╠═</gradient> <gradient:#ff9778:#ffff55>Cambio:</gradient> [CHANGE] \n <gradient:#ffe712:#ffd83d>╠═</gradient> <gradient:#ff9778:#ffff55>Máximo:</gradient> [HIGH] \n <gradient:#ffe712:#ffd83d>╚═</gradient> <gradient:#ff9778:#ffff55>Mínimo:</gradient> [LOW]"
 gui_info_positive_change: "<gradient:#55ff55:#39ff08>▲ [CHANGE]%</gradient>"
@@ -181,6 +211,62 @@ anvil_alert_invalid_price: "Precio inválido."
 anvil_alert_invalid: "Inválido"
 anvil_alert_limit_reached: "Limite de alertas alcanzado"
 anvil_alert_repeated: "Alerta repetida"
+
+gui_limit_orders_title: "<b><gradient:#9141fa:#b482fa>Ordenes Límite</gradient></b>"
+gui_limit_orders_name_buy: "[ITEM-NAME]"
+gui_limit_orders_name_sell: "[ITEM-NAME]"
+gui_limit_orders_change_positive: "<gradient:#00ff5e:#6d7ba3>+[CHANGE]%</gradient>"
+gui_limit_orders_change_negative: "<gradient:#f70800:#6d7ba3>[CHANGE]%</gradient>"
+gui_limit_orders_lore_unfilled_buy: "\n<b><gradient:#4bff2b:#82e6ff>ORDEN DE COMPRA</gradient></b>\n<gradient:#ffe712:#cca278>Caduca en: [EXPIRATION]</gradient>\n\n<gradient:#ff9778:#ffff55>Precio límite:</gradient> [PRICE]\n<gradient:#ff9778:#ffff55>Precio actual:</gradient> [CURRENT-PRICE]\n<gradient:#767bcc:#6d7ba3>(Cambio necesario: [CHANGE])</gradient>\n\n<gradient:#ffe712:#cca278>Estado de la orden:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n\n<b><gradient:#2fe30b:#6effa3>⏵ Clic para cancelar</gradient></b>\n<gradient:#2dab24:#34c429>Al cancelar recibirás [COMPENSATION]\n<gradient:#2dab24:#34c429>y [QUANTITY] x [NAME]</gradient>"
+gui_limit_orders_lore_filled_buy: "\n<b><gradient:#00ff08:#82e6ff>ORDEN DE COMPRA COMPLETADA</gradient></b>\n\n<gradient:#ffe712:#cca278>Estado de la orden:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n<gradient:#ffe712:#cca278>Precio pagado en promedio:</gradient> [PRICE-ITEM]\n\n<b><gradient:#2fe30b:#6effa3>⏵ Clic para reclamar</gradient></b>\n<gradient:#2dab24:#34c429>Recibirás [QUANTITY] x [NAME]</gradient>\n<gradient:#2dab24:#34c429>y [COMPENSATION]</gradient>"
+gui_limit_orders_lore_unfilled_sell: "\n<b><gradient:#ff130f:#ff217a>ORDEN DE VENTA</gradient></b>\n<gradient:#ffe712:#cca278>Caduca en: [EXPIRATION]</gradient>\n\n<gradient:#ff9778:#ffff55>Precio límite:</gradient> [PRICE]\n<gradient:#ff9778:#ffff55>Precio actual:</gradient> [CURRENT-PRICE]\n<gradient:#767bcc:#6d7ba3>(Cambio necesario: [CHANGE])</gradient>\n\n<gradient:#ffe712:#cca278>Estado de la orden:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n\n<b><gradient:#2fe30b:#6effa3>⏵ Clic para cancelar</gradient></b>\n<gradient:#2dab24:#34c429>Al cancelar recibirás [COMPENSATION]\n<gradient:#2dab24:#34c429>y [QUANTITY] x [NAME]</gradient>"
+gui_limit_orders_lore_filled_sell: "\n<b><gradient:#ff0f0f:#ff217a>ORDEN DE VENTA COMPLETADA</gradient></b>\n\n<gradient:#ffe712:#cca278>Estado de la orden:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n<gradient:#ffe712:#cca278>Precio recibido en promedio:</gradient> [PRICE-ITEM]\n\n<b><gradient:#2fe30b:#6effa3>⏵ Clic para reclamar</gradient></b>\n<gradient:#2dab24:#34c429>Recibirás [QUANTITY] x [NAME]</gradient>\n<gradient:#2dab24:#34c429>y [COMPENSATION]</gradient>"
+gui_limit_orders_lore_expired_buy: "\n<b><gradient:#00ff08:#82e6ff>ORDEN DE COMPRA CADUCADA</gradient></b>\n\n<gradient:#ffe712:#cca278>Estado de la orden:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n\n<b><gradient:#2fe30b:#6effa3>⏵ Clic para reclamar</gradient></b>\n<gradient:#2dab24:#34c429>Recibirás [QUANTITY] x [NAME]</gradient>\n<gradient:#2dab24:#34c429>y [COMPENSATION]</gradient>"
+gui_limit_orders_lore_expired_sell: "\n<b><gradient:#ff0f0f:#ff217a>ORDEN DE VENTA CADUCADA</gradient></b>\n\n<gradient:#ffe712:#cca278>Estado de la orden:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n\n<b><gradient:#2fe30b:#6effa3>⏵ Clic para reclamar</gradient></b>\n<gradient:#2dab24:#34c429>Recibirás [QUANTITY] x [NAME]</gradient>\n<gradient:#2dab24:#34c429>y [COMPENSATION]</gradient>"
+
+gui_limit_orders_received_money_items: "<gradient:#00E3FB:#F9ABFD>Has recibido <bold>[AMOUNT]</bold> x <bold>[NAME]</bold> y </gradient><gradient:#6CFB5C:#97FDBD>[MONEY]</gradient>"
+gui_limit_orders_received_money: "<gradient:#00E3FB:#F9ABFD>Has recibido</gradient> <gradient:#6CFB5C:#97FDBD>[MONEY]</gradient>"
+gui_limit_orders_received_items: "<gradient:#00E3FB:#F9ABFD>Has recibido <bold>[AMOUNT]</bold> x <bold>[NAME]</bold></gradient>"
+
+gui_limit_order_day: "día"
+gui_limit_order_hour: "hora"
+gui_limit_order_minute: "min"
+gui_limit_order_second: "segundo"
+gui_limit_order_days: "días"
+gui_limit_order_hours: "horas"
+gui_limit_order_minutes: "minutos"
+gui_limit_order_seconds: "segundos"
+gui_limit_order_now: "Ahora"
+
+gui_limit_orders_back_name: "<gradient:#ff816b:#ff2e38>⏪ Volver</gradient>"
+
+gui_set_limit_order_back_name: "<gradient:#ff816b:#ff2e38>⏪ Volver</gradient>"
+gui_set_limit_order_time_name: "<b><gradient:#ff9305:#ffeb38>Duración de la orden</gradient></b>"
+gui_set_limit_order_time_lore: "<gradient:#9e9eff:#b8ffdc>Establece la duración de la orden.</gradient>\n<gradient:#9e9eff:#b8ffdc>Una vez vencida la duración, la orden caduca..</gradient>\n\n<gradient:#ffb361:#ffc800>Opciones:</gradient>\n[DURATIONS]\n<gradient:#2eff8c:#5bff2e>⏵ Clic para alternar</gradient>"
+gui_set_limit_order_duration_segment_selected: "<gradient:#ffe999:#b8ffdc>| [DURATION]</gradient> <color:#7686a8>(comisión del [FEE]%, mínimo [MIN]$)</color> <color:#00ff04>☜</color>\n"
+gui_set_limit_order_duration_segment_not_selected: "<gradient:#ffe999:#b8ffdc>| [DURATION]</gradient> <color:#7686a8>(comisión del [FEE]%, mínimo [MIN]$)</color>\n"
+gui_set_limit_order_price_name: "<b><gradient:#ff9305:#ffeb38>Precio Límite</gradient></b>"
+gui_set_limit_order_price_lore_not_set: "<gradient:#9e9eff:#b8ffdc>Establece el precio al que quieres</gradient>\n<gradient:#9e9eff:#b8ffdc>que se ejecute la orden.</gradient>\n\n<gradient:#2eff8c:#5bff2e>⏵ Clic para establecer el precio</gradient>"
+gui_set_limit_order_price_lore_set: "<gradient:#9e9eff:#b8ffdc>Establece el precio al que quieres</gradient>\n<gradient:#9e9eff:#b8ffdc>que se ejecute la orden.</gradient>\n\n<gradient:#f7cc3e:#b8ffdc>Precio:</gradient> [PRICE]\n\n<gradient:#2eff8c:#5bff2e>⏵ Clic para cambiar el precio</gradient>"
+gui_set_limit_order_quantity_name: "<b><gradient:#ff9305:#ffeb38>Cantidad</gradient></b>"
+gui_set_limit_order_quantity_lore_not_set: "<gradient:#9e9eff:#b8ffdc>Establece la cantidad del objeto</gradient>\n<gradient:#9e9eff:#b8ffdc>a ejecutar.</gradient>\n\n<gradient:#2eff8c:#5bff2e>⏵ Clic para establecer cantidad</gradient>"
+gui_set_limit_order_quantity_lore_set: "<gradient:#9e9eff:#b8ffdc>stablece la cantidad del objeto</gradient>\n<gradient:#9e9eff:#b8ffdc>a ejecutar.</gradient>\n\n<gradient:#f7cc3e:#b8ffdc>Cantidad:</gradient> <color:#33ff00>[AMOUNT]</color>\n\n<gradient:#2eff8c:#5bff2e>⏵ Clic para cambiar la cantidad</gradient>"
+gui_set_limit_order_buy_name: "<b><gradient:#30ff29:#c0ff8a>Establecer orden de compra</gradient></b>"
+gui_set_limit_order_buy_lore_unfilled: "\n<gradient:#9e9eff:#b8ffdc>Rellena la información necesaria</gradient>\n<gradient:#9e9eff:#b8ffdc>para establecer la orden. (Precio, Cantidad)</gradient>\n "
+gui_set_limit_order_buy_lore: "\n<u><gradient:#ff9305:#ffeb38>Resumen de la orden</gradient></u>\n\n[CAUTION]<gradient:#969aff:#e9d1ff>Objeto:</gradient> [NAME]\n<gradient:#969aff:#e9d1ff>Precio límite:</gradient> [PRICE]\n<gradient:#969aff:#e9d1ff>Cantidad:</gradient> <color:#4dff5b>[AMOUNT]</color>\n\n<gradient:#969aff:#e9d1ff>Duración: </gradient><color:#edc4ff>[DURATION]</color>\n <gradient:#6687ff:#72a9b5>╠═ Expira el</gradient> <color:#45ffa5>[DATE]</color>\n <gradient:#6687ff:#72a9b5>╚═ Comisión:</gradient> [FEE]\n\n<gradient:#2eff8c:#5bff2e><b>⏵ Clic para confirmar</b></gradient>\n<color:#11ba0b>Al confirmar se te retendrá [HELD]</color>\n<color:#11ba0b>y se te cobrará [FEE]</color>"
+gui_set_limit_order_sell_name: "<b><gradient:#ff4a36:#ffb56b>Establecer oden de venta</gradient></b>"
+gui_set_limit_order_sell_lore_unfilled: "\n<gradient:#9e9eff:#b8ffdc>Rellena la información necesaria</gradient>\n<gradient:#9e9eff:#b8ffdc>para establecer la orden. (Precio, Cantidad)</gradient>\n "
+gui_set_limit_order_sell_lore: "\n<u><gradient:#ff9305:#ffeb38>Resumen de la orden</gradient></u>\n\n[CAUTION]<gradient:#969aff:#e9d1ff>Objeto:</gradient> [NAME]\n<gradient:#969aff:#e9d1ff>Precio límite:</gradient> [PRICE]\n<gradient:#969aff:#e9d1ff>Cantidad:</gradient> <color:#4dff5b>[AMOUNT]</color>\n\n<gradient:#969aff:#e9d1ff>Duración: </gradient><color:#edc4ff>[DURATION]</color>\n <gradient:#6687ff:#72a9b5>╠═ Expira el</gradient> <color:#45ffa5>[DATE]</color>\n <gradient:#6687ff:#72a9b5>╚═ Comisión:</gradient> [FEE]\n\n<gradient:#2eff8c:#5bff2e><b>⏵ Clic para confirmar</b></gradient>\n<color:#11ba0b>Al confirmar se te retendrá [AMOUNT] x [NAME]</color>\n<color:#11ba0b>de tu inventario y se te cobrará [FEE]</color>"
+gui_set_limit_order_buy_caution: "<color:#fbff00>⚠ <b><gradient:#ffcb3d:#ff5c0a>CUIDADO</gradient></b> ⚠</color>\n<gradient:#ffcb3d:#ff5c0a>El precio límite seleccionado está por encima</gradient>\n<gradient:#ffcb3d:#ff5c0a>del precio actual ([PRICE])!</gradient>\n\n"
+gui_set_limit_order_sell_caution: "<color:#fbff00>⚠ <b><gradient:#ffcb3d:#ff5c0a>CUIDADO</gradient></b> ⚠</color>\n<gradient:#ffcb3d:#ff5c0a>El precio límite está por debajo</gradient>\n<gradient:#ffcb3d:#ff5c0a>del precio actual ([PRICE])!</gradient>\n\n"
+
+anvil_limit_price_title: "Precio límite: [NAME]"
+anvil_limit_price_text: "Precio: "
+anvil_limit_price_invalid: "Precio inválido."
+anvil_limit_quantity_title: "Cantidad: [NAME]"
+anvil_limit_quantity_text: "Cantidad: "
+anvil_limit_quantity_invalid: "Cantidad inválida."
+anvil_limit_quantity_max_reached: "Máx [MAX]"
 
 # DISCORD - Sin soporte para MiniMessage.
 
@@ -254,7 +340,7 @@ discord_button_7: "Brokers"
 discord_graph_y_left: "Precio (€)"
 discord_graph_y_right: "Volumen"
 
-discord_wiki: "# :information_source: Información del mercado\n> En este canal podrás **comprar/vender objetos y muchas otras cosas sin estar dentro del juego!** Para empezar a usarlo debes enlazar tu cuenta, para hacerlo presiona el botón :link: **Enlazar cuenta** y sigue las instrucciones.\n## Haz click en una categoría para aprender más."
+discord_wiki: "# :information_source: Información del mercado\n> En este canal podrás **comprar/vender objetos y muchas otras cosas sin estar dentro del juego!** Para empezar a usarlo debes enlazar tu cuenta, para hacerlo presiona el botón :link: **Enlazar cuenta** y sigue las instrucciones.\n## Haz clic en una categoría para aprender más."
 discord_wiki_1: "Inventario"
 discord_wiki_2: "Balance"
 discord_wiki_3: "Alertas"
@@ -265,23 +351,11 @@ discord_wiki_6: "Brokers"
 discord_wiki_inventory: "## :school_satchel: Inventario\n> Una vez que vincules tu cuenta, **tu dinero del juego se compartirá con tu cuenta de discord** y vice versa, y **recibirás un inventario virtual**, en el que podrás almacenar los items que compres por discord. Cada ranura puede almacenar **hasta 999 de un tipo de objeto**. Dos ranuras no pueden almacenar el mismo tipo de objeto. Puedes ampliar las ranuras y comprobar el valor y contenido del inventario presionando el boton :school_satchel: **Inventario**."
 discord_wiki_balance: "## :coin: Balance\n> Si estas enlazado, the :coin: **Balance** button will show you some statistics on how is your financial state. It will display the **purse shared between your discord and minecraft accounts**, and other information as the current **value of your discord inventory** and the money **under brokers management**."
 discord_wiki_alerts: "## :bell: Alerts\n> If you are interested in a certain item you can set up an **alert** to get a **DM when the price of an item reaches a threshold** that you previously register. To set up your own alerts use :bell:**Alerts**"
-discord_wiki_dynamic: "## :dart: Dynamic orders\n> Set orders that can react to the price of the asset. You can place Limit orders, to buy/sell an asset when it reaches a certain price, or take profit/stoploss, in which you will sell your position once a price gets reached. To access this functionality, press :bar_chart: **Advanced Options** and then :dart: **Dynamic Orders**."
-discord_wiki_sessions: "## :desktop:  **Sessions**: \n
-                         > Selecting an item opens a session, in which you will have access to more operations:
-                         \n\n> :chart_with_upwards_trend: **Long price**: Bet in favor of the price increasing. You will take a loan against your Inventory, up to 50% of its value (During the operation all assets will be locked, so you won't be able to sell), and you will multiply the movements of the price by a factor of 3. That means that a 33% gain will translate into a 100% gain, and a -33% into a total loss (-100%).
-                         \n\n> :chart_with_downwards_trend: **Short price**: Bet against the price increasing. Is the inverse of the long. Same principle, with a factor of 2. You will earn a 10% if the price falls 5%, and loss everything if the prices goes up 50%.
-                         \n\n> :bookmark_tabs: **Futures**: They are a contracts in which you can define a future operation with today prices, paying a fee. If you don't have money right now and want to buy or sell, for example diamonds, if you think that todays price is good, you can sign a future contract, paying 10% in advance, and you will have the right of buying the item in a week (10% comission) or in a month (20% comission) with todays price.
-                         \n\n> :date: **Programmed actions**: With this option you will be able to sell/buy items regularly in a fixed time interval. For example, you can buy 64 diamonds each week or sell 200 iron ingots a day."
-discord_wiki_brokers: "## :man_office_worker: Brokers:\n
-                        You can hire a broker to automate the investment process, albeit at a cost in the form of a fee. The available brokers are: 
-                        \n\n> :man_office_worker: **Aggresive broker**: Assing a quantity of money to him and he will automatically try to earn more by any means, complex derivatives included. He charges a fee of **8% a day**. No profits are guaranteed and you can loss all money invested.
-                        \n\n> :man_teacher:  **Regular broker**: Assing a quantity of money to him and he will automatically try to earn more conservatively. He charges a fee of **4% a day**. No profits are guaranteed and you can loss all money invested.
-                        \n\n> :man_technologist:**Lazy broker**: Assing a quantity of money to him will guarantee the market returns (Average) minus a daily **1% fee**."
 
 discord_not_linked_short: "No enlazado!"
 discord_not_linked: ":exclamation: Tu cuenta no está enlazada! Escribe ``/link`` en el juego para comenzar el proceso de enlazado.."
 discord_insufficient_balance: ":x: No tienes suficiente dinero! Tienes: **[VALUE1]** y necesitas al menos **[VALUE2]**"
-discord_without_space: ":x: No tienes espacio suficiente en tu inventario de discord!"
+discord_without_space: ":x: No tienes espacio suficiente en tu cartera!"
 
 discord_alert_name: "Alerta"
 discord_alerts_name: "Alertas"
@@ -300,7 +374,7 @@ discord_alert_invalid_price: "¡Ese precio no es válido!"
 discord_alert_success: "Configurado exitosamente! recibirás un mensaje cuando se alcance el precio."
 discord_alert_limit_reached: "Limite de alertas alcanzado! Quita alertas antes de crear nuevas."
 discord_alert_already_listed: "¡Ese item ya esta en tu lista!"
-discord_alert_reached_segment: ":bell: [EMOJI] Alerta alcanzada para: ``[MATERIAL] ([PRICE1])`` con precio actual: ``[PRICE2]``"
+discord_alert_reached_segment: ":bell: [EMOJI] Alerta alcanzada para: ``[NAME] ([PRICE1])`` con precio actual: ``[PRICE2]``"
 discord_alert_not_in_watchlist: ":x: Ese item no esta en tu lista de seguimiento."
 discord_alert_removed: ":no_bell: Alerta para **[MATERIAL]** eliminada."
 
@@ -318,12 +392,14 @@ discord_market_closed: ":lock: ¡El mercado esta cerrado!"
 
 discord_buy_feedback: ":inbox_tray: Has comprado **[QUANTITY]** de **[ALIAS]** por **[WORTH]**\n\n:coin: Ahora dispones de: **[BALANCE]**"
 discord_buy_more_feedback: ":inbox_tray: Has comprado **[QUANTITY]** de **[ALIAS]** por **[WORTH]** ([WORTH-EACH] cada uno)\n\n:coin: Ahora dispones de: **[BALANCE]**"
+discord_buy_limit_feedback: ":regional_indicator_x: Nadie está vendiendo ese objeto, no puedes comprarlo."
 
 discord_not_enough_items: ":x: ¡No tienes suficiente de este item en tu inventario!"
 
 discord_sell_feedback: ":outbox_tray: Has vendido **[QUANTITY]** de **[ALIAS]** por **[WORTH]**\n\n:coin: Ahora dispones de: **[BALANCE]**"
 discord_sell_more_feedback: ":outbox_tray: Has vendido **[QUANTITY]** de **[ALIAS]** por **[WORTH]** ([WORTH-EACH] each)\n\n:coin: Ahora dispones de: **[BALANCE]**"
 discord_sold_everything: "Acabas de vender todo por: **[VALUE]**"
+discord_sell_limit_feedback: ":regional_indicator_x: Nadie está comprando ese objeto, no puedes venderlo."
 
 discord_not_enough_slot: ":x: ¡No tienes suficiente dinero para comprar otra ranura! Necesitas mínimo **[PRICE]**"
 discord_already_max_slots: ":x: ¡Ya tienes el numero máximo de ranuras disponibles!"
@@ -332,7 +408,7 @@ discord_slot_bought: "¡Ranura nº[NUM] comprada!"
 discord_trade_history_title: ":scroll: **Historial:** Página [PAGE] ([NUM-TRADES]/15)"
 
 discord_balance_title: ":coin:  **Balance**:"
-discord_balance_report: "\n> :green_circle: :dollar: **Dinero** (Minecraft): ``[PURSE]``\n> :yellow_circle: :school_satchel: **Inventario de discord**: ``[INVENTORY-VALUE]``\n>\n> :abacus: **Total**: ``[TOTAL]``\n"
+discord_balance_report: "\n> :green_circle: :dollar: **Dinero** (Minecraft): ``[PURSE]``\n> :yellow_circle: :school_satchel: **Cartera**: ``[INVENTORY-VALUE]``\n>\n> :abacus: **Total**: ``[TOTAL]``\n"
 discord_purse: "Dinero"
 discord_inventory: "Inventario"
 

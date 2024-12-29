@@ -6,6 +6,9 @@ import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
 
+import java.sql.Connection;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +40,7 @@ public interface Database {
     List<Instant> getMonthPrices(Item item);
     List<Instant> getYearPrices(Item item);
     List<Instant> getAllPrices(Item item);
+    Double getPriceOfDay(String identifier, int day);
 
     //
 
@@ -60,8 +64,16 @@ public interface Database {
     void removeItem(UUID uuid, Item item);
     void clearInventory(UUID uuid);
     void updateCapacity(UUID uuid, int capacity);
-    LinkedHashMap<Item, Integer> retrieveInventory(UUID uuid);
+    LinkedHashMap<Item, Integer> retrievePortfolio(UUID uuid);
     int retrieveCapacity(UUID uuid);
+
+    //
+
+    void logContribution(UUID uuid, Item item, int amount);
+    void logWithdraw(UUID uuid, Item item, int amount);
+    HashMap<Integer, Double> getContributionChangeEachDay(UUID uuid);
+    HashMap<Integer, HashMap<String, Integer>> getCompositionEachDay(UUID uuid);
+    int getFirstDay(UUID uuid);
 
     //
 
@@ -69,13 +81,18 @@ public interface Database {
 
     List<CPIInstant> getCPIHistory();
     List<Instant> getPriceAgainstCPI(Item item);
-    void addTransaction(float newFlow, float effectiveTaxes);
+    void addTransaction(double newFlow, double effectiveTaxes);
     List<DayInfo> getDayInfos();
 
-    void addAlert(String userid, Item item, float price);
+    void addAlert(String userid, Item item, double price);
     void removeAlert(String userid, Item item);
     void retrieveAlerts();
     void removeAllAlerts(String userid);
     void purgeAlerts();
+
+    void addLimitOrder(UUID uuid, LocalDateTime expiration, Item item, int type, double price, int amount);
+    void updateLimitOrder(UUID uuid, Item item, int completed, double cost);
+    void removeLimitOrder(String uuid, String identifier);
+    void retrieveLimitOrders();
 
 }

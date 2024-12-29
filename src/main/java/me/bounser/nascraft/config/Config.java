@@ -1,10 +1,12 @@
 package me.bounser.nascraft.config;
 
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.DatabaseType;
 import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.managers.currencies.CurrencyType;
+import me.bounser.nascraft.market.limitorders.Duration;
 import me.bounser.nascraft.sellwand.Wand;
 import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
@@ -90,6 +92,10 @@ public class Config {
         return config.getBoolean("auto-resources-injection");
     }
 
+    public List<String> getIgnoredKeys() {
+        return config.getStringList("ignored-keys");
+    }
+
     public float getLayoutCooldown() {
         if (config.contains("layout-cooldown")) {
             return (float) config.getDouble("layout-cooldown");
@@ -164,8 +170,8 @@ public class Config {
                                 config.getString("currencies.suppliers.vault.format"),
                                 null,
                                 config.getInt("currencies.suppliers.vault.decimal-positions"),
-                                (float) config.getDouble("currencies.suppliers.vault.top-limit"),
-                                (float) config.getDouble("currencies.suppliers.vault.low-limit")));
+                                config.getDouble("currencies.suppliers.vault.top-limit"),
+                                config.getDouble("currencies.suppliers.vault.low-limit")));
             } else {
                 currencies.add(
                         new Currency(
@@ -177,8 +183,8 @@ public class Config {
                                 config.getString("currencies.suppliers." + supplier + ".format"),
                                 config.getString("currencies.suppliers." + supplier + ".balance-placeholder"),
                                 config.getInt("currencies.suppliers." + supplier + ".decimal-positions"),
-                                (float) config.getDouble("currencies.suppliers." + supplier + ".top-limit"),
-                                (float) config.getDouble("currencies.suppliers." + supplier + ".low-limit")));
+                                config.getDouble("currencies.suppliers." + supplier + ".top-limit"),
+                                config.getDouble("currencies.suppliers." + supplier + ".low-limit")));
             }
         }
 
@@ -471,31 +477,60 @@ public class Config {
     }
 
     public int getDefaultSlots() {
-        return config.getInt("discord-bot.main-menu.default-inventory");
+        return config.getInt("portfolio.default-size");
+    }
+
+    public int getPortfolioMaxStorage() {
+        return config.getInt("portfolio.storage-limit");
     }
 
     public float getSlotPriceFactor() {
-        return (float) config.getDouble("discord-bot.main-menu.slot-price-factor");
+        return (float) config.getDouble("portfolio.slot-price-factor");
     }
 
     public float getSlotPriceBase() {
-        return (float) config.getDouble("discord-bot.main-menu.slot-price-base");
+        return (float) config.getDouble("portfolio.slot-price-base");
     }
 
-    public Material getDiscordInvFillersMaterial() {
-        return Material.getMaterial(config.getString("discord-bot.main-menu.in-game-gui.fillers.material").toUpperCase());
+    public Material getPortfolioFillerMaterial() {
+        return Material.getMaterial(config.getString("portfolio.in-game-gui.fillers.material").toUpperCase());
     }
 
-    public Material getDiscordInvLockedMaterial() {
-        return Material.getMaterial(config.getString("discord-bot.main-menu.in-game-gui.locked.material").toUpperCase());
+    public Material getPortfolioLockedMaterial() {
+        return Material.getMaterial(config.getString("portfolio.in-game-gui.locked.material").toUpperCase());
     }
 
-    public int getDiscordInvInfoSlot() {
-        return config.getInt("discord-bot.main-menu.in-game-gui.info.slot");
+    public boolean getLimitOrdersEnabled() {
+        return config.getBoolean("limit-orders.enabled");
     }
 
-    public String getDiscordInvInfoTexture() {
-        return config.getString("discord-bot.main-menu.in-game-gui.info.texture");
+    public int getMaxLimitOrdersPerPlayer() {
+        return config.getInt("limit-orders.max-per-player");
+    }
+
+    public int getMaxLimitOrderSize() {
+        return config.getInt("limit-orders.order-max-size");
+    }
+
+    public int getCheckingPeriod() {
+        return config.getInt("limit-orders.checking-period");
+    }
+
+    public List<Duration> getDurations() {
+        List<Duration> durations = new ArrayList<>();
+
+        for (String duration : config.getConfigurationSection("limit-orders.durations.").getKeys(false)) {
+            durations.add(
+                    new Duration(
+                            config.getInt("limit-orders.durations." + duration + ".duration"),
+                            config.getString("limit-orders.durations." + duration + ".display"),
+                            (float) config.getDouble("limit-orders.durations." + duration + ".fee"),
+                            (float) config.getDouble("limit-orders.durations." + duration + ".min-fee")
+                    )
+            );
+        }
+
+        return durations;
     }
 
     public float getDiscordBuyTax() {
@@ -588,6 +623,11 @@ public class Config {
                 Nascraft.getInstance().getLogger().severe("Does the item exist in the version of your server?");
                 Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
             }
+
+        for (String ignoredKey : getIgnoredKeys())
+            NBT.modify(itemStack, nbt -> {
+                nbt.removeKey(ignoredKey);
+            });
 
         return itemStack;
 
@@ -696,8 +736,10 @@ public class Config {
     public Category getCategoryFromMaterial(String identifier) {
 
         for (Category category : MarketManager.getInstance().getCategories()) {
-            if (categories.getList("categories." + category.getIdentifier() + ".items").contains(identifier)) {
-                return category;
+            if (categories.contains("categories." + category.getIdentifier() + ".items")) {
+                if (categories.getList("categories." + category.getIdentifier() + ".items").contains(identifier)) {
+                    return category;
+                }
             }
         }
         return null;
@@ -722,6 +764,18 @@ public class Config {
         return Material.getMaterial(inventorygui.getString(path).toUpperCase());
     }
 
+    public boolean getLimitOrdersMenuEnabled() {
+        return inventorygui.getBoolean("main-menu.limit-orders.enabled");
+    }
+
+    public int getLimitOrdersSlot() {
+        return inventorygui.getInt("main-menu.limit-orders.slot");
+    }
+
+    public Material getLimitOrdersMaterial() {
+        return Material.getMaterial(inventorygui.getString("main-menu.limit-orders.material").toUpperCase());
+    }
+
     public boolean getInformationMenuEnabled() {
         return inventorygui.getBoolean("main-menu.information.enabled");
     }
@@ -734,26 +788,44 @@ public class Config {
         return Material.getMaterial(inventorygui.getString("main-menu.information.material").toUpperCase());
     }
 
-    public boolean getDiscordMarketMenuEnabled() {
-        return inventorygui.getBoolean("main-menu.discord.enabled");
+    public boolean getPortfolioMarketMenuEnabled() {
+        return inventorygui.getBoolean("main-menu.portfolio.enabled");
     }
 
-    public int getDiscordSlot() {
-        return inventorygui.getInt("main-menu.discord.slot");
+    public int getPortfolioSlot() {
+        return inventorygui.getInt("main-menu.portfolio.slot");
     }
 
-    public Material getDiscordMaterial(boolean linked) {
+    public Material getPortfolioMaterial(boolean linked) {
         if (linked)
-            return Material.getMaterial(inventorygui.getString("main-menu.discord.linked.material").toUpperCase());
-        return Material.getMaterial(inventorygui.getString("main-menu.discord.not-linked.material").toUpperCase());
+            return Material.getMaterial(inventorygui.getString("main-menu.portfolio.linked.material").toUpperCase());
+        return Material.getMaterial(inventorygui.getString("main-menu.portfolio.not-linked.material").toUpperCase());
     }
 
-    public Material getFillersMaterial() {
-        return Material.getMaterial(inventorygui.getString("main-menu.fillers.material").toUpperCase());
+    public boolean getTrendsEnabled() {
+        return inventorygui.getBoolean("main-menu.trends.enabled");
     }
 
-    public List<Integer> getFillersSlots() {
-        return inventorygui.getIntegerList("main-menu.fillers.slots");
+    public int getTrendsSlot() {
+        return inventorygui.getInt("main-menu.trends.slot");
+    }
+
+    public Material getTrendsMaterial() {
+        return Material.getMaterial(inventorygui.getString("main-menu.trends.material").toUpperCase());
+    }
+
+    public HashMap<Material, List<Integer>> getMainMenuFillers() {
+
+        HashMap<Material, List<Integer>> fills = new HashMap<>();
+
+        for (String section : inventorygui.getConfigurationSection("main-menu.fillers.").getKeys(false)) {
+
+            Material material = Material.valueOf(section.toUpperCase());
+
+            fills.put(material, inventorygui.getIntegerList("main-menu.fillers." + section));
+        }
+
+        return fills;
     }
 
     public boolean getSetCategorySegments() {
@@ -813,7 +885,7 @@ public class Config {
 
 
     public boolean getAlertsBuySellEnabled() {
-        return inventorygui.getBoolean("buy-sell.alerts.enabled");
+        return inventorygui.getInt("buy-sell.alerts.slot") != -1;
     }
 
     public int getAlertsBuySellSlot() {
@@ -824,8 +896,20 @@ public class Config {
         return Material.getMaterial(inventorygui.getString("buy-sell.alerts.material").toUpperCase());
     }
 
+    public boolean getLimitOrdersBuySellEnabled() {
+        return inventorygui.getInt("buy-sell.limit-orders.slot") != -1;
+    }
+
+    public int getLimitOrdersBuySellSlot() {
+        return inventorygui.getInt("buy-sell.limit-orders.slot");
+    }
+
+    public Material getLimitOrdersBuySellMaterial() {
+        return Material.getMaterial(inventorygui.getString("buy-sell.limit-orders.material").toUpperCase());
+    }
+
     public boolean getInfoBuySellEnabled() {
-        return inventorygui.getBoolean("buy-sell.info.enabled");
+        return inventorygui.getInt("buy-sell.info.slot") != -1;
     }
 
     public int getInfoBuySellSlot() {
@@ -837,7 +921,7 @@ public class Config {
     }
 
     public boolean getBuySellBackEnabled() {
-        return inventorygui.getBoolean("buy-sell.back-button.enabled");
+        return inventorygui.getInt("buy-sell.back-button.slot") != -1;
     }
 
     public int getBuySellBackSlot() {
@@ -919,6 +1003,122 @@ public class Config {
 
     public List<Integer> getAlertsMenuSlots() {
         return inventorygui.getIntegerList("alerts.alerts.slots");
+    }
+
+    public int getLimitOrdersMenuSize() {
+        return inventorygui.getInt("limit-orders.size");
+    }
+
+    public boolean getLimitOrdersMenuBackEnabled() {
+        return inventorygui.getBoolean("limit-orders.back-button.enabled");
+    }
+
+    public int getLimitOrdersMenuBackSlot() {
+        return inventorygui.getInt("limit-orders.back-button.slot");
+    }
+
+    public Material getLimitOrdersMenuBackMaterial() {
+        return Material.getMaterial(inventorygui.getString("limit-orders.back-button.material").toUpperCase());
+    }
+
+    public Material getLimitOrdersMenuFillersMaterial() {
+        return Material.getMaterial(inventorygui.getString("limit-orders.fillers.material").toUpperCase());
+    }
+
+    public List<Integer> getLimitOrdersMenuFillersSlots() {
+        return inventorygui.getIntegerList("limit-orders.fillers.slots");
+    }
+
+    public List<Integer> getLimitOrdersMenuSlots() {
+        return inventorygui.getIntegerList("limit-orders.orders.slots");
+    }
+
+    public int getSetLimitOrderMenuSize() {
+        return inventorygui.getInt("set-limit-orders.size");
+    }
+
+    public boolean getSetLimitOrderMenuBackEnabled() {
+        return inventorygui.getInt("set-limit-orders.back-button.slot") != -1;
+    }
+
+    public int getSetLimitOrderMenuBackSlot() {
+        return inventorygui.getInt("set-limit-orders.back-button.slot");
+    }
+
+    public Material getSetLimitOrderMenuBackMaterial() {
+        return Material.getMaterial(inventorygui.getString("set-limit-orders.back-button.material").toUpperCase());
+    }
+
+    public int getSetLimitOrderMenuItemSlot() {
+        return inventorygui.getInt("set-limit-orders.item.slot");
+    }
+
+    public int getSetLimitOrderMenuTimeSlot() {
+        return inventorygui.getInt("set-limit-orders.time.slot");
+    }
+
+    public Material getSetLimitOrderMenuTimeMaterial() {
+        return Material.getMaterial(inventorygui.getString("set-limit-orders.time.material").toUpperCase());
+    }
+
+    public int getSetLimitOrderMenuPriceSlot() {
+        return inventorygui.getInt("set-limit-orders.price.slot");
+    }
+
+    public Material getSetLimitOrderMenuPriceMaterial() {
+        return Material.getMaterial(inventorygui.getString("set-limit-orders.price.material").toUpperCase());
+    }
+
+    public int getSetLimitOrderMenuQuantitySlot() {
+        return inventorygui.getInt("set-limit-orders.quantity.slot");
+    }
+
+    public Material getSetLimitOrderMenuQuantityMaterial() {
+        return Material.getMaterial(inventorygui.getString("set-limit-orders.quantity.material").toUpperCase());
+    }
+
+    public int getSetLimitOrderMenuConfirmSellSlot() {
+        return inventorygui.getInt("set-limit-orders.confirm-sell.slot");
+    }
+
+    public Material getSetLimitOrderMenuConfirmSellMaterial() {
+        return Material.getMaterial(inventorygui.getString("set-limit-orders.confirm-sell.material").toUpperCase());
+    }
+
+    public int getSetLimitOrderMenuConfirmBuySlot() {
+        return inventorygui.getInt("set-limit-orders.confirm-buy.slot");
+    }
+
+    public Material getSetLimitOrderMenuConfirmBuyMaterial() {
+        return Material.getMaterial(inventorygui.getString("set-limit-orders.confirm-buy.material").toUpperCase());
+    }
+
+    public Material getSetLimitOrdersMenuFillersMaterial() {
+        return Material.getMaterial(inventorygui.getString("set-limit-orders.fillers.material").toUpperCase());
+    }
+
+    public List<Integer> getSetLimitOrdersMenuFillersSlots() {
+        return inventorygui.getIntegerList("set-limit-orders.fillers.slots");
+    }
+
+    public boolean getPortfolioMenuBackEnabled() {
+        return inventorygui.getBoolean("portfolio.back-button.enabled");
+    }
+
+    public int getPortfolioMenuBackSlot() {
+        return inventorygui.getInt("portfolio.back-button.slot");
+    }
+
+    public Material getPortfolioMenuBackMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.back-button.material").toUpperCase());
+    }
+
+    public boolean getPortfolioInfoEnabled() {
+        return inventorygui.getBoolean("portfolio.info.enabled");
+    }
+
+    public int getPortfolioInfoSlot() {
+        return inventorygui.getInt("portfolio.info.slot");
     }
 
 }

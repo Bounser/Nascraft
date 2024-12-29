@@ -7,17 +7,10 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.discord.linking.LinkManager;
-import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.metadata.FixedMetadataValue;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class DiscordCommand extends Command {
@@ -52,28 +45,12 @@ public class DiscordCommand extends Command {
         if (args.length == 0) {
             DiscordBot.getInstance().getJDA().retrieveUserById(LinkManager.getInstance().getUserDiscordID(player.getUniqueId()))
                     .queue(user -> Lang.get().message(player, Message.DISCORDCMD_LINKED, "[USER]", user.getName()));
-
             return;
-        }
-
-        switch (args[0].toLowerCase()) {
-
-            case "inv":
-            case "inventory":
-
-                Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.DISINV_TITLE));
-
-                Inventory inventory = Bukkit.createInventory(player, 45, BukkitComponentSerializer.legacy().serialize(title));
-                player.openInventory(inventory);
-                player.setMetadata("NascraftDiscordInventory", new FixedMetadataValue(Nascraft.getInstance(),true));
-
-                DiscordInventoryInGame.getInstance().updateDiscordInventory(player);
-
         }
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
-        return args.length == 1 ? Arrays.asList("inventory") : null;
+        return null;
     }
 }

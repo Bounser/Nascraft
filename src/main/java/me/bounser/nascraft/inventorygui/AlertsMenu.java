@@ -45,7 +45,7 @@ public class AlertsMenu implements MenuPage {
 
         // Back button
 
-        if (config.getBuySellBackEnabled()) {
+        if (config.getAlertsMenuBackEnabled()) {
             Component backComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_ALERTS_BACK_NAME));
 
             gui.setItem(
@@ -100,7 +100,7 @@ public class AlertsMenu implements MenuPage {
 
     public void setAlerts() {
 
-        HashMap<Item, Float> alerts = DiscordAlerts.getInstance().getAlertsOfUUID(player.getUniqueId());
+        HashMap<Item, Double> alerts = DiscordAlerts.getInstance().getAlertsOfUUID(player.getUniqueId());
 
         if (alerts == null) return;
 
@@ -109,7 +109,7 @@ public class AlertsMenu implements MenuPage {
         int i = 0;
         for (Item item : alerts.keySet()) {
 
-            if (i > 9) break;
+            if (i > alerts.size()) break;
 
             List<String> itemLore = item.getItemStack().getItemMeta().getLore();
 

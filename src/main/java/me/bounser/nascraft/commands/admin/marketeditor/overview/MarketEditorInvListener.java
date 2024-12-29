@@ -1,5 +1,6 @@
 package me.bounser.nascraft.commands.admin.marketeditor.overview;
 
+import de.tr7zw.changeme.nbtapi.NBT;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.commands.admin.marketeditor.edit.item.EditorManager;
 import me.bounser.nascraft.commands.admin.marketeditor.edit.category.CategoryEditorManager;
@@ -137,7 +138,14 @@ public class MarketEditorInvListener implements Listener {
             case 49:
                 if (event.getCursor() != null && !event.getCursor().getType().equals(Material.AIR)) {
 
-                    EditorManager.getInstance().startEditing(player, event.getCursor().clone());
+                    ItemStack itemStack = event.getCursor().clone();
+
+                    for (String key : Config.getInstance().getIgnoredKeys())
+                        NBT.modify(itemStack, nbt -> {
+                            nbt.removeKey(key);
+                        });
+
+                    EditorManager.getInstance().startEditing(player, itemStack);
 
                 } else {
                     player.sendMessage(ChatColor.RED + "Drop an item to add it to the market!");

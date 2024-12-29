@@ -7,10 +7,10 @@ public class DayInfo {
 
     private int day;
 
-    private float flow;
-    private float tax;
+    private double flow;
+    private double tax;
 
-    public DayInfo(int day, float flow, float tax) {
+    public DayInfo(int day, double flow, double tax) {
         this.day = day;
         this.flow = flow;
         this.tax = tax;
@@ -20,7 +20,7 @@ public class DayInfo {
         return LocalDate.of(2023, 1, 1).plusDays(day).atStartOfDay();
     }
 
-    public float getFlow() { return flow; }
+    public double getFlow() { return flow; }
 
-    public float getTax() { return tax; }
+    public double getTax() { return tax; }
 }

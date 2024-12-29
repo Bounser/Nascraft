@@ -1,8 +1,6 @@
 # Nascraft de_DE - ${project.version}
 # by @BiigToastie
 
-# Should the symbol of the currency be after (or before) the price? ($50 or 50$)
-after: true
 # Decimal separator. Available: point (.), comma (,)
 separator: "comma"
 
@@ -19,6 +17,8 @@ sell_message: "<gradient:#00E3FB:#F9ABFD>Du hast gerade <bold>[AMOUNT]</bold> x 
 not_enough_money: "<gradient:#FB6363:#C4B3FD>✘ Du hast nicht genug Geld!</gradient>"
 not_enough_items: "<gradient:#FB6363:#C4B3FD>✘ Du hast nicht genug Gegenstände zum Verkaufen!</gradient>"
 not_enough_space: "<gradient:#FB6363:#C4B3FD>✘ Du hast nicht genug Platz im Inventar!</gradient>"
+top_limit_reached: "<gradient:#FB6363:#C4B3FD>✘ Niemand will das kaufen!</gradient> <color:#a84b34>(Unterster Preis erreicht)</color>"
+bottom_limit_reached: "<gradient:#FB6363:#C4B3FD>✘ Niemand will dir das verkaufen!</gradient> <color:#a84b34>(Oberster Preis erreicht)</color>"
 shop_closed: "<gradient:#FB6363:#C4B3FD>✘ Fehler beim Kauf: Der Laden ist geschlossen</gradient>"
 
 # Befehle
@@ -61,6 +61,9 @@ alert_setup: "<gradient:#00E3FB:#F9ABFD>Alarm erfolgreich eingerichtet! Du erhä
 alerts_empty: "<gradient:#FB6363:#C4B3FD>Du hast keine Alarme eingerichtet.</gradient>"
 alerts_header: "&eAktive Alarme:\n"
 alerts_list_segment: "\n&6> &l[MATERIAL] &r&ezum Preis von &l[WORTH]"
+
+alert_reached_up: "<color:#ffd269>✉</color> <gradient:#FB6363:#C4B3FD>Alarm erreicht für Artikel: </gradient>[NAME] <color:#ffae2b>- </color>[PRICE1] <gradient:#FB6363:#C4B3FD>Der Preis ist gestiegen auf: [PRICE2]!</gradient>"
+alert_reached_down: "<color:#ffd269>✉</color> <gradient:#FB6363:#C4B3FD>Alarm erreicht für Artikel: </gradient>[NAME] <color:#ffae2b>- </color>[PRICE1] <gradient:#FB6363:#C4B3FD>Der Preis ist gesunken auf: [PRICE2]!</gradient>"
 
 # SELLWAND
 
@@ -142,7 +145,7 @@ gui_category_next_name: "<b><gradient:#ff816b:#ff2e38>→</gradient></b>"
 gui_category_item_lore: " \n<gradient:#497882:#4a5082>Preis: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Veränderung der letzten Stunde: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● KAUFEN:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● VERKAUFEN:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>\n\n<u><gradient:#747cc2:#ebffc4>⏵ Klicke, um mit diesem Artikel zu handeln</gradient></u>"
 
 gui_buysell_item_lore: " \n<gradient:#497882:#4a5082>Preis: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Veränderung der letzten Stunde: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● KAUFEN:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● VERKAUFEN:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>"
-gui_buysell_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Alarm für Artikel setzen</gradient></b>"
+gui_buysell_alerts_name_linked: "<color:#59ff40>✎</color> <b><gradient:#ffbf00:#ff4800>Alarm für Artikel setzen</gradient></b>"
 gui_buysell_alerts_name_setup: "<b><gradient:#ffbf00:#ff4800>Alarm</gradient></b>"
 gui_buysell_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Alarm für Artikel setzen</gradient></b>"
 gui_buysell_alerts_lore_linked: "<gradient:#cc801d:#4a5082>Klicke, um einen Preis auszuwählen. Du wirst benachrichtigt</gradient>\n<gradient:#cc801d:#4a5082>über Discord, sobald der Preis erreicht ist.</gradient>"
@@ -267,18 +270,6 @@ discord_wiki_6: "Makler"
 discord_wiki_inventory: "## :school_satchel: Inventar\n> Sobald du dein Konto verknüpfst, **wird dein In-Game-Geld mit deinem Discord-Konto geteilt** und umgekehrt, und du **erhältst ein virtuelles Inventar**, in dem du die über Discord gekauften Items speichern kannst. Jeder Slot kann **bis zu 999 eines einzigartigen Typs von Items** speichern. Zwei Slots können nicht denselben Typ von Material speichern. Du kannst mehr Slots kaufen und den Inhalt und Wert durch Drücken des :school_satchel: **Inventar**-Buttons überprüfen."
 discord_wiki_balance: "## :coin: Kontostand\n> Wenn du verknüpft bist, zeigt dir der :coin: **Kontostand**-Button einige Statistiken zu deinem finanziellen Zustand. Er zeigt den **zwischen deinem Discord- und Minecraft-Konto geteilten Geldbeutel**, und andere Informationen wie den aktuellen **Wert deines Discord-Inventars** und das Geld **unter der Verwaltung von Maklern**."
 discord_wiki_alerts: "## :bell: Alarme\n> Wenn du an einem bestimmten Item interessiert bist, kannst du einen **Alarm** einrichten, um eine **DM zu erhalten, wenn der Preis eines Items einen vorher festgelegten Schwellenwert erreicht**. Um deine eigenen Alarme einzurichten, benutze :bell: **Alarme**."
-discord_wiki_dynamic: "## :dart: Dynamische Aufträge\n> Erstelle Aufträge, die auf den Preis des Assets reagieren können. Du kannst Limit-Aufträge platzieren, um ein Asset zu kaufen/verkaufen, wenn es einen bestimmten Preis erreicht, oder Take Profit/Stop Loss, bei denen du deine Position verkaufst, sobald ein Preis erreicht wird. Um auf diese Funktionalität zuzugreifen, drücke :bar_chart: **Erweiterte Optionen** und dann :dart: **Dynamische Aufträge**."
-discord_wiki_sessions: "## :desktop: **Sitzungen**:\n
-                         > Die Auswahl eines Items öffnet eine Sitzung, in der du Zugang zu weiteren Operationen hast:
-                         \n\n> :chart_with_upwards_trend: **Long-Preis**: Wette auf eine Preissteigerung. Du nimmst ein Darlehen gegen dein Inventar auf, bis zu 50 % seines Wertes (Während der Operation werden alle Vermögenswerte gesperrt, sodass du sie nicht verkaufen kannst), und du vervielfachst die Preisbewegungen mit einem Faktor von 3. Das bedeutet, dass ein Gewinn von 33 % in einen Gewinn von 100 % umgewandelt wird, und ein Verlust von -33 % in einen Totalverlust (-100 %).
-                         \n\n> :chart_with_downwards_trend: **Short-Preis**: Wette gegen eine Preissteigerung. Es ist das Gegenteil vom Long. Gleiches Prinzip, mit einem Faktor von 2. Du verdienst 10 %, wenn der Preis um 5 % fällt, und verlierst alles, wenn der Preis um 50 % steigt.
-                         \n\n> :bookmark_tabs: **Futures**: Das sind Verträge, bei denen du eine zukünftige Operation zu heutigen Preisen definieren kannst, indem du eine Gebühr bezahlst. Wenn du gerade kein Geld hast und kaufen oder verkaufen möchtest, z. B. Diamanten, und denkst, dass der heutige Preis gut ist, kannst du einen Futures-Kontrakt abschließen, indem du 10 % im Voraus bezahlst, und du hast das Recht, das Item in einer Woche (10 % Provision) oder in einem Monat (20 % Provision) zum heutigen Preis zu kaufen.
-                         \n\n> :date: **Programmierte Aktionen**: Mit dieser Option kannst du Items regelmäßig in einem festen Zeitintervall kaufen/verkaufen. Beispielsweise kannst du jede Woche 64 Diamanten kaufen oder jeden Tag 200 Eisenerz verkaufen."
-discord_wiki_brokers: "## :man_office_worker: Makler:\n
-                        Du kannst einen Makler einstellen, um den Investitionsprozess zu automatisieren, allerdings zu einem Preis in Form einer Gebühr. Die verfügbaren Makler sind: 
-                        \n\n> :man_office_worker: **Aggressiver Makler**: Weise ihm eine Geldmenge zu, und er wird automatisch versuchen, durch alle möglichen Mittel, einschließlich komplexer Derivate, mehr zu verdienen. Er berechnet eine Gebühr von **8 % pro Tag**. Es gibt keine Garantie für Gewinne, und du kannst das gesamte investierte Geld verlieren.
-                        \n\n> :man_teacher:  **Regulärer Makler**: Weise ihm eine Geldmenge zu, und er wird automatisch versuchen, auf konservativere Weise mehr zu verdienen. Er berechnet eine Gebühr von **4 % pro Tag**. Es gibt keine Garantie für Gewinne, und du kannst das gesamte investierte Geld verlieren.
-                        \n\n> :man_technologist:**Fauler Makler**: Weise ihm eine Geldmenge zu, und du erhältst eine Garantie für die Marktrendite (Durchschnitt) abzüglich einer täglichen **1 % Gebühr**."
 
 discord_not_linked_short: "Nicht verknüpft!"
 discord_not_linked: ":exclamation: Dein Konto ist nicht verknüpft! Führe ``/link`` im Spiel aus, um den Prozess der Kontoverknüpfung zu starten."
@@ -302,7 +293,7 @@ discord_alert_invalid_price: "Dieser Preis ist nicht gültig!"
 discord_alert_success: "Erfolg! Du wirst eine DM erhalten, wenn der Preis erreicht wird."
 discord_alert_limit_reached: "Alarm-Limit erreicht! Entferne Alarme, bevor du neue erstellst."
 discord_alert_already_listed: "Dieses Item befindet sich bereits auf deiner Beobachtungsliste!"
-discord_alert_reached_segment: ":bell: [EMOJI] Alarm erreicht für Item: ``[MATERIAL] ([PRICE1])`` mit aktuellem Preis: ``[PRICE2]``"
+discord_alert_reached_segment: ":bell: [EMOJI] Alarm erreicht für Item: ``[NAME] ([PRICE1])`` mit aktuellem Preis: ``[PRICE2]``"
 discord_alert_not_in_watchlist: ":x: Das Item ist nicht auf deiner Beobachtungsliste."
 discord_alert_removed: ":no_bell: Alarm für **[MATERIAL]** entfernt."
 

@@ -1,6 +1,7 @@
 package me.bounser.nascraft.market.unit;
 
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.formatter.RoundUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -12,46 +13,50 @@ public class Price {
 
     private Item item;
 
-    private float value;
+    private double value;
 
     private int precission;
-    private float topLimit;
-    private float lowLimit;
 
-    private float previousValue;
+    private double topLimit;
+    private double lowLimit;
 
-    private float initialValue;
+    private double upperStockThreshold;
+    private double lowerStockThreshold;
+
+    private double previousValue;
+
+    private double initialValue;
 
     private float stock;
 
-    private float support;
-    private float resistance;
+    private double support;
+    private double resistance;
     private float noiseIntensity;
 
     private float elasticity;
 
-    private float historicalHigh;
-    private float historicalLow;
+    private double historicalHigh;
+    private double historicalLow;
 
-    private float hourHigh;
-    private float hourLow;
-    private final List<Float> dayHigh = new ArrayList<>();
-    private final List<Float> dayLow = new ArrayList<>();
+    private double hourHigh;
+    private double hourLow;
+    private final List<Double> dayHigh = new ArrayList<>();
+    private final List<Double> dayLow = new ArrayList<>();
 
-    private List<Float> hourValues;
+    private List<Double> hourValues;
 
     private final float taxBuy;
     private final float taxSell;
 
-    private float chartDayHigh;
-    private float monthHigh;
-    private float yearHigh;
-    private float allHigh;
+    private double chartDayHigh;
+    private double monthHigh;
+    private double yearHigh;
+    private double allHigh;
 
-    private float chartDayLow;
-    private float monthLow;
-    private float yearLow;
-    private float allLow;
+    private double chartDayLow;
+    private double monthLow;
+    private double yearLow;
+    private double allLow;
 
     private float dayChange;
     private float monthChange;
@@ -82,80 +87,83 @@ public class Price {
 
         taxBuy = Config.getInstance().getTaxBuy(getItem().getIdentifier());
         taxSell = Config.getInstance().getTaxSell(getItem().getIdentifier());
+
+        upperStockThreshold = getStockFromValue(topLimit);
+        lowerStockThreshold = getStockFromValue(lowLimit);
     }
 
-    public float getValue() { return value; }
+    public double getValue() { return value; }
 
-    public float getBuyPrice() { return value * taxBuy; }
+    public double getBuyPrice() { return value * taxBuy; }
 
-    public float getSellPrice() { return value * taxSell; }
+    public double getSellPrice() { return value * taxSell; }
 
     public void setStock(float stock) {
         this.stock = stock;
         updateValue();
     }
 
-    public void setDayHigh(float dayHigh) {
+    public void setDayHigh(double dayHigh) {
         this.chartDayHigh = dayHigh;
     }
 
-    public float getChartDayHigh() {
+    public double getChartDayHigh() {
         return chartDayHigh;
     }
 
-    public void setMonthHigh(float monthHigh) {
+    public void setMonthHigh(double monthHigh) {
         this.monthHigh = monthHigh;
     }
 
-    public float getMonthHigh() {
+    public double getMonthHigh() {
         return monthHigh;
     }
 
-    public void setYearHigh(float yearHigh) {
+    public void setYearHigh(double yearHigh) {
         this.yearHigh = yearHigh;
     }
 
-    public float getYearHigh() {
+    public double getYearHigh() {
         return yearHigh;
     }
 
-    public void setAllHigh(float allHigh) {
+    public void setAllHigh(double allHigh) {
         this.allHigh = allHigh;
     }
 
-    public float getAllHigh() {
+    public double getAllHigh() {
         return allHigh;
     }
 
-    public void setDayLow(float dayLow) {
+    public void setDayLow(double dayLow) {
         this.chartDayLow = dayLow;
     }
 
-    public float getChartDayLow() {
+    public double getChartDayLow() {
         return chartDayLow;
     }
 
-    public void setMonthLow(float monthLow) {
+    public void setMonthLow(double monthLow) {
         this.monthLow = monthLow;
     }
 
-    public float getMonthLow() {
+    public double getMonthLow() {
         return monthLow;
     }
 
-    public void setYearLow(float yearLow) {
+    public void setYearLow(double yearLow) {
         this.yearLow = yearLow;
     }
 
-    public float getYearLow() {
+    public double getYearLow() {
         return yearLow;
     }
 
-    public void setAllLow(float allLow) {
+    public void setAllLow(double allLow) {
         this.allLow = allLow;
     }
 
-    public float getAllLow() {
+    public double getAllLow() {
         return allLow;
     }
 
@@ -186,6 +194,29 @@ public class Price {
     public float getStock() { return stock; }
 
     public float getElasticity() { return elasticity; }
+
+    public double getUpperStockLimit() { return upperStockThreshold; }
+
+    public double getLowerStockThreshold() { return lowerStockThreshold; }
+
+    public boolean canStockChange(float change, boolean buy) {
+
+        float newStock = stock + change;
+
+        if (!buy) return !(newStock > lowerStockThreshold);
+        else return !(newStock < upperStockThreshold);
+    }
+
+    public int stockChangeUntilPriceReached(double priceToReach) {
+
+        float stockToReach = getStockFromValue(priceToReach);
+
+        if (priceToReach > value) {
+            return (int) Math.floor(Math.abs(stock - stockToReach));
+        } else {
+            return (int) -Math.floor(Math.abs(stock - stockToReach));
+        }
+    }
 
     public void changeStock(float change) {
 
@@ -233,35 +264,35 @@ public class Price {
 
     }
 
-    public float getChange() {
-        float change = -100 + 100*value/previousValue;
+    public double getChange() {
+        double change = -100 + 100*value/previousValue;
         previousValue = value;
 
         return change;
     }
 
-    public float getHistoricalHigh() { return historicalHigh; }
+    public double getHistoricalHigh() { return historicalHigh; }
 
-    public float getHistoricalLow() { return historicalLow; }
+    public double getHistoricalLow() { return historicalLow; }
 
     public void setHistoricalHigh(float newHistoricalHigh) { historicalHigh = newHistoricalHigh; }
 
     public void setHistoricalLow(float newHistoricalLow) { historicalLow = newHistoricalLow; }
 
-    public float getDayHigh() {
+    public double getDayHigh() {
 
-        float high = dayHigh.get(0);
+        double high = dayHigh.get(0);
 
-        for (float value : dayHigh) if (value > high) high = value;
+        for (double value : dayHigh) if (value > high) high = value;
 
         return Math.max(hourHigh, high);
     }
 
-    public float getDayLow() {
+    public double getDayLow() {
 
-        float low = dayLow.get(0);
+        double low = dayLow.get(0);
 
-        for (float value : dayLow) if (low > value) low = value;
+        for (double value : dayLow) if (low > value) low = value;
 
         return Math.min(hourLow, low);
     }
@@ -295,7 +326,7 @@ public class Price {
         hourHigh = value;
     }
 
-    public void initializeHourValues(float value) {
+    public void initializeHourValues(double value) {
         if (hourValues == null)
             hourValues = new ArrayList<>(Collections.nCopies(60, value));
     }
@@ -305,9 +336,13 @@ public class Price {
         hourValues.add(value);
     }
 
-    public float getValueAnHourAgo() { return hourValues.get(0); }
+    public float getValueChangeLastHour() {
+        return RoundUtils.roundToOne((float) (-100 + 100*value/hourValues.get(0)));
+    }
 
-    public List<Float> getValuesPastHour() { return hourValues; }
+    public double getValueAnHourAgo() { return hourValues.get(0); }
+
+    public List<Double> getValuesPastHour() { return hourValues; }
 
     public float getProjectedCost(float stockChange, float tax) {
 
@@ -329,7 +364,7 @@ public class Price {
         int orderSize = (int) Math.abs(change / maxSize);
         float excess = Math.abs(change % maxSize);
 
-        float fictitiousValue = value;
+        double fictitiousValue = value;
         float fictitiousStock = stock;
         float cost = 0;
 
@@ -351,21 +386,26 @@ public class Price {
 
     public Item getItem() { return item; }
 
-    public float getInitialValue() { return initialValue; }
+    public double getInitialValue() { return initialValue; }
     public float getNoiseIntensity() { return noiseIntensity; }
-    public float getSupport() { return support; }
-    public float getResistance() { return resistance; }
+    public double getSupport() { return support; }
+    public double getResistance() { return resistance; }
 
-    public Price setInitialValue(float initialValue) { this.initialValue = initialValue; return this; }
+    public Price setInitialValue(double initialValue) { this.initialValue = initialValue; return this; }
     public Price setElasticity(float elasticity) {
         this.elasticity = elasticity * Config.getInstance().getElasticityMultiplier(); return this; }
     public Price setNoiseIntensity(float noiseIntensity) { this.noiseIntensity = noiseIntensity * Config.getInstance().getNoiseMultiplier(); return this; }
-    public Price setSupport(float support) { this.support = support; return this; }
-    public Price setResistance(float resistance) { this.resistance = resistance; return this; }
+    public Price setSupport(double support) { this.support = support; return this; }
+    public Price setResistance(double resistance) { this.resistance = resistance; return this; }
 
     public static float roundToDecimals(double value, int decimals) {
         BigDecimal bd = new BigDecimal(Double.toString(value));
         bd = bd.setScale(decimals, RoundingMode.HALF_UP); // Rounds up if the digit is >= 5
         return (float) bd.doubleValue();
     }
+
+    public float getStockFromValue(double value) {
+        return (float) (Math.log(value / initialValue) / (-0.0005 * elasticity));
+    }
+
 }

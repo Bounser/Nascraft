@@ -55,13 +55,9 @@ public class SellHandCommand extends Command {
 
         if (args.length == 0) {
 
-            Item item = MarketManager.getInstance().getItem(handItem.getType().toString());
+            Item item = MarketManager.getInstance().getItem(handItem);
 
             if(item == null) {
-                Lang.get().message(player, Message.SELLHAND_INVALID); return;
-            }
-
-            if(!MarketManager.getInstance().isAValidItem(handItem)) {
                 Lang.get().message(player, Message.SELLHAND_INVALID); return;
             }
 
@@ -78,7 +74,7 @@ public class SellHandCommand extends Command {
             );
 
             component = component.hoverEvent(HoverEvent.showText(hoverText))
-                    .clickEvent(ClickEvent.runCommand("/nsellhand confirm"));
+                    .clickEvent(ClickEvent.runCommand("/" + Config.getInstance().getCommandAlias("sellhand") + " confirm"));
 
             Lang.get().getAudience().player(player).sendMessage(component);
 

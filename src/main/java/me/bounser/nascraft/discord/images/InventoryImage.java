@@ -3,7 +3,7 @@ package me.bounser.nascraft.discord.images;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.discord.inventories.DiscordInventory;
+import me.bounser.nascraft.portfolio.Portfolio;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.managers.currencies.CurrenciesManager;
@@ -21,7 +21,7 @@ public class InventoryImage {
 
     private static final Lang lang = Lang.get();
 
-    public static BufferedImage getImage(DiscordInventory discordInventory) {
+    public static BufferedImage getImage(Portfolio discordInventory) {
 
         HashMap<Item, Integer> inventory = discordInventory.getContent();
 
