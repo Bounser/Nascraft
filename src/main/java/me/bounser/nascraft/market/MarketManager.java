@@ -98,8 +98,10 @@ public class MarketManager {
             }
         }
 
+        Nascraft.getInstance().getLogger().info("Loaded " + categories.size() + " categories.");
+
         Plugin AGUI = Bukkit.getPluginManager().getPlugin("AdvancedGUI");
-        if (categories.size() < 4 && (AGUI == null || !AGUI.isEnabled())) {
+        if (categories.size() < 4 && (AGUI != null)) {
             Nascraft.getInstance().getLogger().severe("You need to have at least 4 categories! Disabling plugin...");
             Nascraft.getInstance().getPluginLoader().disablePlugin(Nascraft.getInstance());
         }

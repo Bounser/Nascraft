@@ -6,7 +6,7 @@
 
     <groupId>me.bounser</groupId>
     <artifactId>Nascraft</artifactId>
-    <version>1.8</version>
+    <version>1.8.2</version>
     <packaging>jar</packaging>
 
     <name>Nascraft</name>
@@ -126,7 +126,7 @@
         <dependency>
             <groupId>xyz.xenondevs.invui</groupId>
             <artifactId>invui</artifactId>
-            <version>1.41</version>
+            <version>1.43</version>
             <type>pom</type>
         </dependency>
         <dependency>

@@ -163,8 +163,12 @@ public class MarketEditor {
 
         List<Category> categories = new ArrayList<>();
 
-        for (int i = 0; i <= 3; i++)
-            categories.add(MarketManager.getInstance().getCategories().get(i + verticalOffset));
+        List<Category> allCategories = MarketManager.getInstance().getCategories();
+
+        for (int i = 0; i <= 3; i++) {
+            if (allCategories.size() > i + verticalOffset)
+                categories.add(MarketManager.getInstance().getCategories().get(i + verticalOffset));
+        }
 
         int j = 0;
 

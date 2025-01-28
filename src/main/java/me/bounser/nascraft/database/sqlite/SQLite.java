@@ -235,11 +235,14 @@ public class SQLite implements Database {
 
     @Override
     public void saveEverything() {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
-            for (Item item : MarketManager.getInstance().getAllParentItems())
+        for (Item item : MarketManager.getInstance().getAllParentItems()) {
+            try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+
                 ItemProperties.saveItem(connection, item);
-        } catch (SQLException e) {
-            Nascraft.getInstance().getLogger().warning(e.getMessage());
+
+            } catch (SQLException e) {
+                Nascraft.getInstance().getLogger().warning(e.getMessage());
+            }
         }
     }
 
