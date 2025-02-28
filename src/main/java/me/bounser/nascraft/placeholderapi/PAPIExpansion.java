@@ -1,19 +1,28 @@
 package me.bounser.nascraft.placeholderapi;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.chart.cpi.CPIInstant;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.discord.linking.LinkManager;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.formatter.RoundUtils;
+import me.bounser.nascraft.portfolio.Portfolio;
+import me.bounser.nascraft.portfolio.PortfoliosManager;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
+import java.util.List;
+
 public class PAPIExpansion extends PlaceholderExpansion {
 
     private String cpi;
+    private String cpiMonth;
+    private String cpiWeek;
 
     @Override
     public String getAuthor() { return "Bounser"; }
@@ -49,8 +58,52 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
                 } else return cpi;
 
+            case "cpimonth":
+
+                if (cpiMonth == null) {
+
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), () -> cpiMonth = null, 200);
+
+                    List<CPIInstant> cpiHistory = DatabaseManager.get().getDatabase().getCPIHistory();
+
+                    int index = cpiHistory.size()-7;
+
+                    if (index < 0) index = cpiHistory.size();
+
+                    float initialCPI = cpiHistory.get(index).getIndexValue();
+
+                    return cpiMonth = String.valueOf(Math.round((MarketManager.getInstance().getConsumerPriceIndex()-initialCPI)*100.0)/initialCPI);
+
+                } else return cpiMonth;
+
+            case "cpiweek":
+
+                if (cpiWeek == null) {
+
+                    Bukkit.getScheduler().runTaskLaterAsynchronously(Nascraft.getInstance(), () -> cpiWeek = null, 200);
+
+                    List<CPIInstant> cpiHistory = DatabaseManager.get().getDatabase().getCPIHistory();
+
+                    int index = cpiHistory.size()-7;
+
+                    if (index < 0) index = cpiHistory.size();
+
+                    float initialCPI = cpiHistory.get(index).getIndexValue();
+
+                    return cpiWeek = String.valueOf(Math.round((MarketManager.getInstance().getConsumerPriceIndex()-initialCPI)*100.0)/initialCPI);
+
+                } else return cpiWeek;
+
             case "linked":
                 return String.valueOf(LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null);
+
+            case "portfoliovalue":
+
+                Portfolio portfolio = PortfoliosManager.getInstance().getPortfolio(player.getUniqueId());
+                if (portfolio == null) return "0";
+                Double value = PortfoliosManager.getInstance().getPortfolio(player.getUniqueId()).getInventoryValuePerCurrency().get(CurrenciesManager.getInstance().getDefaultCurrency());
+                if (value == null) return "0";
+                return String.valueOf(value);
 
             case "discordid":
                 String id = LinkManager.getInstance().getUserDiscordID(player.getUniqueId());
