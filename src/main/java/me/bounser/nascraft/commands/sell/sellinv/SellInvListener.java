@@ -4,6 +4,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.managers.InventoryManager;
 import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.market.MarketManager;
@@ -195,7 +196,7 @@ public class SellInvListener implements Listener {
                     items.remove(item);
                     playerItems.put(player, items);
 
-                    player.getInventory().addItem(event.getCurrentItem());
+                    InventoryManager.addItemsToInventory(player, event.getCurrentItem(), event.getCurrentItem().getAmount());
 
                     renderInv(event.getView().getTopInventory(), player);
 
@@ -213,7 +214,8 @@ public class SellInvListener implements Listener {
             player.removeMetadata("NascraftSell", Nascraft.getInstance());
 
             if (playerItems.containsKey(player)) {
-                for (ItemStack itemStack : playerItems.get(event.getPlayer())) { event.getPlayer().getInventory().addItem(itemStack); }
+                for (ItemStack itemStack : playerItems.get(event.getPlayer()))
+                    InventoryManager.addItemsToInventory(player, itemStack, itemStack.getAmount());
 
                 playerItems.remove(event.getPlayer());
             }

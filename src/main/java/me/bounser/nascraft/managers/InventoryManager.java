@@ -7,6 +7,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
+
 public class InventoryManager {
 
     public static boolean checkInventory(Player player, boolean feedback, ItemStack itemStack, int amount) {
@@ -47,17 +49,12 @@ public class InventoryManager {
 
         ItemStack operationItemStack = itemStack.clone();
 
-        int stacks = amount / itemStack.getMaxStackSize();
+        operationItemStack.setAmount(amount);
 
-        operationItemStack.setAmount(itemStack.getMaxStackSize());
+        HashMap<Integer, ItemStack> toDrop = player.getInventory().addItem(operationItemStack);
 
-        for (int i = 0; i < stacks; i++)
-            player.getInventory().addItem(operationItemStack);
-
-        operationItemStack.setAmount(amount - stacks * itemStack.getMaxStackSize());
-
-        player.getInventory().addItem(operationItemStack);
-
+        for (ItemStack itemStackToDrop: toDrop.values())
+            player.getWorld().dropItem(player.getLocation(), itemStackToDrop);
     }
 
     public static boolean containsAtLeast(Player player, ItemStack itemStack, int amount) {
