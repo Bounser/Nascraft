@@ -6,7 +6,6 @@ import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
 
-import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -60,12 +59,22 @@ public interface Database {
 
     //
 
-    void updateItem(UUID uuid, Item item, int quantity);
-    void removeItem(UUID uuid, Item item);
-    void clearInventory(UUID uuid);
+    void updateItemPortfolio(UUID uuid, Item item, int quantity);
+    void removeItemPortfolio(UUID uuid, Item item);
+    void clearPortfolio(UUID uuid);
     void updateCapacity(UUID uuid, int capacity);
     LinkedHashMap<Item, Integer> retrievePortfolio(UUID uuid);
     int retrieveCapacity(UUID uuid);
+
+    void increaseDebt(UUID uuid, Double debt);
+    void decreaseDebt(UUID uuid, Double debt);
+    double getDebt(UUID uuid);
+    HashMap<UUID, Double> getUUIDAndDebt();
+    void addInterestPaid(UUID uuid, Double interest);
+    HashMap<UUID, Double> getUUIDAndInterestsPaid();
+    double getInterestsPaid(UUID uuid);
+    double getAllOutstandingDebt();
+    double getAllInterestsPaid();
 
     //
 
@@ -83,6 +92,7 @@ public interface Database {
     List<Instant> getPriceAgainstCPI(Item item);
     void addTransaction(double newFlow, double effectiveTaxes);
     List<DayInfo> getDayInfos();
+    double getAllTaxesCollected();
 
     void addAlert(String userid, Item item, double price);
     void removeAlert(String userid, Item item);

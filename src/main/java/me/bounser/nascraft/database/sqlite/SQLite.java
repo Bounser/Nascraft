@@ -179,57 +179,15 @@ public class SQLite implements Database {
                         "completed INT NOT NULL," +
                         "cost INT NOT NULL");
 
-        /*
-
-                createTable(connection, "to_deliver",
+        createTable(connection, "loans",
                 "id INTEGER PRIMARY KEY, " +
                         "uuid VARCHAR(36) NOT NULL," +
-                        "identifier TEXT NOT NULL," +
-                        "amount INT NOT NULL");
+                        "debt DOUBLE NOT NULL");
 
-        createTable(connection, "broker_shares",
+        createTable(connection, "interests",
                 "id INTEGER PRIMARY KEY, " +
                         "uuid VARCHAR(36) NOT NULL," +
-                        "date TEXT NOT NULL," +
-                        "broker TEXT NOT NULL," +
-                        "quantity DOUBLE NOT NULL," +
-                        "cost DOUBLE NOT NULL");
-
-        createTable(connection, "shares_value",
-                "id INTEGER PRIMARY KEY, " +
-                        "broker TEXT NOT NULL," +
-                        "day INT NOT NULL," +
-                        "lastvalue TEXT NOT NULL");
-
-        createTable(connection, "limit_orders",
-                "id INTEGER PRIMARY KEY, " +
-                        "day INT NOT NULL," +
-                        "date TEXT NOT NULL," +
-                        "expiration TEXT NOT NULL," +
-                        "cost DOUBLE NOT NULL," +
-                        "uuid VARCHAR(36) NOT NULL," +
-                        "identifier TEXT NOT NULL," +
-                        "price DOUBLE NOT NULL," +
-                        "quantity INT NOT NULL");
-
-        createTable(connection, "to_deliver",
-                "id INTEGER PRIMARY KEY, " +
-                        "day INT NOT NULL," +
-                        "date TEXT NOT NULL," +
-                        "uuid VARCHAR(36) NOT NULL," +
-                        "identifier TEXT NOT NULL," +
-                        "quantity INT NOT NULL");
-
-        createTable(connection, "expired_orders",
-                "id INTEGER PRIMARY KEY, " +
-                        "day INT NOT NULL," +
-                        "date TEXT NOT NULL," +
-                        "uuid VARCHAR(36) NOT NULL," +
-                        "money DOUBLE NOT NULL," +
-                        "identifier TEXT NOT NULL," +
-                        "quantity INT NOT NULL");
-
-         */
+                        "paid DOUBLE NOT NULL");
 
     }
 
@@ -237,9 +195,7 @@ public class SQLite implements Database {
     public void saveEverything() {
         for (Item item : MarketManager.getInstance().getAllParentItems()) {
             try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
-
                 ItemProperties.saveItem(connection, item);
-
             } catch (SQLException e) {
                 Nascraft.getInstance().getLogger().warning(e.getMessage());
             }
@@ -467,27 +423,27 @@ public class SQLite implements Database {
     }
 
     @Override
-    public void updateItem(UUID uuid, Item item, int quantity) {
+    public void updateItemPortfolio(UUID uuid, Item item, int quantity) {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
-            Portfolios.updateItem(connection, uuid, item, quantity);
+            Portfolios.updateItemPortfolio(connection, uuid, item, quantity);
         } catch (SQLException e) {
             Nascraft.getInstance().getLogger().warning(e.getMessage());
         }
     }
 
     @Override
-    public void removeItem(UUID uuid, Item item) {
+    public void removeItemPortfolio(UUID uuid, Item item) {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
-            Portfolios.removeItem(connection, uuid, item);
+            Portfolios.removeItemPortfolio(connection, uuid, item);
         } catch (SQLException e) {
             Nascraft.getInstance().getLogger().warning(e.getMessage());
         }
     }
 
     @Override
-    public void clearInventory(UUID uuid) {
+    public void clearPortfolio(UUID uuid) {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
-            Portfolios.clearInventory(connection, uuid);
+            Portfolios.clearPortfolio(connection, uuid);
         } catch (SQLException e) {
             Nascraft.getInstance().getLogger().warning(e.getMessage());
         }
@@ -570,6 +526,92 @@ public class SQLite implements Database {
         }
     }
 
+    @Override
+    public void increaseDebt(UUID uuid, Double debt) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            Debt.increaseDebt(connection, uuid, debt);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public void decreaseDebt(UUID uuid, Double debt) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            Debt.decreaseDebt(connection, uuid, debt);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public double getDebt(UUID uuid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Debt.getDebt(connection, uuid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public HashMap<UUID, Double> getUUIDAndDebt() {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Debt.getUUIDAndDebt(connection);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public void addInterestPaid(UUID uuid, Double interest) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            Debt.addInterestPaid(connection, uuid, interest);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public HashMap<UUID, Double> getUUIDAndInterestsPaid() {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Debt.getUUIDAndInterestsPaid(connection);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public double getInterestsPaid(UUID uuid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Debt.getInterestsPaid(connection, uuid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public double getAllOutstandingDebt() {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Debt.getAllOutstandingDebt(connection);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
+    public double getAllInterestsPaid() {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Debt.getAllInterestsPaid(connection);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return 0;
+    }
 
     @Override
     public void saveCPIValue(float indexValue) {
@@ -620,8 +662,17 @@ public class SQLite implements Database {
     }
 
     @Override
-    public void addAlert(String userid, Item item, double price) {
+    public double getAllTaxesCollected() {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Statistics.getAllTaxesCollected(connection);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return 0;
+    }
 
+    @Override
+    public void addAlert(String userid, Item item, double price) {
         try {
             if (connection != null && !connection.isClosed()) {
                 Alerts.addAlert(connection, userid, item, price);

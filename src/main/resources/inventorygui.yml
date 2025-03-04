@@ -339,3 +339,68 @@ portfolio:
   info:
     enabled: true
     slot: 4
+
+  loan:
+    enabled: true
+    slot: 8
+    material: 'paper'
+
+  debt:
+
+    size: 27
+
+    back-button:
+      enabled: true
+      material: 'arrow'
+      slot: 0
+
+    exp:
+      enabled: true
+      slot: 4
+      material: paper
+
+    info:
+      enabled: true
+      slot: 13
+      material: book
+
+    repay-all:
+      enabled: true
+      slot: 10
+      material: 'lime_stained_glass_pane'
+
+    repay-custom:
+      enabled: true
+      slot: 11
+      material: 'lime_candle'
+
+    get-max-loan:
+      enabled: true
+      slot: 16
+      material: 'red_stained_glass_pane'
+
+    custom-loan:
+      enabled: true
+      slot: 15
+      material: 'red_candle'
+
+    fillers:
+      material: 'black_stained_glass_pane'
+      slots:
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 18
+        - 19
+        - 20
+        - 21
+        - 22
+        - 23
+        - 24
+        - 25
+        - 26

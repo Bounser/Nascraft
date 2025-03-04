@@ -92,7 +92,7 @@ link_wrong_format:  "<gradient:#FB6363:#C4B3FD>✘ Wrong code format!</gradient>
 link_no_process_found: "<gradient:#FB6363:#C4B3FD>✘ No linking process found with that code.</gradient>"
 link_success: "<gradient:#FF00CD:#DA58FF>Linked successfully with user:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
 link_unlinked: "<gradient:#FF00CD:#DA58FF>You have been unlinked from user:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
-link_direct_message: ":link: Your discords account has been successfully linked to the minecraft user: ``[USER]``"
+link_direct_message: ":link: Your discord account has been successfully linked to the minecraft user: ``[USER]``"
 
 # DISCORD COMMAND
 
@@ -118,6 +118,43 @@ portfolio_composition_stats_name: "<gradient:#00E3FB:#F9ABFD>Portfolio Compositi
 portfolio_composition_stats_lore: "\n [COMPOSITION]"
 portfolio_composition_stats_segment: "[COLOR]■ <gradient:#96a9e0:#2b92ff>[PERCENTAGE]</gradient> [NAME] <color:#e09f7e>-</color> [WORTH]\n "
 portfolio_composition_empty: " <gradient:#96a9e0:#2b92ff>Your portfolio is empty.</gradient>\n "
+
+portfolio_debt_name: "<bold><gradient:#f24452:#aa5744>DEBT</gradient></bold>"
+portfolio_debt_lore: "<gradient:#9e74a1:#6284a1>Get loans against the value of your portfolio.</gradient>\n\n<gradient:#2eff8c:#5bff2e>⏵ Click to open debt manager</gradient>"
+portfolio_debt_title: "          <bold><gradient:#f24452:#aa5744>DEBT MANAGER</gradient></bold>"
+portfolio_debt_exp_name: "<bold><gradient:#f24452:#aa5744>How debt works</gradient></bold>"
+portfolio_debt_exp_lore: "<gradient:#9e74a1:#6284a1>Your portfolio items are not liquid,</gradient>\n<gradient:#9e74a1:#6284a1>meaning you cannot access their value until they are sold.</gradient>\n\n<gradient:#9e74a1:#6284a1>With this system, you can borrow funds,</gradient>\n<gradient:#9e74a1:#6284a1>with the only cost being the interest on the loan.</gradient>\n\n<gradient:#9e74a1:#6284a1>Once the loan is confirmed, your portfolio will</gradient>\n<gradient:#9e74a1:#6284a1>be locked, and if its value falls below a certain</gradient>\n<gradient:#9e74a1:#6284a1>threshold, your assets may be liquidated to repay the debt.</gradient>\n"
+portfolio_debt_info_name: "<bold><gradient:#f24452:#aa5744>DEBT</gradient></bold>"
+portfolio_debt_info_lore: "<gradient:#9e74a1:#6284a1>Your debt currently amounts to:</gradient>\n[CURR-DEBT] <gradient:#9e74a1:#6284a1>([CURR-PER]% of portfolio)</gradient>\n\n<gradient:#9e74a1:#6284a1>Maximum possible loan:</gradient>\n[MAX] <gradient:#9e74a1:#6284a1>([MAX-PER]% of portfolio)</gradient>\n\n<gradient:#9e74a1:#6284a1>Next interest payment: (In [TIME])</gradient>\n[INTEREST]\n\n<gradient:#9e74a1:#6284a1>Lifetime payed interests:</gradient> [LIFETIME]"
+portfolio_debt_back_name: "<gradient:#ff816b:#ff2e38>⏪ Back</gradient>"
+portfolio_debt_repay_everything_name: "<bold><gradient:#8be83a:#d2e854>REPAY EVERYTHING</gradient></bold>"
+portfolio_debt_repay_everything_lore: "\n<gradient:#9e74a1:#6284a1>You'll pay:</gradient> [AMOUNT]\n "
+portfolio_debt_take_all_name: "<bold><gradient:#e83e35:#e8812c>TAKE 90% OF MAXIMUM LOAN</gradient></bold>"
+portfolio_debt_take_all_lore: "\n<gradient:#9e74a1:#6284a1>You'll get:</gradient> [AMOUNT]\n\n<gradient:#9e74a1:#6284a1>Daily interest rate of:</gradient> <color:#b99cff>[INTEREST]%</color>\n\n<gradient:#9e74a1:#6284a1>(10% margin of security applied)</gradient>"
+portfolio_debt_custom_name: "<bold><gradient:#e83e35:#e8812c>GET LOAN</gradient></bold>"
+portfolio_debt_custom_lore: "\n<gradient:#9e74a1:#6284a1>Click to set the amount to borrow</gradient>\n\n<gradient:#9e74a1:#6284a1>You can take a loan of up to</gradient> [ADDITIONAL]\n\n<gradient:#9e74a1:#6284a1>Daily interest rate of:</gradient> <color:#b99cff>[INTEREST]%</color>"
+portfolio_debt_repay_name: "<bold><gradient:#8be83a:#d2e854>REPAY</gradient></bold>"
+portfolio_debt_repay_lore: "\n<gradient:#9e74a1:#6284a1>Click to set the amount to repay</gradient>\n\n<gradient:#9e74a1:#6284a1>Current debt:</gradient> [DEBT]"
+
+portfolio_debt_alert: "<color:#fbff00>⚠ <b><gradient:#ffcb3d:#ff5c0a>CAUTION</gradient></b> ⚠</color>\n<gradient:#FB6363:#C4B3FD>Your debt exceeds 95% of your margin. Repay your debt or add more items to your portfolio to avoid liquidation</gradient>"
+portfolio_debt_liquidated: "<color:#fbff00>⚠ <b><gradient:#ffcb3d:#ff5c0a>ATTENTION</gradient></b> ⚠</color>\n<gradient:#FB6363:#C4B3FD>Your debt exceeded the limit and your portfolio has been liquidated to repay it.</gradient>"
+portfolio_debt_money: "<gradient:#FB6363:#C4B3FD>Your debt exceeded the limit and [AMOUNT] were took from your account to stay within the limits.</gradient>"
+portfolio_debt_interest_payed: "<gradient:#00E3FB:#F9ABFD>Interest for your debt has been charged. ([AMOUNT]).</gradient>"
+portfolio_debt_interest_acc: "<gradient:#00E3FB:#F9ABFD>Interest for your debt couldn't be charged and has been added to your total debt. (+[AMOUNT]).</gradient>"
+portfolio_debt_repayed_all: "<gradient:#00E3FB:#F9ABFD>You have repayed all your debt! ([AMOUNT])</gradient>"
+portfolio_debt_repayed: "<gradient:#00E3FB:#F9ABFD>You have repayed [AMOUNT]. Your debt is now [DEBT]</gradient>"
+portfolio_debt_take_loan: "<gradient:#00E3FB:#F9ABFD>You have received a loan of [AMOUNT]. Your total debt is now [DEBT]</gradient>"
+portfolio_debt_no_collateral: "<gradient:#00E3FB:#F9ABFD>You don't have anything in your portfolio to take a loan against it</gradient>"
+portfolio_debt_cant_take_loan: "<gradient:#00E3FB:#F9ABFD>You don't have enough items in your portfolio to take that loan</gradient>"
+portfolio_debt_min_loan: "<gradient:#00E3FB:#F9ABFD>Loans have to be of minimum [AMOUNT]</gradient>"
+portfolio_debt_portfolio_locked: "<gradient:#00E3FB:#F9ABFD>Repay your debt to be able to get your items out of your portfolio</gradient>"
+portfolio_debt_dis_locked: ":exclamation: Repay your debt to be able to use the items in your portfolio"
+portfolio_debt_anvil_not_enough: "Not enough money to pay"
+portfolio_debt_anvil_invalid: "Invalid Amount"
+portfolio_debt_anvil_repay: "Repay: "
+portfolio_debt_anvil_repay_title: "Repay Debt"
+portfolio_debt_anvil_custom: "Loan: "
+portfolio_debt_anvil_custom_title: "Take new Loan"
 
 # Market
 
