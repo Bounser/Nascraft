@@ -2,8 +2,11 @@ package me.bounser.nascraft.placeholderapi;
 
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.chart.cpi.CPIInstant;
+import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.discord.linking.LinkManager;
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.managers.DebtManager;
 import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.MarketManager;
@@ -68,7 +71,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
                     int index = cpiHistory.size()-7;
 
-                    if (index < 0) index = cpiHistory.size();
+                    if (index < 0) index = cpiHistory.size() - 1;
 
                     float initialCPI = cpiHistory.get(index).getIndexValue();
 
@@ -86,7 +89,7 @@ public class PAPIExpansion extends PlaceholderExpansion {
 
                     int index = cpiHistory.size()-7;
 
-                    if (index < 0) index = cpiHistory.size();
+                    if (index < 0) index = cpiHistory.size() - 1;
 
                     float initialCPI = cpiHistory.get(index).getIndexValue();
 
@@ -103,7 +106,15 @@ public class PAPIExpansion extends PlaceholderExpansion {
                 if (portfolio == null) return "0";
                 Double value = PortfoliosManager.getInstance().getPortfolio(player.getUniqueId()).getInventoryValuePerCurrency().get(CurrenciesManager.getInstance().getDefaultCurrency());
                 if (value == null) return "0";
-                return String.valueOf(value);
+                return String.valueOf(Formatter.roundToDecimals(value, CurrenciesManager.getInstance().getDefaultCurrency().getDecimalPrecission()));
+
+            case "debt":
+                double debt = DebtManager.getInstance().getDebtOfPlayer(player.getUniqueId());
+                return String.valueOf(Formatter.roundToDecimals(debt, CurrenciesManager.getInstance().getDefaultCurrency().getDecimalPrecission()));
+
+            case "interest":
+                double interest = DebtManager.getInstance().getDebtOfPlayer(player.getUniqueId()) * Config.getInstance().getLoansDailyInterest();
+                return String.valueOf(Formatter.roundToDecimals(interest, CurrenciesManager.getInstance().getDefaultCurrency().getDecimalPrecission()));
 
             case "discordid":
                 String id = LinkManager.getInstance().getUserDiscordID(player.getUniqueId());
