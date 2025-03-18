@@ -5,10 +5,7 @@ import me.bounser.nascraft.commands.Command;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.commands.LimitOrders;
-import me.bounser.nascraft.inventorygui.BuySellMenu;
-import me.bounser.nascraft.inventorygui.CategoryMenu;
-import me.bounser.nascraft.inventorygui.LimitOrdersMenu;
-import me.bounser.nascraft.inventorygui.MarketMenuManager;
+import me.bounser.nascraft.inventorygui.*;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.limitorders.LimitOrder;
@@ -121,6 +118,19 @@ public class MarketCommand extends Command {
 
         } else {
 
+            if (args.length == 1) {
+
+                Player player = Bukkit.getPlayer(args[0]);
+
+                if (player == null) {
+                    Nascraft.getInstance().getLogger().info(ChatColor.RED + "Invalid player");
+                    return;
+                }
+
+                MarketMenuManager.getInstance().setMenuOfPlayer(player, new MainMenu(player));
+                return;
+            }
+
             if (args.length == 3 && args[0].toLowerCase().equals("category")) {
 
                 Player player = Bukkit.getPlayer(args[2]);
@@ -142,7 +152,7 @@ public class MarketCommand extends Command {
             }
 
             if (args.length != 4) {
-                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Invalid use of command. \n(CONSOLE) /market <Buy/Sell> <Material> <Quantity> <Player>\n(CONSOLE) /market category <category-identifier> <Player>");
+                Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Invalid use of command. \n(CONSOLE) /market <Buy/Sell> <Material> <Quantity> <Player>\n(CONSOLE) /market category <category-identifier> <Player>\n(CONSOLE) /market <Player>");
                 return;
             }
 

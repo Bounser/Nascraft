@@ -173,7 +173,7 @@ public class DiscordCommands extends ListenerAdapter {
                     OfflinePlayer player2 = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(event.getUser().getId()));
 
                     double purse = Nascraft.getEconomy().getBalance(player2);
-                    float inventory = PortfoliosManager.getInstance().getPortfolio(event.getUser().getId()).getInventoryValue();
+                    double inventory = PortfoliosManager.getInstance().getPortfolio(event.getUser().getId()).getInventoryValue();
                     float brokerValue = 0;
                     double total = purse + inventory + brokerValue;
 
@@ -343,7 +343,7 @@ public class DiscordCommands extends ListenerAdapter {
                                         OfflinePlayer player2 = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(user.getId()));
 
                                         double purse = Nascraft.getEconomy().getBalance(player2);
-                                        float inventory = PortfoliosManager.getInstance().getPortfolio(event.getUser().getId()).getInventoryValue();
+                                        double inventory = PortfoliosManager.getInstance().getPortfolio(event.getUser().getId()).getInventoryValue();
                                         float brokerValue = 0;
                                         double total = purse + inventory + brokerValue;
 

@@ -18,7 +18,7 @@ public class BalanceImage {
 
         OfflinePlayer player = Bukkit.getOfflinePlayer(LinkManager.getInstance().getUUID(user.getId()));
         double purse = Nascraft.getEconomy().getBalance(player);
-        float inventory = PortfoliosManager.getInstance().getPortfolio(user.getId()).getInventoryValue();
+        double inventory = PortfoliosManager.getInstance().getPortfolio(user.getId()).getInventoryValue();
         float brokerValue = 0;
 
         float total = (float) (purse + inventory + brokerValue);

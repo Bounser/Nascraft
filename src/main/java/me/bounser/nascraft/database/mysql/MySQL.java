@@ -6,6 +6,7 @@ import me.bounser.nascraft.database.commands.resources.DayInfo;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
+import me.bounser.nascraft.portfolio.Portfolio;
 
 import java.sql.Connection;
 import java.time.LocalDateTime;
@@ -189,17 +190,17 @@ public class MySQL implements Database {
     }
 
     @Override
-    public void updateItem(UUID uuid, Item item, int quantity) {
+    public void updateItemPortfolio(UUID uuid, Item item, int quantity) {
 
     }
 
     @Override
-    public void removeItem(UUID uuid, Item item) {
+    public void removeItemPortfolio(UUID uuid, Item item) {
 
     }
 
     @Override
-    public void clearInventory(UUID uuid) {
+    public void clearPortfolio(UUID uuid) {
 
     }
 
@@ -215,6 +216,71 @@ public class MySQL implements Database {
 
     @Override
     public int retrieveCapacity(UUID uuid) {
+        return 0;
+    }
+
+    @Override
+    public void increaseDebt(UUID uuid, Double debt) {
+
+    }
+
+    @Override
+    public void decreaseDebt(UUID uuid, Double debt) {
+
+    }
+
+    @Override
+    public double getDebt(UUID uuid) {
+        return 0;
+    }
+
+    @Override
+    public HashMap<UUID, Double> getUUIDAndDebt() {
+        return null;
+    }
+
+    @Override
+    public void addInterestPaid(UUID uuid, Double interest) {
+
+    }
+
+    @Override
+    public HashMap<UUID, Double> getUUIDAndInterestsPaid() {
+        return null;
+    }
+
+    @Override
+    public double getInterestsPaid(UUID uuid) {
+        return 0;
+    }
+
+    @Override
+    public double getAllOutstandingDebt() {
+        return 0;
+    }
+
+    @Override
+    public double getAllInterestsPaid() {
+        return 0;
+    }
+
+    @Override
+    public void saveOrUpdateWorth(UUID uuid, int day, double worth) {
+
+    }
+
+    @Override
+    public void saveOrUpdateWorthToday(UUID uuid, double worth) {
+
+    }
+
+    @Override
+    public HashMap<UUID, Portfolio> getTopWorth(int n) {
+        return null;
+    }
+
+    @Override
+    public double getLatestWorth(UUID uuid) {
         return 0;
     }
 
@@ -269,6 +335,11 @@ public class MySQL implements Database {
     }
 
     @Override
+    public double getAllTaxesCollected() {
+        return 0;
+    }
+
+    @Override
     public void addAlert(String userid, Item item, double price) {
 
     }
@@ -310,6 +381,16 @@ public class MySQL implements Database {
 
     @Override
     public void retrieveLimitOrders() {
+
+    }
+
+    @Override
+    public String getNameByUUID(UUID uuid) {
+        return "";
+    }
+
+    @Override
+    public void saveOrUpdateName(UUID uuid, String nick) {
 
     }
 

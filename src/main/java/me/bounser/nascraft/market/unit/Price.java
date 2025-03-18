@@ -201,6 +201,8 @@ public class Price {
 
     public boolean canStockChange(float change, boolean buy) {
 
+        if (elasticity == 0) return true;
+
         float newStock = stock + change;
 
         if (!buy) return !(newStock > lowerStockThreshold);
@@ -242,6 +244,8 @@ public class Price {
 
     public void applyNoise() {
 
+        if (elasticity == 0 || noiseIntensity == 0) return;
+
         float prevStock = stock;
 
         if (support != 0 && value < support && Math.random() > 0.8) {
@@ -261,7 +265,6 @@ public class Price {
         updateValue();
 
         item.addVolume(Math.abs(Math.round(stock - prevStock)));
-
     }
 
     public double getChange() {
@@ -345,6 +348,9 @@ public class Price {
     public List<Double> getValuesPastHour() { return hourValues; }
 
     public float getProjectedCost(float stockChange, float tax) {
+
+        if (elasticity == 0)
+            return roundToDecimals(Math.abs((value * stockChange * tax)), precission);
 
         float change;
 

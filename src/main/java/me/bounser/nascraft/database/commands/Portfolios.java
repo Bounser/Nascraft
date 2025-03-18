@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class Portfolios {
 
-    public static void updateItem(Connection connection, UUID uuid, Item item, int quantity) {
+    public static void updateItemPortfolio(Connection connection, UUID uuid, Item item, int quantity) {
         try {
             String sql1 = "SELECT amount FROM portfolios WHERE uuid=? AND identifier=?;";
             PreparedStatement prep1 =  connection.prepareStatement(sql1);
@@ -41,7 +41,7 @@ public class Portfolios {
         }
     }
 
-    public static void removeItem(Connection connection, UUID uuid, Item item) {
+    public static void removeItemPortfolio(Connection connection, UUID uuid, Item item) {
         try {
             String sql = "DELETE FROM portfolios WHERE uuid=? AND identifier=?;";
             PreparedStatement prep = connection.prepareStatement(sql);
@@ -53,7 +53,7 @@ public class Portfolios {
         }
     }
 
-    public static void clearInventory(Connection connection, UUID uuid) {
+    public static void clearPortfolio(Connection connection, UUID uuid) {
         try {
             String sql = "DELETE FROM portfolios WHERE uuid=?;";
             PreparedStatement prep = connection.prepareStatement(sql);

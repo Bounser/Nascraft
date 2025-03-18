@@ -42,7 +42,7 @@ public class ImagesManager {
         if (items.contains("items." + identifier + ".item-stack.type")) {
 
             imageName = items.getString("items." + identifier + ".item-stack.type").toLowerCase() + ".png";
-            imagePath = "1-21-materials/minecraft_" + imageName;
+            imagePath = "1-21-4-materials/minecraft_" + imageName;
 
             try (InputStream input = Nascraft.getInstance().getResource(imagePath)) {
                 if (input != null) {
@@ -60,7 +60,7 @@ public class ImagesManager {
         }
 
         imageName = identifier.replaceAll("\\d", "").toLowerCase() + ".png";
-        imagePath = "1-21-materials/minecraft_" + imageName;
+        imagePath = "1-21-4-materials/minecraft_" + imageName;
 
         try (InputStream input = Nascraft.getInstance().getResource(imagePath)) {
             if (input != null) {

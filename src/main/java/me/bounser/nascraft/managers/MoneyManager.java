@@ -7,11 +7,10 @@ import me.clip.placeholderapi.PlaceholderAPI;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.configuration.file.FileConfiguration;
 
 public class MoneyManager {
 
-    public static MoneyManager instance;
+    private static MoneyManager instance;
 
     private Economy economy;
     public static MoneyManager getInstance() { return instance == null ? instance = new MoneyManager() : instance; }
@@ -87,6 +86,31 @@ public class MoneyManager {
                     DatabaseManager.get().getDatabase().addTransaction(-amount, Math.abs(amount - amount / taxRate));
                 else
                     DatabaseManager.get().getDatabase().addTransaction(-amount, 0);
+
+                break;
+
+            case CUSTOM:
+                String command = currency.getDepositCommand()
+                        .replace("[USER-NAME]", player.getName());
+                if (amount == (int) amount) {
+                    command = command.replace("[AMOUNT]", String.valueOf((int) amount));
+                } else {
+                    command = command.replace("[AMOUNT]", String.valueOf((int) amount));
+                }
+
+                String finalCommand = command;
+                Bukkit.getScheduler().runTask(Nascraft.getInstance(), () -> {
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCommand);
+                });
+        }
+    }
+
+    public void simpleDeposit(OfflinePlayer player, Currency currency, double amount) {
+
+        switch (currency.getCurrencyType()) {
+
+            case VAULT:
+                economy.depositPlayer(player, amount);
 
                 break;
 

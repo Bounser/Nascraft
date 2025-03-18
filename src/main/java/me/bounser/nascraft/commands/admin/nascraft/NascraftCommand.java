@@ -7,6 +7,11 @@ import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.managers.DebtManager;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
+import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
@@ -23,7 +28,7 @@ import java.util.UUID;
 
 public class NascraftCommand extends Command {
 
-    private final List<String> arguments = Arrays.asList("reload", "edit", "stop", "resume", "cpi", "save", "logs");
+    private final List<String> arguments = Arrays.asList("reload", "edit", "stop", "resume", "info", "save", "logs", "forgivedebt");
 
     private final List<String> tradesArguments = Arrays.asList("<player nick or uuid>", "<item>", "global");
 
@@ -44,7 +49,12 @@ public class NascraftCommand extends Command {
             return;
         }
 
-        String syntaxError = ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: \nreload | edit | save | cpi | stop | resume | logs";
+        String syntaxError = ChatColor.DARK_PURPLE + "[NC] " +ChatColor.RED + "Wrong syntax. Available arguments: \n";
+
+        for (String argument : arguments.subList(0, arguments.size()-2))
+            syntaxError += argument + " | ";
+
+        syntaxError += arguments.get(arguments.size() - 1);
 
         if (args.length == 0) {
             sender.sendMessage(syntaxError);
@@ -52,6 +62,7 @@ public class NascraftCommand extends Command {
         }
 
         switch(args[0].toLowerCase()){
+
             case "save":
                 DatabaseManager.get().getDatabase().saveEverything();
                 sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Data saved.");
@@ -111,8 +122,17 @@ public class NascraftCommand extends Command {
                 }
                 break;
 
-            case "cpi":
-                sender.sendMessage(ChatColor.BLUE + "CPI: " + MarketManager.getInstance().getConsumerPriceIndex());
+            case "info":
+
+                Currency currency = CurrenciesManager.getInstance().getDefaultCurrency();
+
+                String msg = "\n<color:#9985ff>● All time inflation: <color:#57ffa0>" + Formatter.roundToDecimals(MarketManager.getInstance().getConsumerPriceIndex()-100, 3) + "%</color>\n\n"
+                        + "● All outstanding debt: " + Formatter.format(currency, DatabaseManager.get().getDatabase().getAllOutstandingDebt(), Style.ROUND_BASIC) + " (" + DatabaseManager.get().getDatabase().getUUIDAndDebt().keySet().size()  + " debtors)\n"
+                        + "● All interests collected: " + Formatter.format(currency, DatabaseManager.get().getDatabase().getAllInterestsPaid(), Style.ROUND_BASIC) + "\n\n"
+                        + "● All taxes collected: " + Formatter.format(currency, Math.abs(DatabaseManager.get().getDatabase().getAllTaxesCollected()), Style.ROUND_BASIC) + "</color>\n";
+
+                Lang.get().message((Player) sender, msg);
+
                 break;
 
             case "stop":
@@ -155,6 +175,46 @@ public class NascraftCommand extends Command {
                 else Nascraft.getInstance().getLogger().info(ChatColor.RED  + "Command not available through console.");
                 break;
 
+            case "forgivedebt":
+
+                if (args.length != 3) {
+                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED  + "Wrong usage. /nascraft forgivedebt <player name> <all/amount>");
+                    break;
+                }
+
+                Player player = Bukkit.getPlayer(args[1]);
+
+                if (player == null) {
+                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED  + "Player not found");
+                    break;
+                }
+
+                if (args[2] == null || args[2].isEmpty()) {
+                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED  + "Invalid amount");
+                    break;
+                }
+
+                double debt = 0;
+                double playerDebt = DebtManager.getInstance().getDebtOfPlayer(player.getUniqueId());
+
+                try {
+                    debt = Double.parseDouble(args[2]);
+                } catch (NumberFormatException e) {
+                    if (args[2].equalsIgnoreCase("all")) {
+                        debt = playerDebt;
+                    } else {
+                        sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED  + "Invalid amount");
+                    }
+                }
+
+                DebtManager.getInstance().decreaseDebt(player.getUniqueId(), debt);
+                String msgDebt = "\n<color:#9985ff>You have forgiven: " + Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), debt, Style.ROUND_BASIC) + " of debt for the player <b>" + player.getName() +"</b>.\n"
+                        + "The player has now a debt of " + Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), DebtManager.getInstance().getDebtOfPlayer(player.getUniqueId()), Style.ROUND_BASIC) + "\n";
+
+                Lang.get().message((Player) sender, msgDebt);
+
+                break;
+
             default:
                 sender.sendMessage(syntaxError);
         }
@@ -172,8 +232,29 @@ public class NascraftCommand extends Command {
     @Override
     public List<String> onTabComplete(CommandSender sender, String[] args) {
         if (args.length > 1) {
-            if (args[0].equalsIgnoreCase("logs")) {
+            if (args[0].equalsIgnoreCase("logs"))
                 return StringUtil.copyPartialMatches(args[1], tradesArguments, new ArrayList<>());
+
+            if (args[0].equalsIgnoreCase("forgivedebt")) {
+
+                if (args.length == 3) {
+
+                    Player player = Bukkit.getPlayer(args[1]);
+
+                    if (player == null) return Arrays.asList("Invalid player");
+
+                    return Arrays.asList("all", String.valueOf(Formatter.roundToDecimals(DebtManager.getInstance().getDebtOfPlayer(player.getUniqueId()), CurrenciesManager.getInstance().getDefaultCurrency().getDecimalPrecission())));
+
+                } else {
+
+                    List<String> playerNames = new ArrayList<>();
+
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        playerNames.add(player.getName());
+                    }
+
+                    return StringUtil.copyPartialMatches(args[1], playerNames, new ArrayList<>());
+                }
             }
         }
 

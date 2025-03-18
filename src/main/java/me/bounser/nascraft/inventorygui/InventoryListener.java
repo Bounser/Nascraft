@@ -10,8 +10,10 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.inventorygui.MiniChart.InfoMenu;
+import me.bounser.nascraft.managers.DebtManager;
 import me.bounser.nascraft.managers.InventoryManager;
 import me.bounser.nascraft.managers.MoneyManager;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.limitorders.LimitOrder;
 import me.bounser.nascraft.market.limitorders.LimitOrdersManager;
@@ -29,7 +31,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 
 import java.time.LocalDateTime;
@@ -661,6 +662,165 @@ public class InventoryListener implements Listener {
 
                     if (menu != null) menu.update();
                 }
+
+            case "debt":
+
+                if (config.getDebtBackEnabled() && config.getDebtBackSlot() == slot) {
+                    Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_TITLE));
+
+                    Inventory inventory = Bukkit.createInventory(player, 45, BukkitComponentSerializer.legacy().serialize(title));
+                    player.openInventory(inventory);
+                    player.setMetadata("NascraftPortfolio", new FixedMetadataValue(Nascraft.getInstance(),false));
+
+                    PortfolioInventory.getInstance().updatePortfolioInventory(player);
+                    return;
+                }
+
+                double debt = DebtManager.getInstance().getDebtOfPlayer(player.getUniqueId());
+
+                if (config.getDebtRepayAllEnabled() && config.getDebtRepayAllSlot() == slot) {
+
+                    if (MoneyManager.getInstance().hasEnoughMoney(player, CurrenciesManager.getInstance().getDefaultCurrency(), debt)) {
+
+                        MoneyManager.getInstance().simpleWithdraw(player, CurrenciesManager.getInstance().getDefaultCurrency(), debt);
+                        DebtManager.getInstance().decreaseDebt(player.getUniqueId(), debt);
+
+                        MarketMenuManager.getInstance().getMenuFromPlayer(player).update();
+
+                        Lang.get().message(player, Lang.get().message(Message.PORTFOLIO_DEBT_REPAYED_ALL)
+                                .replace("[AMOUNT]", Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), debt, Style.ROUND_BASIC)));
+
+                    } else {
+                        Lang.get().message(player, Lang.get().message(Message.NOT_ENOUGH_MONEY));
+                    }
+                    return;
+                }
+
+                if (config.getDebtRepayEnabled() && config.getDebtRepaySlot() == slot) {
+
+                    new AnvilGUI.Builder()
+                            .onClick((anvilSlot, stateSnapshot) -> {
+
+                                Pattern pattern = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+");
+                                Matcher matcher = pattern.matcher(stateSnapshot.getText());
+
+                                if (matcher.find()) {
+                                    String intString = matcher.group();
+
+                                    double value = Math.abs(Double.parseDouble(intString));
+
+                                    if (value == 0 || value > debt)
+                                        return List.of(AnvilGUI.ResponseAction.replaceInputText(String.valueOf(Formatter.roundToDecimals(debt, CurrenciesManager.getInstance().getDefaultCurrency().getDecimalPrecission()))));
+
+                                    if (!MoneyManager.getInstance().hasEnoughMoney(player, CurrenciesManager.getInstance().getDefaultCurrency(), value))
+                                        return List.of(AnvilGUI.ResponseAction.replaceInputText(Lang.get().message(Message.PORTFOLIO_DEBT_ANVIL_NOT_ENOUGH)));
+
+                                    MoneyManager.getInstance().simpleWithdraw(player, CurrenciesManager.getInstance().getDefaultCurrency(), value);
+                                    DebtManager.getInstance().decreaseDebt(player.getUniqueId(), value);
+
+                                    Lang.get().message(player, Lang.get().message(Message.PORTFOLIO_DEBT_REPAYED)
+                                            .replace("[AMOUNT]", Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), value, Style.ROUND_BASIC))
+                                            .replace("[DEBT]", Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), debt-value, Style.ROUND_BASIC)));
+
+                                    return Arrays.asList(AnvilGUI.ResponseAction.close());
+
+                                } else {
+                                    return List.of(AnvilGUI.ResponseAction.replaceInputText(Lang.get().message(Message.PORTFOLIO_DEBT_ANVIL_INVALID)));
+                                }
+
+                            })
+                            .text(Lang.get().message(Message.PORTFOLIO_DEBT_ANVIL_REPAY))
+                            .title(Lang.get().message(Message.PORTFOLIO_DEBT_ANVIL_REPAY_TITLE))
+                            .plugin(Nascraft.getInstance())
+                            .open(player);
+                    return;
+                }
+
+                if (config.getDebtMaxLoanEnabled() && config.getDebtMaxLoanSlot() == slot) {
+
+                    double loan = Math.min(DebtManager.getInstance().getMaximumLoan(player.getUniqueId()) * 0.9, config.getLoansMaxSize());
+
+                    loan -= debt;
+
+                    if (loan > 0) {
+
+                        if (loan < config.getLoansMinSize()) {
+                            Lang.get().message(player, Lang.get().message(Message.PORTFOLIO_DEBT_MIN_LOAN)
+                                    .replace("[AMOUNT]", Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), config.getLoansMinSize(), Style.ROUND_BASIC)));
+                            return;
+                        }
+
+                        DebtManager.getInstance().increaseDebt(player.getUniqueId(), loan);
+                        MoneyManager.getInstance().simpleDeposit(player, CurrenciesManager.getInstance().getDefaultCurrency(), loan);
+
+                        MarketMenuManager.getInstance().getMenuFromPlayer(player).update();
+
+                        Lang.get().message(player, Lang.get().message(Message.PORTFOLIO_DEBT_TAKE_LOAN)
+                                .replace("[AMOUNT]", Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), loan, Style.ROUND_BASIC))
+                                .replace("[DEBT]", Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), loan + debt , Style.ROUND_BASIC)));
+
+                    } else {
+                        Lang.get().message(player, Lang.get().message(Message.PORTFOLIO_DEBT_NO_COLLATERAL));
+                    }
+                    return;
+                }
+
+                if (config.getDebtCustomEnabled() && config.getDebtCustomSlot() == slot) {
+
+                    new AnvilGUI.Builder()
+                            .onClick((anvilSlot, stateSnapshot) -> {
+
+                                Pattern pattern = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+");
+                                Matcher matcher = pattern.matcher(stateSnapshot.getText());
+
+                                if (matcher.find()) {
+                                    String intString = matcher.group();
+
+                                    double value = Math.abs(Double.parseDouble(intString));
+                                    double maxLoan = Math.min(DebtManager.getInstance().getMaximumLoan(player.getUniqueId()), config.getLoansMaxSize());
+                                    double minLoan = config.getLoansMinSize();
+
+                                    if ((value + debt) < minLoan)
+                                        return List.of(AnvilGUI.ResponseAction.replaceInputText(String.valueOf(Formatter.roundToDecimals(minLoan, CurrenciesManager.getInstance().getDefaultCurrency().getDecimalPrecission()))));
+
+                                    if (value == 0 || (value + debt) > maxLoan)
+                                        return List.of(AnvilGUI.ResponseAction.replaceInputText(String.valueOf(Formatter.roundToDecimals(maxLoan-debt, CurrenciesManager.getInstance().getDefaultCurrency().getDecimalPrecission()))));
+
+                                    MoneyManager.getInstance().simpleDeposit(player, CurrenciesManager.getInstance().getDefaultCurrency(), value);
+                                    DebtManager.getInstance().increaseDebt(player.getUniqueId(), value);
+
+                                    Lang.get().message(player, Lang.get().message(Message.PORTFOLIO_DEBT_TAKE_LOAN)
+                                            .replace("[AMOUNT]", Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), value, Style.ROUND_BASIC))
+                                            .replace("[DEBT]", Formatter.format(CurrenciesManager.getInstance().getDefaultCurrency(), value + debt, Style.ROUND_BASIC)));
+
+                                    return Arrays.asList(AnvilGUI.ResponseAction.close());
+
+                                } else {
+                                    return List.of(AnvilGUI.ResponseAction.replaceInputText(Lang.get().message(Message.PORTFOLIO_DEBT_ANVIL_INVALID)));
+                                }
+
+                            })
+                            .text(Lang.get().message(Message.PORTFOLIO_DEBT_ANVIL_CUSTOM))
+                            .title(Lang.get().message(Message.PORTFOLIO_DEBT_ANVIL_CUSTOM_TITLE))
+                            .plugin(Nascraft.getInstance())
+                            .open(player);
+                    return;
+                }
+
+            case "top":
+
+                if (config.getTopBackEnabled() && config.getTopBackSlot() == slot) {
+                    Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_TITLE));
+
+                    Inventory inventory = Bukkit.createInventory(player, 45, BukkitComponentSerializer.legacy().serialize(title));
+                    player.openInventory(inventory);
+                    player.setMetadata("NascraftPortfolio", new FixedMetadataValue(Nascraft.getInstance(),false));
+
+                    PortfolioInventory.getInstance().updatePortfolioInventory(player);
+                    return;
+                }
+
+                return;
         }
     }
 

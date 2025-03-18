@@ -13,6 +13,7 @@ import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.discord.alerts.DiscordAlerts;
 import me.bounser.nascraft.discord.images.*;
+import me.bounser.nascraft.managers.DebtManager;
 import me.bounser.nascraft.portfolio.PortfoliosManager;
 import me.bounser.nascraft.portfolio.Portfolio;
 import me.bounser.nascraft.discord.linking.LinkManager;
@@ -420,6 +421,14 @@ public class DiscordButtons extends ListenerAdapter {
 
             case "sellallconfirmed":
 
+                if (DebtManager.getInstance().getDebtOfPlayer(uuid) != 0) {
+                    event.reply(Lang.get().message(Message.PORTFOLIO_DEBT_DIS_LOCKED))
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
+
+                    return;
+                }
+
                 if (!MarketManager.getInstance().getActive()) {
                     event.reply(Lang.get().message(Message.DISCORD_MARKET_CLOSED))
                             .setEphemeral(true)
@@ -439,7 +448,7 @@ public class DiscordButtons extends ListenerAdapter {
                 OfflinePlayer player2 = Bukkit.getOfflinePlayer(uuid);
 
                 double purse = Nascraft.getEconomy().getBalance(player2);
-                float inventory = PortfoliosManager.getInstance().getPortfolio(event.getUser().getId()).getInventoryValue();
+                double inventory = PortfoliosManager.getInstance().getPortfolio(event.getUser().getId()).getInventoryValue();
                 float brokerValue = 0;
                 double total = purse + inventory + brokerValue;
 
@@ -662,6 +671,14 @@ public class DiscordButtons extends ListenerAdapter {
 
                 if (!discordInventory.hasItem(item, quantity)) {
                     event.reply(Lang.get().message(Message.DISCORD_NOT_ENOUGH_ITEMS))
+                            .setEphemeral(true)
+                            .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
+
+                    return;
+                }
+
+                if (DebtManager.getInstance().getDebtOfPlayer(uuid) != 0) {
+                    event.reply(Lang.get().message(Message.PORTFOLIO_DEBT_DIS_LOCKED))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
 

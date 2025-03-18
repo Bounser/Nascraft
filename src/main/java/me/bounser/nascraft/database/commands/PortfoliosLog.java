@@ -86,7 +86,7 @@ public class PortfoliosLog {
                 prep2.executeUpdate();
 
             } else {
-                String sql2 = "INSERT INTO portfolios_log (uuid, identifier, amount, contribution) VALUES (?,?,?);";
+                String sql2 = "INSERT INTO portfolios_log (uuid, identifier, amount, contribution) VALUES (?,?,?,?);";
                 PreparedStatement prep2 =  connection.prepareStatement(sql2);
                 prep2.setString(1, uuid.toString());
                 prep2.setString(2, item.getIdentifier());

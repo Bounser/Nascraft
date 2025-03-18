@@ -1,6 +1,7 @@
 package me.bounser.nascraft.commands.admin.nascraft;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.database.Database;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.formatter.Formatter;
@@ -105,7 +106,7 @@ public class NascraftLogListener implements Listener {
             ItemStack itemStack = new ItemStack(Material.PLAYER_HEAD);
 
             ItemMeta meta = itemStack.getItemMeta();
-            meta.setDisplayName(ChatColor.BLUE + "Trades of: " + uuid);
+            meta.setDisplayName(ChatColor.BLUE + "Trades of: " + DatabaseManager.get().getDatabase().getNameByUUID(uuid) + " (" + uuid + ")");
             itemStack.setItemMeta(meta);
 
             logsGUI.setItem(4, itemStack);
@@ -191,7 +192,7 @@ public class NascraftLogListener implements Listener {
 
                 List<String> lore = new ArrayList<>();
 
-                lore.add(ChatColor.BLUE + "Player (UUID): " + trade.getUuid());
+                lore.add(ChatColor.BLUE + "Player: " + DatabaseManager.get().getDatabase().getNameByUUID(trade.getUuid()) +  " (" + trade.getUuid() + ")");
                 lore.add("");
 
                 if (trade.getAmount() > 64) {

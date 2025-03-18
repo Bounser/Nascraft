@@ -174,4 +174,21 @@ public class Statistics {
         }
     }
 
+    public static double getAllTaxesCollected(Connection connection) {
+        try {
+            String sql = "SELECT taxes FROM flows ORDER BY day DESC LIMIT 1;";
+
+            PreparedStatement prep = connection.prepareStatement(sql);
+            ResultSet rs = prep.executeQuery();
+
+            if (rs.next())
+                return rs.getDouble("taxes");
+
+            return 0;
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
