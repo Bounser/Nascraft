@@ -7,6 +7,7 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.inventorygui.MarketMenuManager;
+import me.bounser.nascraft.managers.DebtManager;
 import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.managers.MoneyManager;
@@ -64,13 +65,23 @@ public class PortfolioInventory implements Listener {
             return;
         }
 
+        if (event.getClickedInventory().getSize() == 45 && Config.getInstance().getPortfolioDebtEnabled() && event.getSlot() == Config.getInstance().getPortfolioDebtSlot()) {
+            MarketMenuManager.getInstance().setMenuOfPlayer(player, new DebtMenu(player));
+            return;
+        }
+
+        if (event.getClickedInventory().getSize() == 45 && Config.getInstance().getPortfolioTopEnabled() && event.getSlot() == Config.getInstance().getPortfolioTopSlot()) {
+            MarketMenuManager.getInstance().setMenuOfPlayer(player, new TopMenu(player));
+            return;
+        }
+
         // EXPANSION
         if (event.getClickedInventory().getSize() == 45 && event.getCurrentItem() != null && event.getRawSlot() > 8 + portfolio.getCapacity() && event.getRawSlot() <= 35) {
             if (MoneyManager.getInstance().hasEnoughMoney((OfflinePlayer) event.getWhoClicked(), CurrenciesManager.getInstance().getVaultCurrency(), portfolio.getNextSlotPrice())) {
                 Nascraft.getEconomy().withdrawPlayer((OfflinePlayer) event.getView().getPlayer(), portfolio.getNextSlotPrice());
                 portfolio.increaseCapacity();
             } else {
-                Lang.get().message((Player) event.getWhoClicked(), Message.PORTFOLIO_CANT_AFFORD_EXPANSION);
+                Lang.get().message(player, Message.PORTFOLIO_CANT_AFFORD_EXPANSION);
             }
             return;
         }
@@ -88,6 +99,11 @@ public class PortfolioInventory implements Listener {
 
             if (item == null) return;
 
+            if (DebtManager.getInstance().getDebtOfPlayer(player.getUniqueId()) != 0) {
+                Lang.get().message(player, Message.PORTFOLIO_DEBT_PORTFOLIO_LOCKED);
+                return;
+            }
+
             int quantity = portfolio.getContent().get(item);
 
             quantity = Math.min(quantity, item.getItemStack().getMaxStackSize());
@@ -97,8 +113,10 @@ public class PortfolioInventory implements Listener {
             portfolio.removeItem(item, quantity);
             event.getWhoClicked().getInventory().addItem(item.getItemStack(quantity));
 
+            PortfoliosManager.getInstance().savePortfolioOfPlayer(player);
             return;
         }
+
 
         // DROP ITEM
         if (event.getClickedInventory().getSize() != 45 && event.getCurrentItem() != null) {
@@ -123,6 +141,7 @@ public class PortfolioInventory implements Listener {
 
             portfolio.addItem(item, amount);
 
+            PortfoliosManager.getInstance().savePortfolioOfPlayer(player);
         }
     }
 
@@ -148,7 +167,7 @@ public class PortfolioInventory implements Listener {
 
         insertFillers(inventory);
         insertLockedSpaces(inventory, player.getUniqueId());
-        insertDiscordInventoryContent(inventory, player.getUniqueId());
+        insertPortfolioContent(inventory, player.getUniqueId());
 
         if (Config.getInstance().getPortfolioMenuBackEnabled() && !player.getMetadata("NascraftPortfolio").get(0).asBoolean()) {
             insetBackButton(inventory);
@@ -156,6 +175,14 @@ public class PortfolioInventory implements Listener {
 
         if (Config.getInstance().getPortfolioInfoEnabled()) {
             insertInfoButton(inventory, player.getUniqueId());
+        }
+
+        if (Config.getInstance().getPortfolioDebtEnabled()) {
+            insertDebtButton(inventory);
+        }
+
+        if (Config.getInstance().getPortfolioTopEnabled()) {
+            insertTopButton(inventory);
         }
     }
 
@@ -166,7 +193,7 @@ public class PortfolioInventory implements Listener {
         meta.setDisplayName(" ");
         filler.setItemMeta(meta);
 
-        for(int i : new int[]{0, 1, 2, 3, 5, 6, 7, 8, 36, 37, 38, 39, 40, 41, 42, 43, 44}) {
+        for(int i : new int[]{0, 1, 2, 3, 5, 6, 7, 36, 37, 38, 39, 40, 41, 42, 43, 44}) {
             inventory.setItem(i, filler);
         }
     }
@@ -223,7 +250,7 @@ public class PortfolioInventory implements Listener {
         }
     }
 
-    public void insertDiscordInventoryContent(Inventory inventory, UUID uuid) {
+    public void insertPortfolioContent(Inventory inventory, UUID uuid) {
 
         HashMap<Item, Integer> content = PortfoliosManager.getInstance().getPortfolio(uuid).getContent();
 
@@ -235,42 +262,75 @@ public class PortfolioInventory implements Listener {
             ItemStack itemStack = item.getItemStack();
             ItemMeta meta = itemStack.getItemMeta();
 
-            List<String> finalLore = new ArrayList<>();
+            String extraLore = Lang.get().message(Message.PORTFOLIO_AMOUNT)
+                    .replace("[AMOUNT]", String.valueOf(content.get(item)))
+                    .replace("[WORTH]", Formatter.format(item.getCurrency(), content.get(item) * item.getPrice().getValue(), Style.ROUND_BASIC));
+
+            List<String> lore = new ArrayList<>();
 
             if (meta.hasLore()) {
-
-                List<String> lore = meta.getLore();
-
+                lore = meta.getLore();
                 lore.add("");
-                Component loreComponent = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_AMOUNT, "0", String.valueOf(content.get(item)), "0"));
-                lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
-
-                finalLore = lore;
-
-            } else {
-
-                for (String line : Lang.get().message(Message.PORTFOLIO_AMOUNT, "0", String.valueOf(content.get(item)), "0").split("\\n")) {
-                    Component loreComponent = MiniMessage.miniMessage().deserialize(line);
-                    finalLore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
-                }
             }
 
-            meta.setLore(finalLore);
+            for (String line : extraLore.split("\\n")) {
+                Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+                lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
+            }
+
+            meta.setLore(lore);
 
             itemStack.setItemMeta(meta);
+            itemStack.setAmount(Math.min(itemStack.getMaxStackSize(), content.get(item)));
             inventory.setItem(i, itemStack);
             i++;
         }
     }
 
     public void insetBackButton(Inventory inventory) {
-        ItemStack filler = new ItemStack(Config.getInstance().getPortfolioMenuBackMaterial());
-        ItemMeta meta = filler.getItemMeta();
+        ItemStack back = new ItemStack(Config.getInstance().getPortfolioMenuBackMaterial());
+        ItemMeta meta = back.getItemMeta();
         Component backName = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_BACK_NAME));
         meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(backName));
-        filler.setItemMeta(meta);
+        back.setItemMeta(meta);
 
-        inventory.setItem(Config.getInstance().getPortfolioMenuBackSlot(), filler);
+        inventory.setItem(Config.getInstance().getPortfolioMenuBackSlot(), back);
+    }
+
+    public void insertDebtButton(Inventory inventory) {
+        ItemStack debt = new ItemStack(Config.getInstance().getPortfolioDebtMaterial());
+        ItemMeta meta = debt.getItemMeta();
+        Component backName = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_DEBT_NAME));
+
+        List<String> lore = new ArrayList<>();
+        for (String line : Lang.get().message(Message.PORTFOLIO_DEBT_LORE).split("\\n")) {
+            Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+            lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
+        }
+
+        meta.setLore(lore);
+        meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(backName));
+        debt.setItemMeta(meta);
+
+        inventory.setItem(Config.getInstance().getPortfolioDebtSlot(), debt);
+    }
+
+    public void insertTopButton(Inventory inventory) {
+        ItemStack debt = new ItemStack(Config.getInstance().getPortfolioTopMaterial());
+        ItemMeta meta = debt.getItemMeta();
+        Component backName = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_TOP_NAME));
+
+        List<String> lore = new ArrayList<>();
+        for (String line : Lang.get().message(Message.PORTFOLIO_TOP_BUTTON_LORE).split("\\n")) {
+            Component loreComponent = MiniMessage.miniMessage().deserialize(line);
+            lore.add(BukkitComponentSerializer.legacy().serialize(loreComponent));
+        }
+
+        meta.setLore(lore);
+        meta.setDisplayName(BukkitComponentSerializer.legacy().serialize(backName));
+        debt.setItemMeta(meta);
+
+        inventory.setItem(Config.getInstance().getPortfolioTopSlot(), debt);
     }
 
     public boolean checkInventory(Player player, Item item, int amount) {

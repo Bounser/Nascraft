@@ -10,6 +10,7 @@ import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
+import me.bounser.nascraft.portfolio.Portfolio;
 
 import java.io.File;
 import java.io.IOException;
@@ -130,6 +131,12 @@ public class SQLite implements Database {
                         "amount INT," +
                         "contribution DOUBLE");
 
+        createTable(connection, "portfolios_worth",
+                "id INTEGER PRIMARY KEY, " +
+                        "uuid VARCHAR(36) NOT NULL," +
+                        "day INT," +
+                        "worth DOUBLE");
+
         createTable(connection, "capacities",
                 "uuid VARCHAR(36) PRIMARY KEY," +
                         "capacity INT");
@@ -188,6 +195,11 @@ public class SQLite implements Database {
                 "id INTEGER PRIMARY KEY, " +
                         "uuid VARCHAR(36) NOT NULL," +
                         "paid DOUBLE NOT NULL");
+
+        createTable(connection, "user_names",
+                "id INTEGER PRIMARY KEY, " +
+                        "uuid VARCHAR(36) NOT NULL," +
+                        "name TEXT NOT NULL");
 
     }
 
@@ -614,6 +626,44 @@ public class SQLite implements Database {
     }
 
     @Override
+    public void saveOrUpdateWorth(UUID uuid, int day, double worth) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            PortfoliosWorth.saveOrUpdateWorth(connection, uuid, day, worth);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public void saveOrUpdateWorthToday(UUID uuid, double worth) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            PortfoliosWorth.saveOrUpdateWorthToday(connection, uuid, worth);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public HashMap<UUID, Portfolio> getTopWorth(int n) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return PortfoliosWorth.getTopWorth(connection, n);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public double getLatestWorth(UUID uuid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return PortfoliosWorth.getLatestWorth(connection, uuid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return 0;
+    }
+
+    @Override
     public void saveCPIValue(float indexValue) {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
             Statistics.saveCPI(connection, indexValue);
@@ -759,6 +809,25 @@ public class SQLite implements Database {
     public void retrieveLimitOrders() {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
             LimitOrders.retrieveLimitOrders(connection);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public String getNameByUUID(UUID uuid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return UserNames.getNameByUUID(connection, uuid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return " ";
+    }
+
+    @Override
+    public void saveOrUpdateName(UUID uuid, String name) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            UserNames.saveOrUpdateNick(connection, uuid, name);
         } catch (SQLException e) {
             Nascraft.getInstance().getLogger().warning(e.getMessage());
         }

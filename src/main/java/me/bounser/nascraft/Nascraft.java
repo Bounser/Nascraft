@@ -25,6 +25,8 @@ import me.bounser.nascraft.commands.discord.LinkCommand;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
 import me.bounser.nascraft.inventorygui.InventoryListener;
+import me.bounser.nascraft.managers.DebtManager;
+import me.bounser.nascraft.managers.EventsManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.config.Config;
@@ -132,6 +134,10 @@ public final class Nascraft extends JavaPlugin {
             WandsManager.getInstance();
         }
 
+        if (config.getLoansEnabled()) {
+            DebtManager.getInstance();
+        }
+
         createImagesFolder();
 
         MarketManager.getInstance();
@@ -165,6 +171,7 @@ public final class Nascraft extends JavaPlugin {
             Bukkit.getPluginManager().registerEvents(new PortfolioInventory(), this);
         }
 
+        Bukkit.getPluginManager().registerEvents(new EventsManager(), this);
         ItemChartReduced.load();
     }
 

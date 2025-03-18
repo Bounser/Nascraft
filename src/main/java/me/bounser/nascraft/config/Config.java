@@ -21,6 +21,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
+import java.time.LocalTime;
 import java.util.*;
 
 public class Config {
@@ -1121,4 +1122,200 @@ public class Config {
         return inventorygui.getInt("portfolio.info.slot");
     }
 
+    public Material getPortfolioDebtMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.loan.material").toUpperCase());
+    }
+
+    public boolean getPortfolioDebtEnabled() {
+        return inventorygui.getBoolean("portfolio.loan.enabled");
+    }
+
+    public int getPortfolioDebtSlot() {
+        return inventorygui.getInt("portfolio.loan.slot");
+    }
+
+    public int getDebtSize() {
+        return inventorygui.getInt("portfolio.debt.size");
+    }
+
+    public boolean getDebtBackEnabled() {
+        return inventorygui.getBoolean("portfolio.debt.back-button.enabled");
+    }
+
+    public int getDebtBackSlot() {
+        return inventorygui.getInt("portfolio.debt.back-button.slot");
+    }
+
+    public Material getDebtBackMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.debt.back-button.material").toUpperCase());
+    }
+
+    public boolean getDebtExpEnabled() {
+        return inventorygui.getBoolean("portfolio.debt.exp.enabled");
+    }
+
+    public int getDebtExpSlot() {
+        return inventorygui.getInt("portfolio.debt.exp.slot");
+    }
+
+    public Material getDebtExpMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.debt.exp.material").toUpperCase());
+    }
+
+    public boolean getDebtInfoEnabled() {
+        return inventorygui.getBoolean("portfolio.debt.info.enabled");
+    }
+
+    public int getDebtInfoSlot() {
+        return inventorygui.getInt("portfolio.debt.info.slot");
+    }
+
+    public Material getDebtInfoMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.debt.info.material").toUpperCase());
+    }
+
+    public boolean getDebtRepayAllEnabled() {
+        return inventorygui.getBoolean("portfolio.debt.repay-all.enabled");
+    }
+
+    public int getDebtRepayAllSlot() {
+        return inventorygui.getInt("portfolio.debt.repay-all.slot");
+    }
+
+    public Material getDebtRepayAllMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.debt.repay-all.material").toUpperCase());
+    }
+
+    public boolean getDebtRepayEnabled() {
+        return inventorygui.getBoolean("portfolio.debt.repay-custom.enabled");
+    }
+
+    public int getDebtRepaySlot() {
+        return inventorygui.getInt("portfolio.debt.repay-custom.slot");
+    }
+
+    public Material getDebtRepayMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.debt.repay-custom.material").toUpperCase());
+    }
+
+    public boolean getDebtMaxLoanEnabled() {
+        return inventorygui.getBoolean("portfolio.debt.get-max-loan.enabled");
+    }
+
+    public int getDebtMaxLoanSlot() {
+        return inventorygui.getInt("portfolio.debt.get-max-loan.slot");
+    }
+
+    public Material getDebtMaxLoanMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.debt.get-max-loan.material").toUpperCase());
+    }
+
+    public boolean getDebtCustomEnabled() {
+        return inventorygui.getBoolean("portfolio.debt.custom-loan.enabled");
+    }
+
+    public int getDebtCustomSlot() {
+        return inventorygui.getInt("portfolio.debt.custom-loan.slot");
+    }
+
+    public Material getDebtCustomMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.debt.custom-loan.material").toUpperCase());
+    }
+
+    public List<Integer> getDebtFillersSlots() {
+        return inventorygui.getIntegerList("portfolio.debt.fillers.slots");
+    }
+
+    public Material getDebtFillersMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.debt.fillers.material").toUpperCase());
+    }
+
+    public boolean getLoansEnabled() {
+        return config.getBoolean("portfolio.loans.enabled");
+    }
+
+    public double getLoansMaxSize() {
+        return config.getDouble("portfolio.loans.max-size");
+    }
+
+    public double getLoansMinSize() {
+        return config.getDouble("portfolio.loans.min-size");
+    }
+
+    public double getLoanSecurityMargin() {
+        return config.getDouble("portfolio.loans.security-margin");
+    }
+
+    public int getMarginCheckingPeriod() {
+        return config.getInt("portfolio.loans.margin-checking-period");
+    }
+
+    public LocalTime getInterestPaymentHour() {
+
+        String dateFormatted = config.getString("portfolio.loans.interest-rate.when");
+
+        assert dateFormatted != null;
+        return LocalTime.parse(dateFormatted);
+    }
+
+    public double getLoansDailyInterest() {
+        return config.getDouble("portfolio.loans.interest-rate.percentage");
+    }
+
+    public double getLoansMinimumInterest() {
+        return config.getDouble("portfolio.loans.interest-rate.minimum");
+    }
+
+    public boolean getPortfolioTopEnabled() {
+        return inventorygui.getBoolean("portfolio.leaderboard.enabled");
+    }
+
+    public int getPortfolioTopSlot() {
+        return inventorygui.getInt("portfolio.leaderboard.slot");
+    }
+
+    public Material getPortfolioTopMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.leaderboard.material").toUpperCase());
+    }
+
+    public int getTopSize() {
+        return inventorygui.getInt("portfolio.top.size");
+    }
+
+    public boolean getTopBackEnabled() {
+        return inventorygui.getBoolean("portfolio.top.back-button.enabled");
+    }
+
+    public int getTopBackSlot() {
+        return inventorygui.getInt("portfolio.top.back-button.slot");
+    }
+
+    public Material getTopBackMaterial() {
+        return Material.getMaterial(inventorygui.getString("portfolio.top.back-button.material").toUpperCase());
+    }
+
+    public HashMap<Integer, Integer> getTopPositions() {
+
+        HashMap<Integer, Integer> positions = new HashMap<>();
+
+        for (String pos : inventorygui.getConfigurationSection("portfolio.top.positions").getKeys(false)) {
+            int slot = inventorygui.getInt("portfolio.top.positions." + pos + ".slot");
+            positions.put(Integer.valueOf(pos), slot);
+        }
+
+        return positions;
+    }
+
+    public HashMap<Material, List<Integer>> getTopFillers() {
+
+        HashMap<Material, List<Integer>> fillers = new HashMap<>();
+
+        for (String filler : inventorygui.getConfigurationSection("portfolio.top.fillers").getKeys(false)) {
+            List<Integer> slots = inventorygui.getIntegerList("portfolio.top.fillers." + filler + ".slots");
+            Material material = Material.valueOf(inventorygui.getString("portfolio.top.fillers." + filler + ".material").toUpperCase());
+            fillers.put(material, slots);
+        }
+
+        return fillers;
+    }
 }

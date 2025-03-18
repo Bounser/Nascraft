@@ -342,8 +342,13 @@ portfolio:
 
   loan:
     enabled: true
-    slot: 8
+    slot: 5
     material: 'paper'
+
+  leaderboard:
+    enabled: true
+    slot: 8
+    material: 'book'
 
   debt:
 
@@ -404,3 +409,66 @@ portfolio:
         - 24
         - 25
         - 26
+
+  top:
+
+    size: 36
+
+    back-button:
+      enabled: true
+      material: 'arrow'
+      slot: 0
+
+    positions:
+        1:
+          slot: 10
+        2:
+          slot: 11
+        3:
+          slot: 12
+        4:
+          slot: 22
+        5:
+          slot: 23
+        6:
+          slot: 24
+        7:
+          slot: 25
+
+    fillers:
+        1:
+          material: 'black_stained_glass_pane'
+          slots:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+            - 6
+            - 7
+            - 8
+            - 9
+            - 17
+            - 18
+            - 26
+            - 27
+            - 28
+            - 29
+            - 30
+            - 31
+            - 32
+            - 33
+            - 34
+            - 35
+        2:
+          material: 'gold_block'
+          slots:
+            - 19
+        3:
+          material: 'iron_block'
+          slots:
+            - 20
+        4:
+          material: 'copper_block'
+          slots:
+            - 21

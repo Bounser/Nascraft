@@ -148,6 +148,34 @@ portfolio:
     locked:
       material: 'gray_stained_glass_pane'
 
+  # Players can use items in their portfolio as collateral for loans.
+  # They can only take loans denominated in the default currency.
+  loans:
+    enabled: true
+    # In absolute terms, how large can the loan be.
+    max-size: 999999
+    # Minimum size of a loan.
+    min-size: 100
+    # Apply an additional security margin on top of taxes and value decay.
+    security-margin: 0.1
+    # Margin checking period in seconds
+    margin-checking-period: 20
+    # Interest to be charged for the loan
+    # Charged every day.
+    # In case of default (Players who doesn't have enough money to pay the interest)
+    # enough items will be sold from their portfolio to be able to pay.
+    interest-rate:
+      # At which hour of the day should the interest be charged. 24-hour format.
+      when: '12:00'
+      # Percentage of the total debt to pay in interests daily (In this example 0.5%)
+      percentage: 0.005
+      # Minimum amount to charge as interest.
+      minimum: 1
+    # Display the bigger portfolios of the server.
+    top:
+      # in minutes.
+      update-frequency: 1
+
 limit-orders:
   enabled: true
   # Maximum number of limit orders a player can have active simultaneously.
@@ -186,7 +214,7 @@ discord-bot:
   # You will most likely want to make the channel private, but it's optional.
   log-trades:
     enabled: false
-    channel: 'LOGS-TEXTHANNEL-ID'
+    channel: 'LOGS-TEXTCHANNEL-ID'
 
   # Menu to let users sell/buy items
   # !! FEATURE IN BETA !!

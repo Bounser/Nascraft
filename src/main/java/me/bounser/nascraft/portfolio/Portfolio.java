@@ -4,6 +4,7 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.inventorygui.Portfolio.PortfolioInventory;
+import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
@@ -48,7 +49,7 @@ public class Portfolio {
 
     public void addItem(Item item, int amount) {
         inventory.merge(item, amount, Integer::sum);
-        DatabaseManager.get().getDatabase().updateItem(uuid, item, inventory.get(item));
+        DatabaseManager.get().getDatabase().updateItemPortfolio(uuid, item, inventory.get(item));
         DatabaseManager.get().getDatabase().logContribution(uuid, item, amount);
         updateInventoryInGame();
     }
@@ -64,7 +65,7 @@ public class Portfolio {
 
             if (inventory.get(item) <= 0) {
                 inventory.remove(item);
-                DatabaseManager.get().getDatabase().removeItem(uuid, item);
+                DatabaseManager.get().getDatabase().removeItemPortfolio(uuid, item);
             }
 
             DatabaseManager.get().getDatabase().logWithdraw(uuid, item, amount);
@@ -73,12 +74,12 @@ public class Portfolio {
         }
     }
 
-    public float getInventoryValue() {
+    public double getInventoryValue() {
 
-        float value = 0;
+        double value = 0;
 
         for (Item item : inventory.keySet()) {
-            if (item != null)
+            if (item != null && item.getCurrency().equals(CurrenciesManager.getInstance().getDefaultCurrency()))
                 value += item.getPrice().getValue()*inventory.get(item);
         }
 
@@ -104,6 +105,17 @@ public class Portfolio {
         return worth;
     }
 
+    public double getValueOfDefaultCurrency() {
+
+        double value = 0;
+
+        for (Item item : inventory.keySet())
+            if (item != null && item.getCurrency().equals(CurrenciesManager.getInstance().getDefaultCurrency()))
+                value += item.getPrice().getValue()*inventory.get(item);
+
+        return value;
+    }
+
     public float getNextSlotPrice() {
         return Config.getInstance().getSlotPriceBase() + Config.getInstance().getSlotPriceFactor()*(capacity+1);
     }
@@ -124,11 +136,11 @@ public class Portfolio {
 
     }
 
-    public void sellAll(Consumer<Float> callback) {
+    public void sellAll(Consumer<Double> callback) {
 
         Bukkit.getScheduler().runTask(Nascraft.getInstance(), () -> {
             
-            float value = 0;
+            double value = 0;
 
             LinkedHashMap<Item, Integer> newInventory = new LinkedHashMap();
             
@@ -142,11 +154,35 @@ public class Portfolio {
             inventory = newInventory;
             updateInventoryInGame();
 
-            DatabaseManager.get().getDatabase().clearInventory(uuid);
+            DatabaseManager.get().getDatabase().clearPortfolio(uuid);
 
             for (Item item : inventory.keySet())
-                DatabaseManager.get().getDatabase().updateItem(uuid, item, inventory.get(item));
+                DatabaseManager.get().getDatabase().updateItemPortfolio(uuid, item, inventory.get(item));
 
+            callback.accept(value);
+        });
+    }
+
+    public void liquidatePerCurrency(Currency currency, Consumer<Double> callback) {
+
+        Bukkit.getScheduler().runTask(Nascraft.getInstance(), () -> {
+
+            double value = 0;
+
+            for (Item item : inventory.keySet()) {
+
+                if (item == null) continue;
+
+                if (!item.getCurrency().equals(currency)) continue;
+
+                if (item.getPrice().canStockChange(inventory.get(item), false)) {
+                    value += item.sell(inventory.get(item), uuid, false);
+                    DatabaseManager.get().getDatabase().removeItemPortfolio(uuid, item);
+                }
+
+            }
+            retrievePortfolio();
+            updateInventoryInGame();
             callback.accept(value);
         });
     }

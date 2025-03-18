@@ -5,7 +5,9 @@ import me.bounser.nascraft.database.commands.resources.DayInfo;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
+import me.bounser.nascraft.portfolio.Portfolio;
 
+import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -76,6 +78,11 @@ public interface Database {
     double getAllOutstandingDebt();
     double getAllInterestsPaid();
 
+    void saveOrUpdateWorth(UUID uuid, int day, double worth);
+    void saveOrUpdateWorthToday(UUID uuid, double worth);
+    HashMap<UUID, Portfolio> getTopWorth(int n);
+    double getLatestWorth(UUID uuid);
+
     //
 
     void logContribution(UUID uuid, Item item, int amount);
@@ -104,5 +111,8 @@ public interface Database {
     void updateLimitOrder(UUID uuid, Item item, int completed, double cost);
     void removeLimitOrder(String uuid, String identifier);
     void retrieveLimitOrders();
+
+    String getNameByUUID(UUID uuid);
+    void saveOrUpdateName(UUID uuid, String name);
 
 }

@@ -10,6 +10,7 @@ import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.stats.Instant;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.portfolio.PortfoliosManager;
 import me.leoko.advancedgui.manager.GuiWallManager;
 import me.leoko.advancedgui.utils.GuiWallInstance;
 import org.bukkit.Bukkit;
@@ -117,6 +118,8 @@ public class TasksManager {
             DatabaseManager.get().getDatabase().saveEverything();
 
             DatabaseManager.get().getDatabase().saveCPIValue(MarketManager.getInstance().getConsumerPriceIndex());
+
+            PortfoliosManager.getInstance().savePortfoliosWorthOfOnlinePlayers();
 
         }, 60L * 5 * ticksPerSecond, 60L * 5 * ticksPerSecond); // 5 min
     }
