@@ -595,11 +595,13 @@ public class DiscordButtons extends ListenerAdapter {
 
         Portfolio discordInventory = PortfoliosManager.getInstance().getPortfolio(uuid);
 
+        boolean limitReached = !item.getPrice().canStockChange(quantity, true);
+
         switch (String.valueOf(event.getComponentId().charAt(0))) {
 
             case "b":
 
-                if (!item.getPrice().canStockChange(quantity, true)) {
+                if (limitReached && item.isPriceRestricted()) {
                     event.reply(lang.message(Message.DISCORD_BUY_LIMIT_FEEDBACK))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
@@ -655,14 +657,14 @@ public class DiscordButtons extends ListenerAdapter {
                         .setEphemeral(true)
                         .queue(message -> message.deleteOriginal().queueAfter(6, TimeUnit.SECONDS));
 
-                item.ghostBuyItem(quantity);
+                if (!limitReached) item.ghostBuyItem(quantity);
                 discordInventory.addItem(item, quantity);
 
                 break;
 
             case "s":
 
-                if (!item.getPrice().canStockChange(quantity, false)) {
+                if (limitReached && item.isPriceRestricted()) {
                     event.reply(lang.message(Message.DISCORD_SELL_LIMIT_FEEDBACK))
                             .setEphemeral(true)
                             .queue(message -> message.deleteOriginal().queueAfter(4, TimeUnit.SECONDS));
@@ -714,7 +716,7 @@ public class DiscordButtons extends ListenerAdapter {
                         .setEphemeral(true)
                         .queue(message -> message.deleteOriginal().queueAfter(6, TimeUnit.SECONDS));
 
-                item.ghostSellItem(quantity);
+                if (!limitReached) item.ghostSellItem(quantity);
                 discordInventory.removeItem(item, quantity);
 
                 break;

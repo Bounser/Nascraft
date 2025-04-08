@@ -24,6 +24,12 @@ items:
     # OPTIONAL: The intensity of the noise determines the magnitude of the random fluctuations.
     noise-intensity: 1.4
 
+    # OPTIONAL: Set hard limits and whether they should restrict transactions.
+    # limit:
+    #  high: 10
+    #  low: 0.1
+    #  restricted: true
+
     # OPTIONAL: Set different taxes per item:
     tax:
       # Tax of 5% when buying cobblestone.

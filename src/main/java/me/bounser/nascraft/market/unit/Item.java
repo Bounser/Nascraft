@@ -63,6 +63,8 @@ public class Item {
 
     private List<Item> childs = new ArrayList<>();
 
+    boolean restricted;
+
     public Item (ItemStack itemStack, String identifier, String alias, Category category, BufferedImage image) {
 
         itemStack.setAmount(1);
@@ -88,6 +90,7 @@ public class Item {
                 Config.getInstance().getNoiseIntensity(identifier));
 
         this.icon = image;
+        this.restricted = Config.getInstance().getRestricted(identifier);
 
         price.initializeHourValues(DatabaseManager.get().getDatabase().retrieveLastPrice(this));
 
@@ -164,7 +167,6 @@ public class Item {
 
     public String getFormattedName() { return formattedAlias; }
 
-
     public double buyPrice(int amount) {
         return price.getProjectedCost(-amount*multiplier, price.getBuyTaxMultiplier());
     }
@@ -178,7 +180,9 @@ public class Item {
         Player player = Bukkit.getPlayer(uuid);
         Player offlinePlayer = Bukkit.getPlayer(uuid);
 
-        if (!price.canStockChange(amount, true)) {
+        boolean limitReached = !price.canStockChange(amount, true);
+
+        if (limitReached && restricted) {
             if (player != null && feedback) Lang.get().message(player, Message.TOP_LIMIT_REACHED);
             return 0;
         }
@@ -203,16 +207,18 @@ public class Item {
 
         if (player != null && feedback) Lang.get().message(player, Message.BUY_MESSAGE, Formatter.format(currency, worth, Style.ROUND_BASIC), String.valueOf(amount), taggedAlias);
 
-        if (parent != null)
-            parent.updateInternalValues(amount,
-                    amount*price.getValue(),
-                -amount*multiplier,
-                price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
-        else
-            updateInternalValues(amount,
-                    amount*price.getValue(),
-                    -amount*multiplier,
-                    price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+        if (!limitReached) {
+            if (parent != null)
+                parent.updateInternalValues(amount,
+                        amount*price.getValue(),
+                        -amount*multiplier,
+                        price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+            else
+                updateInternalValues(amount,
+                        amount*price.getValue(),
+                        -amount*multiplier,
+                        price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+        }
 
         Trade trade = new Trade(this, LocalDateTime.now(), worth, amount, true, false, uuid);
 
@@ -242,7 +248,9 @@ public class Item {
         OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
         Player player = Bukkit.getPlayer(uuid);
 
-        if (!price.canStockChange(amount, false)) {
+        boolean limitReached = !price.canStockChange(amount, false);
+
+        if (limitReached && restricted) {
             if (player != null && feedback) Lang.get().message(player, Message.BOTTOM_LIMIT_REACHED);
             return -1;
         }
@@ -273,17 +281,18 @@ public class Item {
             player.getInventory().removeItem(operationItemStack);
         }
 
-        if (parent != null)
-            parent.updateInternalValues(amount,
-                    amount*price.getValue(),
-                    amount*multiplier,
-                    price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
-        else
-            updateInternalValues(amount,
-                    amount*price.getValue(),
-                    amount*multiplier,
-                    price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
-
+        if (!limitReached) {
+            if (parent != null)
+                parent.updateInternalValues(amount,
+                        amount*price.getValue(),
+                        amount*multiplier,
+                        price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+            else
+                updateInternalValues(amount,
+                        amount*price.getValue(),
+                        amount*multiplier,
+                        price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+        }
 
         MoneyManager.getInstance().deposit(offlinePlayer, currency, worth, price.getSellTaxMultiplier());
 
@@ -399,5 +408,7 @@ public class Item {
     public void setItemStack(ItemStack itemStack) { this.itemStack = itemStack; }
 
     public BufferedImage getIcon() { return icon; }
+
+    public boolean isPriceRestricted() { return restricted; }
 
 }

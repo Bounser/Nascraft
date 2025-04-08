@@ -694,6 +694,27 @@ public class Config {
         return (float) config.getDouble("price-options.noise.default-intensity");
     }
 
+    public boolean getRestricted(String identifier) {
+        if (items.contains("items." + identifier + ".limit.restricted")) {
+            return items.getBoolean("items." + identifier + ".limit.restricted");
+        }
+        return true;
+    }
+
+    public double getLowLimit(String identifier) {
+        if (items.contains("items." + identifier + ".limit.low")) {
+            return items.getDouble("items." + identifier + ".limit.low");
+        }
+        return -1;
+    }
+
+    public double getHighLimit(String identifier) {
+        if (items.contains("items." + identifier + ".limit.high")) {
+            return items.getDouble("items." + identifier + ".limit.high");
+        }
+        return -1;
+    }
+
     public float getNoiseMultiplier() {
         if (config.contains("price-options.noise.intensity-multiplier")) {
             return (float) config.getDouble("price-options.noise.intensity-multiplier");

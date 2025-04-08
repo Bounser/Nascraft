@@ -65,7 +65,7 @@ public class SellInvListener implements Listener {
                             totalChange += itemStack.getAmount();
 
 
-                if (!item.getPrice().canStockChange(totalChange, false)) {
+                if (!item.getPrice().canStockChange(totalChange, false) && item.isPriceRestricted()) {
                     Lang.get().message(player, Message.BOTTOM_LIMIT_REACHED);
                     return;
                 }
@@ -82,7 +82,7 @@ public class SellInvListener implements Listener {
                         if (itemStack.isSimilar(item.getItemStack()))
                             totalAmount += itemStack.getAmount();
 
-                    if (!item.getPrice().canStockChange(totalAmount, false)) {
+                    if (!item.getPrice().canStockChange(totalAmount, false) && item.isPriceRestricted()) {
                         Lang.get().message(player, Message.BOTTOM_LIMIT_REACHED);
                         return;
                     }
@@ -129,8 +129,6 @@ public class SellInvListener implements Listener {
 
                     if (playerItems.isEmpty()) return;
 
-                    float realValue = 0;
-
                     HashMap<Currency, Double> result = new HashMap<>();
 
                     List<ItemStack> newPlayerItems = new ArrayList<>();
@@ -139,7 +137,7 @@ public class SellInvListener implements Listener {
 
                         Item item = MarketManager.getInstance().getItem(itemStack);
 
-                        if (item.getPrice().canStockChange(itemStack.getAmount(), false)) {
+                        if (item.getPrice().canStockChange(itemStack.getAmount(), false) || !item.isPriceRestricted()) {
                             double value = item.sell(itemStack.getAmount(), player.getUniqueId(), false);
 
                             if (result.containsKey(item.getCurrency())) {

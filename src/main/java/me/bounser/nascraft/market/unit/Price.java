@@ -71,8 +71,12 @@ public class Price {
         previousValue = value;
 
         precission = item.getCurrency().getDecimalPrecission();
-        topLimit = item.getCurrency().getTopLimit();
-        lowLimit = (float) Math.max(item.getCurrency().getLowLimit(), (float) 1.0/(Math.pow(10f, precission)));
+
+        topLimit = Config.getInstance().getHighLimit(item.getIdentifier());
+        if (topLimit < 0) topLimit = item.getCurrency().getTopLimit();
+
+        lowLimit = Config.getInstance().getLowLimit(item.getIdentifier());
+        if (lowLimit < 0) lowLimit = (float) Math.max(item.getCurrency().getLowLimit(), (float) 1.0/(Math.pow(10f, precission)));
 
         this.initialValue = initialValue;
 
@@ -377,7 +381,10 @@ public class Price {
         for (int i = 0 ; i < orderSize ; i++) {
             cost += fictitiousValue * maxSize;
             fictitiousStock += maxSize * Math.signum(change);
-            fictitiousValue = (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
+
+            if ((stockChange > 0 && lowerStockThreshold <= fictitiousStock) || (stockChange < 0 && upperStockThreshold >= fictitiousStock)) {
+                fictitiousValue = (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
+            }
         }
 
         if (excess > 0) {
