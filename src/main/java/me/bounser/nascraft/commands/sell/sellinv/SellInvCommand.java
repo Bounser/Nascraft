@@ -7,8 +7,10 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.inventorygui.MarketMenuManager;
 import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.managers.currencies.Currency;
+import me.bounser.nascraft.market.MarketManager;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -64,6 +66,11 @@ public class SellInvCommand extends Command {
 
             if (!player.hasPermission("nascraft.sellmenu")) {
                 Lang.get().message(player, Message.NO_PERMISSION);
+                return;
+            }
+
+            if (!MarketManager.getInstance().getActive()) {
+                Lang.get().message(player, Message.SHOP_CLOSED);
                 return;
             }
         }

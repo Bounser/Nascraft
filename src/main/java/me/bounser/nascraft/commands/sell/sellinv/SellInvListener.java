@@ -42,6 +42,11 @@ public class SellInvListener implements Listener {
 
         if (event.getClickedInventory() != null && event.getClickedInventory().getType().equals(InventoryType.PLAYER)) {
 
+            if (!MarketManager.getInstance().getActive()) {
+                Lang.get().message(player, Message.SHOP_CLOSED);
+                return;
+            }
+
             ItemStack itemClicked = event.getCurrentItem();
 
             if (itemClicked == null) return;
@@ -126,6 +131,11 @@ public class SellInvListener implements Listener {
                     event.getWhoClicked().closeInventory(); break;
 
                 case 40:
+
+                    if (!MarketManager.getInstance().getActive()) {
+                        Lang.get().message(player, Message.SHOP_CLOSED);
+                        return;
+                    }
 
                     if (playerItems.isEmpty()) return;
 
