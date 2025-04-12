@@ -64,6 +64,10 @@ price-options:
   elasticity-multiplier: 1
 
 market-control:
+
+  # If market is closed players won't be able to buy/sell.
+  closed: false
+  
   # Although taxation gets applied for buying and selling actions separately, the total tax paid is the same regardless of how it is split
   # The spread is determined by the deviation in both actions. In the default case, it is 6% for selling and 4% for buying, resulting in a total spread of 10%.
 

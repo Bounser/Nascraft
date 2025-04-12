@@ -220,6 +220,19 @@ public class Config {
         return config.getInt("price-options.noise.time");
     }
 
+    public boolean isMarketClosed() {
+        if (!config.contains("market-control.closed")) return false;
+        return config.getBoolean("market-control.closed");
+    }
+
+    public void setMarketOpen() {
+        config.set("market-control.closed", true);
+    }
+
+    public void setMarketClosed() {
+        config.set("market-control.closed", false);
+    }
+
     public float getTaxBuy(String identifier) {
 
         if (items.contains("items." + identifier + ".tax.buy")) {

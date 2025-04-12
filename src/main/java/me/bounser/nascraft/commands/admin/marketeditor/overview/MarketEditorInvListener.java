@@ -119,6 +119,8 @@ public class MarketEditorInvListener implements Listener {
                             ChatColor.GRAY + "Users won't be able to buy/sell."
                     ));
 
+                    Config.getInstance().setMarketClosed();
+
                 } else {
                     enabled = new ItemStack(Material.RED_DYE);
 
@@ -128,7 +130,11 @@ public class MarketEditorInvListener implements Listener {
                             ChatColor.GRAY + "Click to resume the market.",
                             ChatColor.GRAY + "Users will be able to buy/sell."
                     ));
+
+                    Config.getInstance().setMarketOpen();
                 }
+
+                Nascraft.getInstance().saveConfig();
 
                 enabled.setItemMeta(metaEnabled);
 

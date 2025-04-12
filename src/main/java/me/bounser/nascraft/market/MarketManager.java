@@ -42,6 +42,8 @@ public class MarketManager {
         instance = this;
         setupItems();
         ignoredKeys = Config.getInstance().getIgnoredKeys();
+
+        active = !Config.getInstance().isMarketClosed();
     }
 
     public void setupItems() {
