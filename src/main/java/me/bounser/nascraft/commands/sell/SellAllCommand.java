@@ -7,6 +7,7 @@ import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.managers.currencies.CurrenciesManager;
+import me.bounser.nascraft.managers.currencies.Currency;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.formatter.Style;
 import me.bounser.nascraft.market.unit.Item;
@@ -169,9 +170,26 @@ public class SellAllCommand extends Command {
 
         if (confirmed) {
 
+            HashMap<Currency, Double> value = new HashMap<>();
+            int amount = 0;
+
             for (Item item : content.keySet()) {
-                item.sell(content.get(item), player.getUniqueId(), true);
+                amount += content.get(item);
+
+                if (value.containsKey(item.getCurrency())) {
+                    value.put(item.getCurrency(), value.get(item.getCurrency()) + item.sell(content.get(item), player.getUniqueId(), true));
+                } else {
+                    value.put(item.getCurrency(), item.sell(content.get(item), player.getUniqueId(), true));
+                }
             }
+
+            String values = "";
+
+            for (Currency currency : value.keySet()) {
+                values += Formatter.format(currency, value.get(currency), Style.ROUND_BASIC) + " ";
+            }
+
+            Lang.get().message(player, Message.SELLALL_TOTAL, values, String.valueOf(amount), "");
 
         } else {
 

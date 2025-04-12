@@ -34,10 +34,11 @@ list_segment: "\n<gray>> <gradient:#FF00CD:#DA58FF>[NAME] x [AMOUNT] = [WORTH]</
 
 # nsellall
 sellall_everything_error: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ You don't have anything to sell!</gradient>"
-sellall: "<gradient:#FF00CD:#DA58FF>You just sold <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[NAME]</light_purple></bold> worth <green>[WORTH]</green></gradient>"
+sellall: "<gradient:#FF00CD:#DA58FF>You just sold <bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[NAME]</light_purple></bold> worth [WORTH]</gradient>"
 sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ You don't have any [NAME] to sell!</gradient>"
 sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ Material not recognized. Usage: /sellall [material]</gradient>"
 sellall_estimated_value: "<gray>Estimated value:</gray> <green>\n[WORTH]</green>"
+sellall_total: "<gradient:#FF00CD:#DA58FF>Total sold:</gradient> [WORTH]"
 
 # nsell
 sell_title: "           <b><gradient:#12438c:#91196f>Selling menu</gradient></b>"

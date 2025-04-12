@@ -38,6 +38,7 @@ sellall: "<gradient:#FF00CD:#DA58FF>Has vendido <bold><light_purple>[AMOUNT]</li
 sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>¡No tienes nada de [NAME] para vender!</gradient>"
 sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>Material no reconocido. Usa: /sellall [material]</gradient>"
 sellall_estimated_value: "<gray>Valor estimado:</gray> <green>[WORTH]</green>"
+sellall_total: "<gradient:#FF00CD:#DA58FF>Total vendido:</gradient> [WORTH]"
 
 # nsell
 sell_title: "          <b><gradient:#12438c:#91196f>Menu de venta</gradient></b>"
