@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: #f3f4f6; 
+    overflow: hidden; 
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #1f2937; 
+    border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #4b5563; 
+    border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #4b5563 #1f2937;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+}
+
+#item-price-chart-container {
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.item-selected {
+    border-left: 3px solid #818cf8;
+    padding-left: calc(0.5rem - 3px);
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+#item-list li:not(.item-selected) {
+     transition: background-color 0.2s ease-in-out;
+}
+#item-list li:not(.item-selected):hover {
+     background-color: #1f2937;
+     cursor: pointer;
+}
+
+.trend-up { color: #34d399; }
+.trend-down { color: #f87171; }
+.trend-neutral { color: #9ca3af; }
+
+#item-list img {
+    vertical-align: middle;
+}
+
+.footer-logo {
+    height: 0.75rem;
+    width: 0.75rem;
+    margin-right: 0.375rem;
+    display: inline-block;
+    vertical-align: baseline;
+}
+
+button {
+     transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.15s ease-in-out;
+}

@@ -89,6 +89,22 @@ public class Config {
 
     // Config:
 
+    public Boolean getWebEnabled() {
+        if (config.contains("web.enabled")) {
+            return config.getBoolean("web.enabled");
+        } else {
+            return false;
+        }
+    }
+
+    public int getWebPort() {
+        if (config.contains("web.port")) {
+            return config.getInt("web.port");
+        } else {
+            return 8080;
+        }
+    }
+
     public Boolean getCheckResources() {
         return config.getBoolean("auto-resources-injection");
     }

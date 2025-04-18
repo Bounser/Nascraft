@@ -21,6 +21,7 @@ import me.bounser.nascraft.managers.MoneyManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.formatter.Style;
+import me.bounser.nascraft.market.unit.stats.Instant;
 import me.bounser.nascraft.market.unit.stats.ItemStats;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
@@ -194,7 +195,7 @@ public class Item {
 
         if(!MarketManager.getInstance().getActive()) { Lang.get().message(player, Message.SHOP_CLOSED); return 0; }
 
-        float worth = price.getProjectedCost(-amount*multiplier, price.getBuyTaxMultiplier());
+        double worth = price.getProjectedCost(-amount*multiplier, price.getBuyTaxMultiplier());
 
         if (!checkBalance(player, feedback, worth)) return 0;
         if (!InventoryManager.checkInventory(player, feedback, itemStack, amount)) return 0;
@@ -235,7 +236,7 @@ public class Item {
         return worth;
     }
 
-    public boolean checkBalance(Player player, boolean feedback, float money) {
+    public boolean checkBalance(Player player, boolean feedback, double money) {
         if (!MoneyManager.getInstance().hasEnoughMoney(player, currency, money)) {
             if (player != null && feedback) Lang.get().message(player, currency.getNotEnoughMessage());
             return false;
@@ -274,7 +275,7 @@ public class Item {
             return -1;
         }
 
-        float worth = price.getProjectedCost(amount*multiplier, price.getSellTaxMultiplier());
+        double worth = price.getProjectedCost(amount*multiplier, price.getSellTaxMultiplier());
 
         if (player != null && feedback) {
             operationItemStack.setAmount(amount);
@@ -410,5 +411,15 @@ public class Item {
     public BufferedImage getIcon() { return icon; }
 
     public boolean isPriceRestricted() { return restricted; }
+
+    public double getChangeLastDay() {
+        Instant firstInstant = DatabaseManager.get().getDatabase().getDayPrices(this).get(0);
+
+        double firstValue = firstInstant.getPrice();
+
+        if (firstValue == 0) return 0;
+
+        return ((price.getValue() - firstInstant.getPrice()) / firstInstant.getPrice());
+    }
 
 }

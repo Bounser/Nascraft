@@ -325,6 +325,11 @@ sell-wands:
       sell: 'right'
       estimate: 'left'
 
+# BETA: Self-hosted website with information and charts.
+web:
+  enabled: false
+  port: 8080
+
 # Verify whether the AdvancedGUI's layout is present, and if it is not, place it in the layout folder of AdvancedGUI.
 auto-resources-injection: true
 

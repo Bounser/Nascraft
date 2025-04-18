@@ -2,8 +2,10 @@ package me.bounser.nascraft.market.resources;
 
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
+import me.bounser.nascraft.database.DatabaseManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.market.unit.stats.Instant;
 import net.kyori.adventure.platform.bukkit.BukkitComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -84,5 +86,19 @@ public class Category {
     }
 
     public void setItems(List<Item> items) { this.items = items; }
+
+    public double getDayChange() {
+
+        double changes = 0;
+
+        for (Item item : items) {
+
+            Instant firstInstant = DatabaseManager.get().getDatabase().getDayPrices(item).getFirst();
+
+            if (firstInstant.getPrice() != 0 )
+                changes += ((item.getPrice().getValue() - firstInstant.getPrice()) / firstInstant.getPrice());
+        }
+        return changes/items.size();
+    }
 
 }
