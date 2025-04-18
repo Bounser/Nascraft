@@ -141,9 +141,9 @@ public class Formatter {
 
     public static void setSeparator(Separator separator) { Formatter.separator = separator; }
 
-    public static float roundToDecimals(Number toFormat, int decimalPlaces) {
+    public static double roundToDecimals(Number toFormat, int decimalPlaces) {
         double number = toFormat.doubleValue();
-        float scale = (float) Math.pow(10, decimalPlaces);
+        double scale = Math.pow(10, decimalPlaces);
         return Math.round(number * scale) / scale;
     }
 

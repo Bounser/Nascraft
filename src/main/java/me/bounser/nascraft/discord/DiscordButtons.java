@@ -589,7 +589,7 @@ public class DiscordButtons extends ListenerAdapter {
             
         } else if (!initial.equals("i")) { return; }
         
-        float value;
+        double value;
 
         OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 

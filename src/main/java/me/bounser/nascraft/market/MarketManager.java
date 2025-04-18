@@ -2,7 +2,10 @@ package me.bounser.nascraft.market;
 
 import de.tr7zw.changeme.nbtapi.NBT;
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.chart.cpi.CPIInstant;
 import me.bounser.nascraft.database.DatabaseManager;
+import me.bounser.nascraft.formatter.Formatter;
+import me.bounser.nascraft.managers.DebtManager;
 import me.bounser.nascraft.managers.ImagesManager;
 import me.bounser.nascraft.managers.GraphManager;
 import me.bounser.nascraft.managers.TasksManager;
@@ -10,11 +13,20 @@ import me.bounser.nascraft.managers.currencies.CurrenciesManager;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
+import me.bounser.nascraft.market.unit.stats.Instant;
+import me.bounser.nascraft.portfolio.Portfolio;
+import me.bounser.nascraft.portfolio.PortfoliosManager;
+import me.bounser.nascraft.web.dto.CategoryDTO;
+import me.bounser.nascraft.web.dto.ItemDTO;
+import me.bounser.nascraft.web.dto.PortfolioDTO;
+import me.bounser.nascraft.web.dto.TimeSeriesDTO;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.units.qual.C;
 
 import java.awt.image.BufferedImage;
+import java.time.ZoneOffset;
 import java.util.*;
 
 public class MarketManager {
@@ -409,6 +421,120 @@ public class MarketManager {
         }
 
         return (index/numOfItems)*100;
+    }
+
+    public List<ItemDTO> getAllItemData() {
+
+        List<ItemDTO> itemsDTO = new ArrayList<>();
+
+        for (Item item : items) {
+
+            if (!item.isParent()) continue;
+
+            itemsDTO.add(
+                new ItemDTO(
+                        item.getIdentifier(),
+                        item.getName(),
+                        item.getPrice().getValue(),
+                        item.getPrice().getBuyPrice(),
+                        item.getPrice().getSellPrice(),
+                        item.getOperations(),
+                        Formatter.roundToDecimals(item.getPrice().getValueChangeLastHour(), 1)
+                )
+            );
+        }
+
+        return  itemsDTO;
+    }
+
+    public ItemDTO getPopularItem() {
+
+        Item item = getMostTraded(1).get(0);
+
+        return new ItemDTO(
+                item.getIdentifier(),
+                item.getName(),
+                item.getPrice().getValue(),
+                item.getPrice().getBuyPrice(),
+                item.getPrice().getSellPrice(),
+                item.getOperations(),
+                Formatter.roundToDecimals(item.getPrice().getValueChangeLastHour(), 1)
+        );
+
+    }
+
+    public List<TimeSeriesDTO> getCPITimeSeries() {
+
+        List<CPIInstant> instants = DatabaseManager.get().getDatabase().getCPIHistory();
+        List<TimeSeriesDTO> timeSeries = new ArrayList<>();
+
+        for (CPIInstant instant : instants) {
+
+            timeSeries.add(
+                    new TimeSeriesDTO(
+                            instant.getLocalDateTime().toEpochSecond(ZoneOffset.UTC),
+                            instant.getIndexValue()
+                            )
+            );
+        }
+
+        return timeSeries;
+    }
+
+    public List<TimeSeriesDTO> getItemTimeSeries(String identifier) {
+
+        List<TimeSeriesDTO> timeSeries = new ArrayList<>();
+        Set<Long> seenTimestamps = new HashSet<>();
+
+        Item item = getItem(identifier);
+        if (item == null) return null;
+
+        List<Instant> instants = DatabaseManager.get().getDatabase().getAllPrices(item);
+
+        for (Instant instant : instants) {
+            long timestamp = instant.getLocalDateTime().toEpochSecond(ZoneOffset.UTC);
+            if (!seenTimestamps.contains(timestamp) && instant.getPrice() != 0) {
+                seenTimestamps.add(timestamp);
+                timeSeries.add(new TimeSeriesDTO(timestamp, instant.getPrice()));
+            }
+        }
+        return timeSeries;
+    }
+
+    public List<CategoryDTO> getCategoriesDTO() {
+
+        List<CategoryDTO> categoriesDTO = new ArrayList<>();
+
+        for (Category category : categories) {
+
+            categoriesDTO.add(
+                    new CategoryDTO(
+                            category.getIdentifier(),
+                            category.getDisplayName(),
+                            category.getDayChange()
+                    )
+            );
+        }
+        return categoriesDTO;
+    }
+
+    public List<PortfolioDTO> getTopPortfolios() {
+
+        List<PortfolioDTO> portfolioDTO = new ArrayList<>();
+
+        HashMap<UUID, Portfolio> top = DatabaseManager.get().getDatabase().getTopWorth(5);
+
+        for (UUID uuid : top.keySet()) {
+
+            portfolioDTO.add(
+                    new PortfolioDTO(
+                            DatabaseManager.get().getDatabase().getNameByUUID(uuid),
+                            top.get(uuid).getInventoryValue() - DebtManager.getInstance().getDebtOfPlayer(uuid),
+                            top.get(uuid).getContent()
+                    )
+            );
+        }
+        return portfolioDTO;
     }
 
 }

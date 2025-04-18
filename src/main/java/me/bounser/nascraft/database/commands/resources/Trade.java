@@ -11,7 +11,7 @@ public class Trade {
 
     private LocalDateTime date;
 
-    private float value;
+    private double value;
     private int amount;
 
     private boolean buy;
@@ -19,7 +19,7 @@ public class Trade {
 
     private UUID uuid;
 
-    public Trade(Item item, LocalDateTime date, float value, int amount, boolean buy, boolean discord, UUID uuid) {
+    public Trade(Item item, LocalDateTime date, double value, int amount, boolean buy, boolean discord, UUID uuid) {
         this.item = item;
         this.date = date;
         this.value = value;
@@ -35,7 +35,7 @@ public class Trade {
 
     public LocalDateTime getDate() { return date; }
 
-    public float getValue() { return value; }
+    public double getValue() { return value; }
 
     public int getAmount() { return amount; }
 

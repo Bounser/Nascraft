@@ -232,7 +232,7 @@ public class SellAllCommand extends Command {
             }
 
             for (Item item : content.keySet()) {
-                float value = item.getPrice().getProjectedCost(content.get(item) * item.getMultiplier(), item.getPrice().getSellTaxMultiplier());
+                double value = item.getPrice().getProjectedCost(content.get(item) * item.getMultiplier(), item.getPrice().getSellTaxMultiplier());
                 text = text + Lang.get().message(Message.LIST_SEGMENT, Formatter.format(item.getCurrency(), value, Style.ROUND_BASIC), String.valueOf(content.get(item)), item.getName());
             }
 

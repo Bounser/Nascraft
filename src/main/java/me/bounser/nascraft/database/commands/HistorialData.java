@@ -238,7 +238,9 @@ public class HistorialData {
 
                     LocalDateTime time = LocalDateTime.parse(resultSet1.getString("date"));
 
-                    if (time.isAfter(LocalDateTime.now().minusHours(24))) {
+                    double price = resultSet1.getDouble("price");
+
+                    if (time.isAfter(LocalDateTime.now().minusHours(24)) && price != 0) {
                         prices.add(new Instant(
                                 time,
                                 resultSet1.getDouble("price"),

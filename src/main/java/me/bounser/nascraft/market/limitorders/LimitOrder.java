@@ -72,7 +72,7 @@ public class LimitOrder {
 
                 if (item.getPrice().getBuyPrice() >= priceLimit) return;
 
-                int toBuy = item.getPrice().stockChangeUntilPriceReached(priceLimit/item.getPrice().getBuyTaxMultiplier());
+                int toBuy = (int) item.getPrice().stockChangeUntilPriceReached(priceLimit/item.getPrice().getBuyTaxMultiplier());
 
                 if (toBuy < 0) return;
 
@@ -100,7 +100,7 @@ public class LimitOrder {
 
                 if (item.getPrice().getSellPrice() <= priceLimit) return;
 
-                int toSell = item.getPrice().stockChangeUntilPriceReached(priceLimit/item.getPrice().getSellTaxMultiplier());
+                int toSell = (int) item.getPrice().stockChangeUntilPriceReached(priceLimit/item.getPrice().getSellTaxMultiplier());
 
                 if (toSell > 0) return;
 

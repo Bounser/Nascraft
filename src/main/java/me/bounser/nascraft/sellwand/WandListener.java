@@ -117,10 +117,10 @@ public class WandListener implements Listener {
                     }
                 }
 
-                HashMap<Currency, Float> values = new HashMap<>();
+                HashMap<Currency, Double> values = new HashMap<>();
 
                 for (Currency currency : wand.getCurrencies())
-                    values.put(currency, 0f);
+                    values.put(currency, 0d);
 
                 for (Item item : valuableItems.keySet())
                     values.put(item.getCurrency(), values.get(item.getCurrency()) + item.getPrice().getProjectedCost(valuableItems.get(item), item.getPrice().getSellTaxMultiplier()));
