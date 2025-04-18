@@ -213,14 +213,14 @@ public class Price {
         else return !(newStock < upperStockThreshold);
     }
 
-    public int stockChangeUntilPriceReached(double priceToReach) {
+    public double stockChangeUntilPriceReached(double priceToReach) {
 
-        float stockToReach = getStockFromValue(priceToReach);
+        double stockToReach = getStockFromValue(priceToReach);
 
         if (priceToReach > value) {
-            return (int) Math.floor(Math.abs(stock - stockToReach));
+            return Math.floor(Math.abs(stock - stockToReach));
         } else {
-            return (int) -Math.floor(Math.abs(stock - stockToReach));
+            return -Math.floor(Math.abs(stock - stockToReach));
         }
     }
 
@@ -351,7 +351,7 @@ public class Price {
 
     public List<Double> getValuesPastHour() { return hourValues; }
 
-    public float getProjectedCost(float stockChange, float tax) {
+    public double getProjectedCost(float stockChange, float tax) {
 
         if (elasticity == 0)
             return roundToDecimals(Math.abs((value * stockChange * tax)), precission);
@@ -370,28 +370,55 @@ public class Price {
             change = stockChange;
         }
 
-        int maxSize = (int) Math.round((item.getItemStack().getType().getMaxStackSize())/(elasticity*4) + 0.5);
-        int orderSize = (int) Math.abs(change / maxSize);
-        float excess = Math.abs(change % maxSize);
-
-        double fictitiousValue = value;
-        float fictitiousStock = stock;
-        float cost = 0;
-
-        for (int i = 0 ; i < orderSize ; i++) {
-            cost += fictitiousValue * maxSize;
-            fictitiousStock += maxSize * Math.signum(change);
-
-            if ((stockChange > 0 && lowerStockThreshold <= fictitiousStock) || (stockChange < 0 && upperStockThreshold >= fictitiousStock)) {
-                fictitiousValue = (float) (initialValue * Math.exp(-0.0005 * elasticity * fictitiousStock));
-            }
-        }
-
-        if (excess > 0) {
-            cost += fictitiousValue * excess;
-        }
+        double cost = integratePiecewise(stock, stock + change);
 
         return roundToDecimals(cost*tax, precission);
+    }
+
+    public double integratePiecewise(double start, double end) {
+
+        double initialStock = start;
+        double finalStock = end;
+
+        if (start >= end) {
+            initialStock = end;
+            finalStock = start;
+        }
+
+        double totalIntegral = 0.0;
+
+        double y1 = initialValue * Math.exp(-0.0005* elasticity * upperStockThreshold);
+        double y2 = initialValue * Math.exp(-0.0005* elasticity * lowerStockThreshold);
+
+        double segment1_end = Math.min(finalStock, upperStockThreshold);
+        if (segment1_end > initialStock) {
+            double width = segment1_end - initialStock;
+            totalIntegral += y1 * width;
+        }
+
+        double segment2_start = Math.max(initialStock, upperStockThreshold);
+        double segment2_end = Math.min(finalStock, lowerStockThreshold);
+        if (segment2_end > segment2_start) {
+            totalIntegral += integrateAnalytically(segment2_start, segment2_end);
+        }
+
+        double segment3_start = Math.max(initialStock, lowerStockThreshold);
+        if (finalStock > segment3_start) {
+            double width = finalStock - segment3_start;
+            totalIntegral += y2 * width;
+        }
+
+        return totalIntegral;
+    }
+
+    public double integrateAnalytically(double x1, double x2) {
+
+        final double k = 0.0005 * elasticity;
+
+        double factor = initialValue / k;
+        double expTerm1 = Math.exp(-k * x1);
+        double expTerm2 = Math.exp(-k * x2);
+        return factor * (expTerm1 - expTerm2);
     }
 
     public float getBuyTaxMultiplier() { return taxBuy; }
@@ -417,8 +444,8 @@ public class Price {
         return (float) bd.doubleValue();
     }
 
-    public float getStockFromValue(double value) {
-        return (float) (Math.log(value / initialValue) / (-0.0005 * elasticity));
+    public double getStockFromValue(double value) {
+        return (Math.log(value / initialValue) / (-0.0005 * elasticity));
     }
 
 }
