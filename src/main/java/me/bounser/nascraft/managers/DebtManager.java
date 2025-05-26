@@ -17,6 +17,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.UUID;
@@ -95,6 +96,19 @@ public class DebtManager {
                     }
 
                 }, calculateInitialDelay(LocalTime.now(), Config.getInstance().getInterestPaymentHour())*20, TimeUnit.DAYS.toSeconds(1)*20);
+    }
+
+    public double getNextPayment(UUID uuid) {
+
+        HashMap<UUID, Double> debtors = DatabaseManager.get().getDatabase().getUUIDAndDebt();
+
+        if (!debtors.containsKey(uuid)) return 0;
+
+        return Math.max(debtors.get(uuid) * Config.getInstance().getLoansDailyInterest(), Config.getInstance().getLoansMinimumInterest());
+    }
+
+    public LocalTime getNextPaymentTime() {
+        return Config.getInstance().getInterestPaymentHour();
     }
 
     private static long calculateInitialDelay(LocalTime currentTime, LocalTime targetTime) {

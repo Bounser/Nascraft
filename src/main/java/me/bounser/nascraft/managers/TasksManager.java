@@ -121,6 +121,9 @@ public class TasksManager {
 
             PortfoliosManager.getInstance().savePortfoliosWorthOfOnlinePlayers();
 
+            for (Player player : Bukkit.getOnlinePlayers())
+                DatabaseManager.get().getDatabase().updateBalance(player.getUniqueId());
+
         }, 60L * 5 * ticksPerSecond, 60L * 5 * ticksPerSecond); // 5 min
     }
 

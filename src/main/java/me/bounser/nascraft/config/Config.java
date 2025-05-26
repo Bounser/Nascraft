@@ -105,6 +105,38 @@ public class Config {
         }
     }
 
+    public String getDiscordId() {
+        if (config.contains("web.discord-client-id")) {
+            return config.getString("web.discord-client-id");
+        } else {
+            return "";
+        }
+    }
+
+    public String getDiscordSecret() {
+        if (config.contains("web.discord-client-secret")) {
+            return config.getString("web.discord-client-secret");
+        } else {
+            return "";
+        }
+    }
+
+    public int getWebTimeout() {
+        if (config.contains("web.timeout")) {
+            return config.getInt("web.timeout");
+        } else {
+            return 0;
+        }
+    }
+
+    public int getWebCodeExpiration() {
+        if (config.contains("web.code-expiration")) {
+            return config.getInt("web.code-expiration");
+        } else {
+            return 0;
+        }
+    }
+
     public Boolean getCheckResources() {
         return config.getBoolean("auto-resources-injection");
     }
@@ -258,12 +290,30 @@ public class Config {
         }
     }
 
+    public Double getTaxBuyPercentage(String identifier) {
+
+        if (items.contains("items." + identifier + ".tax.buy")) {
+            return items.getDouble("items." + identifier + ".tax.buy");
+        } else {
+            return config.getDouble("market-control.taxation.buy");
+        }
+    }
+
     public float getTaxSell(String identifier) {
 
         if (items.contains("items." + identifier + ".tax.sell")) {
             return 1 - (float) items.getDouble("items." + identifier + ".tax.sell");
         } else {
             return 1 - (float) config.getDouble("market-control.taxation.sell");
+        }
+    }
+
+    public Double getTaxSellPercentage(String identifier) {
+
+        if (items.contains("items." + identifier + ".tax.sell")) {
+            return items.getDouble("items." + identifier + ".tax.sell");
+        } else {
+            return config.getDouble("market-control.taxation.sell");
         }
     }
 

@@ -32,6 +32,8 @@ public class Lang {
         saveResourceIfNotExists("langs/it_IT.yml");
         saveResourceIfNotExists("langs/de_DE.yml");
         saveResourceIfNotExists("langs/pt_BR.yml");
+        saveResourceIfNotExists("langs/ru_RU.yml");
+        saveResourceIfNotExists("langs/zh_CN.yml");
 
         File language = new File(Nascraft.getInstance().getDataFolder().getPath() + "/langs/" + Config.getInstance().getSelectedLanguage() + ".yml");
 
@@ -81,7 +83,9 @@ public class Lang {
         return this.lang.getString(lang.name().toLowerCase()).replace("&", "§"); }
 
     public void message(Player player, Message lang, String worth, String amount, String name) {
-
+        if (!this.lang.contains(lang.name().toLowerCase())) {
+            Nascraft.getInstance().getLogger().warning("Lang section not found: " + lang.name().toLowerCase());
+        }
         audience.player(player).sendMessage(miniMessage.deserialize(this.lang.getString(lang.name().toLowerCase())
                 .replace("[WORTH]", worth)
                 .replace("[AMOUNT]", amount)

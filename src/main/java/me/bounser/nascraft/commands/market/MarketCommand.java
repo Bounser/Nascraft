@@ -4,13 +4,9 @@ import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.commands.Command;
 import me.bounser.nascraft.config.lang.Lang;
 import me.bounser.nascraft.config.lang.Message;
-import me.bounser.nascraft.database.commands.LimitOrders;
 import me.bounser.nascraft.inventorygui.*;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.config.Config;
-import me.bounser.nascraft.market.limitorders.LimitOrder;
-import me.bounser.nascraft.market.limitorders.LimitOrdersManager;
-import me.bounser.nascraft.market.limitorders.OrderType;
 import me.bounser.nascraft.market.resources.Category;
 import me.bounser.nascraft.market.unit.Item;
 import org.bukkit.Bukkit;
@@ -19,7 +15,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -89,6 +84,11 @@ public class MarketCommand extends Command {
             try {
                 quantity = Integer.parseInt(args[2]);
             } catch (NumberFormatException e) {
+                Lang.get().message(player, Message.MARKET_CMD_INVALID_QUANTITY);
+                return;
+            }
+
+            if (quantity <= 0) {
                 Lang.get().message(player, Message.MARKET_CMD_INVALID_QUANTITY);
                 return;
             }

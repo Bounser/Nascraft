@@ -179,7 +179,7 @@ public class Item {
     public double buy(int amount, UUID uuid, boolean feedback) {
 
         Player player = Bukkit.getPlayer(uuid);
-        Player offlinePlayer = Bukkit.getPlayer(uuid);
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 
         boolean limitReached = !price.canStockChange(amount, true);
 
@@ -197,7 +197,7 @@ public class Item {
 
         double worth = price.getProjectedCost(-amount*multiplier, price.getBuyTaxMultiplier());
 
-        if (!checkBalance(player, feedback, worth)) return 0;
+        if (!checkBalance(offlinePlayer, player, feedback, worth)) return 0;
         if (!InventoryManager.checkInventory(player, feedback, itemStack, amount)) return 0;
 
         if (player != null && feedback) {
@@ -236,8 +236,55 @@ public class Item {
         return worth;
     }
 
-    public boolean checkBalance(Player player, boolean feedback, double money) {
-        if (!MoneyManager.getInstance().hasEnoughMoney(player, currency, money)) {
+    public double buyWithoutCost(int amount, UUID uuid) {
+
+        Player player = Bukkit.getPlayer(uuid);
+
+        boolean limitReached = !price.canStockChange(amount, true);
+
+        if (limitReached && restricted) {
+            return 0;
+        }
+
+        BuyItemEvent event = new BuyItemEvent(player, this, amount);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) return 0;
+
+        if(!MarketManager.getInstance().getActive()) { Lang.get().message(player, Message.SHOP_CLOSED); return 0; }
+
+        double worth = price.getProjectedCost(-amount*multiplier, price.getBuyTaxMultiplier());
+
+        if (!limitReached) {
+            if (parent != null)
+                parent.updateInternalValues(amount,
+                        amount*price.getValue(),
+                        -amount*multiplier,
+                        price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+            else
+                updateInternalValues(amount,
+                        amount*price.getValue(),
+                        -amount*multiplier,
+                        price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+        }
+
+        Trade trade = new Trade(this, LocalDateTime.now(), worth, amount, true, false, uuid);
+
+        DatabaseManager.get().getDatabase().saveTrade(trade);
+
+        if (Config.getInstance().getDiscordEnabled() && Config.getInstance().getLogChannelEnabled())
+            DiscordLog.getInstance().sendTradeLog(trade);
+
+        MarketManager.getInstance().addOperation();
+
+        TransactionCompletedEvent transactionEvent = new TransactionCompletedEvent(player, this, amount, Action.BUY, worth);
+        Bukkit.getPluginManager().callEvent(transactionEvent);
+
+        return worth;
+    }
+
+    public boolean checkBalance(OfflinePlayer offlinePlayer, Player player, boolean feedback, double money) {
+        if (!MoneyManager.getInstance().hasEnoughMoney(offlinePlayer, currency, money)) {
             if (player != null && feedback) Lang.get().message(player, currency.getNotEnoughMessage());
             return false;
         }
@@ -246,8 +293,8 @@ public class Item {
 
     public double sell(int amount, UUID uuid, boolean feedback) {
 
-        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
         Player player = Bukkit.getPlayer(uuid);
+        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 
         boolean limitReached = !price.canStockChange(amount, false);
 
@@ -300,6 +347,59 @@ public class Item {
         worth = RoundUtils.round(worth);
 
         if (player != null && feedback) Lang.get().message(player, Message.SELL_MESSAGE, Formatter.format(currency, worth, Style.ROUND_BASIC), String.valueOf(amount), taggedAlias);
+
+        Trade trade = new Trade(this, LocalDateTime.now(), worth, amount, false, false, uuid);
+
+        DatabaseManager.get().getDatabase().saveTrade(trade);
+        if (Config.getInstance().getDiscordEnabled() && Config.getInstance().getLogChannelEnabled())
+            DiscordLog.getInstance().sendTradeLog(trade);
+        MarketManager.getInstance().addOperation();
+
+        TransactionCompletedEvent transactionEvent = new TransactionCompletedEvent(player, this, amount, Action.SELL, worth);
+        Bukkit.getPluginManager().callEvent(transactionEvent);
+
+        return worth;
+    }
+
+    public double sellWithoutPayment(int amount, UUID uuid) {
+
+        Player player = Bukkit.getPlayer(uuid);
+
+        boolean limitReached = !price.canStockChange(amount, false);
+
+        if (limitReached && restricted) {
+            return -1;
+        }
+
+        SellItemEvent event = new SellItemEvent(player, this, amount);
+        Bukkit.getPluginManager().callEvent(event);
+
+        if (event.isCancelled()) return -1;
+
+        if (!MarketManager.getInstance().getActive()) {
+            return -1;
+        }
+
+        ItemStack operationItemStack = itemStack.clone();
+
+        operationItemStack.setAmount(1);
+
+        double worth = price.getProjectedCost(amount*multiplier, price.getSellTaxMultiplier());
+
+        if (!limitReached) {
+            if (parent != null)
+                parent.updateInternalValues(amount,
+                        amount*price.getValue(),
+                        amount*multiplier,
+                        price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+            else
+                updateInternalValues(amount,
+                        amount*price.getValue(),
+                        amount*multiplier,
+                        price.getValue()*(1-price.getBuyTaxMultiplier())*amount*multiplier);
+        }
+
+        worth = RoundUtils.round(worth);
 
         Trade trade = new Trade(this, LocalDateTime.now(), worth, amount, false, false, uuid);
 

@@ -98,9 +98,9 @@ public class Price {
 
     public double getValue() { return value; }
 
-    public double getBuyPrice() { return value * taxBuy; }
+    public double getBuyPrice() { return getProjectedCost(-1, taxBuy); }
 
-    public double getSellPrice() { return value * taxSell; }
+    public double getSellPrice() { return getProjectedCost(1, taxSell); }
 
     public void setStock(float stock) {
         this.stock = stock;

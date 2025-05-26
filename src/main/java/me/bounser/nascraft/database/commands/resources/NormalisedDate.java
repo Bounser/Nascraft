@@ -32,7 +32,7 @@ public class NormalisedDate {
     public static Date getDateFromDay(int day) {
 
         LocalDate startDate = LocalDate.of(2023, 1, 1);
-        startDate.plusDays(day);
+        startDate = startDate.plusDays(day);
 
         return Date.from(startDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }

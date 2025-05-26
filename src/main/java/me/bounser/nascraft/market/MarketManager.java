@@ -4,6 +4,9 @@ import de.tr7zw.changeme.nbtapi.NBT;
 import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.chart.cpi.CPIInstant;
 import me.bounser.nascraft.database.DatabaseManager;
+import me.bounser.nascraft.database.commands.resources.DayInfo;
+import me.bounser.nascraft.database.commands.resources.NormalisedDate;
+import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.formatter.Formatter;
 import me.bounser.nascraft.managers.DebtManager;
 import me.bounser.nascraft.managers.ImagesManager;
@@ -15,18 +18,15 @@ import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.market.unit.stats.Instant;
 import me.bounser.nascraft.portfolio.Portfolio;
-import me.bounser.nascraft.portfolio.PortfoliosManager;
-import me.bounser.nascraft.web.dto.CategoryDTO;
-import me.bounser.nascraft.web.dto.ItemDTO;
-import me.bounser.nascraft.web.dto.PortfolioDTO;
-import me.bounser.nascraft.web.dto.TimeSeriesDTO;
+import me.bounser.nascraft.web.dto.*;
 import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-import org.checkerframework.checker.units.qual.C;
 
 import java.awt.image.BufferedImage;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 public class MarketManager {
@@ -45,6 +45,8 @@ public class MarketManager {
     private int operationsLastHour = 0;
 
     private List<String> ignoredKeys = new ArrayList<>();
+
+    ZoneOffset offset = ZonedDateTime.now(ZoneId.systemDefault()).getOffset();
 
     private static MarketManager instance = null;
 
@@ -472,7 +474,7 @@ public class MarketManager {
 
             timeSeries.add(
                     new TimeSeriesDTO(
-                            instant.getLocalDateTime().toEpochSecond(ZoneOffset.UTC),
+                            instant.getLocalDateTime().toEpochSecond(offset),
                             instant.getIndexValue()
                             )
             );
@@ -481,9 +483,46 @@ public class MarketManager {
         return timeSeries;
     }
 
-    public List<TimeSeriesDTO> getItemTimeSeries(String identifier) {
+    public List<TimeSeriesDTO> getAllTaxesCollected() {
 
         List<TimeSeriesDTO> timeSeries = new ArrayList<>();
+
+        List<DayInfo> dayInfos = DatabaseManager.get().getDatabase().getDayInfos();
+
+        for (DayInfo dayInfo : dayInfos) {
+            long timestamp = dayInfo.getTime().toEpochSecond(offset);
+
+            timeSeries.add(new TimeSeriesDTO(timestamp, dayInfo.getTax()));
+
+        }
+        return timeSeries;
+    }
+
+    public List<TimeSeriesDTO> getMoneySupply() {
+
+        Map<Integer, Double> values = DatabaseManager.get().getDatabase().getMoneySupplyHistory();
+
+        List<TimeSeriesDTO> timeSeries = new ArrayList<>();
+
+        for (Integer day : values.keySet()) {
+
+            Date dateForDay = NormalisedDate.getDateFromDay(day);
+            long timestamp = dateForDay.toInstant().getEpochSecond();
+
+            timeSeries.add(
+                    new TimeSeriesDTO(
+                            timestamp,
+                            values.get(day)
+                    )
+            );
+        }
+
+        return timeSeries;
+    }
+
+    public List<ItemTimeSeriesDTO> getItemTimeSeries(String identifier) {
+
+        List<ItemTimeSeriesDTO> timeSeries = new ArrayList<>();
         Set<Long> seenTimestamps = new HashSet<>();
 
         Item item = getItem(identifier);
@@ -492,10 +531,50 @@ public class MarketManager {
         List<Instant> instants = DatabaseManager.get().getDatabase().getAllPrices(item);
 
         for (Instant instant : instants) {
-            long timestamp = instant.getLocalDateTime().toEpochSecond(ZoneOffset.UTC);
+            long timestamp = instant.getLocalDateTime().toEpochSecond(offset);
             if (!seenTimestamps.contains(timestamp) && instant.getPrice() != 0) {
                 seenTimestamps.add(timestamp);
-                timeSeries.add(new TimeSeriesDTO(timestamp, instant.getPrice()));
+                timeSeries.add(new ItemTimeSeriesDTO(timestamp, instant.getPrice(), instant.getVolume()));
+            }
+        }
+        return timeSeries;
+    }
+
+    public List<ItemTimeSeriesDTO> getItemTimeSeriesDay(String identifier) {
+
+        List<ItemTimeSeriesDTO> timeSeries = new ArrayList<>();
+        Set<Long> seenTimestamps = new HashSet<>();
+
+        Item item = getItem(identifier);
+        if (item == null) return null;
+
+        List<Instant> instants = DatabaseManager.get().getDatabase().getDayPrices(item);
+
+        for (Instant instant : instants) {
+            long timestamp = instant.getLocalDateTime().toEpochSecond(offset);
+            if (!seenTimestamps.contains(timestamp) && instant.getPrice() != 0) {
+                seenTimestamps.add(timestamp);
+                timeSeries.add(new ItemTimeSeriesDTO(timestamp, instant.getPrice(), instant.getVolume()));
+            }
+        }
+        return timeSeries;
+    }
+
+    public List<ItemTimeSeriesDTO> getItemTimeSeriesMonth(String identifier) {
+
+        List<ItemTimeSeriesDTO> timeSeries = new ArrayList<>();
+        Set<Long> seenTimestamps = new HashSet<>();
+
+        Item item = getItem(identifier);
+        if (item == null) return null;
+
+        List<Instant> instants = DatabaseManager.get().getDatabase().getMonthPrices(item);
+
+        for (Instant instant : instants) {
+            long timestamp = instant.getLocalDateTime().toEpochSecond(offset);
+            if (!seenTimestamps.contains(timestamp) && instant.getPrice() != 0) {
+                seenTimestamps.add(timestamp);
+                timeSeries.add(new ItemTimeSeriesDTO(timestamp, instant.getPrice(), instant.getVolume()));
             }
         }
         return timeSeries;
@@ -535,6 +614,77 @@ public class MarketManager {
             );
         }
         return portfolioDTO;
+    }
+
+    public List<TransactionDTO> getHistoryPlayer(String playerName) {
+
+        List<TransactionDTO> transactions = new ArrayList<>();
+
+        UUID uuid = UUID.fromString(DatabaseManager.get().getDatabase().getUUIDbyName(playerName));
+
+        List<Trade> trades = DatabaseManager.get().getDatabase().retrieveTrades(uuid,0, 500);
+
+        for (Trade trade : trades) {
+
+            if (trade.getItem() != null)
+                transactions.add(
+                        new TransactionDTO(
+                                trade.getItem().getIdentifier(),
+                                trade.getAmount(),
+                                trade.isBuy() ? -trade.getValue() : trade.getValue(),
+                                trade.getDate().toEpochSecond(offset)
+                        )
+                );
+        }
+        return transactions;
+    }
+
+    public List<PlayerStatsDTO> getPlayerStats(String uuidStr) {
+
+        UUID uuid = UUID.fromString(uuidStr);
+
+        return DatabaseManager.get().getDatabase().getAllPlayerStats(uuid);
+    }
+
+    public List<DetailedTransactionDTO> getLastTransactions() {
+
+        List<Trade> trades = DatabaseManager.get().getDatabase().retrieveTrades(0, 10);
+
+        List<DetailedTransactionDTO> transactions = new ArrayList<>();
+
+        for (Trade trade : trades) {
+
+            if (trade.getItem() != null)
+                transactions.add(
+                        new DetailedTransactionDTO(
+                                DatabaseManager.get().getDatabase().getNameByUUID(trade.getUuid()),
+                                trade.getItem().getIdentifier(),
+                                (trade.isBuy() ? 1 : -1) * trade.getAmount(),
+                                trade.getDate().toEpochSecond(offset)
+                        )
+                );
+        }
+
+        return transactions;
+    }
+
+    public DebtDTO getDebtPlayer(String playerName) {
+
+        UUID uuid = UUID.fromString(DatabaseManager.get().getDatabase().getUUIDbyName(playerName));
+
+        DebtManager debt = DebtManager.getInstance();
+
+        DebtDTO debtDTO = new DebtDTO(
+                debt.getDebtOfPlayer(uuid),
+                debt.getNextPayment(uuid),
+                debt.getLifeTimeInterests(uuid),
+                debt.getMaximumLoan(uuid),
+                Config.getInstance().getLoansDailyInterest(),
+                Config.getInstance().getLoansMinimumInterest(),
+                debt.getNextPaymentTime().toString()
+        );
+
+        return debtDTO;
     }
 
 }

@@ -8,6 +8,8 @@ import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
+import java.util.UUID;
+
 public class MoneyManager {
 
     private static MoneyManager instance;

@@ -11,6 +11,7 @@ import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
 import me.bounser.nascraft.portfolio.Portfolio;
+import me.bounser.nascraft.web.dto.PlayerStatsDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -201,6 +202,30 @@ public class SQLite implements Database {
                         "uuid VARCHAR(36) NOT NULL," +
                         "name TEXT NOT NULL");
 
+        createTable(connection, "balances",
+                "id INTEGER PRIMARY KEY, " +
+                        "uuid VARCHAR(36) NOT NULL," +
+                        "balance DOUBLE NOT NULL");
+
+        createTable(connection, "money_supply",
+                "day INT PRIMARY KEY, " +
+                        "supply DOUBLE NOT NULL");
+
+        createTable(connection, "web_credentials",
+                "name TEXT NOT NULL, " +
+                        "pass TEXT NOT NULL");
+
+        createTable(connection, "player_stats",
+                "day INT NOT NULL, " +
+                        "uuid VARCHAR(36) NOT NULL, " +
+                        "balance DOUBLE NOT NULL," +
+                        "portfolio DOUBLE NOT NULL," +
+                        "debt DOUBLE NOT NULL");
+
+        createTable(connection, "discord",
+                "userid VARCHAR(18) NOT NULL," +
+                        "uuid VARCHAR(36) NOT NULL," +
+                        "nickname TEXT NOT NULL");
     }
 
     @Override
@@ -825,12 +850,136 @@ public class SQLite implements Database {
     }
 
     @Override
+    public String getUUIDbyName(String name) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return UserNames.getUUIDbyName(connection, name);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return " ";
+    }
+
+    @Override
     public void saveOrUpdateName(UUID uuid, String name) {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
             UserNames.saveOrUpdateNick(connection, uuid, name);
         } catch (SQLException e) {
             Nascraft.getInstance().getLogger().warning(e.getMessage());
         }
+    }
+
+    @Override
+    public void updateBalance(UUID uuid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            Balances.updateBalance(connection, uuid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public Map<Integer, Double> getMoneySupplyHistory() {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Balances.getMoneySupplyHistory(connection);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public void storeCredentials(String userName, String hash) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            Credentials.saveCredentials(connection, userName, hash);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public String retrieveHash(String userName) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Credentials.getHashFromUserName(connection, userName);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public void clearUserCredentials(String userName) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            Credentials.clearUserCredentials(connection, userName);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public void saveOrUpdatePlayerStats(UUID uuid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            PlayerStats.saveOrUpdatePlayerStats(connection, uuid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public List<PlayerStatsDTO> getAllPlayerStats(UUID uuid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return PlayerStats.getAllPlayerStats(connection, uuid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public void saveDiscordLink(UUID uuid, String userid, String nickname) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            Discord.saveDiscordLink(connection, uuid, userid, nickname);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public void removeDiscordLink(UUID uuid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            Discord.removeLink(connection, uuid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+    }
+
+    @Override
+    public String getDiscordUserId(UUID uuid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Discord.getDiscordUserId(connection, uuid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public UUID getUUIDFromUserid(String userid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Discord.getUUIDFromUserid(connection, userid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return null;
+    }
+
+    @Override
+    public String getNicknameFromUserId(String userid) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
+            return Discord.getNicknameFromUserId(connection, userid);
+        } catch (SQLException e) {
+            Nascraft.getInstance().getLogger().warning(e.getMessage());
+        }
+        return null;
     }
 
 }

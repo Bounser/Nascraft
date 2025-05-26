@@ -10,6 +10,7 @@ import me.bounser.nascraft.commands.admin.marketeditor.edit.category.CategoryEdi
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorInvListener;
 import me.bounser.nascraft.commands.alert.AlertsCommand;
 import me.bounser.nascraft.commands.alert.SetAlertCommand;
+import me.bounser.nascraft.commands.credentials.WebCommand;
 import me.bounser.nascraft.commands.discord.DiscordCommand;
 import me.bounser.nascraft.commands.portfolio.PortfolioCommand;
 import me.bounser.nascraft.inventorygui.Portfolio.PortfolioInventory;
@@ -179,6 +180,10 @@ public final class Nascraft extends JavaPlugin {
         ItemChartReduced.load();
 
         if (config.getWebEnabled()) {
+
+            if (config.isCommandEnabled("web")) {
+                new WebCommand();
+            }
 
             extractDefaultWebFiles();
             extractImage("images/logo.png");

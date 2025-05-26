@@ -78,7 +78,7 @@ public class LimitOrder {
 
                 int buyOrder = Math.min(Math.abs(toBuy), toComplete-completed);
 
-                double buyImpact = item.buy(buyOrder, uuid, false);
+                double buyImpact = item.buyWithoutCost(buyOrder, uuid);
 
                 if (buyImpact <= 0) return;
 
@@ -106,7 +106,7 @@ public class LimitOrder {
 
                 int sellOrder = Math.min(Math.abs(toSell), toComplete-completed);
 
-                double sellImpact = item.sell(sellOrder, uuid, false);
+                double sellImpact = item.sellWithoutPayment(sellOrder, uuid);
 
                 if (sellImpact < 0) return;
 

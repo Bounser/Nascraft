@@ -136,6 +136,9 @@ commands:
       enabled: true
       slot: 8
       material: 'red_stained_glass_pane'
+  web:
+    enabled: false
+    alias: 'remote'
 
 portfolio:
   # Default size of portfolios.
@@ -327,8 +330,8 @@ sell-wands:
 
 # BETA: Self-hosted website with information and charts.
 web:
-  enabled: false
-  port: 8080
+  enabled: true # Set to true to enable the web server
+  port: 8080    # The port the web server will run on
 
 # Verify whether the AdvancedGUI's layout is present, and if it is not, place it in the layout folder of AdvancedGUI.
 auto-resources-injection: true
