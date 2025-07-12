@@ -1,0 +1,482 @@
+# Nascraft tr_TR - ${project.version}
+# by @ulkernova
+# Turkish translation
+
+# Decimal separator. Available: point (.), comma (,)
+separator: "comma"
+
+# General:
+price: "Fiyat"
+material: "Eşya Materyali"
+default_item_format: "<gradient:#8ae6ff:#ebffc4>[ALIAS]</gradient>"
+default_category_format: "<gradient:#6b86ff:#3d67ff>[NAME]</gradient>"
+
+# Available placeholders: [AMOUNT], [NAME], [WORTH]
+buy_message: "<gradient:#00E3FB:#F9ABFD><bold>[AMOUNT]</bold> x <bold>[NAME]</bold> satın aldın, değer: </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+sell_message: "<gradient:#00E3FB:#F9ABFD><bold>[AMOUNT]</bold> x <bold>[NAME]</bold> sattın, değer: </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+
+limit_buy_message: "<gradient:#00E3FB:#F9ABFD><bold>[AMOUNT]</bold> x <bold>[NAME]</bold> için limit emri verildi, fiyat: </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+limit_sell_message: "<gradient:#00E3FB:#F9ABFD><bold>[AMOUNT]</bold> x <bold>[NAME]</bold> satış limit emri verildi, fiyat: </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+limit_buy_completed: "<gradient:#00E3FB:#F9ABFD>Limit emri TAMAMLANDI: <bold>[AMOUNT]</bold> x <bold>[NAME]</bold> satın alındı, fiyat: </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+limit_sell_completed: "<gradient:#00E3FB:#F9ABFD>Limit emri TAMAMLANDI: <bold>[AMOUNT]</bold> x <bold>[NAME]</bold> satıldı, fiyat: </gradient><gradient:#6CFB5C:#97FDBD>[WORTH]</gradient>"
+limit_max_orders_reached: "<gradient:#FB6363:#C4B3FD>✘ Daha fazla eşzamanlı limit emri veremezsin!</gradient>"
+
+not_enough_money: "<gradient:#FB6363:#C4B3FD>✘ Bunu ödeyecek paran yok!</gradient>"
+not_enough_items: "<gradient:#FB6363:#C4B3FD>✘ Satmak için yeterli eşya yok!</gradient>"
+not_enough_space: "<gradient:#FB6363:#C4B3FD>✘ Envanterinde yeterli alan yok!</gradient>"
+top_limit_reached: "<gradient:#FB6363:#C4B3FD>✘ Kimse sana bunu satmak istemiyor!</gradient> <color:#a84b34>(Maksimum fiyata ulaşıldı)</color>"
+bottom_limit_reached: "<gradient:#FB6363:#C4B3FD>✘ Kimse bunu satın almak istemiyor!</gradient> <color:#a84b34>(Minimum fiyata ulaşıldı)</color>"
+shop_closed: "<gradient:#FB6363:#C4B3FD>✘ Satın alma hatası: Mağaza kapalı</gradient>"
+
+# Commands
+no_permission: "<gradient:#FB6363:#C4B3FD>✘ İzin gerekli.</gradient>"
+click_to_confirm: "\n<gold>[ <gradient:#F5FFD5:#FFA200:#F5FFD5>Onaylamak için tıkla</gradient> ]</gold>\n"
+list_segment: "\n<gray>> <gradient:#FF00CD:#DA58FF>[NAME] x [AMOUNT] = [WORTH]</gradient>"
+
+# nsellall
+sellall_everything_error: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ Satacak hiçbir şeyin yok!</gradient>"
+sellall: "<gradient:#FF00CD:#DA58FF><bold><light_purple>[AMOUNT]</light_purple></bold> x <bold><light_purple>[NAME]</light_purple></bold> sattın, değer: [WORTH]</gradient>"
+sellall_error_without_item: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ Satmak için [NAME] yok!</gradient>"
+sellall_error_wrong_material: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ Materyal tanınmıyor. Kullanım: /sellall [materyal]</gradient>"
+sellall_estimated_value: "<gray>Tahmini değer:</gray> <green>\n[WORTH]</green>"
+sellall_total: "<gradient:#FF00CD:#DA58FF>Toplam satış:</gradient> [WORTH]"
+
+# nsell
+sell_title: "           <b><gradient:#12438c:#91196f>Satış menüsü</gradient></b>"
+sell_close: "<b><gradient:#ff0000:#ff3b05>KAPAT</gradient></b>"
+sell_button_name: "<b><gradient:#ffd857:#ff6f00>İÇERİĞİ SAT</gradient></b>"
+sell_button_lore: "<color:#85784d>Yaklaşık şu kadar karşılığında sat:</color> \n[WORTH-LIST]"
+sell_remove_item: "<u><color:#ff2424>⏵ Satış listesinden çıkarmak için tıkla</color></u>"
+sell_help_title: "<b><gradient:#7f60ab:#ab3f7a>Bu nasıl çalışır?</gradient></b>"
+sell_help_lore: "<color:#ab898d>Satmak istediğin tüm eşyaları seç.</color>\n<color:#ab898d>Tahmini değer garanti değildir ve</color>\n<color:#ab898d>işlem tamamlandıktan sonra değişecektir.</color>"
+sell_action_message: "<gradient:#FF00CD:#DA58FF><bold><light_purple>[WORTH]</light_purple></bold> değerinde eşya sattın</gradient>"
+sell_item_not_allowed: "<gradient:#FB6363:#C4B3FD>✘ Bu geçerli bir eşya değil!</gradient>"
+sell_full: "<gradient:#FB6363:#C4B3FD>✘ Satış envanteri dolu!</gradient>"
+
+# sellhand
+sellhand_invalid: "<gradient:#FF0000:#FF7E7E:#FF0000>Geçerli bir eşya tut!</gradient>"
+sellhand_error_hand: "<gradient:#FF0000:#FF7E7E:#FF0000>✘ Hata! Onaylamadan önce elindeki eşyayı değiştirme</gradient>"
+sellhand_estimated_value: "<gray>Tahmini değer:</gray> \n"
+
+# alert
+alert_invalid_use: "<gradient:#FB6363:#C4B3FD>Komut yanlış kullanıldı. /setalert [materyal] [fiyat]</gradient>"
+alert_not_linked: "<gradient:#FB6363:#C4B3FD>✘ Bu komutu kullanmak için hesabını bağlaman gerekiyor!</gradient>"
+alert_in_watchlist: "<gradient:#FB6363:#C4B3FD>Eşya zaten izleme listende.</gradient>"
+alert_invalid_price: "<gradient:#FB6363:#C4B3FD>✘ Komut yanlış kullanıldı. Fiyat bir sayı olmalı. (Örn: 120.90)</gradient>"
+alert_not_recognized: "<gradient:#FB6363:#C4B3FD>Eşya tanınmıyor.</gradient>"
+alert_setup: "<gradient:#00E3FB:#F9ABFD>Alarm doğru şekilde kuruldu! Fiyata ulaşıldığında DM alacaksın.</gradient>"
+# alerts
+alerts_empty: "<gradient:#FB6363:#C4B3FD>Kurulmuş alarmın yok.</gradient>"
+alerts_header: "&eAktif alarmlar:\n"
+alerts_list_segment: "\n&6> &l[NAME] &r&e[WORTH] fiyatında"
+
+alert_reached_up: "<color:#ffd269>✉</color> <gradient:#FB6363:#C4B3FD>Eşya için alarm ulaştı: </gradient>[NAME] <color:#ffae2b>~ </color>[PRICE1] <gradient:#FB6363:#C4B3FD>Fiyat ulaştı: [PRICE2]!</gradient>"
+alert_reached_down: "<color:#ffd269>✉</color> <gradient:#FB6363:#C4B3FD>Eşya için alarm ulaştı: </gradient>[NAME] <color:#ffae2b>~ </color>[PRICE1] <gradient:#FB6363:#C4B3FD>Fiyat düştü: [PRICE2]!</gradient>"
+
+# SELLWAND
+
+sellwand_estimated_value: "<gradient:#FF00CD:#DA58FF>Tahmini değer:</gradient> <bold>\n[WORTH]</bold>"
+sellwand_sold: "<gradient:#FF00CD:#DA58FF>İçerik şu kadar karşılığında satıldı:</gradient> <bold>[WORTH]</bold>"
+sellwand_sold_with_multiplier: "<gradient:#FF00CD:#DA58FF>İçerik şu kadar karşılığında satıldı:</gradient>"
+sellwand_sold_with_multiplier_segment: "<light_purple>[INITIAL-WORTH] x [MULTIPLIER] = <bold>[WORTH]</bold></light_purple>"
+sellwand_ran_out: "<gradient:#FB6363:#C4B3FD>✘ Bu satış asasının kullanımı kalmadı.</gradient>"
+sellwand_nothing_to_sell: "<gradient:#FB6363:#C4B3FD>✘ Satacak hiçbir şey yok!</gradient>"
+sellwand_cooldown: "<gradient:#FB6363:#C4B3FD>Bekleme süresi, [TIME] kaldı!</gradient>"
+sellwand_minutes: "[MINUTES] dakika ve [SECONDS] saniye"
+sellwand_seconds: "[SECONDS] saniye"
+sellwand_too_much: "<gradient:#FB6363:#C4B3FD>✘ Bu asayla bu kadar çok satamazsın!</gradient>"
+
+# LINK COMMAND
+
+link_already_linked: "<gradient:#FF00CD:#DA58FF>Zaten bağlı!</gradient>"
+link_wrong_use: "<gradient:#FB6363:#C4B3FD>✘ Komut yanlış kullanıldı!</gradient>"
+link_wrong_format:  "<gradient:#FB6363:#C4B3FD>✘ Yanlış kod formatı!</gradient>"
+link_no_process_found: "<gradient:#FB6363:#C4B3FD>✘ Bu kodla bağlantı işlemi bulunamadı.</gradient>"
+link_success: "<gradient:#FF00CD:#DA58FF>Başarıyla bağlandı:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+link_unlinked: "<gradient:#FF00CD:#DA58FF>Kullanıcıyla bağlantın kesildi:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+link_direct_message: ":link: Discord hesabın başarıyla minecraft kullanıcısıyla bağlandı: ``[USER]``"
+
+# DISCORD COMMAND
+
+discordcmd_not_linked: "<gradient:#FB6363:#C4B3FD>✘ Bağlı değilsin!</gradient>"
+discordcmd_linked: "<gradient:#FF00CD:#DA58FF>Bağlısın:</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+
+# Portfolio
+
+portfolio_title: "<b><gradient:#8c2eff:#cd75ff>Portföy</gradient></b>"
+portfolio_cant_afford_expansion: "<gradient:#FB6363:#C4B3FD>✘ Yeterli paran yok!</gradient>"
+portfolio_locked_title: "<b><gradient:#ff5e4f:#ff2e4a>KİLİTLİ</gradient></b>"
+portfolio_locked_lore: " \n<gradient:#2eff8c:#5bff2e>⏵ Sonraki slotu satın almak için tıkla:</gradient> <gradient:#ffbb29:#efff78>[AMOUNT]</gradient>\n "
+portfolio_info_title: "<b><gradient:#8c2eff:#cd75ff>Portföyün</gradient></b>"
+portfolio_info_lore: "<gradient:#6c65b5:#7aad63>Portföy Değeri: </gradient>\n[WORTH]\n \n<gradient:#2eff8c:#5bff2e>⏵ İçeriğinin grafiğini ve</gradient>\n<gradient:#2eff8c:#5bff2e>portföy gelişimini görmek için tıkla.</gradient>"
+portfolio_amount: "<gradient:#6c65b5:#7aad63>Miktar: </gradient><color:#66ff40>[AMOUNT]</color>\n\n<gradient:#6c65b5:#7aad63>Değer:</gradient> [WORTH]\n \n<gradient:#2eff8c:#5bff2e>⏵ Çekmek için tıkla</gradient>"
+portfolio_no_space: "<gradient:#FB6363:#C4B3FD>✘ Envanterinde bu eşyayı taşımak için alan yok!</gradient>"
+portfolio_no_storage: "<gradient:#FB6363:#C4B3FD>✘ Limite ulaşıldı, portföyün bunu saklayamaz!</gradient>"
+portfolio_invalid: "<gradient:#FB6363:#C4B3FD>✘ Geçersiz eşya!</gradient>"
+portfolio_back_name: "<gradient:#ff816b:#ff2e38>⏪ Geri</gradient>"
+
+portfolio_composition_title: "          <gradient:#8c00ff:#1c3eff>Portföy bileşimi</gradient>"
+portfolio_composition_stats_name: "<gradient:#00E3FB:#F9ABFD>Portföy Bileşimi:</gradient>"
+portfolio_composition_stats_lore: "\n [COMPOSITION]"
+portfolio_composition_stats_segment: "[COLOR]■ <gradient:#96a9e0:#2b92ff>[PERCENTAGE]</gradient> [NAME] <color:#e09f7e>-</color> [WORTH]\n "
+portfolio_composition_empty: " <gradient:#96a9e0:#2b92ff>Portföyün boş.</gradient>\n "
+
+portfolio_debt_name: "<bold><gradient:#f24452:#aa5744>BORÇ</gradient></bold>"
+portfolio_debt_lore: "<gradient:#9e74a1:#6284a1>Portföyünün değerine karşı kredi al.</gradient>\n\n<gradient:#2eff8c:#5bff2e>⏵ Borç yöneticisini açmak için tıkla</gradient>"
+portfolio_debt_title: "          <bold><gradient:#f24452:#aa5744>BORÇ YÖNETİCİSİ</gradient></bold>"
+portfolio_debt_exp_name: "<bold><gradient:#f24452:#aa5744>Borç nasıl çalışır</gradient></bold>"
+portfolio_debt_exp_lore: "<gradient:#9e74a1:#6284a1>Portföy eşyaların likit değil,</gradient>\n<gradient:#9e74a1:#6284a1>yani satılana kadar değerlerine erişemezsin.</gradient>\n\n<gradient:#9e74a1:#6284a1>Bu sistemle fon ödünç alabilirsin,</gradient>\n<gradient:#9e74a1:#6284a1>tek maliyet kredinin faizi olacak.</gradient>\n\n<gradient:#9e74a1:#6284a1>Kredi onaylandıktan sonra portföyün</gradient>\n<gradient:#9e74a1:#6284a1>kilitlenecek ve değeri belirli bir</gradient>\n<gradient:#9e74a1:#6284a1>eşiğin altına düşerse, varlıkların borcu ödemek için tasfiye edilebilir.</gradient>\n"
+portfolio_debt_info_name: "<bold><gradient:#f24452:#aa5744>BORÇ</gradient></bold>"
+portfolio_debt_info_lore: "<gradient:#9e74a1:#6284a1>Mevcut borcun:</gradient>\n[CURR-DEBT] <gradient:#9e74a1:#6284a1>([CURR-PER]% portföy)</gradient>\n\n<gradient:#9e74a1:#6284a1>Maksimum olası kredi:</gradient>\n[MAX] <gradient:#9e74a1:#6284a1>([MAX-PER]% portföy)</gradient>\n\n<gradient:#9e74a1:#6284a1>Sonraki faiz ödemesi: ([TIME] içinde)</gradient>\n[INTEREST]\n\n<gradient:#9e74a1:#6284a1>Yaşam boyu ödenen faizler:</gradient> [LIFETIME]"
+portfolio_debt_back_name: "<gradient:#ff816b:#ff2e38>⏪ Geri</gradient>"
+portfolio_debt_repay_everything_name: "<bold><gradient:#8be83a:#d2e854>HER ŞEYİ ÖDE</gradient></bold>"
+portfolio_debt_repay_everything_lore: "\n<gradient:#9e74a1:#6284a1>Ödeyeceksin:</gradient> [AMOUNT]\n "
+portfolio_debt_take_all_name: "<bold><gradient:#e83e35:#e8812c>MAKSİMUM KREDİNİN %90'INI AL</gradient></bold>"
+portfolio_debt_take_all_lore: "\n<gradient:#9e74a1:#6284a1>Alacaksın:</gradient> [AMOUNT]\n\n<gradient:#9e74a1:#6284a1>Günlük faiz oranı:</gradient> <color:#b99cff>[INTEREST]%</color>\n\n<gradient:#9e74a1:#6284a1>(%10 güvenlik marjı uygulandı)</gradient>"
+portfolio_debt_custom_name: "<bold><gradient:#e83e35:#e8812c>KREDİ AL</gradient></bold>"
+portfolio_debt_custom_lore: "\n<gradient:#9e74a1:#6284a1>Borç alacak miktarı ayarlamak için tıkla</gradient>\n\n<gradient:#9e74a1:#6284a1>En fazla şu kadar kredi alabilirsin:</gradient> [ADDITIONAL]\n\n<gradient:#9e74a1:#6284a1>Günlük faiz oranı:</gradient> <color:#b99cff>[INTEREST]%</color>"
+portfolio_debt_repay_name: "<bold><gradient:#8be83a:#d2e854>ÖDE</gradient></bold>"
+portfolio_debt_repay_lore: "\n<gradient:#9e74a1:#6284a1>Ödeyeceğin miktarı ayarlamak için tıkla</gradient>\n\n<gradient:#9e74a1:#6284a1>Mevcut borç:</gradient> [DEBT]"
+
+portfolio_debt_alert: "<color:#fbff00>⚠ <b><gradient:#ffcb3d:#ff5c0a>DİKKAT</gradient></b> ⚠</color>\n<gradient:#FB6363:#C4B3FD>Borcun marjının %95'ini aşıyor. Tasfiyeyi önlemek için borcunu öde veya portföyüne daha fazla eşya ekle</gradient>"
+portfolio_debt_liquidated: "<color:#fbff00>⚠ <b><gradient:#ffcb3d:#ff5c0a>DİKKAT</gradient></b> ⚠</color>\n<gradient:#FB6363:#C4B3FD>Borcun limiti aştı ve portföyün onu ödemek için tasfiye edildi.</gradient>"
+portfolio_debt_money: "<gradient:#FB6363:#C4B3FD>Borcun limiti aştı ve limitler içinde kalmak için hesabından [AMOUNT] alındı.</gradient>"
+portfolio_debt_interest_payed: "<gradient:#00E3FB:#F9ABFD>Borcun için faiz ücretlendirildi. ([AMOUNT]).</gradient>"
+portfolio_debt_interest_acc: "<gradient:#00E3FB:#F9ABFD>Borcun için faiz ücretlendirilemedi ve toplam borcuna eklendi. (+[AMOUNT]).</gradient>"
+portfolio_debt_repayed_all: "<gradient:#00E3FB:#F9ABFD>Tüm borcunu ödedin! ([AMOUNT])</gradient>"
+portfolio_debt_repayed: "<gradient:#00E3FB:#F9ABFD>[AMOUNT] ödedin. Borcun şimdi [DEBT]</gradient>"
+portfolio_debt_take_loan: "<gradient:#00E3FB:#F9ABFD>[AMOUNT] kredi aldın. Toplam borcun şimdi [DEBT]</gradient>"
+portfolio_debt_no_collateral: "<gradient:#00E3FB:#F9ABFD>Portföyünde karşılık gösterebileceğin hiçbir şey yok</gradient>"
+portfolio_debt_cant_take_loan: "<gradient:#00E3FB:#F9ABFD>Portföyünde bu krediyi alacak yeterli eşya yok</gradient>"
+portfolio_debt_min_loan: "<gradient:#00E3FB:#F9ABFD>Krediler minimum [AMOUNT] olmalı</gradient>"
+portfolio_debt_portfolio_locked: "<gradient:#00E3FB:#F9ABFD>Portföyündeki eşyaları çıkarabilmek için borcunu öde</gradient>"
+portfolio_debt_dis_locked: ":exclamation: Portföyündeki eşyaları kullanabilmek için borcunu öde"
+portfolio_debt_anvil_not_enough: "Ödeyecek yeterli para yok"
+portfolio_debt_anvil_invalid: "Geçersiz Miktar"
+portfolio_debt_anvil_repay: "Öde: "
+portfolio_debt_anvil_repay_title: "Borç Öde"
+portfolio_debt_anvil_custom: "Kredi: "
+portfolio_debt_anvil_custom_title: "Yeni Kredi Al"
+
+portfolio_top_name: "<gradient:#8c00ff:#1c3eff>En iyi portföyler</gradient>"
+portfolio_top_button_lore: "\n<gradient:#2eff8c:#5bff2e>⏵ En iyileri görmek için tıkla</gradient>"
+portfolio_top_title: "<gradient:#8c00ff:#1c3eff>En iyi portföyler</gradient>"
+portfolio_top_back_name: "<gradient:#ff816b:#ff2e38>⏪ Geri</gradient>"
+portfolio_top_name_1: "<bold><gradient:#ffd429:#ffff96>1. Portföy</gradient></bold>"
+portfolio_top_name_2: "<bold><gradient:#aaaaaa:#dbdbdb>2. Portföy</gradient></bold>"
+portfolio_top_name_3: "<bold><gradient:#db7748:#db968a>3. Portföy</gradient></bold>"
+portfolio_top_name_others: "<bold><gradient:#3295db:#69bfdb>[POS]. Portföy</gradient></bold>"
+portfolio_top_lore: "\n<gradient:#9e74a1:#6284a1>Portföy sahibi:</gradient> <gradient:#ff55ff:#c29cff>[OWNER]</gradient>\n\n<gradient:#9e74a1:#6284a1>Portföy değeri:</gradient> [WORTH]\n<gradient:#9e74a1:#6284a1>Borç:</gradient> [DEBT]\n<gradient:#9e74a1:#6284a1>Net değer:</gradient> [NET]\n\n<gradient:#9e74a1:#6284a1>Şunlardan oluşur:</gradient>\n"
+portfolio_top_lore_list: "  <color:#14ffe8>[PER]% [NAME]\n"
+portfolio_top_lore_extra: "<gradient:#9e74a1:#6284a1>Ve <color:#14ffe8>[NUM-3]</color> eşya daha...</gradient>\n "
+portfolio_top_lore_extra_single: "<gradient:#9e74a1:#6284a1>Ve <color:#14ffe8>1</color> eşya daha...</gradient>\n "
+
+# Market
+
+market_cmd_invalid_use: "<gradient:#FB6363:#C4B3FD>✘ Komut yanlış kullanıldı. /market <Sat/Al> <Eşya> <Miktar></gradient>"
+market_cmd_invalid_quantity: "<gradient:#FB6363:#C4B3FD>✘ Geçersiz miktar</gradient>"
+market_cmd_max_quantity_reached: "<gradient:#FB6363:#C4B3FD>✘ Miktar 64'ten fazla olamaz!</gradient>"
+market_cmd_invalid_identifier: "<gradient:#FB6363:#C4B3FD>✘ Bu tanımlayıcı geçerli değil!</gradient>"
+market_cmd_invalid_option: "<gradient:#FB6363:#C4B3FD>✘ Bu seçenek geçerli değil! </gradient>"
+market_cmd_invalid_category: "<gradient:#FB6363:#C4B3FD>✘ Bu kategori mevcut değil! </gradient>"
+market_cmd_invalid_item: "<gradient:#FB6363:#C4B3FD>✘ Bu eşya mevcut değil! </gradient>"
+
+# Market GUI
+
+gui_fillers_name: " "
+
+gui_positive_change: "<gradient:#4cf000:#66f043>+[PERCENTAGE]%</gradient>"
+gui_no_change: "<gradient:#fffdbd:#aea4ba>~[PERCENTAGE]%</gradient>"
+gui_negative_change: "<gradient:#f00008:#f05c3e>[PERCENTAGE]%</gradient>"
+
+gui_main_menu_title: "        <b><gradient:#12438c:#91196f>Canlı Eşya Pazarı</gradient></b>"
+
+gui_alerts_name_linked: "<b><gradient:#ffbf00:#ff4800>Alarmlar</gradient></b>"
+gui_alerts_lore_linked: "<color:#cc801d><color:#4931e8>Discord</color>'da bildirim (DM) al</color>\n<color:#cc801d>bir eşya belirli bir fiyata ulaştığında</color>\n\n<color:#cc801d>Şu anda [ALERTS] alarmın var</color>\n\n<gradient:#ffa930:#ffca85>Yönetmek için tıkla.</gradient>"
+gui_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Alarmlar</gradient>"
+gui_alerts_lore_not_linked: "<color:#cc801d><color:#4931e8>Discord</color>'da bildirim veya DM al</color>\n<color:#cc801d>bir eşya belirli bir fiyata ulaştığında</color>\n \n<gradient:#ff3650:#ff1100>✘ Hesabın Discord ile bağlı değil.</gradient>"
+
+gui_limit_orders_name: "<b><gradient:#3eff29:#8ca9ff>Limit Emirleri</gradient></b>"
+gui_limit_orders_lore: " \n<gradient:#c68aff:#8ca9ff>Eşyaları belirli bir fiyattan al ve sat.</gradient>\n\n<gradient:#c68aff:#8ca9ff>Şu anda <color:#6b81ff>[TOTAL]</color> limit emrin var.</gradient>\n  <color:#6b81ff>╠═</color> <color:#bdc1ff>Dolduruluyor: [TO-FILL]</color>\n  <color:#6b81ff>╠═</color> <color:#bdc1ff>Tamamlandı: [FILLED]</color>\n  <color:#6b81ff>╚═</color> <color:#bdc1ff>Süresi doldu: [EXPIRED]</color>\n\n<gradient:#38ff5d:#8ca9ff>Limit emirlerinin durumunu kontrol etmek için tıkla.</gradient>"
+
+gui_information_name: "<b><gradient:#622eff:#ff21c8>Pazar Menüsü</gradient></b>"
+gui_information_lore: "<color:#5446b0>Pazardan satın al ve sat.</color>\n<color:#5446b0>Çok çeşitli eşyalarla ticaret yapmak için</color>\n<color:#5446b0>aşağıdaki kategorilere göz at.</color>"
+
+gui_portfolio_name_linked: "<b><gradient:#8c2eff:#cd75ff>Portföyün</gradient></b>"
+gui_portfolio_name_not_linked: "<b><gradient:#8c2eff:#cd75ff>Portföyün</gradient></b>"
+gui_portfolio_lore_linked: "<gradient:#6c65b5:#7aad63>Portföy envanterine erişmek için tıkla</gradient>\n\n<gradient:#6c65b5:#7aad63>✔ Discord ile bağlısın</gradient>"
+gui_portfolio_lore_not_linked: " \n<gradient:#6c65b5:#7aad63>Portföyüne erişmek için tıkla</gradient>\n \n<gradient:#ff5e4f:#ff2e4a>✘ Hesabın Discord ile bağlı değil,</gradient>\n<gradient:#ff5e4f:#ff2e4a>işlemler oyun içi işlemlerle sınırlı.</gradient>"
+
+gui_trends_name: "<b><gradient:#622eff:#ff21c8>Pazar Trendleri</gradient></b> <color:#05b379>(Son saat)</color>"
+gui_trends_lore: " \n<gradient:#00ccff:#58ff4d> En popüler:</gradient> <color:#ff743d>🔥</color> [POPULAR] <color:#ff743d>🔥</color>\n \n<gradient:#00ccff:#58ff4d> En çok hareket eden:</gradient>\n<color:#eda600> 1.</color> [1]\n<color:#aab5ae> 2.</color> [2]\n<color:#c27029> 3.</color> [3]"
+gui_trends_positive: "<gradient:#55ff55:#39ff08>▲ [CHANGE]%</gradient> [NAME]"
+gui_trends_negative: "<gradient:#ff3b4e:#ff1900>▼ [CHANGE]%</gradient> [NAME]"
+
+gui_categories_lore_segment: "<color:#7b8dba>●</color> <color:#81889c>[ALIAS]</color>"
+gui_category_back_name: "<gradient:#ff816b:#ff2e38>⏪ Geri</gradient>"
+gui_category_previous_name: "<b><gradient:#ff816b:#ff2e38>←</gradient></b>"
+gui_category_next_name: "<b><gradient:#ff816b:#ff2e38>→</gradient></b>"
+gui_category_item_lore: " \n<gradient:#497882:#4a5082>Fiyat: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Son saat değişim: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● SATIN AL:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● SAT:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>\n \n<u><gradient:#747cc2:#ebffc4>⏵ Bu eşyayla işlem yapmak için tıkla</gradient></u>"
+
+gui_buysell_item_lore: " \n<gradient:#497882:#4a5082>Fiyat: </gradient><b><gradient:#f08b11:#f0c47d>[PRICE]</b>\n<gradient:#497882:#4a5082>Son saat değişim: </gradient>[CHANGE]\n\n<b><gradient:#2df026:#a1f04d>● SATIN AL:   </b><gradient:#f08b11:#f0c47d>[BUY-PRICE]</gradient>\n<b><gradient:#ff3730:#ff7773>● SAT:  </b><gradient:#f08b11:#f0c47d>[SELL-PRICE]</gradient>"
+gui_buysell_alerts_name_linked: "<color:#59ff40>✎</color> <b><gradient:#ffbf00:#ff4800>Eşya için alarm kur</gradient></b>"
+gui_buysell_alerts_name_setup: "<b><gradient:#ffbf00:#ff4800>Alarm</gradient></b>"
+gui_buysell_alerts_name_not_linked: "<b><gradient:#ffbf00:#ff4800>Eşya için alarm kur</gradient></b>"
+gui_buysell_alerts_lore_linked: "<gradient:#cc801d:#4a5082>Fiyat seçmek için tıkla. Fiyata ulaşıldığında</gradient>\n<gradient:#cc801d:#4a5082>Discord üzerinden bildirim alacaksın.</gradient>"
+gui_buysell_alerts_lore_setup: "<gradient:#cc801d:#4a5082>Bu eşya için şu fiyatta alarmın var:</gradient>\n\n<gradient:#ffa930:#ffca85>> [PRICE]</gradient>\n\n<gradient:#cc801d:#4a5082>Kaldırmak için tıkla.</gradient>"
+gui_buysell_alerts_lore_not_linked: "<gradient:#cc801d:#4a5082>Fiyat seçmek için tıkla. Fiyata ulaşıldığında</gradient>\n<gradient:#cc801d:#4a5082>bildirim alacaksın.</gradient>\n\n<gradient:#ff3650:#ff1100>✘ Hesabın bağlı olmadığı için</gradient>\n<gradient:#ff3650:#ff1100>alarm kuramazsın.</gradient>"
+gui_buysell_info_name: "<b><gradient:#ffc457:#ffb5d0>Grafikler</gradient></b>"
+gui_buysell_info_lore: "<gradient:#ffe712:#c7a987>Fiyat gelişimini gör</gradient>"
+gui_buysell_back_name: "<gradient:#ff816b:#ff2e38>⏪ Dön</gradient>"
+gui_buysell_limit_name_unset: "<b><gradient:#ffe712:#cca278>LİMİT EMRİNİ İPTAL ET</gradient><b>"
+gui_buysell_limit_name_set: "<b><gradient:#ffe712:#cca278>LİMİT EMRİ KUR</gradient></b>"
+gui_buysell_limit_lore_set: "\n <gradient:#976bff:#e28aff>Limit emri eşya için ödeyeceğin/alacağın</gradient>\n <gradient:#976bff:#e28aff>fiyatı belirlemenizi sağlar.</gradient>\n <gradient:#976bff:#e28aff>Fiyata ulaşıldığında emir</gradient>\n <gradient:#976bff:#e28aff>otomatik olarak gerçekleştirilir. </gradient>\n\n <gradient:#976bff:#e28aff>Fiyat hiç karşılanmazsa süresi dolabilir</gradient>\n <gradient:#976bff:#e28aff>ve herhangi bir anda iptal edilebilir.</gradient>\n\n<b><gradient:#2fe30b:#6effa3>⏵ Kurmak için tıkla</gradient></b>"
+
+gui_buysell_buy_buttons_name: "<b><gradient:#44ff3d:#94ff42>[AMOUNT] SATIN AL</gradient></b>"
+gui_buysell_buy_buttons_lore: " \n<gradient:#6c65b5:#7aad63>⏵ [AMOUNT] satın almak için tıkla, fiyat: </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
+
+gui_buysell_sell_buttons_name: "<b><gradient:#eb3926:#eb8063>[AMOUNT] SAT</gradient></b>"
+gui_buysell_sell_buttons_lore: " \n<gradient:#6c65b5:#e3326a>⏵ [AMOUNT] satmak için tıkla, fiyat: </gradient><gradient:#b5a44c:#ffa724>[WORTH]</gradient>"
+
+gui_info_title: "              <gradient:#8c00ff:#1c3eff>Fiyat gelişimi</gradient>"
+gui_info_timeframe_name: "<u><gradient:#ffe712:#c7a987>Zaman aralığı</gradient></u>"
+gui_info_timeframe_lore_before: " "
+gui_info_timeframe_lore_unselected_segment: "<gradient:#ffe712:#ffd83d>[OPTION]</gradient>\n"
+gui_info_timeframe_lore_selected_segment: "<gradient:#ffe712:#ffd83d>[OPTION]</gradient> <color:#2eff8c>☜</color>\n"
+gui_info_timeframe_option_1: "Gün"
+gui_info_timeframe_option_2: "Ay"
+gui_info_timeframe_option_3: "Yıl"
+gui_info_timeframe_option_4: "Tümü"
+gui_info_timeframe_lore_after: " \n<gradient:#2eff8c:#5bff2e>⏵ Seçenekler arasında geçiş yapmak için tıkla</gradient>"
+gui_info_statistics_name: "[ITEM-NAME] <gradient:#ffe712:#c7a987>- İstatistikler</gradient>"
+gui_info_statistics_lore: "\n<gradient:#ff9778:#ffff55>Mevcut fiyat:</gradient> [PRICE]\n \n<b><gradient:#ffe712:#ffd83d>[OPTION]</gradient></b>\n <gradient:#ffe712:#ffd83d>╠═</gradient> <gradient:#ff9778:#ffff55>Değişim:</gradient> [CHANGE] \n <gradient:#ffe712:#ffd83d>╠═</gradient> <gradient:#ff9778:#ffff55>Yüksek:</gradient> [HIGH] \n <gradient:#ffe712:#ffd83d>╚═</gradient> <gradient:#ff9778:#ffff55>Düşük:</gradient> [LOW]"
+gui_info_positive_change: "<gradient:#55ff55:#39ff08>▲ [CHANGE]%</gradient>"
+gui_info_negative_change: "<gradient:#ff3b4e:#ff1900>▼ [CHANGE]%</gradient>"
+
+gui_alerts_title: "<b><gradient:#ff9305:#ffeb38>Alarmlar</gradient></b>"
+gui_alerts_lore: "\n<gradient:#6c65b5:#7aad63>Ulaşılacak fiyat: </gradient><gradient:#ff9305:#ffeb38>[PRICE]</gradient>\n\n<gradient:#6c65b5:#7aad63>⏵ Bu alarmı kaldırmak için tıkla.</gradient>"
+gui_alerts_back_name: "<gradient:#ff816b:#ff2e38>⏪ Dön</gradient>"
+
+anvil_alert_title: "Alarm: [ALIAS]"
+anvil_alert_text: "Fiyat: "
+anvil_alert_invalid_price: "Geçersiz fiyat."
+anvil_alert_invalid: "Geçersiz"
+anvil_alert_limit_reached: "Alarm limiti ulaşıldı"
+anvil_alert_repeated: "Alarm tekrarlandı"
+
+gui_limit_orders_title: "<b><gradient:#9141fa:#b482fa>Limit Emirleri</gradient></b>"
+gui_limit_orders_name_buy: "[ITEM-NAME]"
+gui_limit_orders_name_sell: "[ITEM-NAME]"
+gui_limit_orders_change_positive: "<gradient:#00ff5e:#6d7ba3>+[CHANGE]%</gradient>"
+gui_limit_orders_change_negative: "<gradient:#f70800:#6d7ba3>[CHANGE]%</gradient>"
+gui_limit_orders_lore_unfilled_buy: "\n<b><gradient:#4bff2b:#82e6ff>SATIN ALMA EMRİ</gradient></b>\n<gradient:#ffe712:#cca278>Süresi doluyor: [EXPIRATION]</gradient>\n\n<gradient:#ff9778:#ffff55>Limit fiyatı:</gradient> [PRICE]\n<gradient:#ff9778:#ffff55>Mevcut fiyat:</gradient> [CURRENT-PRICE]\n<gradient:#767bcc:#6d7ba3>(Gerekli değişim: [CHANGE])</gradient>\n\n<gradient:#ffe712:#cca278>Emir durumu:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n\n<b><gradient:#2fe30b:#6effa3>⏵ İptal etmek için tıkla</gradient></b>\n<gradient:#2dab24:#34c429>İptal ettiğinde [COMPENSATION] alacaksın\n<gradient:#2dab24:#34c429>ve [QUANTITY] x [NAME]</gradient>"
+gui_limit_orders_lore_filled_buy: "\n<b><gradient:#00ff08:#82e6ff>SATIN ALMA EMRİ TAMAMLANDI</gradient></b>\n\n<gradient:#ffe712:#cca278>Emir durumu:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n<gradient:#ffe712:#cca278>Eşya başına ortalama ödenen fiyat: </gradient> [PRICE-ITEM]\n\n<b><gradient:#2fe30b:#6effa3>⏵ Talep etmek için tıkla</gradient></b>\n<gradient:#2dab24:#34c429>[QUANTITY] x [NAME] alacaksın</gradient>\n<gradient:#2dab24:#34c429>ve [COMPENSATION]</gradient>"
+gui_limit_orders_lore_unfilled_sell: "\n<b><gradient:#ff130f:#ff217a>SATIŞ EMRİ</gradient></b>\n<gradient:#ffe712:#cca278>Süresi doluyor: [EXPIRATION]</gradient>\n\n<gradient:#ff9778:#ffff55>Limit fiyatı:</gradient> [PRICE]\n<gradient:#ff9778:#ffff55>Mevcut fiyat:</gradient> [CURRENT-PRICE]\n<gradient:#767bcc:#6d7ba3>(Gerekli değişim: [CHANGE])</gradient>\n\n<gradient:#ffe712:#cca278>Emir durumu:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n\n<b><gradient:#2fe30b:#6effa3>⏵ İptal etmek için tıkla</gradient></b>\n<gradient:#2dab24:#34c429>İptal ettiğinde [COMPENSATION] alacaksın\n<gradient:#2dab24:#34c429>ve [QUANTITY] x [NAME]</gradient>"
+gui_limit_orders_lore_filled_sell: "\n<b><gradient:#ff0f0f:#ff217a>SATIŞ EMRİ TAMAMLANDI</gradient></b>\n\n<gradient:#ffe712:#cca278>Emir durumu:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n<gradient:#ffe712:#cca278>Eşya başına ortalama alınan fiyat: </gradient> [PRICE-ITEM]\n\n<b><gradient:#2fe30b:#6effa3>⏵ Talep etmek için tıkla</gradient></b>\n<gradient:#2dab24:#34c429>[QUANTITY] x [NAME] alacaksın</gradient>\n<gradient:#2dab24:#34c429>ve [COMPENSATION]</gradient>"
+gui_limit_orders_lore_expired_buy: "\n<b><gradient:#00ff08:#82e6ff>SATIN ALMA EMRİ SÜRESİ DOLDU</gradient></b>\n\n<gradient:#ffe712:#cca278>Emir durumu:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n\n<b><gradient:#2fe30b:#6effa3>⏵ Talep etmek için tıkla</gradient></b>\n<gradient:#2dab24:#34c429>[QUANTITY] x [NAME] alacaksın</gradient>\n<gradient:#2dab24:#34c429>ve [COMPENSATION]</gradient>"
+gui_limit_orders_lore_expired_sell: "\n<b><gradient:#ff0f0f:#ff217a>SATIŞ EMRİ SÜRESİ DOLDU</gradient></b>\n\n<gradient:#ffe712:#cca278>Emir durumu:</gradient> <gradient:#b9e310:#19e3a6>[FILLED]/[TO-FILL]</gradient>\n\n<b><gradient:#2fe30b:#6effa3>⏵ Talep etmek için tıkla</gradient></b>\n<gradient:#2dab24:#34c429>[QUANTITY] x [NAME] alacaksın</gradient>\n<gradient:#2dab24:#34c429>ve [COMPENSATION]</gradient>"
+
+gui_limit_orders_received_money_items: "<gradient:#00E3FB:#F9ABFD><bold>[AMOUNT]</bold> x <bold>[NAME]</bold> ve </gradient><gradient:#6CFB5C:#97FDBD>[MONEY]</gradient> aldın"
+gui_limit_orders_received_money: "<gradient:#00E3FB:#F9ABFD></gradient> <gradient:#6CFB5C:#97FDBD>[MONEY]</gradient> aldın"
+gui_limit_orders_received_items: "<gradient:#00E3FB:#F9ABFD><bold>[AMOUNT]</bold> x <bold>[NAME]</bold> aldın</gradient>"
+
+gui_limit_order_day: "gün"
+gui_limit_order_hour: "saat"
+gui_limit_order_minute: "dk"
+gui_limit_order_second: "saniye"
+gui_limit_order_days: "gün"
+gui_limit_order_hours: "saat"
+gui_limit_order_minutes: "dakika"
+gui_limit_order_seconds: "saniye"
+gui_limit_order_now: "Şimdi"
+
+gui_limit_orders_back_name: "<gradient:#ff816b:#ff2e38>⏪ Dön</gradient>"
+
+gui_set_limit_order_back_name: "<gradient:#ff816b:#ff2e38>⏪ Dön</gradient>"
+gui_set_limit_order_time_name: "<b><gradient:#ff9305:#ffeb38>Emir Süresi</gradient></b>"
+gui_set_limit_order_time_lore: "<gradient:#9e9eff:#b8ffdc>Süre sonunda dolmayan</gradient>\n<gradient:#9e9eff:#b8ffdc>emirlerin süresi dolar.</gradient>\n\n<gradient:#ffb361:#ffc800>Seçenekler:</gradient>\n[DURATIONS]\n<gradient:#2eff8c:#5bff2e>⏵ Seçenekler arasında geçiş yapmak için tıkla</gradient>"
+gui_set_limit_order_duration_segment_selected: "<gradient:#ffe999:#b8ffdc>| [DURATION]</gradient> <color:#7686a8>([FEE]% ücret, minimum [MIN]$)</color> <color:#00ff04>☜</color>\n"
+gui_set_limit_order_duration_segment_not_selected: "<gradient:#ffe999:#b8ffdc>| [DURATION]</gradient> <color:#7686a8>([FEE]% ücret, minimum [MIN]$)</color>\n"
+gui_set_limit_order_price_name: "<b><gradient:#ff9305:#ffeb38>Fiyat</gradient></b>"
+gui_set_limit_order_price_lore_not_set: "<gradient:#9e9eff:#b8ffdc>Emrin gerçekleştirileceği</gradient>\n<gradient:#9e9eff:#b8ffdc>fiyatı belirle.</gradient>\n\n<gradient:#2eff8c:#5bff2e>⏵ Fiyat belirlemek için tıkla</gradient>"
+gui_set_limit_order_price_lore_set: "<gradient:#9e9eff:#b8ffdc>Emrin gerçekleştirileceği</gradient>\n<gradient:#9e9eff:#b8ffdc>fiyatı belirle.</gradient>\n\n<gradient:#f7cc3e:#b8ffdc>Fiyat:</gradient> [PRICE]\n\n<gradient:#2eff8c:#5bff2e>⏵ Fiyatı değiştirmek için tıkla</gradient>"
+gui_set_limit_order_quantity_name: "<b><gradient:#ff9305:#ffeb38>Miktar</gradient></b>"
+gui_set_limit_order_quantity_lore_not_set: "<gradient:#9e9eff:#b8ffdc>İşlem için eşya</gradient>\n<gradient:#9e9eff:#b8ffdc>miktarını belirle.</gradient>\n\n<gradient:#2eff8c:#5bff2e>⏵ Miktarı belirlemek için tıkla</gradient>"
+gui_set_limit_order_quantity_lore_set: "<gradient:#9e9eff:#b8ffdc>İşlem için eşya</gradient>\n<gradient:#9e9eff:#b8ffdc>miktarını belirle.</gradient>\n\n<gradient:#f7cc3e:#b8ffdc>Miktar:</gradient> <color:#33ff00>[AMOUNT]</color>\n\n<gradient:#2eff8c:#5bff2e>⏵ Miktarı değiştirmek için tıkla</gradient>"
+gui_set_limit_order_buy_name: "<b><gradient:#30ff29:#c0ff8a>Satın Alma Emri Kur</gradient></b>"
+gui_set_limit_order_buy_lore_unfilled: "\n<gradient:#9e9eff:#b8ffdc>Emri kurmak için gerekli bilgileri</gradient>\n<gradient:#9e9eff:#b8ffdc>doldur. (Fiyat, Miktar)</gradient>\n "
+gui_set_limit_order_buy_lore: "\n<u><gradient:#ff9305:#ffeb38>Emir incelemesi</gradient></u>\n\n[CAUTION]<gradient:#969aff:#e9d1ff>Eşya:</gradient> [NAME]\n<gradient:#969aff:#e9d1ff>Fiyat:</gradient> [PRICE]\n<gradient:#969aff:#e9d1ff>Miktar:</gradient> <color:#4dff5b>[AMOUNT]</color>\n\n<gradient:#969aff:#e9d1ff>Süre: </gradient><color:#edc4ff>[DURATION]</color>\n <gradient:#6687ff:#72a9b5>╠═ Süresi doluyor</gradient> <color:#45ffa5>[DATE]</color>\n <gradient:#6687ff:#72a9b5>╚═ Ücret:</gradient> [FEE]\n\n<gradient:#2eff8c:#5bff2e><b>⏵ Onaylamak için tıkla</b></gradient>\n<color:#11ba0b>Onaylandığında [HELD] hesabından</color>\n<color:#11ba0b>tutulacak ve [FEE] ücretlendirilecek.</color>"
+gui_set_limit_order_sell_name: "<b><gradient:#ff4a36:#ffb56b>Satış Emri Kur</gradient></b>"
+gui_set_limit_order_sell_lore_unfilled: "\n<gradient:#9e9eff:#b8ffdc>Emri kurmak için gerekli bilgileri</gradient>\n<gradient:#9e9eff:#b8ffdc>doldur. (Fiyat, Miktar)</gradient>\n "
+gui_set_limit_order_sell_lore: "\n<u><gradient:#ff9305:#ffeb38>Emir incelemesi</gradient></u>\n\n[CAUTION]<gradient:#969aff:#e9d1ff>Eşya:</gradient> [NAME]\n<gradient:#969aff:#e9d1ff>Fiyat:</gradient> [PRICE]\n<gradient:#969aff:#e9d1ff>Miktar:</gradient> <color:#4dff5b>[AMOUNT]</color>\n\n<gradient:#969aff:#e9d1ff>Süre: </gradient><color:#edc4ff>[DURATION]</color>\n <gradient:#6687ff:#72a9b5>╠═ Süresi doluyor</gradient> <color:#45ffa5>[DATE]</color>\n <gradient:#6687ff:#72a9b5>╚═ Ücret:</gradient> [FEE]\n\n<gradient:#2eff8c:#5bff2e><b>⏵ Onaylamak için tıkla</b></gradient>\n<color:#11ba0b>Onaylandığında [AMOUNT] x [NAME]</color>\n<color:#11ba0b>envanterinden tutulacak</color>\n<color:#11ba0b>ve [FEE] hesabından ücretlendirilecek.</color>"
+gui_set_limit_order_buy_caution: "<color:#fbff00>⚠ <b><gradient:#ffcb3d:#ff5c0a>DİKKAT</gradient></b> ⚠</color>\n<gradient:#ffcb3d:#ff5c0a>Limit fiyatı mevcut fiyatın</gradient>\n<gradient:#ffcb3d:#ff5c0a>üzerinde ([PRICE])!</gradient>\n\n"
+gui_set_limit_order_sell_caution: "<color:#fbff00>⚠ <b><gradient:#ffcb3d:#ff5c0a>DİKKAT</gradient></b> ⚠</color>\n<gradient:#ffcb3d:#ff5c0a>Limit fiyatı mevcut fiyatın</gradient>\n<gradient:#ffcb3d:#ff5c0a>altında ([PRICE])!</gradient>\n\n"
+
+anvil_limit_price_title: "Limit Fiyatı: [NAME]"
+anvil_limit_price_text: "Fiyat: "
+anvil_limit_price_invalid: "Geçersiz fiyat."
+anvil_limit_quantity_title: "Miktar: [NAME]"
+anvil_limit_quantity_text: "Miktar: "
+anvil_limit_quantity_invalid: "Geçersiz Miktar."
+anvil_limit_quantity_max_reached: "Maksimum [MAX]"
+
+# DISCORD - No MiniMessage support. ---------------------------------
+
+discord_status: "fiyatların nasıl hareket ettiği"
+
+# Logs
+
+discord_log_trade_linked: "> [[NICK]](https:[UUID]) veya [[USER]](https:id-[ID]) ``[ALIAS]`` eşyasından ``[QUANTITY]`` [ACTION] **[WORTH]** karşılığında"
+discord_log_trade_not_linked: "> [[NICK]](https:[UUID]) ``[ALIAS]`` eşyasından ``[QUANTITY]`` [ACTION] **[WORTH]** karşılığında"
+discord_log_buy: ":inbox_tray: satın aldı"
+discord_log_sell: ":outbox_tray: sattı"
+discord_log_linked: "> :link: Kullanıcı [[NICK]](https:[UUID]) discord hesabı [[DISCORD-NAME]](https:id-[ID]) ile bağlandı"
+discord_log_unlinked: "> :chains: Kullanıcı [[NICK]](https:[UUID]) discord hesabı [[DISCORD-NAME]](https:id-[ID]) ile bağlantısı kesildi"
+
+# Main menu
+
+discord_main_title: ":green_circle:  Canlı eşya pazarı"
+discord_main_footer: "Daha fazla detay ve işlem yapmak (Al/sat) için bir eşya seç. \nİşlemlerdeki fiyatlar değişebilir."
+discord_top_gainers: "En çok kazananlar"
+discord_most_popular: "En popüler"
+discord_big_dippers: "Büyük düşenler"
+discord_buy: "Satın Al"
+discord_sell: "Sat"
+discord_outdated: ":warning: Dikkat: Bilgi güncel değil!"
+discord_day_high: "1 gün yüksek: "
+discord_day_low: "1 gün düşük: "
+discord_historical_high: "Tarihsel yüksek: "
+discord_daily_volume: "Hacim (24s): "
+discord_position: "Pazardaki pozisyon: "
+discord_trend: "Trend (24s): "
+discord_inventory_value: "Değer: "
+discord_buy_slot: "Slot satın al "
+discord_sell_all: "Hepsini Sat"
+discord_confirm: "Onayla"
+
+discord_market_paused: ":pause_button: Pazar durduruldu! Sunucu tekrar açıldığında devam edecek."
+
+discord_detailed_graph_of: "Detaylı grafik"
+discord_1_day: "1 Gün"
+discord_1_month: "1 Ay"
+discord_1_year: "1 Yıl"
+discord_all: "Tümü"
+
+discord_cpi_evolution: "TÜFE Gelişimi"
+discord_compare_cpi: "TÜFE ve Eşyayı Karşılaştır"
+discord_flows: "Pazar Akışları"
+
+discord_material_to_compare: "Karşılaştırmak istediğin eşyanın adı."
+discord_comparison_title: "TÜFE'yi Nesneyle Karşılaştır"
+discord_comparison_label: "Eşya Adı"
+
+discord_cpi_y: "TÜFE"
+discord_cpi: "TÜFE"
+discord_cpi_vs_item: "TÜFE vs [NAME] (Göreli Getiri)"
+discord_flow_y_1: "Birikmiş Akış ($)"
+discord_flow_y_2: "Günlük Değişim ($)"
+discord_flow_legend_1: "Pazar Akışı"
+discord_flow_legend_2: "Toplanan Vergiler"
+
+discord_advanced_tools: "Araçlar:"
+discord_advanced_graphs: "Grafikler:"
+
+discord_button_1: "Eşya Ara"
+discord_button_2: "İşlem Geçmişi"
+discord_button_3: "Gelişmiş"
+discord_button_4: "Hesap Bağla"
+discord_button_5: "Envanter"
+discord_button_6: "Bakiye"
+discord_button_7: "Brokerler"
+
+discord_graph_y_left: "Fiyat ($)"
+discord_graph_y_right: "Hacim"
+
+discord_wiki: "# :information_source: Pazar bilgileri\n> Bu kanalı kullanarak **oyunda olmadan eşya alıp satabilir ve daha fazlasını yapabilirsin!** Bunu kullanmaya başlamak için discord hesabını bağlaman gerekiyor, bunun için :link: **Hesap bağlama** butonuna bas ve talimatları takip et.\n## Daha fazla bilgi için bir kategoriye tıkla"
+discord_wiki_1: "Envanter"
+discord_wiki_2: "Bakiye"
+discord_wiki_3: "Alarmlar"
+discord_wiki_4: "Dinamik Emirler"
+discord_wiki_5: "Oturumlar"
+discord_wiki_6: "Brokerler"
+
+discord_wiki_inventory: "## :school_satchel: Envanter\n> Hesabını bağladığında, **oyun içi paran discord hesabınla paylaşılacak** ve tam tersi, ayrıca **sanal bir envanter alacaksın**, discord üzerinden satın aldığın eşyaları burada saklayabilirsin. Her slot **benzersiz bir eşya türünden 999'a kadar** saklayabilir. İki slot aynı materyal türünü saklayamaz. Daha fazla slot satın alabilir ve :school_satchel: **Envanter** butonuna basarak içeriği ve değeri kontrol edebilirsin."
+discord_wiki_balance: "## :coin: Bakiye\n> Eğer bağlıysan, :coin: **Bakiye** butonu mali durumunla ilgili bazı istatistikleri gösterecek. **Discord ve minecraft hesapların arasında paylaşılan cüzdanı** ve **portföyünün mevcut değeri** ve **broker yönetimi altındaki para** gibi diğer bilgileri gösterecek."
+discord_wiki_alerts: "## :bell: Alarmlar\n> Belirli bir eşyayla ilgileniyorsan, **önceden kaydettiğin bir eşyanın fiyatı eşiğe ulaştığında DM almak** için **alarm** kurabilirsin. Kendi alarmlarını kurmak için :bell:**Alarmlar** kullan"
+
+discord_not_linked_short: "Bağlı değil!"
+discord_not_linked: ":exclamation: Hesabın bağlı değil! Hesap bağlama işlemini başlatmak için oyunda ``/link`` komutunu çalıştır."
+discord_insufficient_balance: ":x: Yeterli para yok! Mevcut bakiyen: **[VALUE1]** ve en az **[VALUE2]** gerekiyor"
+discord_without_space: ":x: Portföyünde yeterli alan yok!"
+
+discord_alert_name: "Alarm"
+discord_alerts_name: "Alarmlar"
+discord_no_alerts_setup: "Kurulmuş alarmın yok!"
+discord_alert_header: "Alarmlar :bell:\n\n"
+discord_alert_segment: "> ``[NAME]`` şu fiyatta: [PRICE]"
+discord_add_alert_button: "Alarm Ekle"
+discord_remove_alert_button: "Alarm Kaldır"
+discord_add_alert_argument_material: "İzlenecek eşyanın materyali."
+discord_add_alert_argument_price: "Ulaşıldığında bildirim almak istediğin fiyat."
+discord_create_alert: "Alarm Oluştur"
+discord_alert_at_price: "Şu fiyatta: [PRICE]"
+discord_alert_remove_select: "Kaldırmak istediğin alarmı seç."
+discord_alert_invalid_material: "Bu materyal geçerli değil!"
+discord_alert_invalid_price: "Bu fiyat geçerli değil!"
+discord_alert_success: "Başarılı! Fiyat ulaştığında DM alacaksın."
+discord_alert_limit_reached: "Alarm limitine ulaşıldı! Yeni alarm oluşturmadan önce alarmları kaldır."
+discord_alert_already_listed: "Bu eşya zaten izleme listende!"
+discord_alert_reached_segment: ":bell: [EMOJI] Eşya için alarm ulaştı: ``[NAME] ([PRICE1])`` mevcut fiyat: ``[PRICE2]``"
+discord_alert_not_in_watchlist: ":x: Eşya izleme listende değil."
+discord_alert_removed: ":no_bell: **[NAME]** için alarm kaldırıldı."
+
+discord_link_discordsrv: ":link: Bağlama işlemini başlatmak için oyunda ``/link `` kullan!"
+discord_link_native: ":link: Hesabını oyunda ``/link [KOD]`` kullanarak bağla!"
+discord_link_discordsrv_extensive: ":link: Pazarla etkileşim kurabilmek için minecraft ve discord hesaplarını bağlaman gerekiyor.\nİşlemi başlatmak için oyunda ``/discord link`` kullan!"
+discord_link_discordsrv_already: ":link: Hesabın şu kullanıcıyla bağlı: ``[UUID]``"
+discord_link_native_extensive: ":link: Pazarla etkileşim kurabilmek için minecraft ve discord hesaplarını bağlaman gerekiyor.\n\n> Hesabını oyunda ``/link [KOD]`` kullanarak bağla!"
+discord_link_native_already: ":link: Hesabın şu kullanıcıyla bağlı: ``[NICKNAME]``"
+discord_unlink_button: "Hesap bağlantısını kes"
+discord_unlinked: ":link: Hesabının ``[NICKNAME]`` ile bağlantısını kestin"
+discord_already_unlinked: ":exclamation: Zaten bağlı değilsin!"
+
+discord_market_closed: ":lock: Pazar şu anda kapalı!"
+
+discord_buy_feedback: ":inbox_tray: **[ALIAS]** eşyasından **[QUANTITY]** satın aldın, değer: **[WORTH]**\n\n:coin: Bakiyen şimdi: **[BALANCE]**"
+discord_buy_more_feedback: ":inbox_tray: **[ALIAS]** eşyasından **[QUANTITY]** satın aldın, değer: **[WORTH]** (her biri [WORTH-EACH])\n\n:coin: Bakiyen şimdi: **[BALANCE]**"
+discord_buy_limit_feedback: ":regional_indicator_x: Kimse bu eşyayı satmıyor! Satın alamazsın."
+
+discord_not_enough_items: ":x: Portföyünde bu eşyadan yeterli yok!"
+
+discord_sell_feedback: ":outbox_tray: **[ALIAS]** eşyasından **[QUANTITY]** sattın, değer: **[WORTH]**\n\n:coin: Bakiyen şimdi: **[BALANCE]**"
+discord_sell_more_feedback: ":outbox_tray: **[ALIAS]** eşyasından **[QUANTITY]** sattın, değer: **[WORTH]** (her biri [WORTH-EACH])\n\n:coin: Bakiyen şimdi: **[BALANCE]**"
+discord_sold_everything: "Her şeyi şu kadar karşılığında sattın: **[VALUE]**"
+discord_sell_limit_feedback: ":regional_indicator_x: Kimse bu eşyayı satın almıyor! Satamazsın."
+
+discord_not_enough_slot: ":x: Başka slot satın alacak yeterli paran yok! **[PRICE]** gerekiyor"
+discord_already_max_slots: ":x: Zaten maksimum slot sayısını satın aldın!"
+discord_slot_bought: "[NUM] numaralı slot satın alındı!"
+
+discord_trade_history_title: ":scroll: **İşlem geçmişi:** Sayfa [PAGE] ([NUM-TRADES]/15)"
+
+discord_balance_title: ":coin:  **Bakiye**:"
+discord_balance_report: "\n> :green_circle: :dollar: **Cüzdan** (Minecraft): ``[PURSE]``\n> :yellow_circle: :school_satchel: **Portföy**: ``[INVENTORY-VALUE]``\n>\n> :abacus: **Toplam**: ``[TOTAL]``\n"
+discord_purse: "Cüzdan"
+discord_inventory: "Envanter"
+
+discord_material_to_operate: "İşlem yapmak istediğin eşyanın materyali"
+discord_material_not_recognized: ":x: Eşya tanınmıyor!"
+
+discord_not_allowed_command: ":exclamation: Bu komutu kullanma izniniz yok!"
+
+# LAYOUT TEXTS:
+# Main title.
+advancedgui_title: "Eşya Pazarı"
+# More text:
+advancedgui_top_movers: "En Çok Hareket Edenler"
+advancedgui_subtop: "son 30 dakikada"
+advancedgui_buy: "Satın Al"
+advancedgui_sell: "Sat"
+advancedgui_price: "Fiyat:"
+advancedgui_amount_selection: "Miktar seç:"
+advancedgui_trend: "Trend:" 

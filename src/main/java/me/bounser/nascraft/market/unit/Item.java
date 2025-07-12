@@ -419,7 +419,7 @@ public class Item {
     }
 
     public void ghostBuyItem(int amount) {
-        updateInternalValues(-amount, amount, -amount,price.getValue()*price.getBuyTaxMultiplier());
+        updateInternalValues(-amount, amount, -amount, price.getValue()*price.getBuyTaxMultiplier());
         MarketManager.getInstance().addOperation();
     }
 

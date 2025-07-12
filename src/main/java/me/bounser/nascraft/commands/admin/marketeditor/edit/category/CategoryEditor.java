@@ -161,7 +161,23 @@ public class CategoryEditor {
         newCategory.setDisplayMaterial(material);
         newCategory.setItems(previousCategory.getItems());
 
-        categories.set(categories.indexOf(previousCategory), newCategory);
+        int categoryIndex = categories.indexOf(previousCategory);
+        
+        if (categoryIndex == -1) {
+            for (int i = 0; i < categories.size(); i++) {
+                if (categories.get(i).getIdentifier().equals(identifier)) {
+                    categoryIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (categoryIndex != -1) {
+            categories.set(categoryIndex, newCategory);
+        } else {
+            categories.add(newCategory);
+            player.sendMessage(ChatColor.YELLOW + "Warning: Previous category not found, added as new category.");
+        }
 
         MarketManager.getInstance().setCategories(categories);
 

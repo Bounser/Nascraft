@@ -344,7 +344,23 @@ public class Price {
     }
 
     public float getValueChangeLastHour() {
-        return RoundUtils.roundToOne((float) (-100 + 100*value/hourValues.get(0)));
+        if (hourValues == null || hourValues.isEmpty()) {
+            return 0.0f;
+        }
+        
+        double hourAgoValue = hourValues.get(0);
+        
+        if (hourAgoValue == 0 || !Double.isFinite(hourAgoValue) || !Double.isFinite(value)) {
+            return 0.0f;
+        }
+        
+        double changeValue = -100 + 100 * value / hourAgoValue;
+        
+        if (!Double.isFinite(changeValue)) {
+            return 0.0f;
+        }
+        
+        return RoundUtils.roundToOne((float) changeValue);
     }
 
     public double getValueAnHourAgo() { return hourValues.get(0); }

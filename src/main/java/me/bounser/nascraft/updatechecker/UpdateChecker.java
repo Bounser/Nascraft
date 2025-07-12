@@ -1,6 +1,7 @@
 package me.bounser.nascraft.updatechecker;
 
 import me.bounser.nascraft.Nascraft;
+import me.bounser.nascraft.managers.scheduler.SchedulerManager;
 import org.bukkit.Bukkit;
 
 import java.io.IOException;
@@ -20,7 +21,8 @@ public class UpdateChecker {
     }
 
     public void getVersion(final Consumer<String> consumer) {
-        Bukkit.getScheduler().runTaskAsynchronously(instance, () -> {
+        // Use the scheduler adapter instead of Bukkit's scheduler
+        SchedulerManager.getInstance().runAsync(() -> {
             try (InputStream is = new URL("https://api.spigotmc.org/legacy/update.php?resource=" + this.resourceId + "/~").openStream(); Scanner scann = new Scanner(is)) {
                 if (scann.hasNext()) {
                     consumer.accept(scann.next());
@@ -30,5 +32,4 @@ public class UpdateChecker {
             }
         });
     }
-
 }

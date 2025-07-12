@@ -6,12 +6,14 @@ import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
 import me.bounser.nascraft.portfolio.Portfolio;
+import me.bounser.nascraft.web.dto.PlayerStatsDTO;
 
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface Database {
@@ -24,15 +26,11 @@ public interface Database {
 
     void saveEverything();
 
-    //
-
     void saveLink(String userId, UUID uuid, String nickname);
     void removeLink(String userId);
     UUID getUUID(String userId);
     String getNickname(String userId);
     String getUserId(UUID uuid);
-
-    //
 
     void saveDayPrice(Item item, Instant instant);
     void saveMonthPrice(Item item, Instant instant);
@@ -43,14 +41,10 @@ public interface Database {
     List<Instant> getAllPrices(Item item);
     Double getPriceOfDay(String identifier, int day);
 
-    //
-
     void saveItem(Item item);
     void retrieveItem(Item item);
     void retrieveItems();
     float retrieveLastPrice(Item item);
-
-    //
 
     void saveTrade(Trade trade);
     List<Trade> retrieveTrades(UUID uuid, int offset, int limit);
@@ -58,8 +52,6 @@ public interface Database {
     List<Trade> retrieveTrades(Item item, int offset, int limit);
     List<Trade> retrieveTrades(int offset, int limit);
     void purgeHistory();
-
-    //
 
     void updateItemPortfolio(UUID uuid, Item item, int quantity);
     void removeItemPortfolio(UUID uuid, Item item);
@@ -83,15 +75,11 @@ public interface Database {
     HashMap<UUID, Portfolio> getTopWorth(int n);
     double getLatestWorth(UUID uuid);
 
-    //
-
     void logContribution(UUID uuid, Item item, int amount);
     void logWithdraw(UUID uuid, Item item, int amount);
     HashMap<Integer, Double> getContributionChangeEachDay(UUID uuid);
     HashMap<Integer, HashMap<String, Integer>> getCompositionEachDay(UUID uuid);
     int getFirstDay(UUID uuid);
-
-    //
 
     void saveCPIValue(float indexValue);
 
@@ -112,7 +100,21 @@ public interface Database {
     void removeLimitOrder(String uuid, String identifier);
     void retrieveLimitOrders();
 
-    String getNameByUUID(UUID uuid);
     void saveOrUpdateName(UUID uuid, String name);
-
+    
+    String getNameByUUID(UUID uuid);
+    UUID getUUIDbyName(String name);
+    
+    void updateBalance(UUID uuid);
+    Map<Integer, Double> getMoneySupplyHistory();
+    void storeCredentials(String userName, String hash);
+    String retrieveHash(String userName);
+    void clearUserCredentials(String userName);
+    void saveOrUpdatePlayerStats(UUID uuid);
+    List<PlayerStatsDTO> getAllPlayerStats(UUID uuid);
+    void saveDiscordLink(UUID uuid, String userid, String nickname);
+    void removeDiscordLink(UUID uuid);
+    String getDiscordUserId(UUID uuid);
+    UUID getUUIDFromUserid(String userid);
+    String getNicknameFromUserId(String userid);
 }

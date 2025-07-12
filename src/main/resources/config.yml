@@ -4,13 +4,100 @@
 language: 'en_US'
 
 database:
-  # Available types: SQLite
+  # Available types: SQLite, MYSQL, REDIS
   type: 'SQLite'
 
   # How many days should logs of trades last in the database?
   # With the option 60, all trades older than 60 days will be automatically removed.
   # Use -1 to disable (Keep all trades logged).
   days-until-history-removed: 60
+  
+  # MySQL configuration (only used when type is set to MYSQL)
+  mysql:
+    host: 'localhost'
+    port: 3306
+    database: 'nascraft'
+    user: 'root'
+    password: ''
+  
+  # Redis configuration (only used when type is set to REDIS)
+  redis:
+    # Host address
+    host: 'localhost'
+    # Port number
+    port: 6379
+    # Username (leave empty for no username)
+    username: ''
+    # Password (leave empty for no password)
+    password: ''
+    # Database number (0-15)
+    database: 0
+    # Maximum number of connections in the pool
+    max-connections: 8
+    # Maximum number of idle connections
+    max-idle: 8
+    # Minimum number of idle connections
+    min-idle: 0
+    
+    # Distributed market synchronization across multiple servers
+    distributed-sync:
+      # Enable real-time price synchronization between servers
+      enabled: true
+      # Noise master configuration - prevents price change loops
+      noise-master:
+        # Enable noise master system - only one server applies noise
+        enabled: true
+        # Auto-elect noise master if none specified (first server to connect)
+        auto-elect: true
+        # Manually specify noise master server ID (optional)
+        # If not specified and auto-elect is true, first server becomes master
+        # master-server: "server-12345678"
+        # Check interval for noise master health (seconds)
+        health-check-interval: 30
+        # Timeout for noise master heartbeat (seconds)
+        master-timeout: 60
+      # Server heartbeat interval in seconds (how often to announce this server is online)
+      heartbeat-interval: 15
+      # Maximum time to wait for Redis operations before giving up (in milliseconds)
+      operation-timeout: 5000
+      # Maximum retry attempts for failed synchronization operations
+      max-retries: 3
+      # Retry delay multiplier for exponential backoff (milliseconds)
+      retry-backoff: 50
+      # Enable detailed logging for distributed operations (for debugging)
+      debug-logging: false
+    
+    # Data synchronization options
+    sync:
+      # Items to prioritize for synchronization
+      priority-items:
+        - 'price'
+        - 'balance'
+        - 'tax'
+        - 'currency'
+        - 'wand'
+      # Synchronization interval in milliseconds (lower means more frequent updates but more network traffic)
+      interval-ms: 100
+      # Use a fallback database for operations that don't require real-time synchronization
+      use-fallback: true
+      # Failover mode when Redis is unavailable:
+      # 'readonly' - Allow only read operations
+      # 'writelocal' - Allow both read and write operations, but only to local database
+      # 'disable' - Disable the plugin completely
+      failover-mode: 'writelocal'
+
+# Folia compatibility settings
+folia:
+  # Enable region-aware scheduling (will automatically detect if Folia is available)
+  enabled: true
+  # Maximum concurrent tasks per region
+  max-region-tasks: 5
+  # Default region for global tasks
+  default-region: 'global'
+  # Load balancing strategy: 'round-robin' or 'least-busy'
+  load-balance: 'round-robin'
+  # Whether to use async operations for database access
+  async-db-operations: true
 
 currencies:
   # Currency to be used by default by all items.

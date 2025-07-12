@@ -208,8 +208,18 @@ public class DiscordBot {
             items = MarketManager.getInstance().getAllParentItemsInAlphabeticalOrder();
         }
 
-        for (Item item : items)
-            builder.addOption(item.getName(), item.getIdentifier(), Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC) + " - " + Lang.get().message(Message.DISCORD_BUY) + ": " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getBuyPrice(), Style.ROUND_BASIC)+ " " + Lang.get().message(Message.DISCORD_SELL) + ": " + Formatter.plainFormat(item.getCurrency(), item.getPrice().getSellPrice(), Style.ROUND_BASIC));
+        if (items.isEmpty()) {
+            builder.addOption("No items available", "no_items", "Market is empty - no items configured");
+        } else {
+            for (Item item : items) {
+                builder.addOption(item.getName(), item.getIdentifier(), 
+                    Formatter.plainFormat(item.getCurrency(), item.getPrice().getValue(), Style.ROUND_BASIC) + " - " + 
+                    Lang.get().message(Message.DISCORD_BUY) + ": " + 
+                    Formatter.plainFormat(item.getCurrency(), item.getPrice().getBuyPrice(), Style.ROUND_BASIC) + " " + 
+                    Lang.get().message(Message.DISCORD_SELL) + ": " + 
+                    Formatter.plainFormat(item.getCurrency(), item.getPrice().getSellPrice(), Style.ROUND_BASIC));
+            }
+        }
 
         return builder.build();
     }

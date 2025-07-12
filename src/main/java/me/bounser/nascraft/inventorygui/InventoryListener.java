@@ -112,7 +112,12 @@ public class InventoryListener implements Listener {
 
             Item item = MarketManager.getInstance().getItem(metadata.substring(10));
 
-            if (item == null) return;
+            if (item == null) {
+                // Provide feedback to the player when the item doesn't exist
+                player.sendMessage("§cError: This item is not available in the market. Please contact an administrator.");
+                Nascraft.getInstance().getLogger().warning("Player " + player.getName() + " tried to buy item with identifier '" + metadata.substring(10) + "' but it doesn't exist in the market!");
+                return;
+            }
 
             if (config.getBuySellBackEnabled() && slot == config.getBuySellBackSlot()) {
                 MarketMenuManager.getInstance().setMenuOfPlayer(player, new CategoryMenu(player, item.getCategory()));

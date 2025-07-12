@@ -230,8 +230,18 @@ public class MarketManager {
         List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
 
         List<Item> topGainers = new ArrayList<>();
+        
+        // Check if items list is empty
+        if (items.isEmpty()) {
+            return topGainers;
+        }
 
         for (int i = 1; i <= quantity ; i++) {
+            
+            // Check if there are still items to process
+            if (items.isEmpty()) {
+                break;
+            }
 
             Item imax = items.get(0);
             for (Item item : items) {
@@ -256,8 +266,18 @@ public class MarketManager {
         List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
 
         List<Item> topDippers = new ArrayList<>();
+        
+        // Check if items list is empty
+        if (items.isEmpty()) {
+            return topDippers;
+        }
 
         for (int i = 1; i <= quantity ; i++) {
+            
+            // Check if there are still items to process
+            if (items.isEmpty()) {
+                break;
+            }
 
             Item imax = items.get(0);
             for (Item item : items) {
@@ -282,8 +302,18 @@ public class MarketManager {
         List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
 
         List<Item> mostMoved = new ArrayList<>();
+        
+        // Check if items list is empty
+        if (items.isEmpty()) {
+            return mostMoved;
+        }
 
         for (int i = 1; i <= quantity ; i++) {
+            
+            // Check if there are still items to process
+            if (items.isEmpty()) {
+                break;
+            }
 
             Item imax = items.get(0);
             for (Item item : items) {
@@ -308,8 +338,18 @@ public class MarketManager {
         List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
 
         List<Item> mostTraded = new ArrayList<>();
+        
+        // Check if items list is empty
+        if (items.isEmpty()) {
+            return mostTraded;
+        }
 
         for (int i = 1; i <= quantity ; i++) {
+            
+            // Check if there are still items to process
+            if (items.isEmpty()) {
+                break;
+            }
 
             Item imax = items.get(0);
             for (Item item : items) {
@@ -421,6 +461,11 @@ public class MarketManager {
                 numOfItems++;
             }
         }
+        
+        // Handle case when no items are included in CPI calculation
+        if (numOfItems == 0) {
+            return 100.0f; // Return base index value
+        }
 
         return (index/numOfItems)*100;
     }
@@ -451,7 +496,15 @@ public class MarketManager {
 
     public ItemDTO getPopularItem() {
 
-        Item item = getMostTraded(1).get(0);
+        List<Item> mostTraded = getMostTraded(1);
+        
+        // Check if there are any items
+        if (mostTraded.isEmpty()) {
+            // Return a default/empty ItemDTO
+            return new ItemDTO("", "No items available", 0.0, 0.0, 0.0, 0, 0.0);
+        }
+        
+        Item item = mostTraded.get(0);
 
         return new ItemDTO(
                 item.getIdentifier(),
@@ -620,7 +673,8 @@ public class MarketManager {
 
         List<TransactionDTO> transactions = new ArrayList<>();
 
-        UUID uuid = UUID.fromString(DatabaseManager.get().getDatabase().getUUIDbyName(playerName));
+        UUID uuid = DatabaseManager.get().getDatabase().getUUIDbyName(playerName);
+        if (uuid == null) return transactions;
 
         List<Trade> trades = DatabaseManager.get().getDatabase().retrieveTrades(uuid,0, 500);
 
@@ -639,11 +693,28 @@ public class MarketManager {
         return transactions;
     }
 
-    public List<PlayerStatsDTO> getPlayerStats(String uuidStr) {
-
-        UUID uuid = UUID.fromString(uuidStr);
-
-        return DatabaseManager.get().getDatabase().getAllPlayerStats(uuid);
+    public PlayerStatsDTO getPlayerStats(UUID uuid, String playerName) {
+        double totalSpent = 0;
+        double totalEarned = 0;
+        int itemsBought = 0;
+        int itemsSold = 0;
+        
+        // Calculate player statistics from trades
+        List<Trade> trades = DatabaseManager.get().getDatabase().retrieveTrades(uuid, 0, Integer.MAX_VALUE);
+        for (Trade trade : trades) {
+            if (trade.getAmount() > 0) {
+                // Buy transaction
+                totalSpent += trade.getValue() * trade.getAmount();
+                itemsBought += trade.getAmount();
+            } else {
+                // Sell transaction
+                totalEarned += trade.getValue() * Math.abs(trade.getAmount());
+                itemsSold += Math.abs(trade.getAmount());
+            }
+        }
+        
+        // Create PlayerStatsDTO with UUID and player name
+        return new PlayerStatsDTO(uuid, playerName, totalSpent, totalEarned, itemsBought, itemsSold);
     }
 
     public List<DetailedTransactionDTO> getLastTransactions() {
@@ -670,7 +741,8 @@ public class MarketManager {
 
     public DebtDTO getDebtPlayer(String playerName) {
 
-        UUID uuid = UUID.fromString(DatabaseManager.get().getDatabase().getUUIDbyName(playerName));
+        UUID uuid = DatabaseManager.get().getDatabase().getUUIDbyName(playerName);
+        if (uuid == null) return null;
 
         DebtManager debt = DebtManager.getInstance();
 
