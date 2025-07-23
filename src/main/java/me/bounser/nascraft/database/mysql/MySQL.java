@@ -3,13 +3,18 @@ package me.bounser.nascraft.database.mysql;
 import me.bounser.nascraft.chart.cpi.CPIInstant;
 import me.bounser.nascraft.database.Database;
 import me.bounser.nascraft.database.commands.resources.DayInfo;
+import me.bounser.nascraft.database.commands.resources.NormalisedDate;
 import me.bounser.nascraft.database.commands.resources.Trade;
 import me.bounser.nascraft.market.unit.Item;
 import me.bounser.nascraft.market.unit.stats.Instant;
 import me.bounser.nascraft.portfolio.Portfolio;
+import me.bounser.nascraft.web.dto.PlayerStatsDTO;
 
-import java.sql.Connection;
+import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.*;
+import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -392,6 +397,65 @@ public class MySQL implements Database {
     @Override
     public void saveOrUpdateName(UUID uuid, String nick) {
 
+    }
+
+    @Override
+    public String getNicknameFromUserId(String userid) {
+        return null;
+    }
+    
+    @Override
+    public UUID getUUIDbyName(String name) {
+        return null;
+    }
+    
+    @Override
+    public void updateBalance(UUID uuid) {
+    }
+    
+    @Override
+    public Map<Integer, Double> getMoneySupplyHistory() {
+        return new HashMap<>();
+    }
+    
+    @Override
+    public void storeCredentials(String userName, String hash) {
+    }
+    
+    @Override
+    public String retrieveHash(String userName) {
+        return null;
+    }
+    
+    @Override
+    public void clearUserCredentials(String userName) {
+    }
+    
+    @Override
+    public void saveOrUpdatePlayerStats(UUID uuid) {
+    }
+    
+    @Override
+    public List<PlayerStatsDTO> getAllPlayerStats(UUID uuid) {
+        return new ArrayList<>();
+    }
+    
+    @Override
+    public void saveDiscordLink(UUID uuid, String userid, String nickname) {
+    }
+    
+    @Override
+    public void removeDiscordLink(UUID uuid) {
+    }
+    
+    @Override
+    public String getDiscordUserId(UUID uuid) {
+        return null;
+    }
+    
+    @Override
+    public UUID getUUIDFromUserid(String userid) {
+        return null;
     }
 
 

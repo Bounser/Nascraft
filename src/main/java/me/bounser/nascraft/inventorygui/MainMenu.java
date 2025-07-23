@@ -181,20 +181,44 @@ public class MainMenu implements MenuPage {
 
             Component trends = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_TRENDS_NAME));
 
+            List<Item> mostTraded = MarketManager.getInstance().getMostTraded(1);
             List<Item> moreMoved = MarketManager.getInstance().getMostTraded(3);
+            
+            String trendsLore;
+            
+            // Check if there are any traded items
+            if (!mostTraded.isEmpty()) {
+                trendsLore = Lang.get().message(Message.GUI_TRENDS_LORE)
+                        .replace("[POPULAR]", mostTraded.get(0).getTaggedName());
 
-            String trendsLore = Lang.get().message(Message.GUI_TRENDS_LORE)
-                            .replace("[POPULAR]", MarketManager.getInstance().getMostTraded(1).get(0).getTaggedName());
+                int i = 1;
 
-            int i = 1;
-
-            for (Item item : moreMoved) {
-                float lastChange = item.getPrice().getValueChangeLastHour();
-                String movement = Lang.get().message(lastChange > 0 ? Message.GUI_TRENDS_POSITIVE : Message.GUI_TRENDS_NEGATIVE);
-                trendsLore = trendsLore.replace("[" + i + "]", movement
-                        .replace("[CHANGE]", String.valueOf(lastChange))
-                        .replace("[NAME]", item.getTaggedName()));
-                i++;
+                for (Item item : moreMoved) {
+                    float lastChange = item.getPrice().getValueChangeLastHour();
+                    String movement = Lang.get().message(lastChange > 0 ? Message.GUI_TRENDS_POSITIVE : Message.GUI_TRENDS_NEGATIVE);
+                    trendsLore = trendsLore.replace("[" + i + "]", movement
+                            .replace("[CHANGE]", String.valueOf(lastChange))
+                            .replace("[NAME]", item.getTaggedName()));
+                    i++;
+                }
+                
+                // Fill in any remaining placeholders if we have less than 3 items
+                for (; i <= 3; i++) {
+                    trendsLore = trendsLore.replace("[" + i + "]", Lang.get().message(Message.GUI_TRENDS_NEGATIVE)
+                            .replace("[CHANGE]", "0.0")
+                            .replace("[NAME]", "N/A"));
+                }
+            } else {
+                // No items available, show a default message
+                trendsLore = Lang.get().message(Message.GUI_TRENDS_LORE)
+                        .replace("[POPULAR]", "No items available");
+                
+                // Replace all placeholders with N/A
+                for (int i = 1; i <= 3; i++) {
+                    trendsLore = trendsLore.replace("[" + i + "]", Lang.get().message(Message.GUI_TRENDS_NEGATIVE)
+                            .replace("[CHANGE]", "0.0")
+                            .replace("[NAME]", "N/A"));
+                }
             }
 
             lore.clear();

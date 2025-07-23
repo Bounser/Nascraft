@@ -62,6 +62,14 @@ public class SQLite implements Database {
 
     @Override
     public void connect() {
+        if (connection != null) {
+            try {
+                if (!connection.isClosed()) {
+                    return;
+                }
+            } catch (SQLException e) {
+            }
+        }
 
         createDatabaseIfNotExists();
 
@@ -850,13 +858,13 @@ public class SQLite implements Database {
     }
 
     @Override
-    public String getUUIDbyName(String name) {
+    public UUID getUUIDbyName(String name) {
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
             return UserNames.getUUIDbyName(connection, name);
         } catch (SQLException e) {
             Nascraft.getInstance().getLogger().warning(e.getMessage());
         }
-        return " ";
+        return null;
     }
 
     @Override
@@ -886,33 +894,62 @@ public class SQLite implements Database {
         }
         return null;
     }
+    
+    private static class Credentials {
+        public static void storeCredentials(Connection connection, String userName, String hash) {
+            try {
+                String sql = "INSERT OR REPLACE INTO credentials (username, hash) VALUES (?, ?);";
+                PreparedStatement prep = connection.prepareStatement(sql);
+                prep.setString(1, userName);
+                prep.setString(2, hash);
+                prep.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+        public static String retrieveHash(Connection connection, String userName) {
+            try {
+                String sql = "SELECT hash FROM credentials WHERE username=?;";
+                PreparedStatement prep = connection.prepareStatement(sql);
+                prep.setString(1, userName);
+                ResultSet resultSet = prep.executeQuery();
+                
+                if (resultSet.next()) {
+                    return resultSet.getString("hash");
+                } else {
+                    return null;
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
+        public static void clearUserCredentials(Connection connection, String userName) {
+            try {
+                String sql = "DELETE FROM credentials WHERE username=?;";
+                PreparedStatement prep = connection.prepareStatement(sql);
+                prep.setString(1, userName);
+                prep.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     @Override
     public void storeCredentials(String userName, String hash) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
-            Credentials.saveCredentials(connection, userName, hash);
-        } catch (SQLException e) {
-            Nascraft.getInstance().getLogger().warning(e.getMessage());
-        }
+        Credentials.storeCredentials(connection, userName, hash);
     }
 
     @Override
     public String retrieveHash(String userName) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
-            return Credentials.getHashFromUserName(connection, userName);
-        } catch (SQLException e) {
-            Nascraft.getInstance().getLogger().warning(e.getMessage());
-        }
-        return null;
+        return Credentials.retrieveHash(connection, userName);
     }
 
     @Override
     public void clearUserCredentials(String userName) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + PATH)) {
-            Credentials.clearUserCredentials(connection, userName);
-        } catch (SQLException e) {
-            Nascraft.getInstance().getLogger().warning(e.getMessage());
-        }
+        Credentials.clearUserCredentials(connection, userName);
     }
 
     @Override

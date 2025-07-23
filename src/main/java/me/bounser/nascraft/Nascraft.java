@@ -10,9 +10,9 @@ import me.bounser.nascraft.commands.admin.marketeditor.edit.category.CategoryEdi
 import me.bounser.nascraft.commands.admin.marketeditor.overview.MarketEditorInvListener;
 import me.bounser.nascraft.commands.alert.AlertsCommand;
 import me.bounser.nascraft.commands.alert.SetAlertCommand;
-import me.bounser.nascraft.commands.credentials.WebCommand;
 import me.bounser.nascraft.commands.discord.DiscordCommand;
 import me.bounser.nascraft.commands.portfolio.PortfolioCommand;
+import me.bounser.nascraft.database.DataMigrationManager;
 import me.bounser.nascraft.inventorygui.Portfolio.PortfolioInventory;
 import me.bounser.nascraft.commands.market.MarketCommand;
 import me.bounser.nascraft.commands.sell.SellHandCommand;
@@ -21,13 +21,17 @@ import me.bounser.nascraft.commands.sell.sellinv.SellInvListener;
 import me.bounser.nascraft.commands.sell.sellinv.SellInvCommand;
 import me.bounser.nascraft.commands.sellwand.GiveSellWandCommand;
 import me.bounser.nascraft.database.DatabaseManager;
+import me.bounser.nascraft.database.DatabaseType;
 import me.bounser.nascraft.discord.DiscordBot;
 import me.bounser.nascraft.commands.discord.LinkCommand;
 import me.bounser.nascraft.discord.linking.LinkManager;
 import me.bounser.nascraft.discord.linking.LinkingMethod;
 import me.bounser.nascraft.inventorygui.InventoryListener;
+import me.bounser.nascraft.managers.CacheManager;
 import me.bounser.nascraft.managers.DebtManager;
 import me.bounser.nascraft.managers.EventsManager;
+import me.bounser.nascraft.managers.scheduler.SchedulerAdapter;
+import me.bounser.nascraft.managers.scheduler.SchedulerManager;
 import me.bounser.nascraft.market.MarketManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.config.Config;
@@ -43,24 +47,22 @@ import me.leoko.advancedgui.utils.VersionMediator;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.milkbowl.vault.permission.Permission;
 import org.apache.commons.io.FileUtils;
-import org.bstats.bukkit.Metrics;
-import org.bstats.charts.AdvancedPie;
-import org.bstats.charts.SimplePie;
-import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bstats.bukkit.Metrics;
 
 import net.milkbowl.vault.economy.Economy;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
+import java.lang.reflect.Method;
+import me.bounser.nascraft.managers.TasksManager;
 
 
 public final class Nascraft extends JavaPlugin {
@@ -73,7 +75,10 @@ public final class Nascraft extends JavaPlugin {
     private static final String AGUI_VERSION = "2.2.8";
 
     private BukkitAudiences adventure;
-
+    private SchedulerAdapter schedulerAdapter;
+    private CacheManager cacheManager;
+    private DataMigrationManager dataMigrationManager;
+    
     private WebServerManager webServerManager;
 
     public static Nascraft getInstance() { return main; }
@@ -86,6 +91,12 @@ public final class Nascraft extends JavaPlugin {
         main = this;
 
         Config config = Config.getInstance();
+
+        this.schedulerAdapter = SchedulerManager.init(this);
+        
+        this.cacheManager = CacheManager.getInstance();
+        
+        this.dataMigrationManager = new DataMigrationManager(this);
 
         setupMetrics();
 
@@ -180,11 +191,6 @@ public final class Nascraft extends JavaPlugin {
         ItemChartReduced.load();
 
         if (config.getWebEnabled()) {
-
-            if (config.isCommandEnabled("web")) {
-                new WebCommand();
-            }
-
             extractDefaultWebFiles();
             extractImage("images/logo.png");
             extractImage("images/logo-color.png");
@@ -192,14 +198,27 @@ public final class Nascraft extends JavaPlugin {
 
             webServerManager = new WebServerManager(this, config.getWebPort());
 
-            getServer().getScheduler().runTaskAsynchronously(this, () -> {
+            SchedulerManager.getInstance().runAsync(() -> {
                 webServerManager.startServer();
             });
+        }
+        
+        if (SchedulerManager.isFolia()) {
+            getLogger().info("Running in Folia mode with region-aware scheduling");
+        } else {
+            getLogger().info("Running in standard Bukkit mode");
+        }
+        
+        if (Config.getInstance().getDatabaseType() == DatabaseType.REDIS && Config.getInstance().getRedisUseFallback()) {
+            getLogger().info("Redis database with SQLite fallback is enabled");
         }
     }
 
     @Override
     public void onDisable() {
+        if (TasksManager.instance != null) {
+            TasksManager.getInstance().prepareForShutdown();
+        }
 
         getLogger().info("Saving and closing connection with database...");
         DatabaseManager.get().getDatabase().disconnect();
@@ -224,14 +243,16 @@ public final class Nascraft extends JavaPlugin {
     private void setupMetrics() {
         Metrics metrics = new Metrics(this, 18404);
 
-        metrics.addCustomChart(new SimplePie("discord_bridge", () -> String.valueOf(Config.getInstance().getDiscordEnabled())));
+        metrics.addCustomChart(new org.bstats.charts.SimplePie("discord_bridge", () -> String.valueOf(Config.getInstance().getDiscordEnabled())));
 
         if (Config.getInstance().getDiscordEnabled())
-            metrics.addCustomChart(new SimplePie("linking_method", () -> Config.getInstance().getLinkingMethod().toString()));
+            metrics.addCustomChart(new org.bstats.charts.SimplePie("linking_method", () -> Config.getInstance().getLinkingMethod().toString()));
 
-        metrics.addCustomChart(new SimplePie("used_with_advancedgui", () -> String.valueOf(Bukkit.getPluginManager().getPlugin("AdvancedGUI") != null)));
-        metrics.addCustomChart(new SingleLineChart("operations_per_hour", () -> MarketManager.getInstance().getOperationsLastHour()));
-        metrics.addCustomChart(new AdvancedPie("players_linked_with_discord", new Callable<Map<String, Integer>>() {
+        metrics.addCustomChart(new org.bstats.charts.SimplePie("used_with_advancedgui", () -> String.valueOf(Bukkit.getPluginManager().getPlugin("AdvancedGUI") != null)));
+        metrics.addCustomChart(new org.bstats.charts.SingleLineChart("operations_per_hour", () -> MarketManager.getInstance().getOperationsLastHour()));
+        metrics.addCustomChart(new org.bstats.charts.SimplePie("folia_enabled", () -> String.valueOf(SchedulerManager.isFolia())));
+        metrics.addCustomChart(new org.bstats.charts.SimplePie("redis_enabled", () -> String.valueOf(Config.getInstance().getDatabaseType() == DatabaseType.REDIS)));
+        metrics.addCustomChart(new org.bstats.charts.AdvancedPie("players_linked_with_discord", new Callable<Map<String, Integer>>() {
             @Override
             public Map<String, Integer> call() {
                 Map<String, Integer> valueMap = new HashMap<>();
@@ -248,7 +269,6 @@ public final class Nascraft extends JavaPlugin {
                 int counter = 0;
                 for (Player player : Bukkit.getOnlinePlayers())
                     if (LinkManager.getInstance().getUserDiscordID(player.getUniqueId()) != null) counter++;
-
                 return counter;
             }
         }));
@@ -257,24 +277,53 @@ public final class Nascraft extends JavaPlugin {
     public static Economy getEconomy() { return economy; }
 
     public static Permission getPermissions() { return perms; }
+    
+    /**
+     * Get the scheduler adapter
+     * 
+     * @return The scheduler adapter
+     */
+    public SchedulerAdapter getSchedulerAdapter() {
+        return schedulerAdapter;
+    }
+    
+    /**
+     * Get the cache manager
+     * 
+     * @return The cache manager
+     */
+    public CacheManager getCacheManager() {
+        return cacheManager;
+    }
+    
+    /**
+     * Get the data migration manager
+     * 
+     * @return The data migration manager
+     */
+    public DataMigrationManager getDataMigrationManager() {
+        return dataMigrationManager;
+    }
 
     private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) { return false; }
-
+        if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
+            return false;
+        }
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) { return false; }
-
+        if (rsp == null) {
+            return false;
+        }
         economy = rsp.getProvider();
-        return economy != null;
+        return true;
     }
 
     private boolean setupPermissions() {
         RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-        perms = rsp.getProvider();
+        if (rsp != null) perms = rsp.getProvider();
         return perms != null;
     }
 
-    public @NonNull BukkitAudiences adventure() {
+    public BukkitAudiences adventure() {
         if (this.adventure == null) {
             throw new IllegalStateException("Tried to access Adventure when the plugin was disabled!");
         }
@@ -282,100 +331,129 @@ public final class Nascraft extends JavaPlugin {
     }
 
     private void createImagesFolder() {
-
-        File imagesFolder = new File(getDataFolder(), "images");
-
-        if (!imagesFolder.exists()) {
-            boolean success = imagesFolder.mkdirs();
-            if (!success) getLogger().warning("Failed to create images folder.");
+        File imageFolder = new File(getDataFolder(), "images");
+        if (!imageFolder.exists()) {
+            imageFolder.mkdirs();
         }
     }
 
     private void checkResources() {
-
-        getLogger().info("Checking required layouts... ");
-        getLogger().info("If you want to disable this procedure, set auto_resources_injection to false in the config.yml file.");
-
-        File fileToReplace = new File(getDataFolder().getParent() + "/AdvancedGUI/layout/Nascraft.json");
-
-        if (!fileToReplace.exists()) {
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(getResource("Nascraft.json")));
-                StringBuilder jsonContent = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    jsonContent.append(line);
-                }
-                reader.close();
-
-                FileUtils.writeStringToFile(fileToReplace, jsonContent.toString(), "UTF-8");
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            if (Bukkit.getPluginManager().getPlugin("AdvancedGUI") == null) {
+                getLogger().warning("AdvancedGUI is not installed! Graph functionality will be limited.");
+                return;
             }
-            getLogger().info("Layout Nascraft.json added.");
-
-            LayoutManager.getInstance().shutdownSync();
-            GuiWallManager.getInstance().shutdown();
-            GuiItemManager.getInstance().shutdown();
-
-            Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-                AdvancedGUI.getInstance().readConfig();
-                VersionMediator.reload();
-                LayoutManager.getInstance().reload(layout -> getLogger().severe("§cFailed to load layout: " + layout + " §7(see console for details)"));
-                Bukkit.getScheduler().runTask(AdvancedGUI.getInstance(), () -> {
-                    GuiWallManager.getInstance().setup();
-                    GuiItemManager.getInstance().setup();
-                });
-            });
-        } else {
-            getLogger().info("Layout (Nascraft.json) present!");
+            
+            GuiItemManager gim = GuiItemManager.getInstance();
+            GuiWallManager gwm = GuiWallManager.getInstance();
+            LayoutManager lm = LayoutManager.getInstance();
+            
+            if (!hasItemKey(gim, "nascraft_item")) {
+                getLogger().warning("Missing nascraft_item in AdvancedGUI configuration!");
+            }
+            
+            File resourcesFolder = new File(getDataFolder(), "resources");
+            if (!resourcesFolder.exists()) {
+                resourcesFolder.mkdirs();
+            }
+            
+            extractLayoutIfNeeded(lm, resourcesFolder, "nascraft_chart");
+            extractLayoutIfNeeded(lm, resourcesFolder, "nascraft_portfolio");
+            
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, "Error checking AdvancedGUI resources", e);
+        }
+    }
+    
+    private boolean hasItemKey(GuiItemManager gim, String key) {
+        try {
+            Method keyExistsMethod = GuiItemManager.class.getDeclaredMethod("keyExists", String.class);
+            keyExistsMethod.setAccessible(true);
+            return (boolean) keyExistsMethod.invoke(gim, key);
+        } catch (Exception e) {
+            getLogger().warning("Could not check if item key exists: " + key);
+            return false;
+        }
+    }
+    
+    private void extractLayoutIfNeeded(LayoutManager lm, File resourcesFolder, String layoutName) {
+        try {
+            Method layoutExistsMethod = LayoutManager.class.getDeclaredMethod("layoutExists", String.class);
+            layoutExistsMethod.setAccessible(true);
+            
+            if (!(boolean) layoutExistsMethod.invoke(lm, layoutName)) {
+                File layoutFile = new File(resourcesFolder, layoutName + ".json");
+                if (!layoutFile.exists()) {
+                    InputStream in = getResource("layouts/" + layoutName + ".json");
+                    if (in != null) {
+                        FileUtils.copyInputStreamToFile(in, layoutFile);
+                        getLogger().info("Extracted layout: " + layoutName);
+                    }
+                }
+                
+                Method extractLayoutMethod = LayoutManager.class.getDeclaredMethod("extractLayout", File.class);
+                extractLayoutMethod.setAccessible(true);
+                extractLayoutMethod.invoke(lm, layoutFile);
+            }
+        } catch (Exception e) {
+            getLogger().warning("Could not extract layout: " + layoutName);
         }
     }
 
     private void extractDefaultWebFiles() {
-        getLogger().info("Checking external web directory: " + new File(getDataFolder(), "web").getPath());
+        File webDir = new File(getDataFolder(), "web");
+        if (!webDir.exists()) {
+            webDir.mkdirs();
+        }
 
-        String[] essentialFiles = {
-                "web/index.html",
-                "web/style.css",
-                "web/script.js"
+        String[] webFiles = {
+                "index.html", "script.js", "style.css"
         };
 
-        boolean copiedAny = false;
-        for (String resourcePath : essentialFiles) {
-            File targetFile = new File(getDataFolder(), resourcePath);
-            try {
-                if (!targetFile.exists()) {
-                    saveResource(resourcePath, false);
-                    getLogger().info("Copied default file: " + resourcePath);
-                    copiedAny = true;
+        for (String fileName : webFiles) {
+            File targetFile = new File(webDir, fileName);
+            if (!targetFile.exists()) {
+                try (InputStream in = getClass().getResourceAsStream("/web/" + fileName)) {
+                    if (in != null) {
+                        try (FileOutputStream out = new FileOutputStream(targetFile)) {
+                            byte[] buffer = new byte[1024];
+                            int bytesRead;
+                            while ((bytesRead = in.read(buffer)) != -1) {
+                                out.write(buffer, 0, bytesRead);
+                            }
+                        }
+                    }
+                } catch (IOException e) {
+                    getLogger().log(Level.SEVERE, "Failed to extract web file: " + fileName, e);
                 }
-            } catch (IllegalArgumentException e) {
-                getLogger().log(Level.SEVERE, "Error extracting: " + resourcePath, e);
             }
         }
-
-        if (!copiedAny) {
-            getLogger().info("External web files are present.");
-        } else {
-            getLogger().info("Default web files copied to " + new File(getDataFolder(), "web").getPath());
-        }
-
     }
 
     private void extractImage(String resourcePath) {
-        File targetFile = new File(getDataFolder(), resourcePath);
+        File imageDir = new File(getDataFolder(), "web/images");
+        if (!imageDir.exists()) {
+            imageDir.mkdirs();
+        }
+
+        String fileName = resourcePath.substring(resourcePath.lastIndexOf("/") + 1);
+        File targetFile = new File(imageDir, fileName);
 
         if (!targetFile.exists()) {
-            try {
-                saveResource(resourcePath, false);
-            } catch (IllegalArgumentException e) {
-                getLogger().log(Level.SEVERE, "Failed to extract image: Resource path '" + resourcePath + "' not found within the plugin JAR!", e);
-            } catch (Exception e) {
-                getLogger().log(Level.SEVERE, "An unexpected error occurred while extracting image '" + resourcePath + "'", e);
+            try (InputStream in = getClass().getResourceAsStream("/web/" + resourcePath)) {
+                if (in != null) {
+                    try (FileOutputStream out = new FileOutputStream(targetFile)) {
+                        byte[] buffer = new byte[1024];
+                        int bytesRead;
+                        while ((bytesRead = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, bytesRead);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                getLogger().log(Level.SEVERE, "Failed to extract image: " + fileName, e);
             }
         }
     }
-
 
 }

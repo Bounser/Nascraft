@@ -1,7 +1,9 @@
 package me.bounser.nascraft.database;
 
+import me.bounser.nascraft.Nascraft;
 import me.bounser.nascraft.config.Config;
 import me.bounser.nascraft.database.mysql.MySQL;
+import me.bounser.nascraft.database.redis.Redis;
 import me.bounser.nascraft.database.sqlite.SQLite;
 
 public class DatabaseManager {
@@ -39,9 +41,12 @@ public class DatabaseManager {
 
             case REDIS:
                 database = new Redis(
-                        Config.getInstance().getHost(),
-                        Config.getInstance().getPort(),
-                        Config.getInstance().getPassword()
+                        Nascraft.getInstance(),
+                        Config.getInstance().getRedisHost(),
+                        Config.getInstance().getRedisPort(),
+                        Config.getInstance().getRedisPassword(),
+                        Config.getInstance().getRedisUsername(),
+                        Config.getInstance().getRedisDatabase()
                 ); break;
         }
 

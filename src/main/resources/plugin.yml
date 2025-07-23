@@ -5,3 +5,10 @@ api-version: 1.13
 softdepend: [ Vault, PlaceholderAPI, AdvancedGUI, DiscordSRV ]
 authors: [ bounser ]
 description: Market valuations in minecraft
+folia-supported: true
+
+commands:
+  migrate:
+    description: Migrates data from SQLite to Redis
+    usage: /migrate
+    permission: nascraft.admin

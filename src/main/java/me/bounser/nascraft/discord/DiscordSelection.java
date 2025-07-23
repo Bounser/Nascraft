@@ -16,6 +16,13 @@ public class DiscordSelection extends ListenerAdapter {
 
         if (event.getChannel().getId().equals(Config.getInstance().getChannel())) {
 
+            if (event.getValues().get(0).equals("no_items")) {
+                event.reply(":exclamation: No items are currently available in the market!")
+                        .setEphemeral(true)
+                        .queue(message -> message.deleteOriginal().queueAfter(7, TimeUnit.SECONDS));
+                return;
+            }
+
             if (event.getValues().get(0).contains("alert-")) {
 
                 if (DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()) == null || !DiscordAlerts.getInstance().getAlerts().get(event.getUser().getId()).containsKey(MarketManager.getInstance().getItem(event.getValues().get(0).substring(6)))) {
@@ -34,6 +41,13 @@ public class DiscordSelection extends ListenerAdapter {
             }
 
             Item item = MarketManager.getInstance().getItem(event.getValues().get(0));
+            
+            if (item == null) {
+                event.reply(":exclamation: The selected item is no longer available!")
+                        .setEphemeral(true)
+                        .queue(message -> message.deleteOriginal().queueAfter(7, TimeUnit.SECONDS));
+                return;
+            }
 
             DiscordBot.getInstance().sendBasicScreen(item, event.getUser(), null, event, null);
         }

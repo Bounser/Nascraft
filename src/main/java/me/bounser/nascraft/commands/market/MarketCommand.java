@@ -101,6 +101,10 @@ public class MarketCommand extends Command {
             Item item = MarketManager.getInstance().getItem(args[1]);
 
             if (item == null) {
+                player.sendMessage("§cDebug: Item '" + args[1] + "' not found in market.");
+                player.sendMessage("§eAvailable items: " + String.join(", ", MarketManager.getInstance().getAllItemsAndChildsIdentifiers()));
+                player.sendMessage("§eTotal loaded items: " + MarketManager.getInstance().getAllItems().size());
+                
                 Lang.get().message(player, Message.MARKET_CMD_INVALID_IDENTIFIER);
                 return;
             }

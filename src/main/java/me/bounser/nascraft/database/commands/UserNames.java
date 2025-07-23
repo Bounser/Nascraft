@@ -50,4 +50,21 @@ public class UserNames {
         }
     }
 
+    public static UUID getUUIDbyName(Connection connection, String name) {
+        try {
+            String sql = "SELECT uuid FROM user_names WHERE name=?;";
+            PreparedStatement prep = connection.prepareStatement(sql);
+            prep.setString(1, name);
+            ResultSet resultSet = prep.executeQuery();
+
+            if (resultSet.next()) {
+                String uuidString = resultSet.getString("uuid");
+                return UUID.fromString(uuidString);
+            } else {
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -48,6 +48,9 @@ import java.util.logging.Level;
 import com.google.gson.Gson; // Keep Gson for parsing Discord's JSON response
 import com.google.gson.JsonObject; // Keep Gson for parsing Discord's JSON response
 
+import java.time.LocalDateTime;
+import java.util.Collections;
+
 
 public class WebServerManager {
 
@@ -537,15 +540,17 @@ public class WebServerManager {
             webServer.get("/api/stats", ctx -> {
                 HttpSession session = ctx.req().getSession(false);
                 String uuidStr = (String) session.getAttribute("minecraft-uuid");
-                List<PlayerStatsDTO> stats = marketManager.getPlayerStats(uuidStr);
-                ctx.json(stats != null ? stats : new ArrayList<>());
+                String username = (String) session.getAttribute("minecraft-user-name");
+                UUID uuid = UUID.fromString(uuidStr);
+                PlayerStatsDTO stats = marketManager.getPlayerStats(uuid, username);
+                ctx.json(stats != null ? Collections.singletonList(stats) : new ArrayList<>());
             });
             webServer.get("/api/debt", ctx -> {
                 HttpSession session = ctx.req().getSession(false);
                 String username = (String) session.getAttribute("minecraft-user-name");
                 DebtDTO debt = marketManager.getDebtPlayer(username);
                 if (debt == null) {
-                    ctx.json(new DebtDTO(0, 0, 0, 0, 0, 0, "00:00"));
+                    ctx.json(new DebtDTO(UUID.randomUUID(), "", 0, 0, LocalDateTime.now(), LocalDateTime.now(), false));
                 } else {
                     ctx.json(debt);
                 }
