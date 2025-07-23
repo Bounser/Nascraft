@@ -139,7 +139,7 @@
         <dependency>
             <groupId>xyz.xenondevs.invui</groupId>
             <artifactId>invui</artifactId>
-            <version>1.43</version>
+            <version>1.45</version>
             <type>pom</type>
         </dependency>
         <dependency>
