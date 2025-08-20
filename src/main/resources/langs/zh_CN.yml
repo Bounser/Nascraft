@@ -62,8 +62,8 @@ alert_invalid_use: "<gradient:#FB6363:#C4B3FD>命令使用错误。正确用法�
 alert_not_linked: "<gradient:#FB6363:#C4B3FD>✘ 请先绑定账户！</gradient>"
 alert_in_watchlist: "<gradient:#FB6363:#C4B3FD>该物品已在监控列表中。</gradient>"
 alert_invalid_price: "<gradient:#FB6363:#C4B3FD>✘ 价格必须为数字（例如 120.90）</gradient>"
-alert_not_recognized: "<gradient:#FB6363:#C4B3FD>物品未识别。</gradient>"
-alert_setup: "<gradient:#00E3FB:#F9ABFD>警报设置成功！当价格达到时将收到私信通知。</gradient>"
+alert_not_recognized: "<gradient:#FB6363:#C4B3FD>未能识别物品，请检查指令参数。</gradient>"
+alert_setup: "<gradient:#00E3FB:#F9ABFD>警报设置成功！当价格达到您设定的价格时将会收到私信通知。</gradient>"
 
 # 警报列表 (alerts)
 alerts_empty: "<gradient:#FB6363:#C4B3FD>未设置任何警报。</gradient>"
@@ -96,7 +96,7 @@ link_direct_message: ":link: 你的Discord账户已成功绑定Minecraft用户�
 
 # Discord命令 (DISCORD COMMAND)
 discordcmd_not_linked: "<gradient:#FB6363:#C4B3FD>✘ 账户未绑定！</gradient>"
-discordcmd_linked: "<gradient:#FF00CD:#DA58FF>已绑定用户：</gradient> <bold><light_purple>[USER]</light_purple></bold>"
+discordcmd_linked: "<gradient:#FF00CD:#DA58FF>已绑定账户：</gradient> <bold><light_purple>[USER]</light_purple></bold>"
 
 # 投资组合 (Portfolio)
 portfolio_title: "<b><gradient:#8c2eff:#cd75ff>投资组合</gradient></b>"
@@ -154,7 +154,7 @@ portfolio_debt_anvil_repay_title: "债务还款"
 portfolio_debt_anvil_custom: "贷款金额："
 portfolio_debt_anvil_custom_title: "申请贷款"
 
-portfolio_top_name: "<gradient:#8c00ff:#1c3eff>富豪榜单</gradient>"
+portfolio_top_name: "<gradient:#8c00ff:#1c3eff>首富榜单</gradient>"
 portfolio_top_button_lore: "\n<gradient:#2eff8c:#5bff2e>⏵ 点击查看排行榜</gradient>"
 portfolio_top_title: "<gradient:#8c00ff:#1c3eff>顶级投资组合</gradient>"
 portfolio_top_back_name: "<gradient:#ff816b:#ff2e38>⏪ 返回</gradient>"

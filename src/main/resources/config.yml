@@ -1,10 +1,13 @@
 # Nascraft config.yml - ${project.version}
+# Check the guide.md file for more guidance on configuration
 
-# Language file to use. Available: en_US es_ES it_IT de_DE pt_BR
+# Language file to use. Available: en_US | es_ES | it_IT | de_DE | pt_BR | zh_CN
+# As of the time of authoring this config.yml update, it appears that Nascraft does not put the langueages in 
+# the ~/plugins/Nascraft folder. For a preview of the translations, head here --> https://github.com/Bounser/Nascraft/tree/master/src/main/resources/langs
 language: 'en_US'
 
 database:
-  # Available types: SQLite, MYSQL, REDIS
+  # Available storage types: SQLite, MYSQL, REDIS
   type: 'SQLite'
 
   # How many days should logs of trades last in the database?
@@ -12,7 +15,7 @@ database:
   # Use -1 to disable (Keep all trades logged).
   days-until-history-removed: 60
   
-  # MySQL configuration (only used when type is set to MYSQL)
+  # MySQL configuration (only used when storage type is set to MYSQL)
   mysql:
     host: 'localhost'
     port: 3306
@@ -20,7 +23,7 @@ database:
     user: 'root'
     password: ''
   
-  # Redis configuration (only used when type is set to REDIS)
+  # Redis configuration (only used when storage type is set to REDIS)
   redis:
     # Host address
     host: 'localhost'
@@ -95,6 +98,10 @@ folia:
   # Default region for global tasks
   default-region: 'global'
   # Load balancing strategy: 'round-robin' or 'least-busy'
+  # Note that `round-robin` randomly balances the load to a thread, regaurdless of whether or not it is busy
+  # the `Lest Busy` option choses the thread with the least load, and computes on that thread
+  # This option can **arguably** prevent lag (to some degree)
+  # if you are seeking server optimizaitons that are more effective, this is not the place. 
   load-balance: 'round-robin'
   # Whether to use async operations for database access
   async-db-operations: true
@@ -106,7 +113,7 @@ currencies:
 
   suppliers:
 
-    # Vault has to be installed!
+    # For this feature to work, the Vault plugin has to be installed and functional
     vault:
       format: "<gradient:#f09947:#feed81>[AMOUNT]$</gradient>"
       not-enough: "<gradient:#FB6363:#C4B3FD>✘ You don't have enough money to buy that!</gradient>"
@@ -118,7 +125,7 @@ currencies:
     #  TO ADD OTHER CURRENCIES PLACEHOLDEDRAPI HAS TO BE INSTALLED  #
     #################################################################
 
-    # !!! Keep in mind that both commands and placeholder have to work even if the player
+    # !!! Keep in mind that both commands and placeholders have to work even if the player
     # !!! is offline if you plan to use the discord extension!
 
     # Example of another kind of currency:
@@ -416,6 +423,10 @@ sell-wands:
       estimate: 'left'
 
 # BETA: Self-hosted website with information and charts.
+# This will start a webserver on http(s)://localhost:{port number}
+# If you are running this server on inside a Docker cointainer, remember to open the ports
+# and restart the server for the webserver to be accessable
+# If you are running the server remotely, access the webserver at http(s)://your.server.ip/{port}
 web:
   enabled: true # Set to true to enable the web server
   port: 8080    # The port the web server will run on

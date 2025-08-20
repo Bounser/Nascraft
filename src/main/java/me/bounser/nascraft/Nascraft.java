@@ -155,6 +155,7 @@ public final class Nascraft extends JavaPlugin {
         }
 
         createImagesFolder();
+        extractGuide(); // Made this to extract the guide.md from the resources folders into the plugins dir -- Earth
 
         MarketManager.getInstance();
 
@@ -455,5 +456,22 @@ public final class Nascraft extends JavaPlugin {
             }
         }
     }
-
+    /**
+     * Extracts the guide.md file to the plugin's data folder if it doesn't exist.
+     */
+    private void extractGuide() {
+        File guideFile = new File(getDataFolder(), "guide.md");
+        if (!guideFile.exists()) {
+            try (InputStream in = getResource("guide.md")) {
+                if (in != null) {
+                    FileUtils.copyInputStreamToFile(in, guideFile);
+                    getLogger().info("Extracted guide.md to plugin folder.");
+                } else {
+                    getLogger().warning("guide.md not found in plugin resources!");
+                }
+            } catch (IOException e) {
+                getLogger().log(Level.SEVERE, "Could not extract guide.md! Did he reject my PR?", e);
+            }
+        }
+    }
 }
