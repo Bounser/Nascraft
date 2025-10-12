@@ -1,10 +1,10 @@
 # Nascraft config.yml - ${project.version}
 
-# Language file to use. Available: en_US es_ES it_IT de_DE pt_BR
+# Language file to use. Available: en_US | es_ES | it_IT | de_DE | pt_BR | zh_CN
 language: 'en_US'
 
 database:
-  # Available types: SQLite, MYSQL, REDIS
+  # Available types: SQLite | MYSQL | REDIS
   type: 'SQLite'
 
   # How many days should logs of trades last in the database?
@@ -115,7 +115,7 @@ currencies:
       low-limit: 0.005
 
     #################################################################
-    #  TO ADD OTHER CURRENCIES PLACEHOLDEDRAPI HAS TO BE INSTALLED  #
+    #  !PLACEHODLER API MUST BE INSTALLED TO USE OTHER CURRENCIES!  #
     #################################################################
 
     # !!! Keep in mind that both commands and placeholder have to work even if the player
@@ -175,6 +175,7 @@ market-control:
   # Do players need the permission "nascraft.market" to operate directly with commands?
   market-permission: true
 
+# set up command aliases for Nascraft
 commands:
   nascraft:
     enabled: true
