@@ -7,14 +7,18 @@ import me.bounser.nascraft.market.unit.Item;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Transaction;
 import redis.clients.jedis.params.ScanParams;
 import redis.clients.jedis.resps.ScanResult;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -27,9 +31,12 @@ public class DistributedMarketSync {
 
     private static final String CHANNEL_PRICE_UPDATE = "nascraft:price:updates";
     private static final String CHANNEL_TRANSACTION = "nascraft:transactions";
+    private static final String CHANNEL_BATCH_UPDATE = "nascraft:batch:updates";
     private static final String KEY_MASTER = "nascraft:master";
     private static final String KEY_ITEM_STOCK = "nascraft:item:%s:stock";
     private static final String KEY_SERVER_HEARTBEAT = "nascraft:server:%s:heartbeat";
+    private static final int BATCH_SIZE = 50;
+    private static final int BATCH_INTERVAL_MS = 100;
 
     private final Nascraft plugin;
     private final JedisPool jedisPool;
@@ -37,14 +44,29 @@ public class DistributedMarketSync {
     private final boolean isMaster;
     private final String masterServerId;
     private final ConcurrentHashMap<String, ReentrantLock> itemLocks;
+    private final ConcurrentHashMap<String, Float> pendingUpdates;
+    private final ConcurrentLinkedQueue<PendingTransaction> transactionQueue;
     private final ScheduledExecutorService scheduler;
     private volatile boolean enabled = false;
     private Thread priceListenerThread;
     private Thread transactionListenerThread;
     private ScheduledFuture<?> heartbeatTask;
     private ScheduledFuture<?> masterCheckTask;
+    private ScheduledFuture<?> batchProcessTask;
     private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
     private static final int MAX_RECONNECT_ATTEMPTS = 10;
+
+    private static class PendingTransaction {
+        final String itemId;
+        final float stockChange;
+        final long timestamp;
+        
+        PendingTransaction(String itemId, float stockChange) {
+            this.itemId = itemId;
+            this.stockChange = stockChange;
+            this.timestamp = System.currentTimeMillis();
+        }
+    }
 
     public DistributedMarketSync(Nascraft plugin, JedisPool jedisPool) {
         this.plugin = plugin;
@@ -53,7 +75,9 @@ public class DistributedMarketSync {
         this.isMaster = Config.getInstance().isMasterServer();
         this.masterServerId = Config.getInstance().getMasterServerId();
         this.itemLocks = new ConcurrentHashMap<>();
-        this.scheduler = Executors.newScheduledThreadPool(3);
+        this.pendingUpdates = new ConcurrentHashMap<>();
+        this.transactionQueue = new ConcurrentLinkedQueue<>();
+        this.scheduler = Executors.newScheduledThreadPool(4);
 
         plugin.getLogger().info("DistributedMarketSync initialized - Server: " + serverId + 
                                ", Role: " + (isMaster ? "MASTER" : "SLAVE"));

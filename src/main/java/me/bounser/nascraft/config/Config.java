@@ -672,12 +672,12 @@ public class Config {
 
     public ItemStack getItemStackOfChild(String identifier, String childIdentifier) {
         ItemStack itemStack = null;
-        if (this.items.contains("items." + identifier + ".childs." + childIdentifier + "item-stack")) {
-            itemStack = (ItemStack)this.items.getSerializable("items." + identifier + ".childs." + childIdentifier + "item-stack", ItemStack.class);
+        if (this.items.contains("items." + identifier + ".child." + childIdentifier + ".item-stack")) {
+            itemStack = (ItemStack)this.items.getSerializable("items." + identifier + ".child." + childIdentifier + ".item-stack", ItemStack.class);
         }
         if (itemStack == null) {
             try {
-                itemStack = new ItemStack(Material.getMaterial((String)childIdentifier.replaceAll("\\d", "").toUpperCase()));
+                itemStack = new ItemStack(Material.getMaterial(childIdentifier.replaceAll("\\d", "").toUpperCase()));
             } catch (IllegalArgumentException e) {
                 Nascraft.getInstance().getLogger().severe("Couldn't load child item with identifier: " + childIdentifier + " for parent: " + identifier);
                 Nascraft.getInstance().getLogger().severe("Reason: Material " + childIdentifier.replaceAll("\\d", "").toUpperCase() + " is not valid!");
