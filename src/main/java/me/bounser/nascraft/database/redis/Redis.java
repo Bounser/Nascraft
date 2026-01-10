@@ -52,9 +52,15 @@ public class Redis implements Database {
         fallbackDatabase.connect();
         
         JedisPoolConfig poolConfig = new JedisPoolConfig();
-        poolConfig.setMaxTotal(128);
+        poolConfig.setMaxTotal(32);
         poolConfig.setMaxIdle(16);
-        poolConfig.setMinIdle(8);
+        poolConfig.setMinIdle(4);
+        poolConfig.setMaxWait(java.time.Duration.ofMillis(3000));
+        poolConfig.setTestOnBorrow(true);
+        poolConfig.setTestWhileIdle(true);
+        poolConfig.setTimeBetweenEvictionRuns(java.time.Duration.ofSeconds(30));
+        poolConfig.setMinEvictableIdleTime(java.time.Duration.ofSeconds(60));
+        poolConfig.setBlockWhenExhausted(true);
         
         if (password != null && !password.isEmpty()) {
             if (username != null && !username.isEmpty()) {
@@ -338,17 +344,23 @@ public class Redis implements Database {
     public List<Instant> getDayPrices(Item item) {
         List<Instant> prices = new ArrayList<>();
         try (Jedis jedis = pool.getResource()) {
-            Set<String> keys = jedis.keys("item:" + item.getIdentifier() + ":price:day:*");
-            for (String key : keys) {
-                String dateStr = key.substring(key.lastIndexOf(":") + 1);
-                LocalDate date = LocalDate.parse(dateStr);
-                String priceStr = jedis.get(key);
-                if (priceStr != null) {
-                    double price = Double.parseDouble(priceStr);
-                    Instant instant = new Instant(date.atStartOfDay(), price, 0);
-                    prices.add(instant);
+            String pattern = "item:" + item.getIdentifier() + ":price:day:*";
+            String cursor = "0";
+            redis.clients.jedis.params.ScanParams params = new redis.clients.jedis.params.ScanParams().match(pattern).count(100);
+            do {
+                redis.clients.jedis.resps.ScanResult<String> result = jedis.scan(cursor, params);
+                for (String key : result.getResult()) {
+                    String dateStr = key.substring(key.lastIndexOf(":") + 1);
+                    LocalDate date = LocalDate.parse(dateStr);
+                    String priceStr = jedis.get(key);
+                    if (priceStr != null) {
+                        double price = Double.parseDouble(priceStr);
+                        Instant instant = new Instant(date.atStartOfDay(), price, 0);
+                        prices.add(instant);
+                    }
                 }
-            }
+                cursor = result.getCursor();
+            } while (!"0".equals(cursor));
             return prices;
         } catch (Exception e) {
             plugin.getLogger().log(Level.SEVERE, "Error getting day prices from Redis", e);
@@ -360,19 +372,25 @@ public class Redis implements Database {
     public List<Instant> getMonthPrices(Item item) {
         List<Instant> prices = new ArrayList<>();
         try (Jedis jedis = pool.getResource()) {
-            Set<String> keys = jedis.keys("item:" + item.getIdentifier() + ":price:month:*");
-            for (String key : keys) {
-                String[] parts = key.substring(key.lastIndexOf("month:") + 6).split(":");
-                int year = Integer.parseInt(parts[0]);
-                int month = Integer.parseInt(parts[1]);
-                LocalDate date = LocalDate.of(year, month, 1);
-                String priceStr = jedis.get(key);
-                if (priceStr != null) {
-                    double price = Double.parseDouble(priceStr);
-                    Instant instant = new Instant(date.atStartOfDay(), price, 0);
-                    prices.add(instant);
+            String pattern = "item:" + item.getIdentifier() + ":price:month:*";
+            String cursor = "0";
+            redis.clients.jedis.params.ScanParams params = new redis.clients.jedis.params.ScanParams().match(pattern).count(100);
+            do {
+                redis.clients.jedis.resps.ScanResult<String> result = jedis.scan(cursor, params);
+                for (String key : result.getResult()) {
+                    String[] parts = key.substring(key.lastIndexOf("month:") + 6).split(":");
+                    int year = Integer.parseInt(parts[0]);
+                    int month = Integer.parseInt(parts[1]);
+                    LocalDate date = LocalDate.of(year, month, 1);
+                    String priceStr = jedis.get(key);
+                    if (priceStr != null) {
+                        double price = Double.parseDouble(priceStr);
+                        Instant instant = new Instant(date.atStartOfDay(), price, 0);
+                        prices.add(instant);
+                    }
                 }
-            }
+                cursor = result.getCursor();
+            } while (!"0".equals(cursor));
             return prices;
         } catch (Exception e) {
             plugin.getLogger().log(Level.SEVERE, "Error getting month prices from Redis", e);

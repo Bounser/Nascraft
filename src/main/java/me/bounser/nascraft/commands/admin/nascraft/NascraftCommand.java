@@ -339,30 +339,20 @@ public class NascraftCommand extends Command {
     
     private void showNoiseMasterStatus(Player player, Redis redisDB) {
         try {
-            if (Config.getInstance().getNoiseMasterEnabled()) {
-                player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GREEN + "✓ Noise master system is ENABLED");
-                
-                String currentNoiseMaster = redisDB.getDistributedSync().getCurrentNoiseMaster();
-                boolean isNoiseMaster = redisDB.getDistributedSync().isNoiseMaster();
-                
-                if (currentNoiseMaster != null) {
-                    player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Current noise master: " + ChatColor.WHITE + currentNoiseMaster);
-                    if (isNoiseMaster) {
-                        player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GREEN + "✓ This server is the NOISE MASTER");
-                    } else {
-                        player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "This server is a noise follower");
-                    }
-                } else {
-                    player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.YELLOW + "⚠ No noise master currently active");
-                }
-                
-                player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Use " + ChatColor.WHITE + "/nascraft noise" + ChatColor.GRAY + " for noise master commands");
+            boolean isMaster = redisDB.getDistributedSync().isMaster();
+            String role = isMaster ? "MASTER" : "SLAVE";
+            String masterServerId = redisDB.getDistributedSync().getMasterServerId();
+            
+            player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Server role: " + 
+                (isMaster ? ChatColor.GREEN : ChatColor.YELLOW) + role);
+            
+            if (isMaster) {
+                player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GREEN + "This server controls all price changes");
             } else {
-                player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.YELLOW + "⚠ Noise master system is DISABLED");
-                player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "All servers apply noise independently");
+                player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Master server: " + ChatColor.WHITE + masterServerId);
             }
         } catch (Exception e) {
-            player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Error checking noise master status: " + e.getMessage());
+            player.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Error checking status: " + e.getMessage());
         }
     }
     
@@ -373,141 +363,43 @@ public class NascraftCommand extends Command {
         }
         
         if (!DatabaseManager.get().getDatabase().getClass().getSimpleName().equals("Redis")) {
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Noise master commands are only available with Redis database.");
+            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Sync commands are only available with Redis database.");
             return;
         }
         
         Redis redisDB = (Redis) DatabaseManager.get().getDatabase();
-        
-        if (args.length == 1) {
-            showNoiseCommandHelp(sender);
-            return;
-        }
-        
-        switch (args[1].toLowerCase()) {
-            case "status":
-                showNoiseMasterFullStatus(sender, redisDB);
-                break;
-                
-            case "claim":
-                claimNoiseMaster(sender, redisDB);
-                break;
-                
-            case "set":
-                if (args.length != 3) {
-                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Usage: /nascraft noise set <server-id>");
-                    return;
-                }
-                setNoiseMaster(sender, redisDB, args[2]);
-                break;
-                
-            default:
-                showNoiseCommandHelp(sender);
-        }
+        showSyncStatus(sender, redisDB);
     }
     
-    private void showNoiseCommandHelp(CommandSender sender) {
-        sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "=== Noise Master Commands ===");
-        sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "/nascraft noise status - Show detailed noise master status");
-        sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "/nascraft noise claim - Claim noise master role for this server");
-        sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "/nascraft noise set <server-id> - Set specific server as noise master");
-        sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.YELLOW + "Note: Only one server should apply noise to prevent price loops");
-    }
-    
-    private void showNoiseMasterFullStatus(CommandSender sender, Redis redisDB) {
+    private void showSyncStatus(CommandSender sender, Redis redisDB) {
         try {
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "=== Noise Master Status ===");
+            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "=== Distributed Sync Status ===");
             
-            if (!Config.getInstance().getNoiseMasterEnabled()) {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.YELLOW + "⚠ Noise master system is DISABLED");
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "All servers apply noise independently");
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Enable in config.yml: database.redis.distributed-sync.noise-master.enabled");
-                return;
-            }
+            boolean isMaster = redisDB.getDistributedSync().isMaster();
+            String serverId = redisDB.getDistributedSync().getServerId();
+            String masterServerId = redisDB.getDistributedSync().getMasterServerId();
             
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GREEN + "✓ Noise master system is ENABLED");
+            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Server ID: " + ChatColor.WHITE + serverId);
+            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Role: " + 
+                (isMaster ? ChatColor.GREEN + "MASTER" : ChatColor.YELLOW + "SLAVE"));
             
-            String currentNoiseMaster = redisDB.getDistributedSync().getCurrentNoiseMaster();
-            boolean isNoiseMaster = redisDB.getDistributedSync().isNoiseMaster();
-            String thisServerId = redisDB.getDistributedSync().getServerId();
-            
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "This server ID: " + ChatColor.WHITE + thisServerId);
-            
-            if (currentNoiseMaster != null) {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Current noise master: " + ChatColor.WHITE + currentNoiseMaster);
-                if (isNoiseMaster) {
-                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GREEN + "✓ This server is the NOISE MASTER");
-                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "This server applies noise to all items");
-                } else {
-                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "This server is a noise follower");
-                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "This server receives noise changes from master");
-                }
+            if (isMaster) {
+                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GREEN + "This server controls all price changes and noise");
             } else {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.YELLOW + "⚠ No noise master currently active");
-                if (Config.getInstance().getNoiseMasterAutoElect()) {
-                    sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Auto-elect is enabled - first server will become master");
-                }
+                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Master server: " + ChatColor.WHITE + masterServerId);
+                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Transactions are forwarded to master");
             }
             
-            Set<String> activeServers = redisDB.getActiveServers();
+            Set<String> activeServers = redisDB.getDistributedSync().getActiveServers();
             sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Active servers (" + activeServers.size() + "):");
-            for (String serverId : activeServers) {
-                boolean isMaster = serverId.equals(currentNoiseMaster);
-                String prefix = isMaster ? ChatColor.GREEN + "★ " : ChatColor.GRAY + "  • ";
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + prefix + ChatColor.WHITE + serverId);
+            for (String server : activeServers) {
+                boolean isThisMaster = server.equals(masterServerId);
+                String prefix = isThisMaster ? ChatColor.GREEN + "* " : ChatColor.GRAY + "  ";
+                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + prefix + ChatColor.WHITE + server);
             }
             
         } catch (Exception e) {
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Error checking noise master status: " + e.getMessage());
-        }
-    }
-    
-    private void claimNoiseMaster(CommandSender sender, Redis redisDB) {
-        try {
-            if (!Config.getInstance().getNoiseMasterEnabled()) {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Noise master system is disabled in config.yml");
-                return;
-            }
-            
-            boolean success = redisDB.getDistributedSync().setNoiseMaster(redisDB.getDistributedSync().getServerId());
-            
-            if (success) {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GREEN + "✓ Successfully claimed noise master role!");
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "This server will now apply noise to all items");
-            } else {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Failed to claim noise master role");
-            }
-            
-        } catch (Exception e) {
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Error claiming noise master role: " + e.getMessage());
-        }
-    }
-    
-    private void setNoiseMaster(CommandSender sender, Redis redisDB, String serverId) {
-        try {
-            if (!Config.getInstance().getNoiseMasterEnabled()) {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Noise master system is disabled in config.yml");
-                return;
-            }
-            
-            Set<String> activeServers = redisDB.getActiveServers();
-            if (!activeServers.contains(serverId)) {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Server '" + serverId + "' is not currently active");
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "Active servers: " + String.join(", ", activeServers));
-                return;
-            }
-            
-            boolean success = redisDB.getDistributedSync().setNoiseMaster(serverId);
-            
-            if (success) {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GREEN + "✓ Successfully set '" + serverId + "' as noise master!");
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.GRAY + "That server will now apply noise to all items");
-            } else {
-                sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Failed to set noise master");
-            }
-            
-        } catch (Exception e) {
-            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Error setting noise master: " + e.getMessage());
+            sender.sendMessage(ChatColor.DARK_PURPLE + "[NC] " + ChatColor.RED + "Error: " + e.getMessage());
         }
     }
 }

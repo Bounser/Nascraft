@@ -7,654 +7,500 @@ import me.bounser.nascraft.market.unit.Item;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.Transaction;
+import redis.clients.jedis.params.ScanParams;
+import redis.clients.jedis.resps.ScanResult;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 
-/**
- * Plugin-only distributed market synchronization using standard Redis operations.
- * No server configuration required - works with any default Redis installation.
- */
 public class DistributedMarketSync {
+
+    private static final String CHANNEL_PRICE_UPDATE = "nascraft:price:updates";
+    private static final String CHANNEL_TRANSACTION = "nascraft:transactions";
+    private static final String CHANNEL_BATCH_UPDATE = "nascraft:batch:updates";
+    private static final String KEY_MASTER = "nascraft:master";
+    private static final String KEY_ITEM_STOCK = "nascraft:item:%s:stock";
+    private static final String KEY_SERVER_HEARTBEAT = "nascraft:server:%s:heartbeat";
+    private static final int BATCH_SIZE = 50;
+    private static final int BATCH_INTERVAL_MS = 100;
 
     private final Nascraft plugin;
     private final JedisPool jedisPool;
     private final String serverId;
+    private final boolean isMaster;
+    private final String masterServerId;
     private final ConcurrentHashMap<String, ReentrantLock> itemLocks;
+    private final ConcurrentHashMap<String, Float> pendingUpdates;
+    private final ConcurrentLinkedQueue<PendingTransaction> transactionQueue;
     private final ScheduledExecutorService scheduler;
     private volatile boolean enabled = false;
-    private Thread pubSubThread;
-    private final MarketSyncListener syncListener;
-    
-    // Simple conflict resolution using timestamps and server priority
-    private final long serverStartTime;
-    
-    // Noise master management
-    private volatile String currentNoiseMaster = null;
-    private volatile boolean isNoiseMaster = false;
-    private final Object noiseMasterLock = new Object();
-    
+    private Thread priceListenerThread;
+    private Thread transactionListenerThread;
+    private ScheduledFuture<?> heartbeatTask;
+    private ScheduledFuture<?> masterCheckTask;
+    private ScheduledFuture<?> batchProcessTask;
+    private final AtomicInteger reconnectAttempts = new AtomicInteger(0);
+    private static final int MAX_RECONNECT_ATTEMPTS = 10;
+
+    private static class PendingTransaction {
+        final String itemId;
+        final float stockChange;
+        final long timestamp;
+        
+        PendingTransaction(String itemId, float stockChange) {
+            this.itemId = itemId;
+            this.stockChange = stockChange;
+            this.timestamp = System.currentTimeMillis();
+        }
+    }
+
     public DistributedMarketSync(Nascraft plugin, JedisPool jedisPool) {
         this.plugin = plugin;
         this.jedisPool = jedisPool;
-        this.serverId = generateUniqueServerId();
+        this.serverId = Config.getInstance().getServerId();
+        this.isMaster = Config.getInstance().isMasterServer();
+        this.masterServerId = Config.getInstance().getMasterServerId();
         this.itemLocks = new ConcurrentHashMap<>();
-        this.scheduler = Executors.newScheduledThreadPool(2);
-        this.syncListener = new MarketSyncListener();
-        this.serverStartTime = System.currentTimeMillis();
-        
-        plugin.getLogger().info("Initialized DistributedMarketSync with server ID: " + serverId);
+        this.pendingUpdates = new ConcurrentHashMap<>();
+        this.transactionQueue = new ConcurrentLinkedQueue<>();
+        this.scheduler = Executors.newScheduledThreadPool(4);
+
+        plugin.getLogger().info("DistributedMarketSync initialized - Server: " + serverId + 
+                               ", Role: " + (isMaster ? "MASTER" : "SLAVE"));
     }
-    
-    private String generateUniqueServerId() {
-        // Create unique server ID using server name + random component
-        String serverName = plugin.getServer().getName();
-        if (serverName == null || serverName.isEmpty()) {
-            serverName = "server";
-        }
-        return serverName + "-" + UUID.randomUUID().toString().substring(0, 8);
-    }
-    
+
     public void enable() {
         if (enabled) return;
-        
+
         try {
-            // Test Redis connection first
-            if (!testRedisConnection()) {
+            if (!testConnection()) {
                 plugin.getLogger().warning("Redis connection failed - distributed sync disabled");
                 return;
             }
-            
-            // Start server heartbeat
-            startHeartbeat();
-            
-            // Initialize noise master system
-            initializeNoiseMaster();
-            
-            // Start listening for price updates
-            startSyncListener();
-            
-            // Load current market state
-            loadMarketState();
-            
+
             enabled = true;
-            plugin.getLogger().info("Distributed Market Sync enabled successfully");
-            
+
+            startHeartbeat();
+
+            if (isMaster) {
+                registerAsMaster();
+                startPriceListener();
+                startTransactionListener();
+            } else {
+                startPriceListener();
+                startMasterHealthCheck();
+                loadMarketStateFromMaster();
+            }
+
+            plugin.getLogger().info("Distributed sync enabled - Role: " + (isMaster ? "MASTER" : "SLAVE"));
+
         } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "Failed to enable distributed market sync", e);
+            enabled = false;
+            plugin.getLogger().log(Level.SEVERE, "Failed to enable distributed sync", e);
         }
     }
-    
+
     public void disable() {
         if (!enabled) return;
-        
         enabled = false;
+
+        if (heartbeatTask != null) heartbeatTask.cancel(false);
+        if (masterCheckTask != null) masterCheckTask.cancel(false);
+        if (batchProcessTask != null) batchProcessTask.cancel(false);
         
-        // Stop scheduler
-        if (scheduler != null && !scheduler.isShutdown()) {
-            scheduler.shutdown();
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
         }
-        
-        // Stop pub/sub listener
-        if (pubSubThread != null && pubSubThread.isAlive()) {
-            pubSubThread.interrupt();
+
+        if (priceListenerThread != null) priceListenerThread.interrupt();
+        if (transactionListenerThread != null) transactionListenerThread.interrupt();
+
+        removeHeartbeat();
+
+        if (isMaster) {
+            unregisterAsMaster();
         }
-        
-        // Remove server from active list
-        removeServerHeartbeat();
-        
-        // Step down as noise master if we are one
-        if (isNoiseMaster) {
-            stepDownAsNoiseMaster();
-        }
-        
-        plugin.getLogger().info("Distributed Market Sync disabled");
+
+        plugin.getLogger().info("Distributed sync disabled");
     }
-    
-    private boolean testRedisConnection() {
+
+    private boolean testConnection() {
         try (Jedis jedis = jedisPool.getResource()) {
-            String response = jedis.ping();
-            return "PONG".equals(response);
+            return "PONG".equals(jedis.ping());
         } catch (Exception e) {
             plugin.getLogger().log(Level.WARNING, "Redis connection test failed", e);
             return false;
         }
     }
-    
+
     private void startHeartbeat() {
-        // Send heartbeat every 15 seconds
-        scheduler.scheduleAtFixedRate(() -> {
+        int interval = Config.getInstance().getHeartbeatInterval();
+        heartbeatTask = scheduler.scheduleAtFixedRate(() -> {
             try (Jedis jedis = jedisPool.getResource()) {
-                String heartbeatKey = "nascraft:server:" + serverId + ":heartbeat";
-                jedis.setex(heartbeatKey, 45, String.valueOf(System.currentTimeMillis()));
+                String key = String.format(KEY_SERVER_HEARTBEAT, serverId);
+                jedis.setex(key, interval * 3, String.valueOf(System.currentTimeMillis()));
             } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Failed to send heartbeat", e);
-            }
-        }, 0, 15, TimeUnit.SECONDS);
-    }
-    
-    private void startSyncListener() {
-        pubSubThread = new Thread(() -> {
-            try (Jedis jedis = jedisPool.getResource()) {
-                jedis.subscribe(syncListener, "nascraft:market:updates");
-            } catch (Exception e) {
-                if (enabled) {
-                    plugin.getLogger().log(Level.WARNING, "Market sync listener disconnected", e);
-                    // Auto-reconnect after 5 seconds
-                    scheduler.schedule(this::startSyncListener, 5, TimeUnit.SECONDS);
+                if (Config.getInstance().getDebugLogging()) {
+                    plugin.getLogger().log(Level.WARNING, "Heartbeat failed", e);
                 }
             }
-        });
-        pubSubThread.setDaemon(true);
-        pubSubThread.start();
+        }, 0, interval, TimeUnit.SECONDS);
     }
-    
-    private void loadMarketState() {
-        // Load current prices for all items from Redis
-        MarketManager marketManager = MarketManager.getInstance();
-        
-        for (Item item : marketManager.getAllItems()) {
-            try {
-                loadItemState(item);
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Failed to load state for item: " + item.getIdentifier(), e);
-            }
-        }
-    }
-    
-    private void loadItemState(Item item) {
+
+    private void removeHeartbeat() {
         try (Jedis jedis = jedisPool.getResource()) {
-            String priceKey = "nascraft:item:" + item.getIdentifier() + ":price";
-            String stockKey = "nascraft:item:" + item.getIdentifier() + ":stock";
-            
-            String priceStr = jedis.get(priceKey);
-            String stockStr = jedis.get(stockKey);
-            
-            if (priceStr != null && stockStr != null) {
-                try {
-                    float stock = Float.parseFloat(stockStr);
-                    item.getPrice().setStock(stock);
-                    
-                    plugin.getLogger().info("Loaded item " + item.getIdentifier() + 
-                                           " - Stock: " + stock);
-                } catch (NumberFormatException e) {
-                    plugin.getLogger().warning("Invalid price data for item: " + item.getIdentifier());
-                }
-            }
+            jedis.del(String.format(KEY_SERVER_HEARTBEAT, serverId));
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to remove heartbeat", e);
         }
     }
-    
-    /**
-     * Synchronize item stock change across all servers
-     * Uses Redis WATCH/MULTI/EXEC for atomic operations
-     */
-    public boolean syncStockChange(Item item, float stockChange) {
-        if (!enabled) {
+
+    private void registerAsMaster() {
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.set(KEY_MASTER, serverId);
+            plugin.getLogger().info("Registered as master server");
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.SEVERE, "Failed to register as master", e);
+        }
+    }
+
+    private void unregisterAsMaster() {
+        try (Jedis jedis = jedisPool.getResource()) {
+            String current = jedis.get(KEY_MASTER);
+            if (serverId.equals(current)) {
+                jedis.del(KEY_MASTER);
+            }
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to unregister as master", e);
+        }
+    }
+
+    private void startMasterHealthCheck() {
+        masterCheckTask = scheduler.scheduleAtFixedRate(() -> {
+            if (!isMasterAlive()) {
+                plugin.getLogger().warning("Master server is not responding");
+            }
+        }, 30, 30, TimeUnit.SECONDS);
+    }
+
+    private boolean isMasterAlive() {
+        try (Jedis jedis = jedisPool.getResource()) {
+            String key = String.format(KEY_SERVER_HEARTBEAT, masterServerId);
+            String timestamp = jedis.get(key);
+            if (timestamp == null) return false;
+            long lastBeat = Long.parseLong(timestamp);
+            return (System.currentTimeMillis() - lastBeat) < 60000;
+        } catch (Exception e) {
             return false;
         }
-        
+    }
+
+    private void startPriceListener() {
+        priceListenerThread = new Thread(() -> {
+            while (enabled) {
+                try (Jedis jedis = jedisPool.getResource()) {
+                    reconnectAttempts.set(0);
+                    jedis.subscribe(new PriceUpdateListener(), CHANNEL_PRICE_UPDATE);
+                } catch (Exception e) {
+                    if (enabled) {
+                        int attempts = reconnectAttempts.incrementAndGet();
+                        if (attempts <= MAX_RECONNECT_ATTEMPTS) {
+                            long backoff = Math.min(5000 * (1L << attempts), 60000);
+                            plugin.getLogger().warning("Price listener disconnected, reconnecting in " + backoff + "ms");
+                            try {
+                                Thread.sleep(backoff);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                break;
+                            }
+                        } else {
+                            plugin.getLogger().severe("Max reconnect attempts reached for price listener");
+                            break;
+                        }
+                    }
+                }
+            }
+        }, "Nascraft-PriceListener");
+        priceListenerThread.setDaemon(true);
+        priceListenerThread.start();
+    }
+
+    private void startTransactionListener() {
+        if (!isMaster) return;
+
+        transactionListenerThread = new Thread(() -> {
+            AtomicInteger txReconnectAttempts = new AtomicInteger(0);
+            while (enabled) {
+                try (Jedis jedis = jedisPool.getResource()) {
+                    txReconnectAttempts.set(0);
+                    jedis.subscribe(new TransactionListener(), CHANNEL_TRANSACTION);
+                } catch (Exception e) {
+                    if (enabled) {
+                        int attempts = txReconnectAttempts.incrementAndGet();
+                        if (attempts <= MAX_RECONNECT_ATTEMPTS) {
+                            long backoff = Math.min(5000 * (1L << attempts), 60000);
+                            plugin.getLogger().warning("Transaction listener disconnected, reconnecting in " + backoff + "ms");
+                            try {
+                                Thread.sleep(backoff);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                break;
+                            }
+                        } else {
+                            plugin.getLogger().severe("Max reconnect attempts reached for transaction listener");
+                            break;
+                        }
+                    }
+                }
+            }
+        }, "Nascraft-TransactionListener");
+        transactionListenerThread.setDaemon(true);
+        transactionListenerThread.start();
+    }
+
+    private void loadMarketStateFromMaster() {
+        List<Item> items = MarketManager.getInstance().getAllItems();
+        if (items.isEmpty()) return;
+
+        try (Jedis jedis = jedisPool.getResource()) {
+            Pipeline pipeline = jedis.pipelined();
+            List<redis.clients.jedis.Response<String>> responses = new ArrayList<>();
+            
+            for (Item item : items) {
+                String key = String.format(KEY_ITEM_STOCK, item.getIdentifier());
+                responses.add(pipeline.get(key));
+            }
+            
+            pipeline.sync();
+            
+            for (int i = 0; i < items.size(); i++) {
+                try {
+                    String stockStr = responses.get(i).get();
+                    if (stockStr != null) {
+                        float stock = Float.parseFloat(stockStr);
+                        items.get(i).getPrice().setStock(stock);
+                    }
+                } catch (Exception e) {
+                    if (Config.getInstance().getDebugLogging()) {
+                        plugin.getLogger().warning("Failed to load state for: " + items.get(i).getIdentifier());
+                    }
+                }
+            }
+            
+            plugin.getLogger().info("Loaded market state for " + items.size() + " items from master");
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to load market state from master", e);
+        }
+    }
+
+    public boolean syncStockChange(Item item, float stockChange) {
+        if (!enabled) return false;
+
+        if (isMaster) {
+            return executeStockUpdate(item, stockChange);
+        } else {
+            return sendTransactionToMaster(item, stockChange);
+        }
+    }
+
+    private boolean executeStockUpdate(Item item, float stockChange) {
+        return executeStockUpdate(item, stockChange, false);
+    }
+
+    private boolean executeStockUpdate(Item item, float stockChange, boolean fromRemote) {
         String identifier = item.getIdentifier();
         ReentrantLock lock = itemLocks.computeIfAbsent(identifier, k -> new ReentrantLock());
-        
-        lock.lock();
+
+        if (!lock.tryLock()) {
+            return false;
+        }
+
         try {
-            return executeAtomicStockUpdate(item, stockChange);
+            String stockKey = String.format(KEY_ITEM_STOCK, identifier);
+            int maxRetries = Config.getInstance().getMaxRetries();
+
+            for (int attempt = 0; attempt < maxRetries; attempt++) {
+                try (Jedis jedis = jedisPool.getResource()) {
+                    jedis.watch(stockKey);
+
+                    float currentStock = item.getPrice().getStock();
+                    float newStock = fromRemote ? currentStock + stockChange : currentStock;
+
+                    Transaction tx = jedis.multi();
+                    tx.set(stockKey, String.valueOf(newStock));
+                    List<Object> result = tx.exec();
+
+                    if (result != null) {
+                        if (fromRemote) {
+                            item.getPrice().setStock(newStock);
+                        }
+                        publishPriceUpdate(identifier, newStock);
+                        return true;
+                    }
+
+                    Thread.sleep(Config.getInstance().getRetryBackoff() * (1L << attempt));
+
+                } catch (Exception e) {
+                    if (attempt == maxRetries - 1) {
+                        plugin.getLogger().log(Level.WARNING, "Stock update failed for " + identifier, e);
+                    }
+                }
+            }
+            return false;
         } finally {
             lock.unlock();
         }
     }
-    
-    private boolean executeAtomicStockUpdate(Item item, float stockChange) {
-        String identifier = item.getIdentifier();
-        String stockKey = "nascraft:item:" + identifier + ":stock";
-        String updateKey = "nascraft:item:" + identifier + ":last_update";
-        String serverKey = "nascraft:item:" + identifier + ":updated_by";
-        
-        int maxRetries = 3;
-        for (int attempt = 0; attempt < maxRetries; attempt++) {
-            try (Jedis jedis = jedisPool.getResource()) {
-                // Start watching the stock key for changes
-                jedis.watch(stockKey);
-                
-                // Get current stock
-                String currentStockStr = jedis.get(stockKey);
-                float currentStock = 0.0f;
-                
-                if (currentStockStr != null) {
-                    try {
-                        currentStock = Float.parseFloat(currentStockStr);
-                    } catch (NumberFormatException e) {
-                        plugin.getLogger().warning("Invalid stock value for " + identifier + ": " + currentStockStr);
-                    }
-                }
-                
-                // Calculate new stock
-                float newStock = currentStock + stockChange;
-                
-                // Start transaction
-                Transaction transaction = jedis.multi();
-                transaction.set(stockKey, String.valueOf(newStock));
-                transaction.set(updateKey, String.valueOf(System.currentTimeMillis()));
-                transaction.set(serverKey, serverId);
-                
-                // Execute transaction
-                List<Object> results = transaction.exec();
-                
-                if (results != null) {
-                    // Transaction succeeded
-                    // Update local item
-                    item.getPrice().setStock(newStock);
-                    
-                    // Publish update to other servers
-                    publishStockUpdate(identifier, stockChange, newStock);
-                    
-                    plugin.getLogger().info("Successfully synced stock change for " + identifier + 
-                                           " - Change: " + stockChange + ", New Stock: " + newStock);
-                    return true;
-                } else {
-                    // Transaction failed due to concurrent modification
-                    if (attempt < maxRetries - 1) {
-                        // Wait with exponential backoff
-                        Thread.sleep(50 * (1L << attempt));
-                        continue;
-                    }
-                    plugin.getLogger().warning("Failed to sync stock change for " + identifier + 
-                                             " after " + maxRetries + " attempts");
-                    return false;
-                }
-                
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.SEVERE, "Error in atomic stock update for " + identifier, e);
-                if (attempt < maxRetries - 1) {
-                    try {
-                        Thread.sleep(100 * (1L << attempt));
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        return false;
-                    }
-                }
-            }
-        }
-        
-        return false;
-    }
-    
-    private void publishStockUpdate(String itemId, float stockChange, float newStock) {
+
+    private boolean sendTransactionToMaster(Item item, float stockChange) {
         try (Jedis jedis = jedisPool.getResource()) {
-            // Create simple message format: server|item|change|newStock|timestamp
-            String message = String.format("%s|%s|%.2f|%.2f|%d", 
-                serverId, itemId, stockChange, newStock, System.currentTimeMillis());
-            
-            jedis.publish("nascraft:market:updates", message);
-            
+            String message = String.format("%s|%s|%.4f|%d",
+                    serverId, item.getIdentifier(), stockChange, System.currentTimeMillis());
+            jedis.publish(CHANNEL_TRANSACTION, message);
+            return true;
         } catch (Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Failed to publish stock update", e);
+            plugin.getLogger().log(Level.WARNING, "Failed to send transaction to master", e);
+            return false;
         }
     }
-    
-    private void removeServerHeartbeat() {
+
+    private void publishPriceUpdate(String itemId, float newStock) {
         try (Jedis jedis = jedisPool.getResource()) {
-            String heartbeatKey = "nascraft:server:" + serverId + ":heartbeat";
-            jedis.del(heartbeatKey);
+            String message = String.format("%s|%.4f|%d", itemId, newStock, System.currentTimeMillis());
+            jedis.publish(CHANNEL_PRICE_UPDATE, message);
         } catch (Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Failed to remove server heartbeat", e);
+            plugin.getLogger().log(Level.WARNING, "Failed to publish price update", e);
         }
     }
-    
-    /**
-     * Pub/Sub listener for market updates from other servers
-     */
-    private class MarketSyncListener extends JedisPubSub {
-        
-        @Override
-        public void onMessage(String channel, String message) {
-            if (!enabled || !"nascraft:market:updates".equals(channel)) {
-                return;
-            }
-            
-            try {
-                handleMarketUpdate(message);
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Error handling market update: " + message, e);
-            }
-        }
-        
-        private void handleMarketUpdate(String message) {
-            try {
-                // Parse message: server|item|change|newStock|timestamp
-                String[] parts = message.split("\\|");
-                if (parts.length != 5) {
-                    plugin.getLogger().warning("Invalid market update message format: " + message);
-                    return;
-                }
-                
-                String sourceServerId = parts[0];
-                String itemId = parts[1];
-                float stockChange = Float.parseFloat(parts[2]);
-                float newStock = Float.parseFloat(parts[3]);
-                long timestamp = Long.parseLong(parts[4]);
-                
-                // Ignore our own updates
-                if (serverId.equals(sourceServerId)) {
-                    return;
-                }
-                
-                // Apply update to local item
-                Item item = MarketManager.getInstance().getItem(itemId);
-                if (item != null) {
-                    // Use lock to prevent conflicts with local updates
-                    ReentrantLock lock = itemLocks.computeIfAbsent(itemId, k -> new ReentrantLock());
-                    
-                    if (lock.tryLock(100, TimeUnit.MILLISECONDS)) {
-                        try {
-                            // Check if this update is newer than our last local update
-                            if (shouldApplyUpdate(itemId, timestamp)) {
-                                item.getPrice().setStock(newStock);
-                                
-                                plugin.getLogger().info("Applied market update from " + sourceServerId + 
-                                                       " for " + itemId + " - New Stock: " + newStock);
-                            }
-                        } finally {
-                            lock.unlock();
-                        }
-                    } else {
-                        // Couldn't get lock, schedule retry
-                        scheduler.schedule(() -> handleMarketUpdate(message), 50, TimeUnit.MILLISECONDS);
+
+    public Set<String> getActiveServers() {
+        Set<String> servers = new HashSet<>();
+        try (Jedis jedis = jedisPool.getResource()) {
+            ScanParams params = new ScanParams().match("nascraft:server:*:heartbeat").count(100);
+            String cursor = "0";
+            long now = System.currentTimeMillis();
+
+            do {
+                ScanResult<String> result = jedis.scan(cursor, params);
+                for (String key : result.getResult()) {
+                    String ts = jedis.get(key);
+                    if (ts != null && (now - Long.parseLong(ts)) < 60000) {
+                        String id = key.replace("nascraft:server:", "").replace(":heartbeat", "");
+                        servers.add(id);
                     }
                 }
-                
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Error processing market update", e);
-            }
-        }
-        
-        private boolean shouldApplyUpdate(String itemId, long updateTimestamp) {
-            try (Jedis jedis = jedisPool.getResource()) {
-                String lastUpdateKey = "nascraft:item:" + itemId + ":last_update";
-                String lastUpdateStr = jedis.get(lastUpdateKey);
-                
-                if (lastUpdateStr == null) {
-                    return true; // No previous update
-                }
-                
-                long lastUpdate = Long.parseLong(lastUpdateStr);
-                
-                // Apply update if it's newer, or if timestamps are equal but from a "higher priority" server
-                if (updateTimestamp > lastUpdate) {
-                    return true;
-                } else if (updateTimestamp == lastUpdate) {
-                    // Use server start time as tiebreaker for deterministic ordering
-                    return serverStartTime > System.currentTimeMillis() - 1000; // Recent start = lower priority
-                }
-                
-                return false;
-                
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Error checking update timestamp for " + itemId, e);
-                return false;
-            }
-        }
-    }
-    
-    /**
-     * Get list of active servers for monitoring
-     */
-    public java.util.Set<String> getActiveServers() {
-        try (Jedis jedis = jedisPool.getResource()) {
-            java.util.Set<String> activeServers = new java.util.HashSet<>();
-            
-            // Scan for heartbeat keys
-            String pattern = "nascraft:server:*:heartbeat";
-            java.util.Set<String> keys = jedis.keys(pattern);
-            
-            long currentTime = System.currentTimeMillis();
-            for (String key : keys) {
-                try {
-                    String timestampStr = jedis.get(key);
-                    if (timestampStr != null) {
-                        long timestamp = Long.parseLong(timestampStr);
-                        // Consider server active if heartbeat is less than 60 seconds old
-                        if (currentTime - timestamp < 60000) {
-                            // Extract server ID from key
-                            String serverIdFromKey = key.replace("nascraft:server:", "").replace(":heartbeat", "");
-                            activeServers.add(serverIdFromKey);
-                        }
-                    }
-                } catch (NumberFormatException e) {
-                    // Skip invalid heartbeat
-                }
-            }
-            
-            return activeServers;
-            
+                cursor = result.getCursor();
+            } while (!"0".equals(cursor));
+
         } catch (Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Error getting active servers", e);
-            return new java.util.HashSet<>();
+            plugin.getLogger().log(Level.WARNING, "Failed to get active servers", e);
         }
+        return servers;
     }
-    
+
+    public boolean shouldApplyNoise() {
+        return isMaster;
+    }
+
     public boolean isEnabled() {
         return enabled;
     }
-    
+
     public String getServerId() {
         return serverId;
     }
 
-    private void initializeNoiseMaster() {
-        if (!Config.getInstance().getDistributedSyncEnabled() || 
-            !Config.getInstance().getNoiseMasterEnabled()) {
-            return;
-        }
-        
-        // Check if there's a manually specified noise master
-        String specifiedMaster = Config.getInstance().getNoiseMasterServerId();
-        if (specifiedMaster != null && !specifiedMaster.isEmpty()) {
-            if (specifiedMaster.equals(serverId)) {
-                becomeNoiseMaster();
-            } else {
-                // Wait for specified master to come online
-                currentNoiseMaster = specifiedMaster;
-                isNoiseMaster = false;
-            }
-        } else if (Config.getInstance().getNoiseMasterAutoElect()) {
-            // Try to become noise master if auto-elect is enabled
-            tryBecomeNoiseMaster();
-        }
-        
-        // Start noise master health check
-        startNoiseMasterHealthCheck();
+    public boolean isMaster() {
+        return isMaster;
     }
-    
-    private void startNoiseMasterHealthCheck() {
-        int healthCheckInterval = Config.getInstance().getNoiseMasterHealthCheckInterval();
+
+    public String getMasterServerId() {
+        return masterServerId;
+    }
+
+    public void syncNoiseUpdate(Item item) {
+        if (!enabled || !isMaster) return;
         
-        scheduler.scheduleAtFixedRate(() -> {
+        String identifier = item.getIdentifier();
+        float currentStock = item.getPrice().getStock();
+        
+        try (Jedis jedis = jedisPool.getResource()) {
+            String stockKey = String.format(KEY_ITEM_STOCK, identifier);
+            jedis.set(stockKey, String.valueOf(currentStock));
+            publishPriceUpdate(identifier, currentStock);
+        } catch (Exception e) {
+            if (Config.getInstance().getDebugLogging()) {
+                plugin.getLogger().log(Level.WARNING, "Failed to sync noise update for " + identifier, e);
+            }
+        }
+    }
+
+    private class PriceUpdateListener extends JedisPubSub {
+        @Override
+        public void onMessage(String channel, String message) {
+            if (!enabled || isMaster) return;
+
             try {
-                checkNoiseMasterHealth();
-            } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Error in noise master health check", e);
-            }
-        }, healthCheckInterval, healthCheckInterval, TimeUnit.SECONDS);
-    }
-    
-    private void checkNoiseMasterHealth() {
-        synchronized (noiseMasterLock) {
-            if (currentNoiseMaster != null) {
-                // Check if current master is still alive
-                if (!isServerAlive(currentNoiseMaster)) {
-                    plugin.getLogger().warning("Noise master " + currentNoiseMaster + " is no longer responsive");
-                    currentNoiseMaster = null;
-                    isNoiseMaster = false;
-                    
-                    // Try to become the new master if auto-elect is enabled
-                    if (Config.getInstance().getNoiseMasterAutoElect()) {
-                        tryBecomeNoiseMaster();
-                    }
+                String[] parts = message.split("\\|");
+                if (parts.length < 3) return;
+
+                String itemId = parts[0];
+                float newStock = Float.parseFloat(parts[1]);
+
+                Item item = MarketManager.getInstance().getItem(itemId);
+                if (item != null) {
+                    item.getPrice().setStock(newStock);
                 }
-            } else if (Config.getInstance().getNoiseMasterAutoElect()) {
-                // No current master, try to become one
-                tryBecomeNoiseMaster();
-            }
-        }
-    }
-    
-    private boolean isServerAlive(String serverId) {
-        try (Jedis jedis = jedisPool.getResource()) {
-            String heartbeatKey = "nascraft:server:" + serverId + ":heartbeat";
-            String timestampStr = jedis.get(heartbeatKey);
-            
-            if (timestampStr == null) {
-                return false;
-            }
-            
-            long timestamp = Long.parseLong(timestampStr);
-            long currentTime = System.currentTimeMillis();
-            int masterTimeout = Config.getInstance().getNoiseMasterTimeout();
-            
-            return (currentTime - timestamp) < (masterTimeout * 1000L);
-            
-        } catch (Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Error checking server health for " + serverId, e);
-            return false;
-        }
-    }
-    
-    private boolean tryBecomeNoiseMaster() {
-        try (Jedis jedis = jedisPool.getResource()) {
-            String noiseMasterKey = "nascraft:noise-master";
-            
-            // Try to set ourselves as noise master with expiration using SetParams
-            redis.clients.jedis.params.SetParams params = new redis.clients.jedis.params.SetParams();
-            params.nx().ex(Config.getInstance().getNoiseMasterTimeout());
-            
-            String result = jedis.set(noiseMasterKey, serverId, params);
-            
-            if ("OK".equals(result)) {
-                becomeNoiseMaster();
-                return true;
-            }
-            
-            return false;
-            
-        } catch (Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Error trying to become noise master", e);
-            return false;
-        }
-    }
-    
-    private void becomeNoiseMaster() {
-        synchronized (noiseMasterLock) {
-            isNoiseMaster = true;
-            currentNoiseMaster = serverId;
-            
-            // Refresh our noise master lock regularly
-            scheduler.scheduleAtFixedRate(this::refreshNoiseMasterLock, 
-                Config.getInstance().getNoiseMasterTimeout() / 2, 
-                Config.getInstance().getNoiseMasterTimeout() / 2, 
-                TimeUnit.SECONDS);
-            
-            plugin.getLogger().info("This server is now the NOISE MASTER - applying noise to all items");
-        }
-    }
-    
-    private void refreshNoiseMasterLock() {
-        if (!isNoiseMaster) return;
-        
-        try (Jedis jedis = jedisPool.getResource()) {
-            String noiseMasterKey = "nascraft:noise-master";
-            jedis.setex(noiseMasterKey, Config.getInstance().getNoiseMasterTimeout(), serverId);
-            
-        } catch (Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Error refreshing noise master lock", e);
-        }
-    }
-    
-    private void stepDownAsNoiseMaster() {
-        synchronized (noiseMasterLock) {
-            if (!isNoiseMaster) return;
-            
-            isNoiseMaster = false;
-            currentNoiseMaster = null;
-            
-            try (Jedis jedis = jedisPool.getResource()) {
-                String noiseMasterKey = "nascraft:noise-master";
-                jedis.del(noiseMasterKey);
-                plugin.getLogger().info("Stepped down as noise master");
-                
             } catch (Exception e) {
-                plugin.getLogger().log(Level.WARNING, "Error stepping down as noise master", e);
-            }
-        }
-    }
-    
-    /**
-     * Check if this server should apply noise to items
-     * @return true if this server is the designated noise master
-     */
-    public boolean shouldApplyNoise() {
-        if (!Config.getInstance().getDistributedSyncEnabled() || 
-            !Config.getInstance().getNoiseMasterEnabled()) {
-            // If distributed sync or noise master is disabled, all servers can apply noise
-            return true;
-        }
-        
-        return isNoiseMaster;
-    }
-    
-    /**
-     * Get the current noise master server ID
-     * @return the server ID of the current noise master, or null if none
-     */
-    public String getCurrentNoiseMaster() {
-        return currentNoiseMaster;
-    }
-    
-    /**
-     * Check if this server is the current noise master
-     * @return true if this server is the noise master
-     */
-    public boolean isNoiseMaster() {
-        return isNoiseMaster;
-    }
-    
-    /**
-     * Manually set a specific server as the noise master
-     * @param serverId the server ID to set as noise master
-     * @return true if successful
-     */
-    public boolean setNoiseMaster(String serverId) {
-        try (Jedis jedis = jedisPool.getResource()) {
-            String noiseMasterKey = "nascraft:noise-master";
-            
-            // Set the new noise master
-            jedis.setex(noiseMasterKey, Config.getInstance().getNoiseMasterTimeout(), serverId);
-            
-            synchronized (noiseMasterLock) {
-                if (serverId.equals(this.serverId)) {
-                    becomeNoiseMaster();
-                } else {
-                    // Step down if we were the master
-                    if (isNoiseMaster) {
-                        isNoiseMaster = false;
-                        plugin.getLogger().info("Stepped down as noise master - new master: " + serverId);
-                    }
-                    currentNoiseMaster = serverId;
+                if (Config.getInstance().getDebugLogging()) {
+                    plugin.getLogger().log(Level.WARNING, "Error processing price update", e);
                 }
             }
-            
-            return true;
-            
-        } catch (Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Error setting noise master", e);
-            return false;
         }
     }
-} 
+
+    private class TransactionListener extends JedisPubSub {
+        @Override
+        public void onMessage(String channel, String message) {
+            if (!enabled || !isMaster) return;
+
+            try {
+                String[] parts = message.split("\\|");
+                if (parts.length < 4) return;
+
+                String sourceServer = parts[0];
+                String itemId = parts[1];
+                float stockChange = Float.parseFloat(parts[2]);
+
+                if (serverId.equals(sourceServer)) return;
+
+                Item item = MarketManager.getInstance().getItem(itemId);
+                if (item != null) {
+                    executeStockUpdate(item, stockChange, true);
+                }
+            } catch (Exception e) {
+                plugin.getLogger().log(Level.WARNING, "Error processing transaction", e);
+            }
+        }
+    }
+}

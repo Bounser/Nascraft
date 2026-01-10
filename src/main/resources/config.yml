@@ -41,21 +41,15 @@ database:
     
     # Distributed market synchronization across multiple servers
     distributed-sync:
-      # Enable real-time price synchronization between servers
       enabled: true
-      # Noise master configuration - prevents price change loops
-      noise-master:
-        # Enable noise master system - only one server applies noise
-        enabled: true
-        # Auto-elect noise master if none specified (first server to connect)
-        auto-elect: true
-        # Manually specify noise master server ID (optional)
-        # If not specified and auto-elect is true, first server becomes master
-        # master-server: "server-12345678"
-        # Check interval for noise master health (seconds)
-        health-check-interval: 30
-        # Timeout for noise master heartbeat (seconds)
-        master-timeout: 60
+      # Server role: 'master' or 'slave'
+      # Master: Controls all price changes, applies noise, processes transactions
+      # Slave: Sends transactions to master, receives price updates
+      role: 'slave'
+      # Master server ID (required for slaves to identify the master)
+      master-server-id: 'main'
+      # This server's unique ID (used for identification)
+      server-id: 'server-1'
       # Server heartbeat interval in seconds (how often to announce this server is online)
       heartbeat-interval: 15
       # Maximum time to wait for Redis operations before giving up (in milliseconds)
