@@ -92,6 +92,8 @@ public class DistributedMarketSync {
                 return;
             }
 
+            enabled = true;
+
             startHeartbeat();
 
             if (isMaster) {
@@ -101,16 +103,13 @@ public class DistributedMarketSync {
             } else {
                 startPriceListener();
                 startMasterHealthCheck();
-            }
-
-            if (!isMaster) {
                 loadMarketStateFromMaster();
             }
 
-            enabled = true;
             plugin.getLogger().info("Distributed sync enabled - Role: " + (isMaster ? "MASTER" : "SLAVE"));
 
         } catch (Exception e) {
+            enabled = false;
             plugin.getLogger().log(Level.SEVERE, "Failed to enable distributed sync", e);
         }
     }
