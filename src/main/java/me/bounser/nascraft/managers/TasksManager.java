@@ -154,14 +154,24 @@ public class TasksManager {
         if (isShuttingDown) return;
         
         noiseTaskId.set(SchedulerManager.getInstance().scheduleAsyncRepeating(() -> {
-            // Check if this server should apply noise (only noise master applies noise)
             if (shouldApplyNoise()) {
                 for (Item item : MarketManager.getInstance().getAllParentItems()) {
-                    if (Config.getInstance().getPriceNoise())
+                    if (Config.getInstance().getPriceNoise()) {
                         item.getPrice().applyNoise();
+                        syncNoiseIfEnabled(item);
+                    }
                 }
             }
         }, (long) delay * ticksPerSecond, (long) Config.getInstance().getNoiseTime() * ticksPerSecond));
+    }
+    
+    private void syncNoiseIfEnabled(Item item) {
+        if (DatabaseManager.get().getDatabase() instanceof me.bounser.nascraft.database.redis.Redis) {
+            me.bounser.nascraft.database.redis.Redis redis = (me.bounser.nascraft.database.redis.Redis) DatabaseManager.get().getDatabase();
+            if (redis.getDistributedSync().isEnabled()) {
+                redis.getDistributedSync().syncNoiseUpdate(item);
+            }
+        }
     }
     
     /**

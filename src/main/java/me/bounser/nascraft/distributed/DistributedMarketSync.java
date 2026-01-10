@@ -439,6 +439,23 @@ public class DistributedMarketSync {
         return masterServerId;
     }
 
+    public void syncNoiseUpdate(Item item) {
+        if (!enabled || !isMaster) return;
+        
+        String identifier = item.getIdentifier();
+        float currentStock = item.getPrice().getStock();
+        
+        try (Jedis jedis = jedisPool.getResource()) {
+            String stockKey = String.format(KEY_ITEM_STOCK, identifier);
+            jedis.set(stockKey, String.valueOf(currentStock));
+            publishPriceUpdate(identifier, currentStock);
+        } catch (Exception e) {
+            if (Config.getInstance().getDebugLogging()) {
+                plugin.getLogger().log(Level.WARNING, "Failed to sync noise update for " + identifier, e);
+            }
+        }
+    }
+
     private class PriceUpdateListener extends JedisPubSub {
         @Override
         public void onMessage(String channel, String message) {
