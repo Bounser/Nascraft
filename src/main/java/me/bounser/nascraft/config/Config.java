@@ -1411,26 +1411,42 @@ public class Config {
     }
     
     public boolean getDistributedSyncEnabled() { 
-        return this.config.getBoolean("database.redis.distributed-sync.enabled"); 
+        return this.config.getBoolean("database.redis.distributed-sync.enabled", true); 
     }
     
-    public boolean getNoiseMasterEnabled() {
-        return this.config.getBoolean("database.redis.distributed-sync.noise-master.enabled");
+    public String getDistributedSyncRole() {
+        return this.config.getString("database.redis.distributed-sync.role", "slave");
     }
     
-    public boolean getNoiseMasterAutoElect() {
-        return this.config.getBoolean("database.redis.distributed-sync.noise-master.auto-elect");
+    public boolean isMasterServer() {
+        return "master".equalsIgnoreCase(getDistributedSyncRole());
     }
     
-    public String getNoiseMasterServerId() {
-        return this.config.getString("database.redis.distributed-sync.noise-master.master-server");
+    public String getMasterServerId() {
+        return this.config.getString("database.redis.distributed-sync.master-server-id", "main");
     }
     
-    public int getNoiseMasterHealthCheckInterval() {
-        return this.config.getInt("database.redis.distributed-sync.noise-master.health-check-interval");
+    public String getServerId() {
+        return this.config.getString("database.redis.distributed-sync.server-id", "server-1");
     }
     
-    public int getNoiseMasterTimeout() {
-        return this.config.getInt("database.redis.distributed-sync.noise-master.master-timeout");
+    public int getHeartbeatInterval() {
+        return this.config.getInt("database.redis.distributed-sync.heartbeat-interval", 15);
+    }
+    
+    public int getOperationTimeout() {
+        return this.config.getInt("database.redis.distributed-sync.operation-timeout", 5000);
+    }
+    
+    public int getMaxRetries() {
+        return this.config.getInt("database.redis.distributed-sync.max-retries", 3);
+    }
+    
+    public int getRetryBackoff() {
+        return this.config.getInt("database.redis.distributed-sync.retry-backoff", 50);
+    }
+    
+    public boolean getDebugLogging() {
+        return this.config.getBoolean("database.redis.distributed-sync.debug-logging", false);
     }
 }

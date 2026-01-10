@@ -123,6 +123,13 @@ public class DiscordCommands extends ListenerAdapter {
                                 .setEphemeral(true)
                                 .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
                         break;
+
+                    case REPEATED:
+                    case LIMIT_REACHED:
+                        event.reply(Lang.get().message(Message.DISCORD_ALERT_NOT_IN_WATCHLIST))
+                                .setEphemeral(true)
+                                .queue(message -> message.deleteOriginal().queueAfter(10, TimeUnit.SECONDS));
+                        break;
                 }
 
             case "link":
