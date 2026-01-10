@@ -121,8 +121,17 @@ public class DistributedMarketSync {
 
         if (heartbeatTask != null) heartbeatTask.cancel(false);
         if (masterCheckTask != null) masterCheckTask.cancel(false);
+        if (batchProcessTask != null) batchProcessTask.cancel(false);
         
         scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
 
         if (priceListenerThread != null) priceListenerThread.interrupt();
         if (transactionListenerThread != null) transactionListenerThread.interrupt();
@@ -241,15 +250,25 @@ public class DistributedMarketSync {
         if (!isMaster) return;
 
         transactionListenerThread = new Thread(() -> {
+            AtomicInteger txReconnectAttempts = new AtomicInteger(0);
             while (enabled) {
                 try (Jedis jedis = jedisPool.getResource()) {
+                    txReconnectAttempts.set(0);
                     jedis.subscribe(new TransactionListener(), CHANNEL_TRANSACTION);
                 } catch (Exception e) {
                     if (enabled) {
-                        try {
-                            Thread.sleep(5000);
-                        } catch (InterruptedException ie) {
-                            Thread.currentThread().interrupt();
+                        int attempts = txReconnectAttempts.incrementAndGet();
+                        if (attempts <= MAX_RECONNECT_ATTEMPTS) {
+                            long backoff = Math.min(5000 * (1L << attempts), 60000);
+                            plugin.getLogger().warning("Transaction listener disconnected, reconnecting in " + backoff + "ms");
+                            try {
+                                Thread.sleep(backoff);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                break;
+                            }
+                        } else {
+                            plugin.getLogger().severe("Max reconnect attempts reached for transaction listener");
                             break;
                         }
                     }
@@ -261,19 +280,37 @@ public class DistributedMarketSync {
     }
 
     private void loadMarketStateFromMaster() {
-        for (Item item : MarketManager.getInstance().getAllItems()) {
-            try (Jedis jedis = jedisPool.getResource()) {
+        List<Item> items = MarketManager.getInstance().getAllItems();
+        if (items.isEmpty()) return;
+
+        try (Jedis jedis = jedisPool.getResource()) {
+            Pipeline pipeline = jedis.pipelined();
+            List<redis.clients.jedis.Response<String>> responses = new ArrayList<>();
+            
+            for (Item item : items) {
                 String key = String.format(KEY_ITEM_STOCK, item.getIdentifier());
-                String stockStr = jedis.get(key);
-                if (stockStr != null) {
-                    float stock = Float.parseFloat(stockStr);
-                    item.getPrice().setStock(stock);
-                }
-            } catch (Exception e) {
-                if (Config.getInstance().getDebugLogging()) {
-                    plugin.getLogger().warning("Failed to load state for: " + item.getIdentifier());
+                responses.add(pipeline.get(key));
+            }
+            
+            pipeline.sync();
+            
+            for (int i = 0; i < items.size(); i++) {
+                try {
+                    String stockStr = responses.get(i).get();
+                    if (stockStr != null) {
+                        float stock = Float.parseFloat(stockStr);
+                        items.get(i).getPrice().setStock(stock);
+                    }
+                } catch (Exception e) {
+                    if (Config.getInstance().getDebugLogging()) {
+                        plugin.getLogger().warning("Failed to load state for: " + items.get(i).getIdentifier());
+                    }
                 }
             }
+            
+            plugin.getLogger().info("Loaded market state for " + items.size() + " items from master");
+        } catch (Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to load market state from master", e);
         }
     }
 
@@ -288,6 +325,10 @@ public class DistributedMarketSync {
     }
 
     private boolean executeStockUpdate(Item item, float stockChange) {
+        return executeStockUpdate(item, stockChange, false);
+    }
+
+    private boolean executeStockUpdate(Item item, float stockChange, boolean fromRemote) {
         String identifier = item.getIdentifier();
         ReentrantLock lock = itemLocks.computeIfAbsent(identifier, k -> new ReentrantLock());
 
@@ -303,16 +344,17 @@ public class DistributedMarketSync {
                 try (Jedis jedis = jedisPool.getResource()) {
                     jedis.watch(stockKey);
 
-                    String currentStr = jedis.get(stockKey);
-                    float current = currentStr != null ? Float.parseFloat(currentStr) : 0f;
-                    float newStock = current + stockChange;
+                    float currentStock = item.getPrice().getStock();
+                    float newStock = fromRemote ? currentStock + stockChange : currentStock;
 
                     Transaction tx = jedis.multi();
                     tx.set(stockKey, String.valueOf(newStock));
                     List<Object> result = tx.exec();
 
                     if (result != null) {
-                        item.getPrice().setStock(newStock);
+                        if (fromRemote) {
+                            item.getPrice().setStock(newStock);
+                        }
                         publishPriceUpdate(identifier, newStock);
                         return true;
                     }
@@ -438,7 +480,7 @@ public class DistributedMarketSync {
 
                 Item item = MarketManager.getInstance().getItem(itemId);
                 if (item != null) {
-                    executeStockUpdate(item, stockChange);
+                    executeStockUpdate(item, stockChange, true);
                 }
             } catch (Exception e) {
                 plugin.getLogger().log(Level.WARNING, "Error processing transaction", e);
