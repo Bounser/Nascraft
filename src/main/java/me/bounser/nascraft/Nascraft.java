@@ -234,24 +234,65 @@ public class Nascraft extends JavaPlugin {
         Database db = DatabaseManager.get().getDatabase();
         if (!(db instanceof BaseDatabase bd)) return;
 
-        try {
-            for (ItemState state : bd.loadAllItemStates()) {
-                var item = Services.get().market().getItem(state.itemId());
-                if (item == null) continue;
-                long localVer = item.getPrice().getVersion();
-                if (state.version() > localVer) {
-                    item.getPrice().applyRemoteState(state.value(), state.stock(), state.version());
-                }
+        Map<String, ItemState> states = bd.loadItemStates();
+        FoliaScheduler.runGlobal(this, () -> {
+            int applied = 0;
+            for (var entry : states.entrySet()) {
+                var item = Services.get().market().getItem(entry.getKey());
+                if (item == null || !item.isParent()) continue;
+                if (item.getPrice().applyRemoteState(entry.getValue().stock(), entry.getValue().version()))
+                    applied++;
             }
-        } catch (Exception e) {
-            getLogger().warning("Cross-server reconcile failed: " + e.getMessage());
-        }
+            if (applied > 0)
+                getLogger().fine("[Sync] Reconciliation applied " + applied + " state(s) from database.");
+        });
     }
 
+    private void setupMetrics() {
+        Metrics metrics = new Metrics(this, 18404);
+
+        metrics.addCustomChart(new SimplePie("discord_bridge", () -> String.valueOf(Config.getInstance().getDiscordEnabled())));
+
+        metrics.addCustomChart(new SimplePie("cross_server", () -> Config.getInstance().isCrossServerEnabled() ? "Enabled" : "Disabled"));
+
+        if (Config.getInstance().getDiscordEnabled())
+            metrics.addCustomChart(new SimplePie("linking_method", () -> Config.getInstance().getLinkingMethod().toString()));
+
+        metrics.addCustomChart(new SimplePie("used_with_advancedgui", () -> String.valueOf(Bukkit.getPluginManager().getPlugin("AdvancedGUI") != null)));
+        metrics.addCustomChart(new SingleLineChart("operations_per_hour", () -> Services.get().market().getOperationsLastHour()));
+        metrics.addCustomChart(new AdvancedPie("players_linked_with_discord", new Callable<Map<String, Integer>>() {
+            @Override
+            public Map<String, Integer> call() {
+                Map<String, Integer> valueMap = new HashMap<>();
+
+                if (!Config.getInstance().getDiscordEnabled()) return valueMap;
+
+                int linkedPlayers = getLinkedPlayers();
+                valueMap.put("Linked", linkedPlayers);
+                valueMap.put("Not linked", Bukkit.getOnlinePlayers().size() - linkedPlayers);
+                return valueMap;
+            }
+
+            private int getLinkedPlayers() {
+                int counter = 0;
+                for (Player player : Bukkit.getOnlinePlayers())
+                    if (Services.get().links().getUserDiscordID(player.getUniqueId()) != null) counter++;
+
+                return counter;
+            }
+        }));
+    }
+
+    public static Economy getEconomy() { return economy; }
+
+    public static Permission getPermissions() { return perms; }
+
     private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") == null) return false;
+        if (getServer().getPluginManager().getPlugin("Vault") == null) { return false; }
+
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-        if (rsp == null) return false;
+        if (rsp == null) { return false; }
+
         economy = rsp.getProvider();
         return economy != null;
     }
@@ -263,56 +304,55 @@ public class Nascraft extends JavaPlugin {
         return perms != null;
     }
 
-    public static Economy getEconomy() { return economy; }
-
-    public static Permission getPermissions() { return perms; }
-
-    private void setupMetrics() {
-        Metrics metrics = new Metrics(this, 17837);
-
-        metrics.addCustomChart(new SingleLineChart("items", () -> Services.get().market().getAllItems().size()));
-        metrics.addCustomChart(new SingleLineChart("parents", () -> Services.get().market().getAllParentItems().size()));
-        metrics.addCustomChart(new SimplePie("database", () -> Config.getInstance().getDatabaseType().toString()));
-        metrics.addCustomChart(new AdvancedPie("currencies", () -> {
-            Map<String, Integer> values = new HashMap<>();
-            Services.get().market().getCurrencies().forEach(currency -> values.merge(currency.getIdentifier(), 1, Integer::sum));
-            return values;
-        }));
-    }
-
     private void createImagesFolder() {
-        File folder = new File(getDataFolder(), "images");
-        if (!folder.exists() && !folder.mkdirs()) getLogger().warning("Could not create images folder!");
-    }
 
-    private void checkResources() {
-        File oldResources = new File(getDataFolder(), "resources");
-        if (!oldResources.exists()) return;
+        File imagesFolder = new File(getDataFolder(), "images");
 
-        getLogger().info("Updating AdvancedGUI resources...");
-        try {
-            FileUtils.deleteDirectory(oldResources);
-            extractResources();
-        } catch (IOException e) {
-            getLogger().warning("Could not update AdvancedGUI resources: " + e.getMessage());
+        if (!imagesFolder.exists()) {
+            boolean success = imagesFolder.mkdirs();
+            if (!success) getLogger().warning("Failed to create images folder.");
         }
     }
 
-    private void extractResources() throws IOException {
-        File resourcesFolder = new File(getDataFolder(), "resources");
-        if (!resourcesFolder.exists() && !resourcesFolder.mkdirs()) return;
+    private void checkResources() {
 
-        saveResource("resources/gui-items.yml", true);
-        saveResource("resources/layouts.yml", true);
-        saveResource("resources/walls.yml", true);
+        getLogger().info("Checking required layouts... ");
+        getLogger().info("If you want to disable this procedure, set auto_resources_injection to false in the config.yml file.");
 
-        VersionMediator mediator = AdvancedGUI.getInstance().getVersionMediator();
-        GuiItemManager itemManager = mediator.getGuiItemManager();
-        LayoutManager layoutManager = mediator.getLayoutManager();
-        GuiWallManager wallManager = mediator.getGuiWallManager();
+        File fileToReplace = new File(getDataFolder().getParent() + "/AdvancedGUI/layout/Nascraft.json");
 
-        itemManager.load();
-        layoutManager.load();
-        wallManager.load();
+        if (!fileToReplace.exists()) {
+            try {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(getResource("Nascraft.json")));
+                StringBuilder jsonContent = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    jsonContent.append(line);
+                }
+                reader.close();
+
+                FileUtils.writeStringToFile(fileToReplace, jsonContent.toString(), "UTF-8");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            getLogger().info("Layout Nascraft.json added.");
+
+            LayoutManager.getInstance().shutdownSync();
+            GuiWallManager.getInstance().shutdown();
+            GuiItemManager.getInstance().shutdown();
+
+            FoliaScheduler.runAsync(this, () -> {
+                AdvancedGUI.getInstance().readConfig();
+                VersionMediator.reload();
+                LayoutManager.getInstance().reload(layout -> getLogger().severe("§cFailed to load layout: " + layout + " §7(see console for details)"));
+                FoliaScheduler.runGlobal(AdvancedGUI.getInstance(), () -> {
+                    GuiWallManager.getInstance().setup();
+                    GuiItemManager.getInstance().setup();
+                });
+            });
+        } else {
+            getLogger().info("Layout (Nascraft.json) present!");
+        }
     }
+
 }
