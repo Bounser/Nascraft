@@ -1,7 +1,7 @@
 name: Nascraft
 version: '${version}'
 main: me.bounser.nascraft.Nascraft
-api-version: '1.21'
+api-version: '26.2'
 folia-supported: true
 softdepend: [ Vault, PlaceholderAPI, AdvancedGUI, DiscordSRV ]
 authors: [ bounser ]
@@ -14,4 +14,4 @@ libraries:
   - jfree:jfreechart:1.0.13
   - com.zaxxer:HikariCP:5.1.0
   - redis.clients:jedis:5.1.2
-  - org.jetbrains.kotlin:kotlin-stdlib:2.1.21
+  - org.jetbrains.kotlin:kotlin-stdlib:2.3.0
