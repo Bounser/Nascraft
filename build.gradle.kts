@@ -34,7 +34,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.+")
 
-    implementation("xyz.xenondevs.invui:invui:2.1.0@pom") { isTransitive = true }
+    implementation("xyz.xenondevs.invui:invui:2.1.0")
 
     compileOnly("jfree:jfreechart:1.0.13")
 
