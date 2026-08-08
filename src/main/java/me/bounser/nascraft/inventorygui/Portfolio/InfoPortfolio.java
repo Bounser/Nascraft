@@ -8,32 +8,28 @@ import me.bounser.nascraft.config.lang.Message;
 import me.bounser.nascraft.inventorygui.MenuPage;
 import me.bounser.nascraft.portfolio.Portfolio;
 import me.bounser.nascraft.scheduler.FoliaScheduler;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.map.MapPalette;
 import org.bukkit.metadata.FixedMetadataValue;
-import xyz.xenondevs.inventoryaccess.map.MapPatch;
 import xyz.xenondevs.invui.gui.Gui;
-import xyz.xenondevs.invui.gui.structure.Structure;
+import xyz.xenondevs.invui.gui.Structure;
 import xyz.xenondevs.invui.window.CartographyWindow;
 
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 
 public class InfoPortfolio implements MenuPage {
 
-    private Player player;
-    private Portfolio portfolio;
+    private final Player player;
+    private final Portfolio portfolio;
     private ModeItem modeItem;
 
     public InfoPortfolio(Portfolio portfolio, Player player) {
         this.portfolio = portfolio;
         this.player = player;
-
         open();
     }
 
@@ -45,73 +41,55 @@ public class InfoPortfolio implements MenuPage {
         PortfolioStatsItem stats = new PortfolioStatsItem(portfolio, player, modeItem);
 
         Structure structure = new Structure(
-                "I C")
+                "I",
+                "C")
                 .addIngredient('I', modeItem)
                 .addIngredient('C', stats);
 
-        Gui gui = Gui.normal()
+        Gui gui = Gui.builder()
                 .setStructure(structure)
                 .build();
 
-        CartographyWindow window = CartographyWindow.single()
+        CartographyWindow window = CartographyWindow.builder()
                 .setViewer(player)
-                .setTitle(LegacyComponentSerializer.legacySection().serialize(title))
-                .setGui(gui)
+                .setTitle(title)
+                .setInputGui(gui)
+                .setMap(getCompositionImage(portfolio))
                 .build();
 
-        window.setCloseHandlers(Arrays.asList(new Runnable() {
-            @Override
-            public void run() {
-                Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_TITLE));
+        window.addCloseHandler(reason -> {
+            Component portfolioTitle = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_TITLE));
 
-                Inventory inventory = Bukkit.createInventory(player, 45, LegacyComponentSerializer.legacySection().serialize(title));
-                player.openInventory(inventory);
-                player.setMetadata("NascraftPortfolio", new FixedMetadataValue(Nascraft.getInstance(),false));
+            Inventory inventory = Bukkit.createInventory(player, 45, LegacyComponentSerializer.legacySection().serialize(portfolioTitle));
+            player.openInventory(inventory);
+            player.setMetadata("NascraftPortfolio", new FixedMetadataValue(Nascraft.getInstance(), false));
+            PortfolioInventory.getInstance().updatePortfolioInventory(player);
 
+            FoliaScheduler.runAtEntityLater(Nascraft.getInstance(), player, () -> {
+                Component delayedTitle = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_TITLE));
+                Inventory delayedInventory = Bukkit.createInventory(player, 45, LegacyComponentSerializer.legacySection().serialize(delayedTitle));
+                player.openInventory(delayedInventory);
+                player.setMetadata("NascraftPortfolio", new FixedMetadataValue(Nascraft.getInstance(), false));
                 PortfolioInventory.getInstance().updatePortfolioInventory(player);
-
-                FoliaScheduler.runAtEntityLater(Nascraft.getInstance(), player, new Runnable() {
-                    @Override
-                    public void run() {
-                        Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_TITLE));
-
-                        Inventory inventory = Bukkit.createInventory(player, 45, LegacyComponentSerializer.legacySection().serialize(title));
-                        player.openInventory(inventory);
-                        player.setMetadata("NascraftPortfolio", new FixedMetadataValue(Nascraft.getInstance(),false));
-
-                        PortfolioInventory.getInstance().updatePortfolioInventory(player);
-
-                    }
-                }, 1L);
-            }
-        }));
-
-        window.updateMap(getMapPatchComposition(portfolio));
+            }, 1L);
+        });
 
         window.open();
     }
 
     @Override
     public void close() {
-
     }
 
     @Override
     public void update() {
-
     }
 
-    public static MapPatch getMapPatchComposition(Portfolio portfolio) {
-
-        BufferedImage graphImage = PortfolioCompositionChart.getImage(portfolio, 128, 128);
-        
-        return new MapPatch(0, 0, 128, 128, MapPalette.imageToBytes(graphImage));
+    public static BufferedImage getCompositionImage(Portfolio portfolio) {
+        return PortfolioCompositionChart.getImage(portfolio, 128, 128);
     }
 
-    public static MapPatch getMapPatchEvolution(Portfolio portfolio) {
-
-        BufferedImage graphImage = PortfolioEvolutionChart.getImage(portfolio, 128, 128);
-
-        return new MapPatch(0, 0, 128, 128, MapPalette.imageToBytes(graphImage));
+    public static BufferedImage getEvolutionImage(Portfolio portfolio) {
+        return PortfolioEvolutionChart.getImage(portfolio, 128, 128);
     }
 }
