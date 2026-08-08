@@ -181,19 +181,25 @@ public class MainMenu implements MenuPage {
 
             Component trends = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.GUI_TRENDS_NAME));
 
-            List<Item> moreMoved = MarketManager.getInstance().getMostTraded(3);
+            List<Item> mostTraded = MarketManager.getInstance().getMostTraded(3);
+            String popular = mostTraded.isEmpty() ? "-" : mostTraded.get(0).getTaggedName();
 
             String trendsLore = Lang.get().message(Message.GUI_TRENDS_LORE)
-                            .replace("[POPULAR]", MarketManager.getInstance().getMostTraded(1).get(0).getTaggedName());
+                    .replace("[POPULAR]", popular);
 
             int i = 1;
 
-            for (Item item : moreMoved) {
+            for (Item item : mostTraded) {
                 float lastChange = item.getPrice().getValueChangeLastHour();
                 String movement = Lang.get().message(lastChange > 0 ? Message.GUI_TRENDS_POSITIVE : Message.GUI_TRENDS_NEGATIVE);
                 trendsLore = trendsLore.replace("[" + i + "]", movement
                         .replace("[CHANGE]", String.valueOf(lastChange))
                         .replace("[NAME]", item.getTaggedName()));
+                i++;
+            }
+
+            while (i <= 3) {
+                trendsLore = trendsLore.replace("[" + i + "]", "-");
                 i++;
             }
 
