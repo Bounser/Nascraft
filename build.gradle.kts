@@ -42,7 +42,9 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("org.xerial:sqlite-jdbc:3.43.0.0")
     compileOnly("com.zaxxer:HikariCP:5.1.0")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
+        exclude(group = "org.bukkit", module = "bukkit")
+    }
     compileOnly("com.discordsrv:discordsrv:1.28.0")
     compileOnly("commons-io:commons-io:2.14.0")
 
