@@ -32,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:26.2-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
 
     implementation("xyz.xenondevs.invui:invui:2.1.0@pom") { isTransitive = true }
 
@@ -59,7 +59,7 @@ dependencies {
     testImplementation("org.xerial:sqlite-jdbc:3.43.0.0")
     testImplementation("org.mockito:mockito-core:5.14.2")
     testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")
-    testImplementation("io.papermc.paper:paper-api:26.2-R0.1-SNAPSHOT")
+    testImplementation("io.papermc.paper:paper-api:26.2.build.+")
 }
 
 tasks {
