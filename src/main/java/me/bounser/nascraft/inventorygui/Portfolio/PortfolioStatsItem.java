@@ -14,13 +14,12 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.jetbrains.annotations.NotNull;
+import xyz.xenondevs.invui.Click;
 import xyz.xenondevs.invui.item.ItemProvider;
-import xyz.xenondevs.invui.item.builder.ItemBuilder;
-import xyz.xenondevs.invui.item.impl.AbstractItem;
+import xyz.xenondevs.invui.item.ItemBuilder;
+import xyz.xenondevs.invui.item.AbstractItem;
 
 import java.awt.*;
 import java.util.*;
@@ -39,7 +38,7 @@ public class PortfolioStatsItem extends AbstractItem {
     }
 
     @Override
-    public ItemProvider getItemProvider() {
+    public ItemProvider getItemProvider(Player viewer) {
 
         Component title = MiniMessage.miniMessage().deserialize(Lang.get().message(Message.PORTFOLIO_COMPOSITION_STATS_NAME));
 
@@ -60,12 +59,12 @@ public class PortfolioStatsItem extends AbstractItem {
         }
 
         return new ItemBuilder(item)
-                .setDisplayName(LegacyComponentSerializer.legacySection().serialize(title))
+                .setName(title)
                 .setLegacyLore(lore);
     }
 
     @Override
-    public void handleClick(@NotNull ClickType clickType, @NotNull Player player, @NotNull InventoryClickEvent inventoryClickEvent) {
+    public void handleClick(ClickType clickType, Player player, Click click) {
 
     }
 
