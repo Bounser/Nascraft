@@ -1,9 +1,7 @@
-import java.net.URI
-
 plugins {
     java
-    kotlin("jvm") version "2.1.21"
-    id("com.gradleup.shadow") version "8.3.5"
+    kotlin("jvm") version "2.3.0"
+    id("com.gradleup.shadow") version "9.4.3"
     id("xyz.jpenilla.run-paper") version "3.0.2"
 }
 
@@ -11,12 +9,12 @@ group = "me.bounser"
 version = "1.9.2"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 repositories {
@@ -34,14 +32,14 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:26.2-R0.1-SNAPSHOT")
 
-    implementation("xyz.xenondevs.invui:invui:1.43@pom") { isTransitive = true }
+    implementation("xyz.xenondevs.invui:invui:2.1.0@pom") { isTransitive = true }
 
     compileOnly("jfree:jfreechart:1.0.13")
 
     compileOnly("me.leoko.advancedgui:AdvancedGUI:2.2.8")
-    compileOnly("me.clip:placeholderapi:2.11.5")
+    compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("org.xerial:sqlite-jdbc:3.43.0.0")
     compileOnly("com.zaxxer:HikariCP:5.1.0")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7")
@@ -57,22 +55,12 @@ dependencies {
     implementation("de.tr7zw:item-nbt-api:2.13.1")
 
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.3")
-    testRuntimeOnly   ("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.xerial:sqlite-jdbc:3.43.0.0")
     testImplementation("org.mockito:mockito-core:5.14.2")
     testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")
-    testImplementation("io.papermc.paper:paper-api:1.21.3-R0.1-SNAPSHOT")
+    testImplementation("io.papermc.paper:paper-api:26.2-R0.1-SNAPSHOT")
 }
-
-fun latestPaperMinecraftVersion(): String =
-    URI("https://api.papermc.io/v2/projects/paper")
-        .toURL()
-        .readText()
-        .substringAfter("\"versions\":[")
-        .substringBefore("]")
-        .split(",")
-        .last()
-        .trim('"')
 
 tasks {
     processResources {
@@ -110,7 +98,7 @@ tasks {
     }
 
     runServer {
-        minecraftVersion(latestPaperMinecraftVersion())
+        minecraftVersion("26.2")
         jvmArgs("-Dcom.mojang.eula.agree=true")
         downloadPlugins {
             github("milkbowl", "Vault", "1.7.3", "Vault.jar")
