@@ -238,106 +238,41 @@ public class MarketManager {
         return itemStackWithoutFlags1.isSimilar(itemStackWithoutFlags2);
     }
 
+    private List<Item> rankParentItems(int quantity, Comparator<Item> comparator) {
+        if (quantity <= 0) return new ArrayList<>();
+
+        List<Item> ranked = new ArrayList<>(getAllParentItems());
+        ranked.sort(comparator);
+
+        return new ArrayList<>(ranked.subList(0, Math.min(quantity, ranked.size())));
+    }
+
     public List<Item> getTopGainers(int quantity) {
-
-        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
-
-        List<Item> topGainers = new ArrayList<>();
-
-        for (int i = 1; i <= quantity ; i++) {
-
-            Item imax = items.get(0);
-            for (Item item : items) {
-
-                float variation = item.getPrice().getValueChangeLastHour();
-
-                if (variation != 0) {
-                    if (variation > imax.getPrice().getValueChangeLastHour()) {
-                        imax = item;
-                    }
-                }
-            }
-            items.remove(imax);
-
-            topGainers.add(imax);
-        }
-        return topGainers;
+        return rankParentItems(
+                quantity,
+                Comparator.comparingDouble((Item item) -> item.getPrice().getValueChangeLastHour()).reversed()
+        );
     }
 
     public List<Item> getTopDippers(int quantity) {
-
-        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
-
-        List<Item> topDippers = new ArrayList<>();
-
-        for (int i = 1; i <= quantity ; i++) {
-
-            Item imax = items.get(0);
-            for (Item item : items) {
-
-                float variation = item.getPrice().getValueChangeLastHour();
-
-                if (variation != 0) {
-                    if (variation < imax.getPrice().getValueChangeLastHour()) {
-                        imax = item;
-                    }
-                }
-            }
-            items.remove(imax);
-
-            topDippers.add(imax);
-        }
-        return topDippers;
+        return rankParentItems(
+                quantity,
+                Comparator.comparingDouble(item -> item.getPrice().getValueChangeLastHour())
+        );
     }
 
     public List<Item> getMostMoved(int quantity) {
-
-        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
-
-        List<Item> mostMoved = new ArrayList<>();
-
-        for (int i = 1; i <= quantity ; i++) {
-
-            Item imax = items.get(0);
-            for (Item item : items) {
-
-                float variation = item.getPrice().getValueChangeLastHour();
-
-                if (variation != 0) {
-                    if (Math.abs(variation) > Math.abs(imax.getPrice().getValueChangeLastHour())) {
-                        imax = item;
-                    }
-                }
-            }
-            items.remove(imax);
-
-            mostMoved.add(imax);
-        }
-        return mostMoved;
+        return rankParentItems(
+                quantity,
+                Comparator.comparingDouble((Item item) -> Math.abs(item.getPrice().getValueChangeLastHour())).reversed()
+        );
     }
 
     public List<Item> getMostTraded(int quantity) {
-
-        List<Item> items = new ArrayList<>(MarketManager.getInstance().getAllParentItems());
-
-        List<Item> mostTraded = new ArrayList<>();
-
-        for (int i = 1; i <= quantity ; i++) {
-
-            Item imax = items.get(0);
-            for (Item item : items) {
-
-                if (item.getOperations() >= 1) {
-                    if (item.getOperations() > imax.getOperations()) {
-                        imax = item;
-                    }
-                }
-            }
-            items.remove(imax);
-
-            mostTraded.add(imax);
-        }
-        return mostTraded;
+        return rankParentItems(
+                quantity,
+                Comparator.comparingInt(Item::getOperations).reversed()
+        );
     }
 
     public int getPositionByVolume(Item item) {
