@@ -32,9 +32,9 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:26.2-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
 
-    implementation("xyz.xenondevs.invui:invui:2.1.0@pom") { isTransitive = true }
+    implementation("xyz.xenondevs.invui:invui:2.1.0")
 
     compileOnly("jfree:jfreechart:1.0.13")
 
@@ -42,7 +42,9 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.11.6")
     compileOnly("org.xerial:sqlite-jdbc:3.43.0.0")
     compileOnly("com.zaxxer:HikariCP:5.1.0")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
+        exclude(group = "org.bukkit", module = "bukkit")
+    }
     compileOnly("com.discordsrv:discordsrv:1.28.0")
     compileOnly("commons-io:commons-io:2.14.0")
 
@@ -59,7 +61,7 @@ dependencies {
     testImplementation("org.xerial:sqlite-jdbc:3.43.0.0")
     testImplementation("org.mockito:mockito-core:5.14.2")
     testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")
-    testImplementation("io.papermc.paper:paper-api:26.2-R0.1-SNAPSHOT")
+    testImplementation("io.papermc.paper:paper-api:26.2.build.+")
 }
 
 tasks {

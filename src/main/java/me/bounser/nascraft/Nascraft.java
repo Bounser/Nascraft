@@ -34,7 +34,6 @@ import me.bounser.nascraft.managers.EventsManager;
 import me.bounser.nascraft.placeholderapi.PAPIExpansion;
 import me.bounser.nascraft.scheduler.FoliaScheduler;
 import me.bounser.nascraft.config.Config;
-import me.bounser.nascraft.premium.PremiumLoader;
 import me.bounser.nascraft.sellwand.WandListener;
 import me.bounser.nascraft.updatechecker.UpdateChecker;
 import me.leoko.advancedgui.AdvancedGUI;
@@ -201,8 +200,6 @@ public class Nascraft extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new EventsManager(), this);
         ItemChartReduced.load();
 
-        PremiumLoader.enable(this);
-
         long purgeTicks = 20L * 60L * 60L * 6L;
         FoliaScheduler.runAsyncTimer(this, () -> {
             if (!Config.getInstance().isPrimaryNode()) return;
@@ -218,8 +215,6 @@ public class Nascraft extends JavaPlugin {
 
     @Override
     public void onDisable() {
-
-        PremiumLoader.disable();
 
         if (redisManager != null) redisManager.disconnect();
 
