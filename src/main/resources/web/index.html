@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Nascraft Market</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">Nascraft 2</p>
+      <h1 id="site-title">Nascraft Market</h1>
+    </div>
+    <div class="status"><span id="status-dot"></span><span id="status-text">Connecting…</span></div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel sidebar">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">Market</p>
+          <h2>Items</h2>
+        </div>
+        <input id="search" type="search" placeholder="Search items…" autocomplete="off">
+      </div>
+      <div id="popular" class="popular">Loading popular item…</div>
+      <div id="items" class="item-list"></div>
+    </aside>
+
+    <section class="content">
+      <section class="stats-grid">
+        <article class="panel metric"><span>Items</span><strong id="metric-items">–</strong></article>
+        <article class="panel metric"><span>Categories</span><strong id="metric-categories">–</strong></article>
+        <article class="panel metric"><span>Top portfolio</span><strong id="metric-portfolio">–</strong></article>
+      </section>
+
+      <section class="panel chart-panel">
+        <div class="panel-head row">
+          <div>
+            <p class="eyebrow">Price history</p>
+            <h2 id="selected-name">Select an item</h2>
+          </div>
+          <div class="quote" id="selected-quote">–</div>
+        </div>
+        <div class="chart-wrap"><canvas id="item-chart"></canvas></div>
+      </section>
+
+      <section class="bottom-grid">
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">Economy</p><h2>CPI history</h2></div></div>
+          <div class="chart-wrap small"><canvas id="cpi-chart"></canvas></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">Leaderboard</p><h2>Top portfolios</h2></div></div>
+          <div id="portfolios" class="list-block"></div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head"><div><p class="eyebrow">Overview</p><h2>Categories</h2></div></div>
+          <div id="categories" class="list-block"></div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <footer>Self-hosted by Nascraft</footer>
+  <script src="/script.js" defer></script>
+</body>
+</html>
