@@ -1,6 +1,6 @@
 name: Nascraft
 version: '${version}'
-main: me.bounser.nascraft.Nascraft
+main: me.bounser.nascraft.NascraftWebEntrypoint
 api-version: '26.2'
 folia-supported: true
 softdepend: [ Vault, PlaceholderAPI, AdvancedGUI, DiscordSRV ]
