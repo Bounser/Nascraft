@@ -24,8 +24,6 @@ public class NascraftWebEntrypoint extends Nascraft {
         if (!webConfig.enabled()) return;
 
         extractDefaultWebFiles();
-        extractImage("images/logo.png");
-        extractImage("images/logo-color.png");
         extractImage("images/fire.png");
 
         webServerManager = new WebServerManager(this, webConfig);
