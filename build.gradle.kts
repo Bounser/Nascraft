@@ -35,6 +35,8 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.+")
 
     implementation("xyz.xenondevs.invui:invui:2.1.0")
+    implementation("io.javalin:javalin:6.6.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.3")
 
     compileOnly("jfree:jfreechart:1.0.13")
 
@@ -59,8 +61,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.xerial:sqlite-jdbc:3.43.0.0")
-    testImplementation("org.mockito:mockito-core:5.14.2")
-    testImplementation("org.mockito:mockito-junit-jupiter:5.14.2")
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
     testImplementation("io.papermc.paper:paper-api:26.2.build.+")
 }
 
@@ -89,6 +91,7 @@ tasks {
         relocate("org.bstats", "me.bounser.bstats")
         relocate("net.wesjd.anvilgui", "me.bounser.anvilgui")
         relocate("de.tr7zw.changeme.nbtapi", "me.bounser.nbtapi")
+        relocate("io.javalin", "me.bounser.web.libs.javalin")
     }
 
     test {
