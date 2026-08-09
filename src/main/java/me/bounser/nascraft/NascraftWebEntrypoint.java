@@ -5,15 +5,11 @@ import me.bounser.nascraft.web.WebConfig;
 import me.bounser.nascraft.web.WebServerManager;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Set;
+import java.util.List;
 import java.util.logging.Level;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Nascraft 2 entrypoint that restores the self-hosted website shipped in the
@@ -21,9 +17,8 @@ import java.util.zip.ZipInputStream;
  */
 public class NascraftWebEntrypoint extends Nascraft {
 
-    private static final String WEB_BUNDLE_RESOURCE = "web-original-1.9.1.zip";
-    private static final String WEB_BUNDLE_VERSION = "1.9.1-original";
-    private static final Set<String> ALLOWED_WEB_FILES = Set.of(
+    private static final String WEB_BUNDLE_VERSION = "1.9.1-original-direct";
+    private static final List<String> ORIGINAL_WEB_RESOURCES = List.of(
             "web/index.html",
             "web/style.css",
             "web/script.js",
@@ -70,38 +65,24 @@ public class NascraftWebEntrypoint extends Nascraft {
             getLogger().log(Level.WARNING, "Could not read web frontend version marker; restoring bundled frontend.", exception);
         }
 
-        if (!webDirectory.exists() && !webDirectory.mkdirs()) {
-            getLogger().warning("Could not create web directory: " + webDirectory.getAbsolutePath());
-        }
-
-        try (InputStream resource = getResource(WEB_BUNDLE_RESOURCE)) {
-            if (resource == null) {
-                getLogger().severe("Bundled original web frontend is missing: " + WEB_BUNDLE_RESOURCE);
-                return;
-            }
-
-            try (ZipInputStream zip = new ZipInputStream(resource)) {
-                ZipEntry entry;
-                while ((entry = zip.getNextEntry()) != null) {
-                    String path = entry.getName().replace('\\', '/');
-                    if (!ALLOWED_WEB_FILES.contains(path) || entry.isDirectory()) continue;
-
-                    File destination = new File(getDataFolder(), path);
-                    File parent = destination.getParentFile();
-                    if (parent != null && !parent.exists() && !parent.mkdirs()) {
-                        throw new IOException("Could not create directory " + parent);
-                    }
-
-                    try (FileOutputStream output = new FileOutputStream(destination, false)) {
-                        zip.transferTo(output);
-                    }
-                    getLogger().info("Restored original web resource: " + path);
+        try {
+            for (String resource : ORIGINAL_WEB_RESOURCES) {
+                File destination = new File(getDataFolder(), resource);
+                File parent = destination.getParentFile();
+                if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                    throw new IOException("Could not create directory " + parent);
                 }
+
+                saveResource(resource, true);
+                getLogger().info("Restored original web resource: " + resource);
             }
 
+            if (!webDirectory.exists() && !webDirectory.mkdirs()) {
+                throw new IOException("Could not create web directory " + webDirectory);
+            }
             Files.writeString(marker.toPath(), WEB_BUNDLE_VERSION + System.lineSeparator(), StandardCharsets.UTF_8);
             getLogger().info("Original Nascraft 1.9.1 web frontend restored to " + webDirectory.getAbsolutePath());
-        } catch (IOException exception) {
+        } catch (IOException | IllegalArgumentException exception) {
             getLogger().log(Level.SEVERE, "Failed to restore original Nascraft 1.9.1 web frontend.", exception);
         }
     }
