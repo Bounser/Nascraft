@@ -5,14 +5,32 @@ import me.bounser.nascraft.web.WebConfig;
 import me.bounser.nascraft.web.WebServerManager;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Set;
 import java.util.logging.Level;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * Nascraft 2 entrypoint that restores the self-hosted website shipped in the
- * 1.9.1 release JAR. Keeping the web bootstrap here makes the restoration
- * isolated from the core plugin lifecycle while the 2.0 branch is tested.
+ * official Nascraft 1.9.1 release JAR.
  */
 public class NascraftWebEntrypoint extends Nascraft {
+
+    private static final String WEB_BUNDLE_RESOURCE = "web-original-1.9.1.zip";
+    private static final String WEB_BUNDLE_VERSION = "1.9.1-original";
+    private static final Set<String> ALLOWED_WEB_FILES = Set.of(
+            "web/index.html",
+            "web/style.css",
+            "web/script.js",
+            "images/logo.png",
+            "images/logo-color.png",
+            "images/fire.png"
+    );
 
     private WebServerManager webServerManager;
 
@@ -23,8 +41,7 @@ public class NascraftWebEntrypoint extends Nascraft {
         WebConfig webConfig = new WebConfig(this);
         if (!webConfig.enabled()) return;
 
-        extractDefaultWebFiles();
-        extractImage("images/fire.png");
+        restoreOriginalWebFrontend();
 
         webServerManager = new WebServerManager(this, webConfig);
         FoliaScheduler.runAsync(this, webServerManager::startServer);
@@ -39,43 +56,53 @@ public class NascraftWebEntrypoint extends Nascraft {
         super.onDisable();
     }
 
-    private void extractDefaultWebFiles() {
-        String[] resources = {"web/index.html", "web/style.css", "web/script.js"};
-        boolean extracted = false;
-
+    private void restoreOriginalWebFrontend() {
         File webDirectory = new File(getDataFolder(), "web");
+        File marker = new File(webDirectory, ".nascraft-web-version");
+
+        try {
+            if (marker.isFile()
+                    && Files.readString(marker.toPath(), StandardCharsets.UTF_8).trim().equals(WEB_BUNDLE_VERSION)) {
+                getLogger().info("Original Nascraft 1.9.1 web frontend is present at " + webDirectory.getAbsolutePath());
+                return;
+            }
+        } catch (IOException exception) {
+            getLogger().log(Level.WARNING, "Could not read web frontend version marker; restoring bundled frontend.", exception);
+        }
+
         if (!webDirectory.exists() && !webDirectory.mkdirs()) {
             getLogger().warning("Could not create web directory: " + webDirectory.getAbsolutePath());
         }
 
-        for (String resource : resources) {
-            File destination = new File(getDataFolder(), resource);
-            if (destination.exists()) continue;
-
-            try {
-                saveResource(resource, false);
-                getLogger().info("Extracted default web resource: " + resource);
-                extracted = true;
-            } catch (IllegalArgumentException exception) {
-                getLogger().log(Level.SEVERE, "Bundled web resource is missing: " + resource, exception);
+        try (InputStream resource = getResource(WEB_BUNDLE_RESOURCE)) {
+            if (resource == null) {
+                getLogger().severe("Bundled original web frontend is missing: " + WEB_BUNDLE_RESOURCE);
+                return;
             }
-        }
 
-        if (!extracted) getLogger().info("External web files are present at " + webDirectory.getAbsolutePath());
-        else getLogger().info("Web files extracted to " + webDirectory.getAbsolutePath());
-    }
+            try (ZipInputStream zip = new ZipInputStream(resource)) {
+                ZipEntry entry;
+                while ((entry = zip.getNextEntry()) != null) {
+                    String path = entry.getName().replace('\\', '/');
+                    if (!ALLOWED_WEB_FILES.contains(path) || entry.isDirectory()) continue;
 
-    private void extractImage(String resource) {
-        File destination = new File(getDataFolder(), resource);
-        if (destination.exists()) return;
+                    File destination = new File(getDataFolder(), path);
+                    File parent = destination.getParentFile();
+                    if (parent != null && !parent.exists() && !parent.mkdirs()) {
+                        throw new IOException("Could not create directory " + parent);
+                    }
 
-        File parent = destination.getParentFile();
-        if (parent != null && !parent.exists()) parent.mkdirs();
+                    try (FileOutputStream output = new FileOutputStream(destination, false)) {
+                        zip.transferTo(output);
+                    }
+                    getLogger().info("Restored original web resource: " + path);
+                }
+            }
 
-        try {
-            saveResource(resource, false);
-        } catch (IllegalArgumentException exception) {
-            getLogger().log(Level.WARNING, "Bundled web image is missing: " + resource, exception);
+            Files.writeString(marker.toPath(), WEB_BUNDLE_VERSION + System.lineSeparator(), StandardCharsets.UTF_8);
+            getLogger().info("Original Nascraft 1.9.1 web frontend restored to " + webDirectory.getAbsolutePath());
+        } catch (IOException exception) {
+            getLogger().log(Level.SEVERE, "Failed to restore original Nascraft 1.9.1 web frontend.", exception);
         }
     }
 }
